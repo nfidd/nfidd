@@ -1,0 +1,50 @@
+# Independent learning outcomes
+
+## R and statistical concepts used
+
+- familiarity with R concepts used in the course
+  - to be completed once the course has been fully written but likely includes functions, accessing documentation, etc.
+- understanding of statistical concepts used in the course
+  - to be completed once the course has been fully written but likely includes discrete and continuous probability distributions
+
+## Delay distributions
+
+- understanding of the ubiquity of delays in epidemiological data
+- understanding of how delays affect population-level epidemiological data via discrete convolutions
+- ability to apply convolutions of discrete probability distributions to epidemiological data in R
+- understanding of how censoring affects the estimation and interpretation of epidemiological delay distributions
+- ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
+
+## Right truncation and nowcasting
+
+- understanding of right truncation in epidemiolgical data
+- ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+- understanding of nowcasting as a particular right truncation problem
+- ability to perform a simple nowcast in R
+- awareness of the breadth of methods to perform nowcasting
+
+## R estimation and the renewal equation
+
+- understanding of the reproduction number and challenges in its estimation
+- awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
+- understanding of the renewal equation as an epidemiological model
+- awareness of connections of the renewal equation with other epidemiological models
+- familiarity with the generation time as a particular type of delay distributions
+- ability to estimate static and time-varying reproduction numbers from time-series data in R
+
+## Forecasting
+
+- understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
+- understanding of the difference between forecasts, projections and scenarios
+- familiarity with common forecasting models and their properties, and applicability in epidemiology
+- ability to use a common forecasting model on an epidemiological time series in R
+- ability to use a mechanistic model for forecasting an epidemiological time series in R
+- understanding of predictive ensembles and their properties
+- ability to create a predictive ensemble of forecasts in R
+
+## Evaluating forecasts (and nowcasts)
+
+- familiarity with metrics for evaluating deterministic forecasts (e.g. MAE)
+- ability to score deterministic forecasts in R
+- familiarity with metrics for evaluating probabilistic forecasts and their properties
+- ability to score probabilistic forecasts in R
