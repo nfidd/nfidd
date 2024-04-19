@@ -1,0 +1,28 @@
+---
+output: github_document
+---
+
+# Nowcasting and forecasting infectious disease dynamics
+
+This repository contains the material to create the nfiidd course page.
+
+All the raw material is in the folder `Rmd/` and is written in `Rmarkdown`. Any
+changes to the Rmarkdown files are automatically updated on the web site once
+committed to the `main` branch.
+
+To add a lesson, add an Rmd file in `Rmd/` and edit `Rmd/_site.yml` so it
+appears in the menu.
+
+## Local testing
+
+The `html` pages can be generated locally using the function
+
+```{r render, eval = FALSE}
+rmarkdown::render_site("Rmd/")
+```
+
+This creates the `html` pages in the `Rmd/_site` directory.
+
+## Contributors
+
+
