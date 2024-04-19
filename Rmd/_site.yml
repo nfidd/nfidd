@@ -1,0 +1,14 @@
+name: "nfidd"
+navbar:
+  title: "NFIDD"
+  type: inverse
+  right:
+    - icon: fa-envelope-o
+      href: contact.html
+    - icon: fa-github
+      href: https://github.com/nfidd/nfidd
+
+output:
+  html_document:
+    include:
+      after_body: footer.html

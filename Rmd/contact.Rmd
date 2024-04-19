@@ -1,0 +1,5 @@
+---
+title: "Contact"
+---
+
+For any questions about the course or its content, feel free to contact [Sebastian Funk](https://www.lshtm.ac.uk/aboutus/people/funk.sebastian).
