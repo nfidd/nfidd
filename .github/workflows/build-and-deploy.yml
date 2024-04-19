@@ -28,6 +28,7 @@ jobs:
         run: Rscript -e "rmarkdown::render_site(input = 'Rmd', encoding = 'UTF-8')"
 
       - name: Deploy 🚀
+        if: github.event_name != 'pull_request'
         id: deployment
         uses: JamesIves/github-pages-deploy-action@v4
         with:
