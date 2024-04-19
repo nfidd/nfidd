@@ -2,4 +2,5 @@
 title: "Contact"
 ---
 
-For any questions about the course or its content, feel free to contact [Sebastian Funk](https://www.lshtm.ac.uk/aboutus/people/funk.sebastian).
+For any questions about the course or its content, feel free to use the <a href="https://github.com/nfidd/nfidd/discussions">Discussion
+  board</a>
