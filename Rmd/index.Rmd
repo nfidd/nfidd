@@ -9,3 +9,18 @@ output:
 # Required software
 * [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
 * [RStudio](http://www.rstudio.com/products/rstudio/download/) (optional) is a popular graphic user interface (GUI).
+
+# Installation of the `nfiidd` package
+
+To install the packages needed in the course, including the `nfiidd` package that contains data files used, you can use the `remotes` package:
+
+```{r install, eval=FALSE}
+install.packages("remotes")
+remotes::install_github("nfiidd/nfiidd", dependencies = TRUE)
+```
+
+Then you can check that the installation completed successfully by loading the package into your **R** session:
+
+```{r load, eval=FALSE}
+library("nfiidd")
+```
