@@ -32,7 +32,13 @@ package](https://github.com/ropenscilabs/allcontributors) following the
 [all-contributors](https://allcontributors.org) specification.
 Contributions of any kind are welcome!
 
+### Code
+
 <a href="https://github.com/nfidd/nfidd/commits?author=sbfnk">sbfnk</a>
+
+### Issues
+
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+commenter%3Aseabbs">seabbs</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
