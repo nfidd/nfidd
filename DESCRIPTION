@@ -18,6 +18,9 @@ URL: https://github.com/nfidd/nfidd
 BugReports: https://github.com/nfidd/nfiidd/issues
 Depends:
     R (>= 4.2.0)
+Suggests:
+    rstan,
+    fitdistrplus
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
