@@ -7,7 +7,7 @@ Monday June 24: 9.00-9.15
 - Introduction to the course and the instructors (5 mins)
 - Overview of the course (10 mins)
 
-## Session 1: R and statistical concepts used
+## Session 1: R, Stan, and statistical concept background
 
 Monday June 24: 9.15-10.00
 
@@ -51,7 +51,7 @@ Monday June 24: 14.45-15.30
 - Using delay distributions to model the data generating process of an epidemic (15 mins)
 - Practice session: implementing a convolution model and identifying potential problems (30 mins)
 
-## Session 4: R estimation and the renewal equation
+## Session 5: R estimation and the renewal equation
 
 Monday June 24: 16.00-17.30
 
@@ -61,7 +61,7 @@ Monday June 24: 16.00-17.30
 - Practice session: combining R estimation with delay distribution convolutions (30 mins)
 - Wrap up (10 mins)
 
-## Session 5: Nowcasting
+## Session 6: Nowcasting
 
 Tuesday June 25: 9.00-10.30
 
@@ -71,7 +71,7 @@ Tuesday June 25: 9.00-10.30
 - Practice session: Joint estimation of delay distributions and nowcasting (35 mins)
 - Wrap up (10 mins)
 
-## Session 6: Forecasting concepts
+## Session 7: Forecasting concepts
 
 Tuesday June 25: 11.00-12.30
 
@@ -83,7 +83,7 @@ Tuesday June 25: 11.00-12.30
 
 Tuesday June 25: 16.00-17.30
 
-## Session 7: Forecasting models
+## Session 8: Forecasting models
 
 Tuesday June 25: 14.00-15.30
 
@@ -92,7 +92,7 @@ Tuesday June 25: 14.00-15.30
 - Practice session: Evaluating forecasts from a range of common models (30 mins)
 - Wrap up and discussion (15 mins)
 
-## Session 8: Ensemble modelling
+## Session 9: Ensemble modelling
 
 Tuesday June 25: 16.00-16.55
 
@@ -100,13 +100,13 @@ Tuesday June 25: 16.00-16.55
 - Practice session: Create and evaluate a set of ensemble models (30 mins)
 - Wrap-up (10 mins)
 
-## Session 9: Methods in the real world
+## Session 10: Methods in the real world
 
 Tuesday June 25: 17.00-17.30
 
 - Instructor panel: How do you use these methods in your work? Short talks and Q and A (30 mins)
 
-## Session 10: From line list to estimates
+## Session 11: From line list to estimates
 
 Wednesday June 26: 9.00-10.30
 
@@ -119,7 +119,7 @@ Wednesday June 26: 9.00-10.30
   using the models created in this course (70 mins)
 - Wrap up (10 mins)
 
-## Session 11: Overview of available tools
+## Session 12: Overview of available tools
 
 Wednesday June 26: 11.00-12.00
 
@@ -128,7 +128,7 @@ Wednesday June 26: 11.00-12.00
 and related it to the material in this course.  (30 mins)
 - Wrap up (10 mins)
 
-## Session 12: End of course summary and discussion
+## Session 13: End of course summary and discussion
 
 Wednesday June 26: 11.00-12.00
 
