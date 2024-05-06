@@ -3,22 +3,19 @@
 
 This repository contains the material to create the nfiidd course page.
 
-All the raw material is in the folder `Rmd/` and is written in
-`Rmarkdown`. Any changes to the Rmarkdown files are automatically
+All the raw material is in the folder `sessions/` and is written in
+`quarto`. Any changes to the quarto files are automatically
 updated on the web site once committed to the `main` branch.
 
-To add a lesson, add an Rmd file in `Rmd/` and edit `Rmd/_site.yml` so
-it appears in the menu.
+To add a lesson, add a folder in the `sessions` folder that contains a index.qmd`, and the edit `sessions.qmd` to add it to the schedule.
 
 ## Local testing
 
 The `html` pages can be generated locally using the function
 
-``` r
-rmarkdown::render_site("Rmd/")
+``` bash
+quarto render
 ```
-
-This creates the `html` pages in the `Rmd/_site` directory.
 
 ## Contributors
 

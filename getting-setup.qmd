@@ -1,11 +1,3 @@
----
-title: Nowcasting and forecasting infectious disease dynamics
-author: by Katharine Sherratt, Sam Abbott, Sebastian Funk
-output:
-  html_document:
-    toc: false
----
-
 # Required software
 * [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
 * [RStudio](http://www.rstudio.com/products/rstudio/download/) (optional) is a popular graphic user interface (GUI).
