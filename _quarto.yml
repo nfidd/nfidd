@@ -5,8 +5,6 @@ website:
   title: "NFIDD"
   site-url: https://nfidd.github.io/nfidd/
   description: "Nowcasting and forecasting infectious disease dynamics"
-  image: images/logo.png
-  favicon: images/favicon-32x32.png
   open-graph: true
   comments:
     giscus:
