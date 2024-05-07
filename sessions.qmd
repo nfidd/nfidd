@@ -1,4 +1,7 @@
-# Session plan
+---
+title: "Sessions"
+comments: false
+---
 
 ## Session 0: Introduction and course overview
 

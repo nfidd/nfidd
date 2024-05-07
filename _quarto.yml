@@ -1,0 +1,36 @@
+project:
+  type: website
+
+website:
+  title: "NFIDD"
+  site-url: https://nfidd.github.io/nfidd/
+  description: "Nowcasting and forecasting infectious disease dynamics"
+  open-graph: true
+  comments:
+    giscus:
+      repo: nfidd/nfidd
+      category: 'Website discussions'
+      mapping: title
+      reactions-enabled: true
+  navbar:
+    left:
+      - text: Sessions
+        href: sessions.qmd
+      - text: "Learning objectives"
+        href: learning_objectives.qmd
+      - text: "Getting set up for the course"
+        href: getting-set-up.qmd
+      - text: "Getting help"
+        href: help.qmd
+    right:
+      - icon: github
+        href: https://github.com/nfidd/nfidd
+
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    css: styles.css
+    link-external-icon: true
+    link-external-newwindow: true
