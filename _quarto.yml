@@ -18,7 +18,7 @@ website:
         href: sessions.qmd
       - text: "Learning objectives"
         href: learning_objectives.qmd
-      - text: "Getting setup for the course"
+      - text: "Getting set up for the course"
         href: getting-setup.qmd
       - text: "Getting help"
         href: help.qmd
