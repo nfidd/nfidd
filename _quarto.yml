@@ -19,7 +19,7 @@ website:
       - text: "Learning objectives"
         href: learning_objectives.qmd
       - text: "Getting set up for the course"
-        href: getting-setup.qmd
+        href: getting-set-up.qmd
       - text: "Getting help"
         href: help.qmd
     right:
