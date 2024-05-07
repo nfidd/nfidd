@@ -4,9 +4,6 @@ site: distill::distill_website
 comments: false
 about:
   template: jolla
-  image-width: 6em
-  image-shape: rectangle
-  image: images/logo.png
   links:
     - icon: chat-fill
       text: Sessions
