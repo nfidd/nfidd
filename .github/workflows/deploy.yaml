@@ -23,6 +23,11 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::knitr, any::rmarkdown
+
       - name: Render site
         run: quarto render
 
