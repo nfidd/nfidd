@@ -4,17 +4,18 @@
 This repository contains the material to create the nfiidd course page.
 
 All the raw material is in the folder `sessions/` and is written in
-`quarto`. Any changes to the quarto files are automatically
-updated on the web site once committed to the `main` branch.
+`quarto`. Any changes to the quarto files are automatically updated on
+the web site once committed to the `main` branch.
 
-To add a lesson, add a folder in the `sessions` folder that contains a index.qmd`, and the edit `sessions.qmd` to add it to the schedule.
+To add a lesson, add a folder in the `sessions` folder that contains a
+index.qmd`, and the edit`sessions.qmd\` to add it to the schedule.
 
 ## Local testing
 
 The `html` pages can be generated locally using the function
 
-``` bash
-quarto render
+``` r
+quarto::quarto_render()
 ```
 
 ## Contributors
