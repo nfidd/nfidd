@@ -16,8 +16,8 @@ To add a lesson, add a folder in the `sessions` folder that contains a index.qmd
 
 The `html` pages can be generated locally using the function
 
-``` bash
-quarto render
+``` {r render, eval = FALSE}
+quarto::quarto_render()
 ```
 
 ## Contributors
