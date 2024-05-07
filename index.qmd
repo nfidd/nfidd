@@ -1,5 +1,5 @@
 ---
-title: "Welcome to the Nowcasting and forecasting infectious disease dynamics course site"
+title: "Nowcasting and forecasting infectious disease dynamics"
 site: distill::distill_website
 comments: false
 about:
