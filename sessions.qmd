@@ -5,18 +5,17 @@ comments: false
 
 ## Session 0: Introduction and course overview
 
-Monday June 24: 9.00-9.15
+Monday June 24: 9.00-9.30
 
-- Introduction to the course and the instructors (5 mins)
-- Overview of the course (10 mins)
+- Introduction to the course and the instructors (10 mins)
+- Motivating the course: From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
-Monday June 24: 9.15-10.00
+Monday June 24: 9.30-10.00
 
 - Introduction to R concepts used in the course (15 mins)
 - Introduction to stan concepts used in the course (15 mins)
-- Practice session: Getting a working environment (10 mins)
 
 ## Session 2a: Delay distributions
 
@@ -86,34 +85,38 @@ Tuesday June 25: 11.00-12.30
 
 Tuesday June 25: 16.00-17.30
 
-## Session 8: Forecasting models
+## Session 8a: Forecasting models
 
 Tuesday June 25: 14.00-15.30
 
 - An overview of forecasting models (15 mins)
 - Practice session: Forecasting with a range of common models (30 mins)
-- Practice session: Evaluating forecasts from a range of common models (30 mins)
-- Wrap up and discussion (15 mins)
+- Practice session: Evaluating forecasts from a range of common models (45 mins)
+
+## Session 8b: Forecasting models
+
+Tuesday June 25: 16.00-16.30
+
+- Instructor-led participant discussion about the evaluated forecasts (20 mins)
+- Wrap up (10 mins)
 
 ## Session 9: Ensemble modelling
 
-Tuesday June 25: 16.00-16.55
+Tuesday June 25: 16.30-16.45
 
 - The unreasonable success of ensemble models (15 mins)
-- Practice session: Create and evaluate a set of ensemble models (30 mins)
-- Wrap-up (10 mins)
 
 ## Session 10: Methods in the real world
 
-Tuesday June 25: 17.00-17.30
+Tuesday June 25: 16.45-17.30
 
-- Instructor panel: How do you use these methods in your work? Short talks and Q and A (30 mins)
+- Instructor panel: How do you use these methods in your work? Short talks and Q and A (45 mins)
 
 ## Session 11: From line list to estimates
 
 Wednesday June 26: 9.00-10.30
 
-- What is a line list? (10 mins)
+- Using what we have learned to solve epidemiological problems (10 mins)
 - Practice session: starting from a line list, produce:
   - delay distribution estimates
   - nowcasts
