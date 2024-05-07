@@ -1,4 +1,7 @@
-# Independent learning outcomes
+---
+title: "Independent learning outcomes"
+comments: false
+---
 
 ## R and statistical concepts used
 
