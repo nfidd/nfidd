@@ -1,0 +1,139 @@
+---
+title: "Delay distributions"
+---
+
+```{r echo = FALSE}
+set.seed(123)
+```
+
+# Objectives
+
+The aim of this session is for you to familiarise yourself with the concept of delay distributions and their use in describing epidemiological processes.
+You will do this by working in `R` with epidemiological time series that are linked via delay distributions.
+
+# Simulating delayed epidemiological data
+
+First, load and plot the data
+
+```{r}
+library("nfiidd")
+library("ggplot2")
+
+data(infection_dates)
+head(infection_dates)
+
+ggplot(infection_dates, aes(x = infection_date)) +
+  geom_histogram() +
+  xlab("Infection date") +
+  ylab("Number of infections")
+```
+
+Next, simulate delay
+
+```r
+library("dplyr")
+inf_hosp <- infection_dates |>
+  mutate(
+    incubation_period = rgamma(n(), shape = 5, rate = 1),
+    onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
+    onset_date = infection_date + floor(incubation_period),
+    hosp_date = onset_date + floor(onset_to_hosp)
+  )
+```
+
+Next, plot onsets
+
+```r
+ggplot(inf_hosp, aes(x = hosp_date)) +
+  geom_histogram() +
+  xlab("Onset date") +
+  ylab("Number of symptom onsets")
+```
+
+Or maybe plot both
+
+```r
+inf <- inf_hosp |>
+  count(date = infection_date) |>
+  mutate(type = "infections")
+onset <- inf_hosp |>
+  count(date = onset_date) |>
+  mutate(type = "onsets")
+all <- bind_rows(inf, onset)
+ggplot(all, aes(x = date, y = n, colour = type)) +
+  geom_line() +
+  scale_colour_brewer(palette = "Set1") +
+  xlab("Date") +
+  ylab("Count")
+```
+
+Not everybody with symptoms gets hospitalised.
+Need to scale
+
+```r
+hosp_scaled <- inf_hosp |>
+  mutate(hosp_date = if_else(rbinom(n = n(), size = 1, p = 0.3) == 1, hosp_date, as.Date(NA_character_)))
+hosp <- hosp_scaled |>
+  filter(!is.na(hosp_date)) |>
+  count(date = hosp_date) |>
+  mutate(type = "hospitalisations")
+all <- bind_rows(inf, hosp)
+ggplot(all, aes(x = date, y = n, colour = type)) +
+  geom_line() +
+  scale_colour_brewer(palette = "Set1") +
+  xlab("Date") +
+  ylab("Count")
+```
+
+Hospitalisations alone
+
+```r
+ggplot(inf_hosp, aes(x = hosp_date)) +
+  geom_histogram(binwidth = 1) +
+  xlab("Hospitalisation date") +
+  ylab("Number of hospitalisations")
+```
+
+# Estimating delay distributions
+
+Provide data set that is the result of the operations above, but only with dates.
+
+```r
+hosp_scaled <- hosp_scaled |>
+  mutate(
+    incubation_period = as.integer(onset_date - infection_date), 
+    onset_to_hosp = as.integer(hosp_date - onset_date)
+  )
+```
+
+now go backwards?
+naive(ish) approach: find the distribution that matches what is happening - use fitdistrplus!
+
+```r
+library("fitdistrplus")
+## question: what to do about zeroes? Probably best to add 0.5 to all
+fitdistrplus::fitdist(c(na.omit(hosp_scaled$onset_to_hosp + 0.5)), distr = "lnorm")
+## pretty good - will need to tweak to highlight issue
+```
+
+some bias in estimation - how to avoid? Create discrete version and use fitdistrplus with that.
+
+```r
+hosp_scaled <- hosp_scaled |>
+  mutate(
+    left = pmax(0, onset_to_hosp - 1),
+    right = onset_to_hosp + 1
+  ) |>
+  filter(!is.na(onset_to_hosp))
+fitdistrplus::fitdistcens(hosp_scaled, distr = "lnorm")
+```
+
+# Full estimation of delay distributions
+
+
+
+# Real-time estimation and right-truncation
+
+- try the approach from before -- oops! What has gone wrong?
+- implement truncation
+- we have estimated a delay - hey, we can do nowcating!
