@@ -13,67 +13,67 @@ You will do this by working in `R` with epidemiological time series that are lin
 
 # Simulating delayed epidemiological data
 
-First, load and plot the data
+We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
+For now we will not concern ourselves with the model used to generate the data.
+This represents the typical situation in the real world, where we may have a model of how an infection has spread, but we don't know how well this corresponds to what really happened.
+
+We will later deal with modelling infectious processes.
+For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
+In particular, we will consider the fact that these observations are *incomplete* (e.g. because not every infection leads to hospitalisations and so focusing on hospitalisations may leave infections unobserved) and happen with a delay (e.g. from infection to symptoms).
+
+We will work with a data set that is included in the `nfidd` R package that you installed initially.
+It can be loaded with the `data` command
 
 ```{r}
 library("nfiidd")
 library("ggplot2")
-library("tidyr")
 
 data(infection_times)
 head(infection_times)
 
+## visualise the infection curve
 ggplot(infection_times, aes(x = infection_time)) +
   geom_histogram() +
   xlab("Infection time (in days)") +
   ylab("Number of infections")
 ```
 
-Next, simulate delay
+We would now like to simulate hospitalisations arising from this outbreak.
+We assume that the incubation period (or time from infection to symptom onset) is gamma-distributed with shape 5 and rate 1.
+We further assume that the onset-to-hospitalisation period is lognormally distributed with meanlog 1 and sdlog 1.
+We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
 
-```r
+**Take 10 minutes** to add onset and hospitalisation dates to the infection data.
+
+```{r inf_hosp}
 library("dplyr")
+## assume a start date, e.g. 10 May of this year
 start_date <- as.Date("2024-05-10")
-inf_hosp <- infection_times |>
-  mutate(
-    incubation_period = rgamma(n(), shape = 5, rate = 1),
-    onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
-    infection_date = start_date + infection_time,
-    onset_date = start_date + infection_time + incubation_period,
-    hosp_date =
-      start_date + infection_time + incubation_period + onset_to_hosp
-  )
+## create a new data frame based on the `infection_times` data frame
+## representing for each infected individual
+## - `incubation_period`: the time from infection to symptom onset
+## - `onset_to_hosp`: the time from symptom onset to hospitalisation
+## - `infection_date`: the date on which an individual became infected
+## - `onset_date`: the date on which an individual started showing symptoms
+## - `hosp_date`: the date on which an individual became hospitalised (or NA if
+##    they didn't get hospitalied)
+df <- NULL ## replace NULL with your code
 ```
 
-Next, plot onsets
-
-```r
-ggplot(inf_hosp, aes(x = hosp_date)) +
-  geom_histogram() +
-  xlab("Onset date") +
-  ylab("Number of symptom onsets")
+```{r inf_hosp_solution}
+source(here::here("scripts", "snippets", "delay-distributions.r"))
 ```
 
-Or maybe plot both
+If you have trouble filling any of the empty bits in, have a look at our [solution](delay_distributions_solutions.html#simulating-delayed-epidemiological-data) for reference and copy/paste the code from there.
+
+Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
 
 ```r
-df <- inf_hosp |>
-  pivot_longer(cols = c(infection_date, onset_date, hosp_date), names_to = "type", values_to = "date")
-ggplot(df, aes(x = date)) +
-  geom_histogram(position = "dodge") +
-  facet_wrap(~ type, ncol = 1) +
-  xlab("Date") +
-  ylab("Count")
-```
-
-Not everybody with symptoms gets hospitalised.
-Need to scale
-
-```r
-hosp_scaled <- inf_hosp |>
-  mutate(hosp_date = if_else(rbinom(n = n(), size = 1, p = 0.3) == 1, hosp_date, as.Date(NA_character_)))
 df <- hosp_scaled |>
-  pivot_longer(cols = c(infection_date, onset_date, hosp_date), names_to = "type", values_to = "date")
+  pivot_longer(
+    cols = c(infection_date, onset_date, hosp_date),
+    names_to = "type", values_to = "date"
+  )
 ggplot(df, aes(x = date)) +
   geom_histogram(position = "dodge") +
   facet_wrap(~ type, ncol = 1) +
@@ -83,56 +83,61 @@ ggplot(df, aes(x = date)) +
 
 # Estimating delay distributions
 
-Provide data set that is the result of the operations above, but only with dates.
+As mentioned above, our data set of infection, onset and hospitalisation dates is not the typical data set we encounter in outbreaks.
+In reality, we don't ahve infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+For now, let us just assume we have a data set of symptom onsets and some hospitalisation, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+This is an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
 
-```r
-## temporary: to be replaced with data set that has the dates in it
-hosp_scaled <- hosp_scaled |>
-  mutate(
-    incubation_period = as.integer(onset_date - infection_date), 
-    onset_to_hosp = as.integer(hosp_date - onset_date)
-  )
-```
+As with all our estimation tasks throughout this course, we will be using stan, a fully-fledged toolkit for estimation.
+We will try to represent the model we simulated above as much as possible in this.
+One way that this could look, for examle, is:
 
-now go backwards?
-naive(ish) approach: find the distribution that matches what is happening
+```{r delay_model}
+library("cmdstanr")
 
-```r
 delay_model <- '
   data {
-    int n;
-    array[n] real onset_to_hosp;
+    int n; // number of data points (rows with hospiatlisation date)
+    array[n] real onset_to_hosp; // onset to hospitalisation delays in the data
   }
 
   parameters {
-     real meanlog;
-     real<lower = 0> sdlog;
+     real meanlog; // parameter to be estimtated
+     real<lower = 0> sdlog; // parameter to be estimated
   }
 
   model {
-    // priors
-    meanlog ~ normal(0, 10);
-    sdlog ~ normal(0, 10) T[0, ];
+    meanlog ~ normal(0, 10); // prior distribution
+    sdlog ~ normal(0, 10) T[0, ]; // prior distribution
 
-    // likelihood
-    onset_to_hosp ~ lognormal(meanlog, sdlog);
+    onset_to_hosp ~ lognormal(meanlog, sdlog); // likelihood
   }
 '
+```
 
-model <- stan_model(model_code = delay_model)
+** Take 5 minutes ** to try to understand the model code and the relationships it encodes.
 
-sampling(
-  model,
+You can now sample from the posterior of this model, i.e. conduct inference, by first compiling the model code.
+
+```{r compile_delay_model}
+file <- write_stan_file(delay_model)
+model <- cmdstan_model(file)
+```
+
+Once this is done, you can _sample_ from the model's posterior distribution:
+
+```{r sample_delay_model}
+model$sample(
   data = list(
     n = nrow(na.omit(hosp_scaled)),
     onset_to_hosp = na.omit(hosp_scaled)$onset_to_hosp
   )
-)
 ```
 
-This will cause an error - why? (answer: zeroes; would be nice to have a better error message stan)
+This will probably cause an error - can you think of a reason why (if you don't see an error you could still think about what may cause an error, or resimulate the data that is being fitted to by re-running the commands that add columns to the infection times data set)?
 
-How to fix? Add 1? Add 0.5? The latter works quite well - why?
+Can you change something that will avoid the error?
+You can look at [our example](delay_distribution_solution.html#estimating-delay-distributions) for a suggested fix, before moving on to a better solution in the next section.
 
 # Accounting for censoring
 
@@ -168,21 +173,21 @@ delay_model_discrete <- '
     // likelihood
     for (i in 1:n) {
       if (onset_to_hosp_lower[i] > 0) {
-        target += log_diff_exp(
-          lognormal_lcdf(onset_to_hosp_upper[i] | meanlog, sdlog),
-          lognormal_lcdf(onset_to_hosp_lower[i] | meanlog, sdlog)
+        target += log(
+          lognormal_cdf(onset_to_hosp_upper[i] | meanlog, sdlog) - 
+          lognormal_cdf(onset_to_hosp_lower[i] | meanlog, sdlog)
         );
       } else {
         target += lognormal_lcdf(onset_to_hosp_upper[i] | meanlog, sdlog);
       }
     }
   }
-
 '
 
-model_discrete <- stan_model(model_code = delay_model_discrete)
-sampling(
-  model_discrete,
+file <- write_stan_file(delay_model_discrete)
+model <- cmdstan_model(file)
+
+model$sample(
   data = list(
     n = nrow(na.omit(hosp_scaled)),
     onset_to_hosp = na.omit(hosp_scaled)$onset_to_hosp
@@ -190,10 +195,12 @@ sampling(
 )
 ```
 
-Better? How could it be made even better?
+You will see that this solution does not require any changes to the data in order to obtain an estimate. 
+Are the estimates "better" than the ones you got before?
+**Take 20 minutes** to familiarise yourself with the stan model above and make sure you understand it.
+Then, experiment with different parameters of the distribution(s), simulate and estimate with and without correcting for censoring.
+Can you find out when biases from not accounting for censoring become larger?
 
-# Real-time estimation and right-truncation
+# Going further
 
-- try the approach from before -- oops! What has gone wrong?
-- implement truncation
-- we have estimated a delay - hey, we can do nowcating!
+- The solution for integrating the censoring window above is only one possible one for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
