@@ -1,0 +1,37 @@
+---
+title: "Coded examples: delay distributions"
+---
+
+```{r fitR, echo=FALSE, cache=FALSE, results="hide"}
+library("nfidd")
+set.seed(1234)
+data(infection_tiems)
+```
+
+```{r echo = FALSE}
+knitr::read_chunk(here::here("scripts", "snippets", "inf-hosp.r"))
+```
+
+```{r inf_hosp, eval = FALSE, tidy = FALSE}
+```
+
+# Simulating delayed epidemiological data
+
+One way of constructing this data set is the following:
+
+```{r echo = FALSE}
+knitr::read_chunk(here::here("scripts", "snippets", "inf-hosp.r"))
+```
+
+```{r inf_hosp, eval = FALSE, tidy = FALSE}
+```
+
+You can now return to the [session on delay distributions](delay_distributions.html#simulating-delayed-epidemiological-data) and visualising the data set, before trying to re-estimate the delays.
+
+# Estimating delay distributions
+
+The problem that the stan sampler might encounter is that some of the delays are zero, whereas the lognormal distribution is defined only for positive random numbers.
+You could try adding a number (what would be sensible here?) to the `onset_to_hosp` variable in the data set before passing it to stan, to avoid any of them being zero.
+Does this work better?
+
+In the section on [accounting for censoring](delay_distributions.html#accounting-for-censoring) we will look at a better solution that will usually get more accurate results.
