@@ -61,7 +61,7 @@ df <- NULL ## replace NULL with your code
 ```
 
 ```{r inf_hosp_solution}
-source(here::here("scripts", "snippets", "delay-distributions.r"))
+source(here::here("scripts", "snippets", "inf-hosp.r"))
 ```
 
 If you have trouble filling any of the empty bits in, have a look at our [solution](delay_distributions_solutions.html#simulating-delayed-epidemiological-data) for reference and copy/paste the code from there.
