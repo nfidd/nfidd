@@ -14,8 +14,8 @@ Monday June 24: 9.00-9.30
 
 Monday June 24: 9.30-10.00
 
-- Introduction to R concepts used in the course (15 mins)
-- Introduction to stan concepts used in the course (15 mins)
+- Introduction to R concepts used in the course (5 mins)
+- Introduction to stan concepts used in the course (25 mins)
 
 ## Session 2a: Delay distributions
 
@@ -136,7 +136,7 @@ and related it to the material in this course.  (30 mins)
 
 ## Session 13: End of course summary and discussion
 
-Wednesday June 26: 11.00-12.00
+Wednesday June 26: 12.00-12.30
 
 - Summary of the course (15 mins)
 - Discussion of future directions and how to continue learning (15 mins)
