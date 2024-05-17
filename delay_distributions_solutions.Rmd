@@ -2,10 +2,10 @@
 title: "Coded examples: delay distributions"
 ---
 
-```{r fitR, echo=FALSE, cache=FALSE, results="hide"}
+```{r nfidd, echo=FALSE, cache=FALSE, results="hide"}
 library("nfidd")
 set.seed(1234)
-data(infection_tiems)
+data(infection_times)
 ```
 
 ```{r echo = FALSE}
