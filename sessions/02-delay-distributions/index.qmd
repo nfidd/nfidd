@@ -13,11 +13,14 @@ The aim of this session is for you to familiarise yourself with the concept of p
 # Libraries used
 
 In this session we will use the `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries}
 library("ggplot2")
 library("here")
 library("cmdstanr")
+library("bayesplot")
+library("posterior")
 ```
 
 # Simulating data from a probability distribution
@@ -94,11 +97,30 @@ stan_data <- list(
   N = length(gammas),
   y = gammas
 )
-res <- mod$sample(data = stan_data)
-res
+gamma_fit <- mod$sample(data = stan_data)
+gamma_fit
 ```
 
-You can see that the estimates are broadly consistent with the parameters we put in. 
+You can see that the estimates are broadly consistent with the parameters we put in.
+To investigate this further, we will conduct a so-called posterior predictive check by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
+
+```{r gamma_ppc}
+# Extract posterior draws
+gamma_posterior <- as_draws_df(gamma_fit$draws())
+head(gamma_posterior)
+
+# Generate posterior predictive samples
+gamma_ppc <- sapply(seq_along(gammas), function(i) {
+  rgamma(n = length(gammas),
+         shape = gamma_posterior$alpha[i],
+         rate = gamma_posterior$beta[i])
+})
+
+# Plot posterior predictive check
+ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
+```
+
+We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e. the samples generated earlier that we fitted to.
 
 # Going further
 
