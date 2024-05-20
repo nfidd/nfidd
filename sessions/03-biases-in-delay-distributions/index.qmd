@@ -1,4 +1,259 @@
 ---
-title: "Session 3: Biases in delay distributions"
+title: "Biases in delay distributions"
 ---
 
+```{r echo = FALSE}
+set.seed(123)
+```
+
+# Objectives
+
+The aim of this session is for you to familiarise yourself with the concept of delay distributions and some specific issue that arise when they are used to describe reporting in infectious disease epidemiology.
+You will do this by working in `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
+In doing so, you will see the specific issues that can arise with epidemiological data.
+
+# Simulating delayed epidemiological data
+
+We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
+For now we will not concern ourselves with the model used to generate the epidemic.
+This represents the typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+
+We will later deal with modelling the infectious process.
+For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
+We will further consider the fact that these observations are *incomplete* (e.g. because not every infection leads to hospitalisations and so focusing on hospitalisations may leave infections unobserved) and happen with a delay (e.g. from infection to symptoms).
+
+We will work with a data set that is included in the `nfidd` R package that you installed initially.
+It can be loaded with the `data` command
+
+```{r}
+library("nfidd")
+library("ggplot2")
+
+data(infection_times)
+head(infection_times)
+
+## visualise the infection curve
+ggplot(infection_times, aes(x = infection_time)) +
+  geom_histogram() +
+  xlab("Infection time (in days)") +
+  ylab("Number of infections")
+```
+
+We would now like to simulate hospitalisations arising from this outbreak.
+We assume that the incubation period (or time from infection to symptom onset) is gamma-distributed with shape 5 and rate 1.
+We further assume that the onset-to-hospitalisation period is lognormally distributed with meanlog 1 and sdlog 1.
+We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
+
+::: {.callout-tip}
+## Take 10 minutes
+Try to add onset and hospitalisation dates to the infection data.
+
+:::
+
+::: {.callout-note collapse="true"}
+## Partial solution
+```{r inf_hosp, message = FALSE}
+library("dplyr")
+## assume a start date, e.g. 10 May of this year
+start_date <- as.Date("2024-05-10")
+## create a new data frame based on the `infection_times` data frame
+## representing for each infected individual
+## - `incubation_period`: the time from infection to symptom onset
+## - `onset_to_hosp`: the time from symptom onset to hospitalisation
+## - `infection_date`: the date on which an individual became infected
+## - `onset_date`: the date on which an individual started showing symptoms
+## - `hosp_date`: the date on which an individual became hospitalised (or NA if
+##    they didn't get hospitalied)
+df <- NULL ## replace NULL with your code
+```
+
+::: {.callout-note collapse="true"}
+## Still stuck? Here is a complete solution that should work for you
+```{r inf_hosp_solution}
+## first, choose random delays
+df <- infection_times |>
+  mutate(
+    incubation_period = rgamma(n(), shape = 5, rate = 1),
+    onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
+    infection_date = as.Date(start_date + infection_time),
+    onset_date = as.Date(start_date + infection_time + incubation_period),
+    hosp_date =
+      as.Date(start_date + infection_time + incubation_period + onset_to_hosp)
+  )
+## next, set 70% of the hospitalization dates to NA because only 30∞ of cases
+## are hospitalized
+df <- df |>
+  mutate(
+    hosp_date = if_else(
+      rbinom(n = n(), size = 1, p = 0.3) == 1,
+      hosp_date,
+      as.Date(NA_character_))
+  )
+```
+
+::: {.callout-caution}
+Note that we have used the `as.Date` function to convert precise times to dates on the time scale of days.
+:::
+
+:::
+
+:::
+
+Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
+
+```{r plot_distributions, messages = FALSE}
+library("tidyr")
+dfl <- df |>
+  pivot_longer(
+    cols = c(infection_date, onset_date, hosp_date),
+    names_to = "type", values_to = "date"
+  )
+ggplot(dfl, aes(x = date)) +
+  geom_histogram(position = "dodge") +
+  facet_wrap(~ type, ncol = 1) +
+  xlab("Date") +
+  ylab("Count")
+```
+
+# Estimating delay distributions
+
+As mentioned above, our data set of infection, onset and hospitalisation dates is not the typical data set we encounter in outbreaks.
+In reality, we don't ahve infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+For now, let us just assume we have a data set of symptom onsets and some hospitalisation, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+This is an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
+
+As with all our estimation tasks throughout this course, we will be using stan, a fully-fledged toolkit for estimation.
+We will try to represent the model we simulated above as much as possible in this.
+One way that this could look, for examle, is:
+
+```{r delay_model}
+library("cmdstanr")
+
+delay_model <- '
+  data {
+    int n; // number of data points (rows with hospiatlisation date)
+    array[n] real onset_to_hosp; // onset to hospitalisation delays in the data
+  }
+
+  parameters {
+     real meanlog; // parameter to be estimtated
+     real<lower = 0> sdlog; // parameter to be estimated
+  }
+
+  model {
+    meanlog ~ normal(0, 10); // prior distribution
+    sdlog ~ normal(0, 10) T[0, ]; // prior distribution
+
+    onset_to_hosp ~ lognormal(meanlog, sdlog); // likelihood
+  }
+'
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Try to understand the model code and the relationships it encodes.
+:::
+
+You can now sample from the posterior of this model, i.e. conduct inference, by first compiling the model code.
+
+```{r compile_delay_model}
+file <- write_stan_file(delay_model)
+model <- cmdstan_model(file)
+```
+
+Once this is done, you can _sample_ from the model's posterior distribution:
+
+```{r sample_delay_model}
+model$sample(
+  data = list(
+    n = nrow(na.omit(df)),
+    onset_to_hosp = na.omit(df)$onset_to_hosp
+  ),
+)
+```
+
+This will probably cause an error - can you think of a reason why (if you don't see an error you could still think about what may cause an error, or resimulate the data that is being fitted to by re-running the commands that add columns to the infection times data set)?
+
+::: {.callout-tip}
+## Take 5 minutes
+Try to understand the model code and the relationships it encodes.
+:::
+
+::: {.callout-note collapse="true"}
+## Can you change something that will avoid the error?
+
+The error is caused by some of the data being 0, which causes the log-likelihood to be `-Inf`.
+One simple fix would be to add `0.5` to the `onset_to_hosp` when passing it to the stan model. 
+However, this is somewhat arbitrary and will cause biases.
+In the next section we are proposing a better solution.
+:::
+
+# Accounting for censoring
+
+A better way to account for censoring is to integrate over a window:
+
+```r
+delay_model_discrete <- '
+  data {
+    int n;
+    array[n] real onset_to_hosp;
+  }
+
+  transformed data {
+    array[n] real onset_to_hosp_upper;
+    array[n] real onset_to_hosp_lower;
+
+    for (i in 1:n) {
+      onset_to_hosp_upper[i] = onset_to_hosp[i] + 1;
+      onset_to_hosp_lower[i] = onset_to_hosp[i] - 1;
+    }
+  }
+
+  parameters {
+     real meanlog;
+     real<lower = 0> sdlog;
+  }
+
+  model {
+    // priors
+    meanlog ~ normal(0, 10);
+    sdlog ~ normal(0, 10);
+
+    // likelihood
+    for (i in 1:n) {
+      if (onset_to_hosp_lower[i] > 0) {
+        target += log(
+          lognormal_cdf(onset_to_hosp_upper[i] | meanlog, sdlog) - 
+          lognormal_cdf(onset_to_hosp_lower[i] | meanlog, sdlog)
+        );
+      } else {
+        target += lognormal_lcdf(onset_to_hosp_upper[i] | meanlog, sdlog);
+      }
+    }
+  }
+'
+
+file <- write_stan_file(delay_model_discrete)
+model <- cmdstan_model(file)
+
+model$sample(
+  data = list(
+    n = nrow(na.omit(df)),
+    onset_to_hosp = na.omit(df)$onset_to_hosp
+  )
+)
+```
+
+You will see that this solution does not require any changes to the data in order to obtain an estimate. 
+Are the estimates "better" than the ones you got before?
+
+::: {.callout-tip}
+## Take 20 minutes
+Familiarise yourself with the stan model above and make sure you understand it.
+Then, experiment with different parameters of the distribution(s), simulate and estimate with and without correcting for censoring.
+Can you find out when biases from not accounting for censoring become larger?
+:::
+
+# Going further
+
+- The solution for integrating the censoring window above is only one possible one for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
