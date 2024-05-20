@@ -39,7 +39,7 @@ These are usually strictly positive because e.g. one cannot develop symptoms bef
 Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
 These are quite similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e. gives more probability to occasional very large values, whereas the gamma distribution as more of a tail on the left, i.e. gives more probability to values lower than the mean.
 
-The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/beta^2$. 
+The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$. 
 A gamma distribution with mean 5 and variance 2, for example, has $\alpha = 12.5$ and $\beta = 2.5$.
 
 ```{r gammas}
@@ -51,7 +51,7 @@ var(gammas)
 ```
 
 The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$. 
-A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sd = 0.28$.
+A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sigma = 0.28$.
 
 ```{r lognormals}
 ## simulate gamma with mean 5, variance 2
