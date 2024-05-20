@@ -12,6 +12,19 @@ The aim of this session is for you to familiarise yourself with the concept of d
 You will do this by working in `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
 In doing so, you will see the specific issues that can arise with epidemiological data.
 
+# Libraries used
+
+In this session we will use the `nfidd` library to load a data set of infection times, the `ggplot2` library for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `here` library to find the stan models, and the `cmdstanr` library for using stan.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+library("here")
+library("cmdstanr")
+```
+
 # Simulating delayed epidemiological data
 
 We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
@@ -26,9 +39,6 @@ We will work with a data set that is included in the `nfidd` R package that you 
 It can be loaded with the `data` command
 
 ```{r}
-library("nfidd")
-library("ggplot2")
-
 data(infection_times)
 head(infection_times)
 
@@ -53,7 +63,6 @@ Try to add onset and hospitalisation dates to the infection data.
 ::: {.callout-note collapse="true"}
 ## Partial solution
 ```{r inf_hosp, message = FALSE}
-library("dplyr")
 ## assume a start date, e.g. 10 May of this year
 start_date <- as.Date("2024-05-10")
 ## create a new data frame based on the `infection_times` data frame
@@ -102,7 +111,6 @@ Note that we have used the `as.Date` function to convert precise times to dates 
 Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
 
 ```{r plot_distributions, messages = FALSE}
-library("tidyr")
 dfl <- df |>
   pivot_longer(
     cols = c(infection_date, onset_date, hosp_date),
@@ -126,27 +134,12 @@ As with all our estimation tasks throughout this course, we will be using stan, 
 We will try to represent the model we simulated above as much as possible in this.
 One way that this could look, for examle, is:
 
-```{r delay_model}
-library("cmdstanr")
-
-delay_model <- '
-  data {
-    int n; // number of data points (rows with hospiatlisation date)
-    array[n] real onset_to_hosp; // onset to hospitalisation delays in the data
-  }
-
-  parameters {
-     real meanlog; // parameter to be estimtated
-     real<lower = 0> sdlog; // parameter to be estimated
-  }
-
-  model {
-    meanlog ~ normal(0, 10); // prior distribution
-    sdlog ~ normal(0, 10) T[0, ]; // prior distribution
-
-    onset_to_hosp ~ lognormal(meanlog, sdlog); // likelihood
-  }
-'
+```{r naive_delay_model}
+mod <- cmdstan_model(
+  here("sessions", "03-biases-in-delay-distributions", "naive_delay_model.stan")
+)
+## show model code with line numbers
+mod$print(line_numbers = TRUE)
 ```
 
 ::: {.callout-tip}
@@ -154,25 +147,25 @@ delay_model <- '
 Try to understand the model code and the relationships it encodes.
 :::
 
-You can now sample from the posterior of this model, i.e. conduct inference, by first compiling the model code.
+You can try to _sample_ from the model's posterior distribution by feeding it our simulated data set.
 
-```{r compile_delay_model}
-file <- write_stan_file(delay_model)
-model <- cmdstan_model(file)
-```
-
-Once this is done, you can _sample_ from the model's posterior distribution:
-
-```{r sample_delay_model}
-model$sample(
+```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+mod$sample(
   data = list(
     n = nrow(na.omit(df)),
     onset_to_hosp = na.omit(df)$onset_to_hosp
   ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 ```
 
-This will probably cause an error - can you think of a reason why (if you don't see an error you could still think about what may cause an error, or resimulate the data that is being fitted to by re-running the commands that add columns to the infection times data set)?
+::: {.callout-caution}
+## Reduce the amount of messages printed to the screen
+As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can safely remove them.
+:::
+
+The command above will probably cause an error - can you think of a reason why (if you don't see an error you could still think about what may cause an error, or resimulate the data that is being fitted to by re-running the commands that add columns to the infection times data set)?
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -192,55 +185,21 @@ In the next section we are proposing a better solution.
 
 A better way to account for censoring is to integrate over a window:
 
-```r
-delay_model_discrete <- '
-  data {
-    int n;
-    array[n] real onset_to_hosp;
-  }
+```{r corrected_delay_model}
+mod <- cmdstan_model(
+  here(
+    "sessions", "03-biases-in-delay-distributions", "corrected_delay_model.stan"
+    )
+)
+## show model code with line numbers
+mod$print(line_numbers = TRUE)
 
-  transformed data {
-    array[n] real onset_to_hosp_upper;
-    array[n] real onset_to_hosp_lower;
-
-    for (i in 1:n) {
-      onset_to_hosp_upper[i] = onset_to_hosp[i] + 1;
-      onset_to_hosp_lower[i] = onset_to_hosp[i] - 1;
-    }
-  }
-
-  parameters {
-     real meanlog;
-     real<lower = 0> sdlog;
-  }
-
-  model {
-    // priors
-    meanlog ~ normal(0, 10);
-    sdlog ~ normal(0, 10);
-
-    // likelihood
-    for (i in 1:n) {
-      if (onset_to_hosp_lower[i] > 0) {
-        target += log(
-          lognormal_cdf(onset_to_hosp_upper[i] | meanlog, sdlog) - 
-          lognormal_cdf(onset_to_hosp_lower[i] | meanlog, sdlog)
-        );
-      } else {
-        target += lognormal_lcdf(onset_to_hosp_upper[i] | meanlog, sdlog);
-      }
-    }
-  }
-'
-
-file <- write_stan_file(delay_model_discrete)
-model <- cmdstan_model(file)
-
-model$sample(
+mod$sample(
   data = list(
     n = nrow(na.omit(df)),
     onset_to_hosp = na.omit(df)$onset_to_hosp
-  )
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 ```
 
