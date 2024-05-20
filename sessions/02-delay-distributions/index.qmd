@@ -82,7 +82,21 @@ mod <- cmdstan_model(here("sessions", "02-delay-distributions", "gamma.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
-We can then use this in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
+::: {.callout-tip}
+## Take 5 minutes
+Familarise yourself with the model above.
+Do you understand all the lines?
+Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) the data that has to be supplied to the model?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Lines 13 and 14 define the parametric prior distributions (for parameters alpha and beta).
+Line 15 defines the likelihood.
+Lines 3 and 4 define the data that has to be supplied to the model.
+:::
+
+We use the model we have defined in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
 Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
 
 ```{r gamma_inference}
@@ -96,11 +110,13 @@ gamma_fit <- mod$sample(
 gamma_fit
 ```
 
+::: {.callout-caution}
 The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debuggin).
+You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+:::
 
 You can see that the estimates are broadly consistent with the parameters we put in.
-To investigate this further, we will conduct a so-called posterior predictive check by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
+To investigate this further, we will conduct a so-called _posterior predictive check_ by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
 
 ```{r gamma_ppc}
 # Extract posterior draws
