@@ -83,14 +83,7 @@ mod$print(line_numbers = TRUE)
 ```
 
 We can then use this in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
-
-```{r gamma_model}
-mod <- cmdstan_model(here("sessions", "02-delay-distributions", "gamma.stan"))
-## show model code with line numbers
-mod$print(line_numbers = TRUE)
-```
-
-Once you have familiarised yourself with the model, you can use it to conduct inference
+Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
 
 ```{r gamma_inference}
 stan_data <- list(
