@@ -90,9 +90,14 @@ stan_data <- list(
   N = length(gammas),
   y = gammas
 )
-gamma_fit <- mod$sample(data = stan_data)
+gamma_fit <- mod$sample(
+  data = stan_data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
 gamma_fit
 ```
+
+The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debuggin).
 
 You can see that the estimates are broadly consistent with the parameters we put in.
 To investigate this further, we will conduct a so-called posterior predictive check by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
