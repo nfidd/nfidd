@@ -136,7 +136,7 @@ and related it to the material in this course.  (30 mins)
 
 ## Session 13: End of course summary and discussion
 
-Wednesday June 26: 11.00-12.00
+Wednesday June 26: 12.00-12.30
 
 - Summary of the course (15 mins)
 - Discussion of future directions and how to continue learning (15 mins)
