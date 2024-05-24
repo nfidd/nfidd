@@ -19,8 +19,13 @@ BugReports: https://github.com/nfidd/nfiidd/issues
 Depends:
     R (>= 4.2.0)
 Suggests:
-    rstan,
-    fitdistrplus
+    cmdstanr,
+    dplyr,
+    here,
+    ggplot2,
+    tidyr
+Remotes:
+    stan-dev/cmdstanr
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
