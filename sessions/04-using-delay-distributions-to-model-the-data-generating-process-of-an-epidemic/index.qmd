@@ -169,4 +169,54 @@ Does a plot of these observations look more like the data from the previous sess
 
 # Estimating a time series of infection
 
+We now invert the procedure of above, i.e. instead of convolving infects and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
+Mathematically this amounts to a _deconvolution_ of the time series, i.e. the opposite process to convolution.
+
+```{r stan_deconvolve}
+mod <- cmdstan_model(
+  here(
+    "sessions",
+    paste0(
+      "04-using-delay-distributions-to-model-the-data-generating-process-of-",
+      "an-epidemic"
+    ),
+    "estimate_infections.stan"
+  )
+)
+
+data <- list(
+  n = nrow(onsets),
+  obs = onsets$observed,
+  ip_shape = 5,
+  ip_rate = 1,
+  ip_max = 15
+)
+inf_fit <- mod$sample(
+  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+```
+
+```{r inf_ppc}
+# Extract posterior draws
+inf_posterior <- inf_fit |>
+  gather_draws(infections[day]) |>
+  group_by(day) |>
+  summarise(
+    median = median(.value),
+    lower_90 = quantile(.value, 0.05),
+    upper_90 = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(infection_date = inf_time_series$infection_date)
+
+
+ggplot(mapping = aes(x = infection_date)) +
+  geom_line(data = inf_time_series, mapping = aes(y = n)) +
+  geom_ribbon(
+    data = inf_posterior,
+    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
+  )
+```
+
+
 # Going further
