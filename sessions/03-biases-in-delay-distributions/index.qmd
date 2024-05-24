@@ -85,10 +85,13 @@ df <- infection_times |>
   mutate(
     incubation_period = rgamma(n(), shape = 5, rate = 1),
     onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
-    infection_date = floor_date(start_date + infection_time),
-    onset_date = floor_date(start_date + infection_time + incubation_period),
+    infection_date = floor_date(start_date + infection_time, unit = "day"),
+    onset_date = floor_date(
+      start_date + infection_time + incubation_period,
+      unit = "day"),
     hosp_date = floor_date(
-      start_date + infection_time + incubation_period + onset_to_hosp
+      start_date + infection_time + incubation_period + onset_to_hosp,
+      unit = "day"
     )
   )
 ## next, set 70% of the hospitalization dates to NA because only 30∞ of cases
