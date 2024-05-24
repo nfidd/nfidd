@@ -12,11 +12,14 @@ The aim of this session is to introduce how delay distributions can be used to m
 
 # Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` pcakage for data wrangling, the `lubridate` package to handle dates, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, the `lubridate` package to handle dates, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
+library("dplyr")
+library("tidyr")
+library("lubridate")
 library("ggplot2")
 library("here")
 library("cmdstanr")
@@ -65,11 +68,104 @@ df <- infection_times |>
 ## infection time series
 inf_time_series <- df |>
   count(infection_date)
-  
+head(inf_time_series)
+```
 
+The resulting time series does contain any days with no infections.
+We can make our calculations easier by adding them:
 
+```{r missing_to_zero}
+all_dates <- expand(
+  df, infection_date = seq(min(infection_date), max(infection_date), by = "day")
+)
+inf_time_series <- all_dates |>
+  full_join(inf_time_series, by = join_by(infection_date)) |>
+  replace_na(list(n = 0))
+head(inf_time_series)
+```
+
+Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
+However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a problem.
+The gamma distribution is a _continuous_ distribution but days are _discrete_ entities.
+One solution to this problem is to first _discretise_ the gamma distribution.
+To do so we integrate it over 2-day windows, which will give a reasonable approximation to using the continuous distribution with continuous infection times and continuous outcomes.
+
+```{r discretise_2_day_window}
+## function that takes to inputs to discretise a continuous delay distribution:
+## cdf: a function that defines the CDF (cumulative distribution function) of
+## the cnotinuous delay distiribution
+## max: the maximum delay
+## ...: parameters of the delay distribution
+## the function returns a vector of probabilities, corresponding to discrete
+## indices 0, 1, 2 of the discretised delay distribution
+## example: discretise(pgamma, 14, shape = 5, rate = 1)
+discretise <- function(cdf, max, ...) {
+  ret <- numeric(max + 1) ## set up vector of size (max + 1)
+  ## for the first element we integrate over [0, 1) because delays cannot be
+  ## negative
+  ret[1] <- cdf(1, ...)
+  ## for all other elements we use 2-day integration windows
+  ret[2:length(ret)] <- cdf(2:(max + 1), ...) - cdf(0:(max - 1), ...)
+  ## normalise
+  ret <- ret / sum(ret)
+  return(ret)
+}
+```
+
+::: {.callout-note}
+## Take 5 minutes
+Try to understand the `discretise()` function above.
+Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
+```{r discretised_gamma}
+gamma_pdf <- discretise(pgamma, 14, shape = 5, rate = 1)
+gamma_pdf
+```
+:::
+
+Next we apply a convolution with the discretised incubation period distribution to the time series of infections to generate a time series of symptom onsets.
+
+```{r convolution}
+## for each infection date, apply convolution with `gamma_pdf`
+onsets <- lapply(seq_len(nrow(inf_time_series)), \(x) {
+  ## get vector of infections (14-day window)
+first_index <- max(1, x - 14)
+  inf <- inf_time_series$n[seq(first_index, x)]
+  ## shorten pdf if needed
+  pdf <- gamma_pdf[seq_len(length(inf))]
+  ## convolve with delay distribution
+  onsets <- round(sum(inf * rev(pdf)))
+  data.frame(onset_date = inf_time_series$infection_date[x], onsets = onsets)
+})
+onsets <- bind_rows(onsets)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Try to understand the code above and how it corresponds to the convolution introduced above.
+
+:::
+
+We can plot these symptom onsets
+```{r convolution_plot}
+ggplot(onsets, aes(x = onset_date, y = onsets)) +
+  geom_bar(stat = "identity")
+```
+
+Do they look similar to the plot of symptom onsets in the previous session?
 
 ## Observation uncertainty
+
+Usually not all data are perfectly observed.
+The counting process itself generally introduces a natural form of error that we can, once again, model with a probability distribution.
+For modelling counts, a common choice is the Poisson distribution.
+We can use this to generate uncertainty around our convolved data.
+
+```{r uncertain}
+onsets <- onsets |>
+  mutate(observed = rpois(n(), onsets))
+```
+
+Does a plot of these observations look more like the data from the previous session than the convolution plotted above?
 
 # Estimating a time series of infection
 
