@@ -14,7 +14,7 @@ In doing so, you will see the specific issues that can arise with epidemiologica
 
 # Libraries used
 
-In this session we will use the `nfidd` library to load a data set of infection times, the `ggplot2` library for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `here` library to find the stan models, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
