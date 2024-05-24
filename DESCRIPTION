@@ -19,8 +19,13 @@ BugReports: https://github.com/nfidd/nfiidd/issues
 Depends:
     R (>= 4.2.0)
 Suggests:
-    rstan,
-    fitdistrplus
+    bayesplot,
+    cmdstanr,
+    ggplot2,
+    here,
+    posterior
+Remotes:
+    stan-dev/cmdstanr
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
