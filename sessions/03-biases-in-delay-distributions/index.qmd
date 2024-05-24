@@ -21,6 +21,7 @@ library("nfidd")
 library("ggplot2")
 library("dplyr")
 library("tidyr")
+library("lubridate")
 library("here")
 library("cmdstanr")
 ```
@@ -61,10 +62,10 @@ Try to add onset and hospitalisation dates to the infection data.
 :::
 
 ::: {.callout-note collapse="true"}
-## Partial solution
+## Solution
 ```{r inf_hosp, message = FALSE}
 ## assume a start date, e.g. 10 May of this year
-start_date <- as.Date("2024-05-10")
+start_date <- ymd("2024-05-10")
 ## create a new data frame based on the `infection_times` data frame
 ## representing for each infected individual
 ## - `incubation_period`: the time from infection to symptom onset
@@ -84,10 +85,11 @@ df <- infection_times |>
   mutate(
     incubation_period = rgamma(n(), shape = 5, rate = 1),
     onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
-    infection_date = as.Date(start_date + infection_time),
-    onset_date = as.Date(start_date + infection_time + incubation_period),
-    hosp_date =
-      as.Date(start_date + infection_time + incubation_period + onset_to_hosp)
+    infection_date = floor_date(start_date + infection_time),
+    onset_date = floor_date(start_date + infection_time + incubation_period),
+    hosp_date = floor_date(
+      start_date + infection_time + incubation_period + onset_to_hosp
+    )
   )
 ## next, set 70% of the hospitalization dates to NA because only 30∞ of cases
 ## are hospitalized
@@ -96,12 +98,12 @@ df <- df |>
     hosp_date = if_else(
       rbinom(n = n(), size = 1, p = 0.3) == 1,
       hosp_date,
-      as.Date(NA_character_))
+      ymd(NA_character_))
   )
 ```
 
 ::: {.callout-caution}
-Note that we have used the `as.Date` function to convert precise times to dates on the time scale of days.
+Note that we have used the `floor_date` function from `lubridate` to convert precise times to dates on the time scale of days.
 :::
 
 :::
