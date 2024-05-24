@@ -16,6 +16,7 @@ In this session we will use the `ggplot2` library for plotting, the `here` libra
 We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("ggplot2")
 library("here")
 library("cmdstanr")
@@ -45,6 +46,25 @@ $$
 
 In words, to get the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
+
+We can use exactly the same data as in the previous session but this time aggregate it into a time series:
+
+```{r aggregate}
+data(infection_times)
+## assume a start date, e.g. 10 May of this year
+start_date <- as.Date("2024-05-10")
+df <- infection_times |>
+  mutate(
+    incubation_period = rgamma(n(), shape = 5, rate = 1),
+    infection_date = as.Date(start_date + infection_time),
+    onset_date = as.Date(start_date + infection_time + incubation_period),
+  )
+## infection time series
+inf_time_series <- df |>
+  count(infection_date)
+  
+
+
 
 ## Observation uncertainty
 
