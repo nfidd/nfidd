@@ -15,20 +15,20 @@ functions {
     return(ret);
   }
 
-  array[] real convolve_with_delay(array[] real infections,
+  array[] real convolve_with_delay(array[] real ts,
                                    array[] real delay) {
-    // length of infections tim series
-    int n = num_elements(infections);
+    // length of time series
+    int n = num_elements(ts);
     int max_delay = num_elements(delay) - 1;
-    array[n] real onsets;
+    array[n] real ret;
     for (i in 1:n) {
       int first_index = max(1, i - max_delay);
       int len = i - first_index + 1;
-      onsets[i] = dot_product(
-        infections[first_index:i], reverse(delay)[1:len]
+      ret[i] = dot_product(
+        ts[first_index:i], reverse(delay)[1:len]
       );
     }
-    return(onsets);
+    return(round(ret));
   }
 }
 

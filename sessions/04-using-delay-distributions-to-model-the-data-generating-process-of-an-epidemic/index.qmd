@@ -116,37 +116,55 @@ discretise <- function(cdf, max, ...) {
 Try to understand the `discretise()` function above.
 Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
 ```{r discretised_gamma}
-gamma_pdf <- discretise(pgamma, 14, shape = 5, rate = 1)
-gamma_pdf
+gamma_pmf <- discretise(pgamma, 14, shape = 5, rate = 1)
+gamma_pmf
 ```
 :::
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections to generate a time series of symptom onsets.
 
 ```{r convolution}
-## for each infection date, apply convolution with `gamma_pdf`
-onsets <- lapply(seq_len(nrow(inf_time_series)), \(x) {
-  ## get vector of infections (14-day window)
-  first_index <- max(1, x - 14)
-  inf <- inf_time_series$n[seq(first_index, x)]
-  ## shorten pdf if needed
-  pdf <- gamma_pdf[seq_len(length(inf))]
-  ## convolve with delay distribution
-  onsets <- round(sum(inf * rev(pdf)))
-  data.frame(onset_date = inf_time_series$infection_date[x], onsets = onsets)
-})
-onsets <- bind_rows(onsets)
+## function that takes two inputs to convolve a time series with a delay
+## ts: vector of the time series to convolve
+## delay: the probability mass function of the delay, given as a vector of
+## probabilities, corresponding to discrete indices 0, 1, 2 of the discretised
+## delay distribution
+## example: convolve_with_delay(c(10, 14, 10, 10), c(0.1, 0.6, 0.3))
+convolve_with_delay <- function(ts, delay) {
+  max_delay <- length(delay) - 1 ## subtract one because zero-indexed
+  convolved <- vapply(seq_along(ts), \(i) {
+    ## get vector of infections (14-day window)
+    first_index <- max(1, i - max_delay)
+    ts_segment <- ts[seq(first_index, i)]
+    ## take reverse of pmf and reverse if needed
+    pmf <- rev(delay)[seq_len(i - first_index + 1)]
+    ## convolve with delay distribution
+    ret <- sum(ts_segment * pmf)
+    return(round(ret))
+  }, numeric(1))
+  return(convolved)
+}
 ```
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Try to understand the code above and how it corresponds to the convolution introduced above.
+Try to understand the `convolve_with_delay()` function above.
+Try it with a few different time series and delay distributions.
+How would you create the time series of infections using the discretised gamma distribution created above and saved in `gamma_pmf`?
+:::
 
+::: {.callout-note collapse="true"]}
+```{r applied_convolution}
+onsets <- convolve_with_delay(inf_time_series$n, gamma_pmf)
+```
 :::
 
 We can plot these symptom onsets
 ```{r convolution_plot}
-ggplot(onsets, aes(x = onset_date, y = onsets)) +
+combined <- inf_time_series |>
+  rename(date = infection_date, infections = n) |>
+  mutate(onsets = onsets)
+ggplot(combined, aes(x = date, y = onsets)) +
   geom_bar(stat = "identity")
 ```
 
