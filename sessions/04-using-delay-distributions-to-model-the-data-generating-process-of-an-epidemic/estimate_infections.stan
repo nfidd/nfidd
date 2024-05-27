@@ -45,10 +45,10 @@ parameters {
 }
 
 transformed parameters {
-  array[ip_max + 1] real gamma_pdf = discretise_gamma(
+  array[ip_max + 1] real gamma_pmf = discretise_gamma(
     ip_shape, ip_rate, ip_max
   );
-  array[n] real onsets = convolve_with_delay(infections, gamma_pdf);
+  array[n] real onsets = convolve_with_delay(infections, gamma_pmf);
 }
 
 model {
