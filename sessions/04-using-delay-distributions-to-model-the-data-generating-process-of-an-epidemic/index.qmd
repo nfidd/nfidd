@@ -13,7 +13,7 @@ The aim of this session is to introduce how delay distributions can be used to m
 # Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, the `lubridate` package to handle dates, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
+We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -23,8 +23,7 @@ library("lubridate")
 library("ggplot2")
 library("here")
 library("cmdstanr")
-library("bayesplot")
-library("posterior")
+library("tidybayes")
 ```
 
 ::: {.callout-tip}
@@ -128,7 +127,7 @@ Next we apply a convolution with the discretised incubation period distribution 
 ## for each infection date, apply convolution with `gamma_pdf`
 onsets <- lapply(seq_len(nrow(inf_time_series)), \(x) {
   ## get vector of infections (14-day window)
-first_index <- max(1, x - 14)
+  first_index <- max(1, x - 14)
   inf <- inf_time_series$n[seq(first_index, x)]
   ## shorten pdf if needed
   pdf <- gamma_pdf[seq_len(length(inf))]
@@ -170,7 +169,7 @@ Does a plot of these observations look more like the data from the previous sess
 # Estimating a time series of infection
 
 We now invert the procedure of above, i.e. instead of convolving infects and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
-Mathematically this amounts to a _deconvolution_ of the time series, i.e. the opposite process to convolution.
+Mathematically this amounts to a _deconvolution_ of the time series, i.e. the reverse process to convolution.
 
 ```{r stan_deconvolve}
 mod <- cmdstan_model(
@@ -183,7 +182,26 @@ mod <- cmdstan_model(
     "estimate_infections.stan"
   )
 )
+mod$print(line_numbers = TRUE)
+```
 
+::: {.callout-tip}
+## Take 10 minutes
+Familarise yourself with the model above.
+Unlike before there is now a `functions` block at the beginning of the model (lines 1-33), where we define two functions, `discretise_gamma()` (line 2) and `convolve_with_delay()` (line 18).
+These correspond to our earlier **R** function `discretise()` and the code we used to generate a time series of symptom onsets, respectively.
+Later, these functions are called in the `model` block, to generate a discretised probability mass function of the gamma distribution (lines 48-50), and to generate the time series of symptom onsets (line 51).
+Which line defines the likelihood, and how does it relate to the section about observation uncertainty above?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Line 57 defines the likelihood, and it does so using the Poisson observation uncertainty we used above.
+:::
+
+We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
+
+```{r inf_fit}
 data <- list(
   n = nrow(onsets),
   obs = onsets$observed,
@@ -195,6 +213,27 @@ inf_fit <- mod$sample(
   data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 ```
+
+::: {.callout-caution}
+The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+:::
+
+
+::: {.callout-tip}
+In this model, we have estimated many more parameters than in the previous models: instead of e.g. 2 parameters of a probability distribution, we now have a total of `r nrow(onsets)` time points for which we estimate the number of infections. 
+This is because we don't have a model for the _process_ that generates infections.
+How would this be different if we e.g. used an SIR model here?
+:::
+
+We can see the first few estimates of the number of infections using
+
+```{r inf_summary}
+inf_fit
+```
+
+Again, we can do a posterior predictive check by plotting the estimates of the time series of infections (with uncertainy) against the data.
+Does it look like a good fit?
 
 ```{r inf_ppc}
 # Extract posterior draws
@@ -218,5 +257,18 @@ ggplot(mapping = aes(x = infection_date)) +
   )
 ```
 
+::: {.callout-tip}
+This time we used the `gather_draws()` function included in `tidybayes` to extract the inference results. 
+This is particularly useful when dealing with arrays such as `inference` because it allows to extract them with a given index (here: `[day]`).
+:::
 
 # Going further
+
+- Above, we used a Poisson distribution to characterise uncertainty.
+In the Poisson distribution, the variance is the same as the mean.
+Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
+If you re-did the analysis above with the negative binomail distribution, what would be the difference?
+
+- We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
+How would this look in stan code?
+Would you expect it to yield a different result?
