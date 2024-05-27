@@ -90,9 +90,9 @@ One solution to this problem is to first _discretise_ the gamma distribution.
 To do so we integrate it over 2-day windows, which will give a reasonable approximation to using the continuous distribution with continuous infection times and continuous outcomes.
 
 ```{r discretise_2_day_window}
-## function that takes to inputs to discretise a continuous delay distribution:
+## function that takes two inputs to discretise a continuous delay distribution:
 ## cdf: a function that defines the CDF (cumulative distribution function) of
-## the cnotinuous delay distiribution
+## the continuous delay distiribution
 ## max: the maximum delay
 ## ...: parameters of the delay distribution
 ## the function returns a vector of probabilities, corresponding to discrete
