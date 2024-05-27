@@ -114,7 +114,67 @@ What kind of behaviours do you see depending on the values you put in?
 # Estimating R from a time series of infections
 
 We now return to the time series of infections we used in the earlier sesssion on epidemiological delays.
+
+```{r load_ts}
+data(infection_times)
+## assume a start date, e.g. 10 May of this year
+start_date <- ymd("2024-05-10")
+df <- infection_times |>
+  mutate(
+    infection_date = floor_date(start_date + infection_time, unit = "day")
+  )
+## infection time series
+inf_infection_times <- df |>
+  count(infection_date)
+head(inf_time_series)
+```
+
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
+As always we first load the stan model and spend some time trying to understand it.
+
+```{r stan_estimate_r}
+mod <- cmdstan_model(
+  here(
+    "sessions", "05-R-estimation-and-the-renewal-equation", "estimate-r.stan"
+  )
+)
+mod$print(line_numbers = TRUE)
+```
+
+```{r r_fit}
+data <- list(
+  n = nrow(inf_time_series) - 1,
+  obs = inf_time_series$n[-1],
+  I0 = inf_time_series$n[1],
+  gen_time_shape = 4,
+  gen_time_rate = 1,
+  gen_time_max = 28
+)
+r_fit <- mod$sample(
+  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+```
+
+```{r r_plot}
+# Extract posterior draws
+r_posterior <- r_fit |>
+  gather_draws(R[day]) |>
+  group_by(day) |>
+  summarise(
+    median = median(.value),
+    lower_90 = quantile(.value, 0.05),
+    upper_90 = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(infection_date = inf_time_series$infection_date[-1])
+
+
+ggplot(mapping = aes(x = infection_date)) +
+  geom_ribbon(
+    data = r_posterior,
+    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
+  )
+```
 
 # Going further
 
