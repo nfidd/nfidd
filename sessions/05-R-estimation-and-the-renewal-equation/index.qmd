@@ -75,20 +75,46 @@ With the theory out of the way we now turn to simulating an epidemic using the r
 We first write a function to simulate the epidemic using the discrete renewal equation.
 
 ```{r renewal_equation}
-## function that takes three inputs to discretise a continuous delay distribution:
-## cdf: a function that defines the CDF (cumulative distribution function) of
-## the cnotinuous delay distiribution
-## max: the maximum delay
-## ...: parameters of the delay distribution
-## the function returns a vector of probabilities, corresponding to discrete
-## indices 0, 1, 2 of the discretised delay distribution
-## example: discretise(pgamma, 14, shape = 5, rate = 1)
+## function that takes three inputs to simulate using the renewal equation
+## I0: the initial number of infections
+## R: the reproduction number, given as a vector with one entry per time point
+## gen_time: the generation time distribution, given as a vector with one entry
+## per day after infection (the first element corresponding to one day after
+## infection)
+## example: renewal(5, c(rep(3, 4), rep(0.5, 5)), c(0.1, 0.2, 0.3, 0.2, 0.1))
 renewal <- function(I0, R, gen_time) {
-  
+  max_gen_time <- length(gen_time)
+  ## number of time points
+  times <- length(R)
+  I <- c(I0, rep(0, times)) ## set up vector holding number of infected
+  ## iterate over time points
+  for (t in 1:times) {
+    ## calculate convolution
+    first_index <- max(1, t - max_gen_time + 1)
+    I_segment <- I[seq(first_index, t)]
+    ## iterate over generation times
+    ## take reverse of pmf and reverse if needed
+    gen_pmf <- rev(gen_time)[seq_len(t - first_index + 1)]
+    ## convolve infections with generation time
+    I[t + 1] <- sum(I_segment * gen_pmf) * R[t]
+  }
+  return(I[-1]) ## remove I0 from time series
 }
 ```
 
+::: {.callout-note}
+## Take 10 minutes
+Try to understand the `renewal()` function above.
+Compare it to the `convolve_with_delay()` function from the session on convolutions.
+Can you explain the key differences between the two?
+Try it with a few different probability distributions and parameters.
+What kind of behaviours do you see depending on the values you put in?
+:::
+
 # Estimating R from a time series of infections
+
+We now return to the time series of infections we used in the earlier sesssion on epidemiological delays.
+We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
 
 # Going further
 
