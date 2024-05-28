@@ -140,9 +140,7 @@ We will try to represent the model we simulated above as much as possible in thi
 One way that this could look, for examle, is:
 
 ```{r naive_delay_model}
-mod <- cmdstan_model(
-  here("sessions", "03-biases-in-delay-distributions", "naive_delay_model.stan")
-)
+mod <- cmdstan_model(here("stan", "naive_delay_model.stan"))
 ## show model code with line numbers
 mod$print(line_numbers = TRUE)
 ```
@@ -191,11 +189,7 @@ In the next section we are proposing a better solution.
 A better way to account for censoring is to integrate over a window:
 
 ```{r corrected_delay_model}
-mod <- cmdstan_model(
-  here(
-    "sessions", "03-biases-in-delay-distributions", "corrected_delay_model.stan"
-  )
-)
+mod <- cmdstan_model(here("stan", "corrected_delay_model.stan"))
 ## show model code with line numbers
 mod$print(line_numbers = TRUE)
 
