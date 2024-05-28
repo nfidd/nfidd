@@ -1,4 +1,5 @@
 ---
-title: "Session 12: Overview of available tools"
+title: "Overview of available tools"
+order: 12
 ---
 

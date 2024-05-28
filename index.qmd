@@ -7,7 +7,7 @@ about:
   links:
     - icon: chat-fill
       text: Sessions
-      href: sessions.qmd
+      href: sessions.html
     - icon: github
       text: Github
       href: https://github.com/nfidd/nfidd
@@ -16,3 +16,6 @@ about:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+A work in progress site for a course on nowcasting and forecasting infectious disease dynamics.
+

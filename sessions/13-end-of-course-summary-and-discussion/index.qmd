@@ -1,4 +1,5 @@
 ---
-title: "Session 13: End of course summary and discussion"
+title: "End of course summary and discussion"
+order: 13
 ---
 
