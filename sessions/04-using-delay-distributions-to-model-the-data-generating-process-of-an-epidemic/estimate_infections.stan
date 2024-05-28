@@ -1,6 +1,7 @@
 functions {
   array[] real discretise_gamma(real shape, real rate, int max_delay) {
-    array[max_delay + 1] real ret;
+    array[max_delay + 1] real ret; // return array
+    real norm; // normalising constant, to be calculated later
     // for the first element we integrate over [0, 1) because delays cannot be
     // negative
     ret[1] = gamma_cdf(1 | shape, rate);
@@ -9,14 +10,14 @@ functions {
       ret[i] = gamma_cdf(i | shape, rate) - gamma_cdf(i - 2 | shape, rate);
     }
     // normalise
-    for (i in 1:max_delay) {
-      ret[i] = ret[i] / sum(ret);
+    norm = sum(ret);
+    for (i in 1:(max_delay + 1)) {
+      ret[i] = ret[i] / norm;
     }
     return(ret);
   }
 
-  array[] real convolve_with_delay(array[] real ts,
-                                   array[] real delay) {
+  array[] real convolve_with_delay(array[] real ts, array[] real delay) {
     // length of time series
     int n = num_elements(ts);
     int max_delay = num_elements(delay) - 1;
