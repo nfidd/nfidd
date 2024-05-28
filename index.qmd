@@ -7,7 +7,7 @@ about:
   links:
     - icon: chat-fill
       text: Sessions
-      href: sessions/00-introduction-and-course-overview.html
+      href: nfidd/sessions/00-introduction-and-course-overview.html
     - icon: github
       text: Github
       href: https://github.com/nfidd/nfidd
