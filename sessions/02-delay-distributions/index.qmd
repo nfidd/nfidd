@@ -90,7 +90,7 @@ To do so, we first load in the model
 
 ```{r load_gamma_model}
 ## load gamma model from the session directory
-mod <- cmdstan_model(here("sessions", "02-delay-distributions", "gamma.stan"))
+mod <- cmdstan_model(here("stan", "gamma.stan"))
 ## show model code with line numbers
 mod$print(line_numbers = TRUE)
 ```
