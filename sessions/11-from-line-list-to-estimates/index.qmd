@@ -1,4 +1,5 @@
 ---
-title: "Session 11: From line list to estimates"
+title: "From line list to estimates"
+order: 11
 ---
 

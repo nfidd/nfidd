@@ -1,4 +1,5 @@
 ---
-title: "Session 0: Introduction and course overview"
+title: "Introduction and course overview"
+order: 0
 ---
 

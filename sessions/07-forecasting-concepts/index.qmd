@@ -1,4 +1,5 @@
 ---
-title: "Session 7: Forecasting concepts"
+title: "Forecasting concepts"
+order: 7
 ---
 

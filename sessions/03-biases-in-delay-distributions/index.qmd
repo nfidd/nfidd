@@ -1,4 +1,5 @@
 ---
-title: "Session 3: Biases in delay distributions"
+title: "Biases in delay distributions"
+order: 3
 ---
 

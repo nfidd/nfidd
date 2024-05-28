@@ -1,4 +1,5 @@
 ---
-title: "Session 1: R, Stan, and statistical concepts"
+title: "R, Stan, and statistical concepts"
+order: 1
 ---
 

@@ -1,4 +1,5 @@
 ---
-title: "Session 10: Methods in the real world"
+title: "Methods in the real world"
+order: 10
 ---
 

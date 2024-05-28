@@ -1,4 +1,5 @@
 ---
-title: "Session 6: Nowcasting"
+title: "Nowcasting"
+order: 6
 ---
 

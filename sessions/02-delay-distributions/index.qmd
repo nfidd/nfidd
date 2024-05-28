@@ -1,5 +1,6 @@
 ---
-title: "Session 2: Delay distributions"
+title: "Delay distributions"
+order: 2
 ---
 
 ```{r echo = FALSE}
