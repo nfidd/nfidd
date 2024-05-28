@@ -28,7 +28,7 @@ website:
     - id: sessions
       title: "Sessions"
       style: "docked"
-      contents: "sessions/*/*.qmd"
+      contents: "sessions/*.qmd"
 
 format:
   html:
