@@ -16,3 +16,6 @@ about:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+A work in progress site for a course on nowcasting and forecasting infectious disease dynamics.
+
