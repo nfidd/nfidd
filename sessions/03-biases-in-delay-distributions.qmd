@@ -31,7 +31,7 @@ library("cmdstanr")
 
 We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
 For now we will not concern ourselves with the model used to generate the epidemic.
-This represents the typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
 
 We will later deal with modelling the infectious process.
 For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
