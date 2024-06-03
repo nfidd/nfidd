@@ -190,16 +190,7 @@ We now invert the procedure of above, i.e. instead of convolving infects and add
 Mathematically this amounts to a _deconvolution_ of the time series, i.e. the reverse process to convolution.
 
 ```{r stan_deconvolve}
-mod <- cmdstan_model(
-  here(
-    "sessions",
-    paste0(
-      "04-using-delay-distributions-to-model-the-data-generating-process-of-",
-      "an-epidemic"
-    ),
-    "estimate_infections.stan"
-  )
-)
+mod <- cmdstan_model(here("stan", "estimate_infections.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
