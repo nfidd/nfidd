@@ -22,8 +22,9 @@ Suggests:
     bayesplot,
     cmdstanr,
     dplyr,
-    here,
     ggplot2,
+    here,
+    lubridate,
     posterior,
     tidyr
 Remotes:

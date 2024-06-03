@@ -59,7 +59,7 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 
 We would now like to simulate hospitalisations arising from this outbreak.
 We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1.
-We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1 and sdlog 1.
+We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1 and sdlog 4.
 We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
 
 ::: {.callout-tip}
@@ -70,29 +70,12 @@ Try to add onset and hospitalisation times (in decimal number of days after the 
 
 ::: {.callout-note collapse="true"}
 ## Solution
-```{r inf_hosp, message = FALSE}
-## assume a start date, e.g. 10 May of this year
-start_date <- ymd("2024-05-10")
-## create a new data frame based on the `infection_times` data frame
-## representing for each infected individual
-## - `incubation_period`: the time from infection to symptom onset
-## - `onset_to_hosp`: the time from symptom onset to hospitalisation
-## - `onset_time`: the decimal day on which an individual started showing symptoms
-## - `hosp_time`: the decimal day on which an individual became hospitalised (or NA if
-##    they didn't get hospitalied)
-df <- NULL ## replace NULL with your code
-```
-
-::: {.callout-note collapse="true"}
-## Still stuck? Here is a complete solution that should work for you
 ```{r inf_hosp_solution}
 ## first, choose random delays
 df <- infection_times |>
   mutate(
-    incubation_period = rgamma(n(), shape = 5, rate = 1),
-    onset_to_hosp = rlnorm(n(), meanlog = 1, sdlog = 1),
-    onset_time = infection_time + incubation_period,
-    hosp_time = infection_time + incubation_period + onset_to_hosp,
+    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
+    hosp_time = onset_time + rlnorm(n(), meanlog = 1.75, sdlog = 0.5)
   )
 ## next, set 70% of the hospitalization dates to NA because only 30∞ of cases
 ## are hospitalized
@@ -105,7 +88,6 @@ df <- df |>
     )
   )
 ```
-:::
 :::
 
 Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
@@ -148,6 +130,8 @@ Do you recover the parameters used for simulation?
 You can _sample_ from the model's posterior distribution by feeding it our simulated data set.
 
 ```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+df <- df |>
+  mutate(onset_to_hosp = hosp_time - onset_time)
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df)),
@@ -171,6 +155,111 @@ res$summary()
 
 Reassuringly, these estimates look similar to what we used in the simulations.
 :::
+
+# Biases in delay distributions
+
+We now consider two types of biases that commonly occur in infectious disease data: _censoring_ and _truncation_.
+
+## Dates, not days: censoring
+
+Data on health outcomes are usually not recorded in the way that we have used so far in this session: as a numeric time since a given start date.
+Instead, we usually deal with _dates_.
+To simulate this, we can round down the infection times in the data set above using the `floor()` function:
+
+```{r censored_times}
+df_dates <- df |>
+  mutate(
+    infection_time = floor(infection_time),
+    onset_time = floor(onset_time),
+    hosp_time = floor(hosp_time)
+  )
+head(df_dates)
+```
+
+::: {.callout-note}
+As before we are still not working with dates but numbers, which makes handling the data easier - we don't have to make any conversions before using the data in stan.
+However, now these are integer numbers because we have rounded down the numbers using the `floor()` function.
+Each of the numbers now represent the number of days that have passed since the start of the outbreak.
+That is, each of the numbers correspond to a day.
+In that sense, the data is more like typical data we get from infectious disease outbreaks.
+:::
+
+## Estimating delay distributions accounting for censoring
+
+A naïve approach to estimating the delay from symptom onset to hospitalisation would be to ignore the fact that we have rounded down the times and just take use difference in days for the estimation.
+
+```{r}
+df_dates <- df_dates |>
+  mutate(
+    incubation_period = onset_time - infection_time,
+    onset_to_hosp = hosp_time - onset_time
+  )
+```
+
+## Take 5 minutes
+Fit the lognormal model used above to the estimates from the rounded data, i.e. using the `df_dates` data set.
+Do you still recover the parameters that we put in?
+
+::: {.callout-note collapse="true"}
+## Solution
+```{r df_dates_solution}
+res <- mod$sample(
+  data = list(
+    n = nrow(na.omit(df_dates)),
+    y = na.omit(df_dates)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+res
+```
+
+Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
+:::
+
+If we want to modify the model in order to account for censoring, we need to take into account that we don't know when exactly on any given day the event happened.
+For example, if we know that symptom onset of an individual occurred on 20 June, 2024, and they were admitted to hospital on 22 June, 2024, this could mean an onset-to-hospitalisation delay from 1 day (onset at 23:59 on the 20th, admitted at 0:01 on the 22nd) to 3 days (onset at 0:01 on the 20th, admitted at 23:59 on the 22nd).
+We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
+
+```{r censoring_adjusted_delay_model}
+cmod <- cmdstan_model(here("stan", "censored_delay_model.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Familarise yourself with the model above.
+Do you understand all the lines?
+Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) reflect that we have now provided the delay as the difference in integer days?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Lines 21-24 define the parametric prior distributions (for parameters meanlog and sdlog, and the estimates of exact times of events).
+Line 26 defines the likelihood.
+Lines 15-17 reflect the integer delays, adjusted by the estimated times of day
+:::
+
+Now we can use this model to re-estimate the parameters of the delay distribution:
+
+```{r censored_estimate}
+cres <- cmod$sample(
+  data = list(
+    n = nrow(na.omit(df_dates)),
+    y = na.omit(df_dates)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+cres
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Try re-simulating the delays using different parameters of the delay distribution.
+Can you establish under which conditions the bias in estimation gets worse?
+:::
+
+## Real-time estimation: truncation
+
 
 ::: {.callout-note collapse="true"}
 ## Can you change something that will avoid the error?
