@@ -1,19 +1,4 @@
 functions {
-  array[] real discretise_gamma(real shape, real rate, int max_delay) {
-    array[max_delay + 1] real ret; // return array
-    real norm; // normalising constant, to be calculated later
-    // for the first element we integrate over [0, 1) because delays cannot be
-    // negative
-    ret[1] = gamma_cdf(1 | shape, rate);
-    // for all other elements we use 2-day integration windows
-    for (i in 2:(max_delay + 1)) {
-      ret[i] = gamma_cdf(i | shape, rate) - gamma_cdf(i - 2 | shape, rate);
-    }
-    // normalise
-    ret = ret / sum(ret);
-    return(ret);
-  }
-
   array[] real convolve_with_delay(array[] real ts, array[] real delay) {
     // length of time series
     int n = num_elements(ts);
@@ -33,9 +18,9 @@ functions {
 data {
   int n;            // number of time days
   array[n] int obs; // observed onsets
-  real ip_shape;    // shape of incubation period
-  real ip_rate;     // rate of incubation period
-  int ip_max;       // max of incubation period
+  int<lower = 1> ip_max; // max incubation period
+  // probability mass function of incubation period distribution (first index zero)
+  array[max_ip + 1] real ip_pmf;
 }
 
 parameters {
@@ -43,10 +28,7 @@ parameters {
 }
 
 transformed parameters {
-  array[ip_max + 1] real gamma_pmf = discretise_gamma(
-    ip_shape, ip_rate, ip_max
-  );
-  array[n] real onsets = convolve_with_delay(infections, gamma_pmf);
+  array[n] real onsets = convolve_with_delay(infections, ip_pmf);
 }
 
 model {

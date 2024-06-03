@@ -46,7 +46,7 @@ $$
 C_t = \sum_{i=0}^{i=p_\mathrm{max}} I_{t-i} p_i
 $$
 
-In words, to get the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
+In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
 We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), again assuming a gamma-distributed incubation period with shape 5 and rate 1 and this time working with symptom onsets:
@@ -88,39 +88,47 @@ head(inf_ts)
 ```
 
 Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
-However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a problem.
-The gamma distribution is a _continuous_ distribution but days are _discrete_ entities.
-One solution to this problem is to first _discretise_ the gamma distribution.
-To do so we integrate it over 2-day windows, which will give a reasonable approximation to using the continuous distribution with continuous infection times and continuous outcomes.
+However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a familiar issue.
+The gamma distribution is a _continuous_ distribution but now we have data in days which are _discrete_ entities.
+In order to simulate a time series of symptom onsets, we first generate a discrete probability mass function of the incubation period (in days) by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+
+In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each day equally likely.
+We then apply the incubation period before once again rounding down to get the day of symptom onset.
+We repeat this many times to get the probabilty mass function that allows us to go from infection days to symptom onset days
 
 ```{r discretise_2_day_window}
 ## function that takes two inputs to discretise a continuous delay distribution:
-## cdf: a function that defines the CDF (cumulative distribution function) of
-## the continuous delay distiribution
-## max: the maximum delay
+## rdelay: a function that generates random delays, e.g. rgamma, rlognormal
+## n: the number of replicates to simualte
 ## ...: parameters of the delay distribution
 ## the function returns a vector of probabilities, corresponding to discrete
 ## indices 0, 1, 2 of the discretised delay distribution
-## example: discretise(pgamma, 14, shape = 5, rate = 1)
-discretise <- function(cdf, max, ...) {
-  ret <- numeric(max + 1) ## set up vector of size (max + 1)
-  ## for the first element we integrate over [0, 1) because delays cannot be
-  ## negative
-  ret[1] <- cdf(1, ...)
-  ## for all other elements we use 2-day integration windows
-  ret[2:length(ret)] <- cdf(2:(max + 1), ...) - cdf(0:(max - 1), ...)
-  ## normalise
-  ret <- ret / sum(ret)
-  return(ret)
+## example: discretise(rgamma, 14, shape = 5, rate = 1)
+censored_delay_pmf <- function(rgen, n = 1e+6, ...) {
+  ## first, simulate exact time of first event (given by day), uniformly
+  ## between 0 and 1
+  first <- runif(n, min = 0, max = 1)
+  ## now,  simulate the exact time of the second event
+  second <- first + rgen(n, ...)
+  ## round down to get the delay in days
+  delay <- floor(second)
+  ## determine the maximum delay
+  max_delay <- max(delay)
+  ## get vector of counts
+  counts <- table(factor(delay, levels = seq(0, max_delay)))
+  ## normalise to get pmf
+  pmf <- counts / sum(counts)
+  ## return
+  return(pmf)
 }
 ```
 
 ::: {.callout-note}
 ## Take 5 minutes
-Try to understand the `discretise()` function above.
+Try to understand the `censored_delay_pmf()` function above.
 Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
 ```{r discretised_gamma}
-gamma_pmf <- discretise(pgamma, 14, shape = 5, rate = 1)
+gamma_pmf <- censored_delay_pmf(rgamma, shape = 5, rate = 1)
 gamma_pmf
 ```
 :::
@@ -140,7 +148,7 @@ convolve_with_delay <- function(ts, delay) {
     ## get vector of infections (14-day window)
     first_index <- max(1, i - max_delay)
     ts_segment <- ts[seq(first_index, i)]
-    ## take reverse of pmf and reverse if needed
+    ## take reverse of pmf and cut if needed
     pmf <- rev(delay)[seq_len(i - first_index + 1)]
     ## convolve with delay distribution
     ret <- sum(ts_segment * pmf)
