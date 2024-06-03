@@ -1,6 +1,6 @@
 data {
   int<lower = 0> n;
-  array[n] int<lower = 0> onset_to_hosp;
+  array[n] int<lower = 1> onset_to_hosp;
 }
 
 parameters {
