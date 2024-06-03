@@ -1,5 +1,6 @@
 ---
-title: "Session 4: Using delay distributions to model the data generating process"
+title: "Using delay distributions to model the data generating process"
+order: 4
 ---
 
 ```{r echo = FALSE}

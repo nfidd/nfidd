@@ -14,8 +14,7 @@ website:
       reactions-enabled: true
   navbar:
     left:
-      - text: Sessions
-        href: sessions.qmd
+      - sidebar:sessions
       - text: "Learning objectives"
         href: learning_objectives.qmd
       - text: "Getting set up for the course"
@@ -25,12 +24,17 @@ website:
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
+  sidebar:
+    - id: sessions
+      title: "Sessions"
+      style: "docked"
+      contents: "sessions/*.qmd"
 
 format:
   html:
     theme:
-      light: flatly
-      dark: darkly
+      light: cosmo
+      dark: solar
     css: styles.css
     link-external-icon: true
     link-external-newwindow: true

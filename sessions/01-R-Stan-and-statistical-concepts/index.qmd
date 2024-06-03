@@ -1,4 +1,0 @@
----
-title: "Session 1: R, Stan, and statistical concepts"
----
-
