@@ -306,16 +306,13 @@ tmod$print(line_numbers = TRUE)
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Familarise yourself with the model above.
-Do you understand all the lines?
-Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) reflect that we have now provided the delay as the difference in integer days?
+Familiarise yourself with the model above.
+Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 40 days?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Lines 21-24 define the parametric prior distributions (for parameters meanlog and sdlog, and the estimates of exact times of events).
-Line 26 defines the likelihood.
-Lines 15-17 reflect the integer delays, adjusted by the estimated times of day
+Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`
 :::
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
@@ -338,8 +335,7 @@ Try re-simulating the delays using different parameters of the delay distributio
 Can you establish under which conditions the bias in estimation gets worse?
 :::
 
+# Going further
 
-
- Going further
-
-- The solution for integrating the censoring window above is only one possible one for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
+- We have looked at censoring and truncation separately, but in reality often both are present. Can you combine the two in a model?
+- The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
