@@ -83,7 +83,7 @@ all_days <- expand(
 )
 inf_ts <- all_days |>
   full_join(inf_ts, by = join_by(infection_day)) |>
-  replace_na(list(n = 0))
+  replace_na(list(infections = 0))
 head(inf_ts)
 ```
 
@@ -100,11 +100,12 @@ We repeat this many times to get the probabilty mass function that allows us to 
 ## function that takes two inputs to discretise a continuous delay distribution:
 ## rdelay: a function that generates random delays, e.g. rgamma, rlognormal
 ## n: the number of replicates to simualte
+## max: the maximum delay
 ## ...: parameters of the delay distribution
 ## the function returns a vector of probabilities, corresponding to discrete
 ## indices 0, 1, 2 of the discretised delay distribution
 ## example: discretise(rgamma, 14, shape = 5, rate = 1)
-censored_delay_pmf <- function(rgen, n = 1e+6, ...) {
+censored_delay_pmf <- function(rgen, n = 1e+6, max, ...) {
   ## first, simulate exact time of first event (given by day), uniformly
   ## between 0 and 1
   first <- runif(n, min = 0, max = 1)
@@ -112,10 +113,8 @@ censored_delay_pmf <- function(rgen, n = 1e+6, ...) {
   second <- first + rgen(n, ...)
   ## round down to get the delay in days
   delay <- floor(second)
-  ## determine the maximum delay
-  max_delay <- max(delay)
   ## get vector of counts
-  counts <- table(factor(delay, levels = seq(0, max_delay)))
+  counts <- table(factor(delay, levels = seq(0, max)))
   ## normalise to get pmf
   pmf <- counts / sum(counts)
   ## return
@@ -128,7 +127,7 @@ censored_delay_pmf <- function(rgen, n = 1e+6, ...) {
 Try to understand the `censored_delay_pmf()` function above.
 Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
 ```{r discretised_gamma}
-gamma_pmf <- censored_delay_pmf(rgamma, shape = 5, rate = 1)
+gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 gamma_pmf
 ```
 :::
@@ -166,6 +165,7 @@ How would you create the time series of infections using the discretised gamma d
 :::
 
 ::: {.callout-note collapse="true"]}
+## Solution
 ```{r applied_convolution}
 onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 ```
@@ -174,7 +174,7 @@ onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 We can plot these symptom onsets
 ```{r convolution_plot}
 combined <- inf_ts |>
-  rename(time = infection_time) |>
+  rename(time = infection_day) |>
   mutate(onsets = onsets)
 ggplot(combined, aes(x = time, y = onsets)) +
   geom_bar(stat = "identity")
@@ -190,7 +190,7 @@ For modelling counts, a common choice is the Poisson distribution.
 We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
-onsets <- onsets |>
+combined <- combined |>
   mutate(observed = rpois(n(), onsets))
 ```
 
@@ -224,11 +224,10 @@ We can now use this model to conduct inference, i.e. to try to reconstruct the t
 
 ```{r inf_fit}
 data <- list(
-  n = nrow(onsets),
-  obs = onsets$observed,
-  ip_shape = 5,
-  ip_rate = 1,
-  ip_max = 15
+  n = nrow(combined),
+  obs = combined$observed,
+  ip_max = length(gamma_pmf) - 1, 
+  ip_pmf = gamma_pmf
 )
 inf_fit <- mod$sample(
   data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
@@ -259,19 +258,19 @@ Does it look like a good fit?
 ```{r inf_ppc}
 # Extract posterior draws
 inf_posterior <- inf_fit |>
-  gather_draws(infections[day]) |>
-  group_by(day) |>
+  gather_draws(infections[infection_day]) |>
+  group_by(infection_day) |>
   summarise(
     median = median(.value),
     lower_90 = quantile(.value, 0.05),
     upper_90 = quantile(.value, 0.95),
     .groups = "drop"
   ) |>
-  mutate(infection_date = inf_ts$infection_date)
+  mutate(infection_day = infection_day - 1)
 
 
-ggplot(mapping = aes(x = infection_date)) +
-  geom_line(data = inf_ts, mapping = aes(y = n)) +
+ggplot(mapping = aes(x = infection_day)) +
+  geom_line(data = inf_ts, mapping = aes(y = infections)) +
   geom_ribbon(
     data = inf_posterior,
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA

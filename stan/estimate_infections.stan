@@ -20,7 +20,7 @@ data {
   array[n] int obs; // observed onsets
   int<lower = 1> ip_max; // max incubation period
   // probability mass function of incubation period distribution (first index zero)
-  array[max_ip + 1] real ip_pmf;
+  array[ip_max + 1] real ip_pmf;
 }
 
 parameters {
