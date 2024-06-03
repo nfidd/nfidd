@@ -28,6 +28,12 @@ jobs:
         with:
           extra-packages: any::knitr, any::rmarkdown
 
+      - name: Install cmdstan
+        uses: epinowcast/actions/install-cmdstan@v1
+        with:
+          cmdstan-version: 'latest'
+          num-cores: 2
+
       - name: Render site
         run: quarto render
 

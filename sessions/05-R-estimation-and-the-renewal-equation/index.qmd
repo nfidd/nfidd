@@ -1,4 +1,0 @@
----
-title: "Session 5: R estimation and the renewal equation"
----
-

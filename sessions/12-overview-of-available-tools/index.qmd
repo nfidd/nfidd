@@ -1,4 +1,0 @@
----
-title: "Session 12: Overview of available tools"
----
-

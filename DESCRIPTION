@@ -19,10 +19,12 @@ BugReports: https://github.com/nfidd/nfiidd/issues
 Depends:
     R (>= 4.2.0)
 Suggests:
+    bayesplot,
     cmdstanr,
     dplyr,
     here,
     ggplot2,
+    posterior,
     tidyr
 Remotes:
     stan-dev/cmdstanr
