@@ -58,8 +58,8 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 :::
 
 We would now like to simulate hospitalisations arising from this outbreak.
-We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1.
-We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1 and sdlog 4.
+We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1, i.e. a mean of 5 days.
+We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1.75 and sdlog 0.5, corresponding to a mean delay of about a week.
 We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
 
 ::: {.callout-tip}
@@ -130,12 +130,12 @@ Do you recover the parameters used for simulation?
 You can _sample_ from the model's posterior distribution by feeding it our simulated data set.
 
 ```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
-df <- df |>
+df_oth <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time)
 res <- mod$sample(
   data = list(
-    n = nrow(na.omit(df)),
-    y = na.omit(df)$onset_to_hosp
+    n = nrow(na.omit(df_oth)),
+    y = na.omit(df_oth)$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
@@ -245,7 +245,7 @@ Now we can use this model to re-estimate the parameters of the delay distributio
 cres <- cmod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
-    y = na.omit(df_dates)$onset_to_hosp
+    onset_to_hosp = na.omit(df_dates)$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
@@ -253,51 +253,93 @@ cres
 ```
 
 ::: {.callout-tip}
-## Take 5 minutes
+## Take 10 minutes
 Try re-simulating the delays using different parameters of the delay distribution.
 Can you establish under which conditions the bias in estimation gets worse?
 :::
 
 ## Real-time estimation: truncation
 
+The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
+However, information e.g. on delay distribution is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
+Estimating delays in real time comes with particular challenges as the timing of the cut-off might introduce a bias.
+If, for example, infections are exponentially increasing then there will be disproportionately more people with recent symptom onset, decreasing the estimate of the mean delay.
+This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
+Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40.
+
+```{r truncated_df}
+df_rt <- df_oth |>
+  filter(hosp_time <= 40)
+```
+
+## Estimating delay distributions accounting for censoring
+
+If we take the naïve mean of delays we get an underestimate as expected
+
+```{r mean_truncated}
+  mean(df_rt$onset_to_hosp)
+```
+
+## Take 5 minutes
+Fit the lognormal model used above to the estimates from the truncated data, i.e. using the `df_rt` data set.
+How far away from the "true" parameters do you end up?
 
 ::: {.callout-note collapse="true"}
-## Can you change something that will avoid the error?
-
-The error is caused by some of the data being 0, which causes the log-likelihood to be `-Inf`.
-One simple fix would be to add `0.5` to the `onset_to_hosp` when passing it to the stan model. 
-However, this is somewhat arbitrary and will cause biases.
-In the next section we are proposing a better solution.
-:::
-
-# Accounting for censoring
-
-A better way to account for censoring is to integrate over a window:
-
-```{r corrected_delay_model}
-mod <- cmdstan_model(here("stan", "corrected_delay_model.stan"))
-## show model code with line numbers
-mod$print(line_numbers = TRUE)
-
-mod$sample(
+## Solution
+```{r df_rt_solution}
+res <- mod$sample(
   data = list(
-    n = nrow(na.omit(df)),
-    onset_to_hosp = na.omit(df)$onset_to_hosp
+    n = nrow(na.omit(df_rt)),
+    y = na.omit(df_rt)$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
+res
 ```
 
-You will see that this solution does not require any changes to the data in order to obtain an estimate. 
-Are the estimates "better" than the ones you got before?
+Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
+
+```{r censoring_adjusted_delay_model}
+tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
+tmod$print(line_numbers = TRUE)
+```
 
 ::: {.callout-tip}
-## Take 20 minutes
-Familiarise yourself with the stan model above and make sure you understand it.
-Then, experiment with different parameters of the distribution(s), simulate and estimate with and without correcting for censoring.
-Can you find out when biases from not accounting for censoring become larger?
+## Take 5 minutes
+Familarise yourself with the model above.
+Do you understand all the lines?
+Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) reflect that we have now provided the delay as the difference in integer days?
 :::
 
-# Going further
+::: {.callout-note collapse="true"}
+## Solution
+Lines 21-24 define the parametric prior distributions (for parameters meanlog and sdlog, and the estimates of exact times of events).
+Line 26 defines the likelihood.
+Lines 15-17 reflect the integer delays, adjusted by the estimated times of day
+:::
+
+Now we can use this model to re-estimate the parameters of the delay distribution:
+
+```{r censored_estimate}
+tres <- tmod$sample(
+  data = list(
+    n = nrow(df_rt),
+    onset_to_hosp = df_rt$onset_to_hosp, 
+    time_since_onset = 40 - df_rt$onset_time
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+tres
+```
+
+::: {.callout-tip}
+## Take 10 minutes
+Try re-simulating the delays using different parameters of the delay distribution.
+Can you establish under which conditions the bias in estimation gets worse?
+:::
+
+
+
+ Going further
 
 - The solution for integrating the censoring window above is only one possible one for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
