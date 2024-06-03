@@ -13,14 +13,13 @@ The aim of this session is to introduce how delay distributions can be used to m
 
 # Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, the `lubridate` package to handle dates, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
-library("lubridate")
 library("ggplot2")
 library("here")
 library("cmdstanr")
@@ -50,38 +49,42 @@ $$
 In words, to get the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use exactly the same data as in the previous session but this time aggregate it into a time series:
+We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), again assuming a gamma-distributed incubation period with shape 5 and rate 1 and this time working with symptom onsets:
 
-```{r aggregate}
+```{r onsets}
 data(infection_times)
-## assume a start date, e.g. 10 May of this year
-start_date <- ymd("2024-05-10")
 df <- infection_times |>
   mutate(
-    incubation_period = rgamma(n(), shape = 5, rate = 1),
-    infection_date = floor_date(start_date + infection_time, unit = "day"),
-    onset_date = floor_date(
-      start_date + infection_time + incubation_period,
-      unit = "day"
-    ),
+    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1)
+  )
+```
+
+We then aggregate this into a daily time series of infections
+
+```{r aggregate}
+## convert to days
+df <- df |>
+  transmute(
+    infection_day = floor(infection_time),
+    onset_day = floor(onset_time)
   )
 ## infection time series
-inf_time_series <- df |>
-  count(infection_date)
-head(inf_time_series)
+inf_ts <- df |>
+  count(infection_day, name = "infections")
+head(inf_ts)
 ```
 
 The resulting time series does contain any days with no infections.
 We can make our calculations easier by adding them:
 
 ```{r missing_to_zero}
-all_dates <- expand(
-  df, infection_date = seq(min(infection_date), max(infection_date), by = "day")
+all_days <- expand(
+  df, infection_day = seq(min(infection_day), max(infection_day))
 )
-inf_time_series <- all_dates |>
-  full_join(inf_time_series, by = join_by(infection_date)) |>
+inf_ts <- all_days |>
+  full_join(inf_ts, by = join_by(infection_day)) |>
   replace_na(list(n = 0))
-head(inf_time_series)
+head(inf_ts)
 ```
 
 Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
@@ -156,16 +159,16 @@ How would you create the time series of infections using the discretised gamma d
 
 ::: {.callout-note collapse="true"]}
 ```{r applied_convolution}
-onsets <- convolve_with_delay(inf_time_series$n, gamma_pmf)
+onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 ```
 :::
 
 We can plot these symptom onsets
 ```{r convolution_plot}
-combined <- inf_time_series |>
-  rename(date = infection_date, infections = n) |>
+combined <- inf_ts |>
+  rename(time = infection_time) |>
   mutate(onsets = onsets)
-ggplot(combined, aes(x = date, y = onsets)) +
+ggplot(combined, aes(x = time, y = onsets)) +
   geom_bar(stat = "identity")
 ```
 
@@ -256,11 +259,11 @@ inf_posterior <- inf_fit |>
     upper_90 = quantile(.value, 0.95),
     .groups = "drop"
   ) |>
-  mutate(infection_date = inf_time_series$infection_date)
+  mutate(infection_date = inf_ts$infection_date)
 
 
 ggplot(mapping = aes(x = infection_date)) +
-  geom_line(data = inf_time_series, mapping = aes(y = n)) +
+  geom_line(data = inf_ts, mapping = aes(y = n)) +
   geom_ribbon(
     data = inf_posterior,
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
