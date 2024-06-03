@@ -10,10 +10,7 @@ functions {
       ret[i] = gamma_cdf(i | shape, rate) - gamma_cdf(i - 2 | shape, rate);
     }
     // normalise
-    norm = sum(ret);
-    for (i in 1:(max_delay + 1)) {
-      ret[i] = ret[i] / norm;
-    }
+    ret = ret / sum(ret);
     return(ret);
   }
 
