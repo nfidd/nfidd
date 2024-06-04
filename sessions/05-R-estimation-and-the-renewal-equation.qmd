@@ -94,6 +94,19 @@ We now return to the time series of infections we used in the earlier session on
 ```
 
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
+We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
+From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
+We can use the `censored_delay_pmf()` function defined in the [previous session](04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) to use this continuous distribution with the discrete renewal equation.
+If you don't have this available any more, you can load it using
+```{r source_censored_delay_pmf}
+source(here("functions", "censored-delay-pmf.r"))
+```
+
+To approximate the generation time PMF using random draws from the underlying continuous distribution use
+```{r gen_time_pmf}
+gen_time_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 4, rate = 1)
+```
+
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
@@ -106,9 +119,8 @@ data <- list(
   n = nrow(inf_ts) - 1,
   obs = inf_ts$n[-1],
   I0 = inf_ts$n[1],
-  gen_time_shape = 4,
-  gen_time_rate = 1,
-  gen_time_max = 14
+  gen_time_max = length(gen_time_pmf) - 1,
+  gen_time_pmf = gen_time_pmf
 )
 r_fit <- mod$sample(
   data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
@@ -118,18 +130,18 @@ r_fit <- mod$sample(
 ```{r r_plot}
 # Extract posterior draws
 r_posterior <- r_fit |>
-  gather_draws(R[day]) |>
-  group_by(day) |>
+  gather_draws(R[infection_day]) |>
+  group_by(infection_day) |>
   summarise(
     median = median(.value),
     lower_90 = quantile(.value, 0.05),
     upper_90 = quantile(.value, 0.95),
     .groups = "drop"
   ) |>
-  mutate(infection_date = inf_ts$infection_date[-1])
+  mutate(infection_day = infection_day - 1)
 
 
-ggplot(mapping = aes(x = infection_date)) +
+ggplot(mapping = aes(x = infection_day)) +
   geom_ribbon(
     data = r_posterior,
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
