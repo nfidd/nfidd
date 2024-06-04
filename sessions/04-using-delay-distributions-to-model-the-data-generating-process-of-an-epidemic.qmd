@@ -225,7 +225,7 @@ We can now use this model to conduct inference, i.e. to try to reconstruct the t
 data <- list(
   n = nrow(combined),
   obs = combined$observed,
-  ip_max = length(gamma_pmf) - 1, 
+  ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
 inf_fit <- mod$sample(
