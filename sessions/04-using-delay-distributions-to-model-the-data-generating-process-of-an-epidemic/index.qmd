@@ -186,7 +186,7 @@ Does a plot of these observations look more like the data from the previous sess
 
 # Estimating a time series of infection
 
-We now invert the procedure of above, i.e. instead of convolving infects and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
+We now invert the procedure of above, i.e. instead of convolving infections and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
 Mathematically this amounts to a _deconvolution_ of the time series, i.e. the reverse process to convolution.
 
 ```{r stan_deconvolve}
