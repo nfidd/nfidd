@@ -61,30 +61,16 @@ df <- infection_times |>
 
 We then aggregate this into a daily time series of infections
 
-```{r aggregate}
-## convert to days
-df <- df |>
-  transmute(
-    infection_day = floor(infection_time),
-    onset_day = floor(onset_time)
-  )
-## infection time series
-inf_ts <- df |>
-  count(infection_day, name = "infections")
-head(inf_ts)
+```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
 
-The resulting time series does contain any days with no infections.
-We can make our calculations easier (as otherwise we would have to try and detect these in any models that used this data which could be complicated) by adding them:
+
+::: {.callout-note}
+The second part of the code snippet above is used to add days without infections with a zero count.
+This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
+:::
 
 ```{r missing_to_zero}
-all_days <- expand(
-  df, infection_day = seq(min(infection_day), max(infection_day))
-)
-inf_ts <- all_days |>
-  full_join(inf_ts, by = join_by(infection_day)) |>
-  replace_na(list(infections = 0))
-head(inf_ts)
 ```
 
 Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
