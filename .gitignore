@@ -6,4 +6,5 @@ _site
 .DS_Store
 /.quarto/
 stan/*
+!stan/functions
 !stan/*.stan
