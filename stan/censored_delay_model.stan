@@ -21,8 +21,8 @@ transformed parameters {
 model {
   meanlog ~ normal(0, 10);
   sdlog ~ normal(0, 10) T[0, ];
-  onset_time ~ beta(1, 1);
-  hosp_time ~ beta(1, 1);
+  onset_time ~ uniform(0, 1);
+  hosp_time ~ uniform(0, 1);
 
   true_onset_to_hosp ~ lognormal(meanlog, sdlog);
 }
