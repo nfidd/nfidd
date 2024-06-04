@@ -299,7 +299,7 @@ res
 
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
-```{r censoring_adjusted_delay_model}
+```{r truncatino_adjusted_delay_model}
 tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
 tmod$print(line_numbers = TRUE)
 ```
@@ -317,7 +317,7 @@ Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
-```{r censored_estimate}
+```{r truncated_estimate}
 tres <- tmod$sample(
   data = list(
     n = nrow(df_rt),
