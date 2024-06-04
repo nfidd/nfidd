@@ -1,5 +1,5 @@
 functions {
-  #include "functions/convolve_with_delay.stan"
+  #include "convolve_with_delay.stan"
 }
 
 data {

@@ -179,6 +179,9 @@ We now estimate the number of infections over time based on an uninformed prior 
 
 ```{r stan_deconvolve}
 mod <- cmdstan_model(here("stan", "estimate_infections.stan"))
+```
+
+```{r stan_deconvolve_print}
 mod$print(line_numbers = TRUE)
 ```
 
