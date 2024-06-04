@@ -3,3 +3,268 @@ title: "Using delay distributions to model the data generating process"
 order: 4
 ---
 
+```{r echo = FALSE}
+set.seed(123)
+```
+
+# Objectives
+
+The aim of this session is to introduce how delay distributions can be used to model the population-level data generating process of an epidemic.
+
+# Libraries used
+
+In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+We will also use the `tidybayes` package for extracting results of the inference.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("here")
+library("cmdstanr")
+library("tidybayes")
+```
+
+::: {.callout-tip}
+The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
+It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+# Simulating observations from a time series of infections
+
+As above we first simulate the process that generates the data, before using the same model to conduct inference.
+
+## Delay distributions and convolutions
+
+In the last session we simulated _individual outcomes_ from a delay distribution, and then re-estimated the corresponding parameters.
+However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
+At the population level, individual level delays translate into _convolutions_.
+If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
+
+$$
+C_t = \sum_{i=0}^{i=p_\mathrm{max}} I_{t-i} p_i
+$$
+
+In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
+For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
+
+We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), again assuming a gamma-distributed incubation period with shape 5 and rate 1 and this time working with symptom onsets:
+
+```{r onsets}
+data(infection_times)
+df <- infection_times |>
+  mutate(
+    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1)
+  )
+```
+
+We then aggregate this into a daily time series of infections
+
+```{r aggregate}
+## convert to days
+df <- df |>
+  transmute(
+    infection_day = floor(infection_time),
+    onset_day = floor(onset_time)
+  )
+## infection time series
+inf_ts <- df |>
+  count(infection_day, name = "infections")
+head(inf_ts)
+```
+
+The resulting time series does contain any days with no infections.
+We can make our calculations easier (as otherwise we would have to try and detect these in any models that used this data which could be complicated) by adding them:
+
+```{r missing_to_zero}
+all_days <- expand(
+  df, infection_day = seq(min(infection_day), max(infection_day))
+)
+inf_ts <- all_days |>
+  full_join(inf_ts, by = join_by(infection_day)) |>
+  replace_na(list(infections = 0))
+head(inf_ts)
+```
+
+Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
+However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a familiar issue.
+The gamma distribution is a _continuous_ distribution but now we have data in days which are _discrete_ entities.
+In order to simulate a time series of symptom onsets, we first generate a discrete probability mass function of the incubation period (in days) by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+
+In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each day equally likely.
+We then apply the incubation period before once again rounding down to get the day of symptom onset.
+We repeat this many times to get the probabilty mass function that allows us to go from infection days to symptom onset days
+
+```{r discretise_2_day_window, file = here::here("functions", "censored-delay-pmf.r")}
+```
+
+::: {.callout-note}
+## Take 5 minutes
+Try to understand the `censored_delay_pmf()` function above.
+Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
+```{r discretised_gamma}
+gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
+gamma_pmf
+```
+:::
+
+Next we apply a convolution with the discretised incubation period distribution to the time series of infections to generate a time series of symptom onsets.
+
+```{r convolution}
+## function that takes two inputs to convolve a time series with a delay
+## ts: vector of the time series to convolve
+## delay: the probability mass function of the delay, given as a vector of
+## probabilities, corresponding to discrete indices 0, 1, 2 of the discretised
+## delay distribution
+## example: convolve_with_delay(c(10, 14, 10, 10), c(0.1, 0.6, 0.3))
+convolve_with_delay <- function(ts, delay) {
+  max_delay <- length(delay) - 1 ## subtract one because zero-indexed
+  convolved <- vapply(seq_along(ts), \(i) {
+    ## get vector of infections (14-day window)
+    first_index <- max(1, i - max_delay)
+    ts_segment <- ts[seq(first_index, i)]
+    ## take reverse of pmf and cut if needed
+    pmf <- rev(delay)[seq_len(i - first_index + 1)]
+    ## convolve with delay distribution
+    ret <- sum(ts_segment * pmf)
+    return(round(ret))
+  }, numeric(1))
+  return(convolved)
+}
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Try to understand the `convolve_with_delay()` function above.
+Try it with a few different time series and delay distributions.
+How would you create the time series of infections using the discretised gamma distribution created above and saved in `gamma_pmf`?
+:::
+
+::: {.callout-note collapse="true"]}
+## Solution
+```{r applied_convolution}
+onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
+```
+:::
+
+We can plot these symptom onsets
+```{r convolution_plot}
+combined <- inf_ts |>
+  rename(time = infection_day) |>
+  mutate(onsets = onsets)
+ggplot(combined, aes(x = time, y = onsets)) +
+  geom_bar(stat = "identity")
+```
+
+Do they look similar to the plot of symptom onsets in the previous session?
+
+## Observation uncertainty
+
+Usually not all data are perfectly observed.
+Also, the convolution we applied is a _deterministic_ operation that brushes over the fact that individual delays are random.
+Given that we are now dealing with count data a natural choice for modelling the variation these processes introduce is the Poisson distribution.
+We can use this to generate uncertainty around our convolved data.
+
+```{r uncertain}
+combined <- combined |>
+  mutate(observed = rpois(n(), onsets))
+```
+
+Does a plot of these observations look more like the data from the previous session than the convolution plotted above?
+
+# Estimating a time series of infection
+
+We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
+
+```{r stan_deconvolve}
+mod <- cmdstan_model(here("stan", "estimate_infections.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 10 minutes
+Familarise yourself with the model above.
+Unlike before there is now a `functions` block at the beginning of the model (lines 1-33), where we define two functions, `discretise_gamma()` (line 2) and `convolve_with_delay()` (line 18).
+These correspond to our earlier **R** function `discretise()` and the code we used to generate a time series of symptom onsets, respectively.
+Later, these functions are called in the `model` block, to generate a discretised probability mass function of the gamma distribution (lines 48-50), and to generate the time series of symptom onsets (line 51).
+Which line defines the likelihood, and how does it relate to the section about observation uncertainty above?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Line 57 defines the likelihood, and it does so using the Poisson observation uncertainty we used above.
+:::
+
+We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
+
+```{r inf_fit}
+data <- list(
+  n = nrow(combined),
+  obs = combined$observed,
+  ip_max = length(gamma_pmf) - 1,
+  ip_pmf = gamma_pmf
+)
+inf_fit <- mod$sample(
+  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+```
+
+::: {.callout-caution}
+The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+:::
+
+
+::: {.callout-tip}
+In this model, we have estimated many more parameters than in the previous models: instead of e.g. 2 parameters of a probability distribution, we now have a total of `r nrow(onsets)` time points for which we estimate the number of infections. 
+This is because we don't have a model for the _process_ that generates infections.
+How would this be different if we e.g. used an SIR model here?
+:::
+
+We can see the first few estimates of the number of infections using
+
+```{r inf_summary}
+inf_fit
+```
+
+Again, we can do a posterior predictive check by plotting the estimates of the time series of infections (with uncertainy) against the data.
+Does it look like a good fit?
+
+```{r inf_ppc}
+# Extract posterior draws
+inf_posterior <- inf_fit |>
+  gather_draws(infections[infection_day]) |>
+  group_by(infection_day) |>
+  summarise(
+    median = median(.value),
+    lower_90 = quantile(.value, 0.05),
+    upper_90 = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(infection_day = infection_day - 1)
+
+
+ggplot(mapping = aes(x = infection_day)) +
+  geom_line(data = inf_ts, mapping = aes(y = infections)) +
+  geom_ribbon(
+    data = inf_posterior,
+    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
+  )
+```
+
+::: {.callout-tip}
+This time we used the `gather_draws()` function included in `tidybayes` to extract the inference results. 
+This is particularly useful when dealing with arrays such as `inference` because it allows to extract them with a given index (here: `[day]`).
+:::
+
+# Going further
+
+- Above, we used a Poisson distribution to characterise uncertainty.
+In the Poisson distribution, the variance is the same as the mean.
+Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
+If you re-did the analysis above with the negative binomail distribution, what would be the difference?
+
+- We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
+How would this look in stan code?
+Would you expect it to yield a different result?
