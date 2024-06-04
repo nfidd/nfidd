@@ -7,8 +7,8 @@ functions {
     for (i in 1:n) {
       int first_index = max(1, i - max_delay);
       int len = i - first_index + 1;
-      array[max_delay + 1] real pmf = reverse(delay)[1:len];
-      array[i - first_index + 1] int ts_segment = ts[first_index:i];
+      array[len] real pmf = reverse(delay)[1:len];
+      array[i - first_index + 1] real ts_segment = ts[first_index:i];
       ret[i] = dot_product(ts_segment, pmf);
     }
     return(round(ret));
