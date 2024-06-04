@@ -1,5 +1,5 @@
 functions {
-  #include "functions/renewal.stan")
+  #include "functions/renewal.stan"
 }
 
 data {
@@ -7,7 +7,7 @@ data {
   int I0;              // number initially infected
   array[n] int obs;     // observed infections
   int gen_time_max;     // max of incubation period
-  arrray [gen_time_max + 1] real gen_time_pmf;  // shape of incubation period
+  array[gen_time_max + 1] real gen_time_pmf;  // shape of incubation period
 }
 
 parameters {
