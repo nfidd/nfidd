@@ -71,7 +71,7 @@ head(inf_time_series)
 ```
 
 The resulting time series does contain any days with no infections.
-We can make our calculations easier by adding them:
+We can make our calculations easier (as otherwise we would have to try and detect these in any models that used this data which could be complicated) by adding them:
 
 ```{r missing_to_zero}
 all_dates <- expand(
