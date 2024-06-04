@@ -65,7 +65,7 @@ Note that in the discrete version we have started the sum at 1 and thus set $g_0
 ::: {.callout-tip}
 ## Instantaneous vs. case reproduction number
 There are different definitions of the reproduction number that can be applied to the situation where it changes in time.
-As it is defined above it is also called the _instantanous_ reproduction number because any change affects all currently infectious individual instantaneously.
+As it is defined above it is also called the _instantaneous_ reproduction number because any change affects all currently infectious individual instantaneously.
 Another example of a definition is the _case_ reproduction number, where changes affect individuals at the time that they are infected but then they have a constant reproduction number throughout their infectious period.
 :::
 
@@ -121,7 +121,21 @@ mod <- cmdstan_model(here("stan", "estimate-r.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
+::: {.callout-tip}
+## Take 5 minutes
+Familiarise yourself with the model above.
+Again there is a `functions` block at the beginning of the model (lines 1-3), where we load a function called `renewal()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/renewal.stan).
+The functions correspond exactly to our earlier **R** function of the same name.
+Later, this functions is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
+Which line defines priors, and which the likelihood?
+:::
 
+::: {.callout-note collapse="true"}
+## Solution
+Line 24 defines the prior distribution of R at each time point, and Line 25 defines the likelihood using Poisson observation uncertainty.
+:::
+
+Once again we can generate estimates from this model:
 
 ```{r r_fit}
 data <- list(
@@ -134,7 +148,10 @@ data <- list(
 r_fit <- mod$sample(
   data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
+r_fit
 ```
+
+Once stan has run its chains, we can visualise the estimates:
 
 ```{r r_plot}
 # Extract posterior draws
@@ -157,6 +174,18 @@ ggplot(
   geom_line() +
   geom_ribbon(alpha = 0.25, colour = NA)
 ```
+
+::: {.callout-tip}
+## Take 10 minutes
+Simulate from the renewal equation using the `renewal()` R function we defined above with a given **R** trajectory.
+For example, you could look at R increasing steadily, or suddenly, or having any other trajectory you might imagine.
+Use the stan model to infer the trajectory of the reproduction number from the resulting time series of infection.
+Does the model reproduce the simulated R trajectories?
+:::
+
+# Estimating R from a time series of symptom onsets
+
+
 
 # Going further
 
