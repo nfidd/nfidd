@@ -3,3 +3,6 @@ title: "Introduction and course overview"
 order: 0
 ---
 
+# Introduction to the course and the instructors
+
+# Motivating the course: From an epidemiological line list to informing decisions in real-time
