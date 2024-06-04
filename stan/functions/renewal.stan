@@ -6,10 +6,10 @@ array[] real renewal(real I0, array[] real R, array[] real gen_time) {
   I[1] = I0;
   for (i in 1:n) {
     int first_index = max(1, i - max_gen_time + 1);
-      int len = i - first_index + 1;
-    I[i + 1] = dot_product(
-      I[first_index:i], reverse(gen_time)[1:len]
-    ) * R[i];
+    int len = i - first_index + 1;
+    array[len] real I_segment = I[first_index:i];
+    array[len] real gen_pmf = reverse(gen_time[1:len]);
+    I[i + 1] = dot_product(I_segment, gen_pmf) * R[i];
   }
   return(I[2:(n + 1)]);
 }

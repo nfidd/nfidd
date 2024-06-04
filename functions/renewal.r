@@ -17,7 +17,7 @@ renewal <- function(I0, R, gen_time) {
     I_segment <- I[seq(first_index, t)]
     ## iterate over generation times
     ## take reverse of pmf and reverse if needed
-    gen_pmf <- rev(gen_time)[seq_len(t - first_index + 1)]
+    gen_pmf <- rev(gen_time[seq_len(t - first_index + 1)])
     ## convolve infections with generation time
     I[t + 1] <- sum(I_segment * gen_pmf) * R[t]
   }

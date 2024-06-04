@@ -6,12 +6,13 @@ data {
   int n;                // number of days
   int I0;              // number initially infected
   array[n] int obs;     // observed infections
-  int gen_time_max;     // max of incubation period
-  array[gen_time_max + 1] real gen_time_pmf;  // shape of incubation period
+  int gen_time_max;     // maximum generation time
+  array[gen_time_max] real gen_time_pmf;  // pmf of generation time distribution
 }
 
 parameters {
   array[n] real<lower = 0> R;
+  real<lower = 0> sigma;
 }
 
 transformed parameters {
