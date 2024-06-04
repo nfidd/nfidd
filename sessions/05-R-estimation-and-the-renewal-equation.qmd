@@ -121,12 +121,14 @@ mod <- cmdstan_model(here("stan", "estimate-r.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
+
+
 ```{r r_fit}
 data <- list(
   n = nrow(inf_ts) - 1,
-  obs = inf_ts$n[-1],
-  I0 = inf_ts$n[1],
-  gen_time_max = length(gen_time_pmf) - 1,
+  obs = inf_ts$infections[-1],
+  I0 = inf_ts$infections[1],
+  gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
 r_fit <- mod$sample(
@@ -141,18 +143,19 @@ r_posterior <- r_fit |>
   group_by(infection_day) |>
   summarise(
     median = median(.value),
-    lower_90 = quantile(.value, 0.05),
-    upper_90 = quantile(.value, 0.95),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
     .groups = "drop"
   ) |>
   mutate(infection_day = infection_day - 1)
 
 
-ggplot(mapping = aes(x = infection_day)) +
-  geom_ribbon(
-    data = r_posterior,
-    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
-  )
+ggplot(
+  data = r_posterior,
+  aes(x = infection_day, y = median, ymin = lower, ymax = upper)
+) +
+  geom_line() +
+  geom_ribbon(alpha = 0.25, colour = NA)
 ```
 
 # Going further
