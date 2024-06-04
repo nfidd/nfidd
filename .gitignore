@@ -5,6 +5,5 @@
 _site
 .DS_Store
 /.quarto/
-sessions/*/*
-!sessions/*/*.qmd
-!sessions/*/*.stan
+stan/*
+!stan/*.stan

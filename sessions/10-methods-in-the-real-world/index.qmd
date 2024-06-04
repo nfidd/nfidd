@@ -1,4 +1,0 @@
----
-title: "Session 10: Methods in the real world"
----
-

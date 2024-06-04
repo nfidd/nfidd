@@ -1,4 +1,0 @@
----
-title: "Session 4: Using delay distributions to model the data generating process"
----
-
