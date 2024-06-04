@@ -75,7 +75,7 @@ head(inf_ts)
 ```
 
 The resulting time series does contain any days with no infections.
-We can make our calculations easier by adding them:
+We can make our calculations easier (as otherwise we would have to try and detect these in any models that used this data which could be complicated) by adding them:
 
 ```{r missing_to_zero}
 all_days <- expand(
@@ -185,8 +185,8 @@ Do they look similar to the plot of symptom onsets in the previous session?
 ## Observation uncertainty
 
 Usually not all data are perfectly observed.
-The counting process itself generally introduces a natural form of error that we can, once again, model with a probability distribution.
-For modelling counts, a common choice is the Poisson distribution.
+Also, the convolution we applied is a _deterministic_ operation that brushes over the fact that individual delays are random.
+Given that we are now dealing with count data a natural choice for modelling the variation these processes introduce is the Poisson distribution.
 We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
@@ -198,7 +198,7 @@ Does a plot of these observations look more like the data from the previous sess
 
 # Estimating a time series of infection
 
-We now invert the procedure of above, i.e. instead of convolving infects and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
+We now invert the procedure of above, i.e. instead of convolving infections and adding uncertainty to simulate observed symptom onsets, we start with observed simulated onsets to estimate the number of infections, given an incubation period.
 Mathematically this amounts to a _deconvolution_ of the time series, i.e. the reverse process to convolution.
 
 ```{r stan_deconvolve}
