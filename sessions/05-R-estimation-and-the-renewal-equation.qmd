@@ -125,7 +125,7 @@ df <- infection_times |>
     infection_date = floor_date(start_date + infection_time, unit = "day")
   )
 ## infection time series
-inf_infection_times <- df |>
+inf_time_series <- df |>
   count(infection_date)
 head(inf_time_series)
 ```
@@ -149,7 +149,7 @@ data <- list(
   I0 = inf_time_series$n[1],
   gen_time_shape = 4,
   gen_time_rate = 1,
-  gen_time_max = 28
+  gen_time_max = 14
 )
 r_fit <- mod$sample(
   data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
