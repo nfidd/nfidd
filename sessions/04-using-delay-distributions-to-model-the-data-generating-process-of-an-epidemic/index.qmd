@@ -173,8 +173,8 @@ Do they look similar to the plot of symptom onsets in the previous session?
 ## Observation uncertainty
 
 Usually not all data are perfectly observed.
-The counting process itself generally introduces a natural form of error that we can, once again, model with a probability distribution.
-For modelling counts, a common choice is the Poisson distribution.
+Also, the convolution we applied is a _deterministic_ operation that brushes over the fact that individual delays are random.
+Given that we are now dealing with count data a natural choice for modelling the variation these processes introduce is the Poisson distribution.
 We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
