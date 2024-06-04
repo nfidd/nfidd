@@ -271,3 +271,5 @@ If you re-did the analysis above with the negative binomail distribution, what w
 - We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
 How would this look in stan code?
 Would you expect it to yield a different result?
+
+# Wrap up
