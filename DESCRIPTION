@@ -21,9 +21,12 @@ Depends:
 Suggests:
     bayesplot,
     cmdstanr,
+    dplyr,
     ggplot2,
     here,
-    posterior
+    lubridate,
+    posterior,
+    tidyr
 Remotes:
     stan-dev/cmdstanr
 Encoding: UTF-8

@@ -3,3 +3,344 @@ title: "Biases in delay distributions"
 order: 3
 ---
 
+```{r echo = FALSE}
+set.seed(123)
+```
+
+# Objectives
+
+The aim of this session is for you to familiarise yourself with the concept of delay distributions and some specific issue that arise when they are used to describe reporting in infectious disease epidemiology.
+You will do this by working in `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
+In doing so, you will see the specific issues that can arise with epidemiological data.
+
+# Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+library("lubridate")
+library("here")
+library("cmdstanr")
+```
+
+# Simulating delayed epidemiological data
+
+We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
+For now we will not concern ourselves with the model used to generate the epidemic.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+
+We will later deal with modelling the infectious process.
+For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
+We will further consider the fact that these observations are *incomplete* (e.g. because not every infection leads to hospitalisations and so focusing on hospitalisations may leave infections unobserved) and happen with a delay (e.g. from infection to symptoms).
+
+We will work with a data set that is included in the `nfidd` R package that you installed initially.
+It can be loaded with the `data` command
+
+```{r}
+data(infection_times)
+head(infection_times)
+
+## visualise the infection curve
+ggplot(infection_times, aes(x = infection_time)) +
+  geom_histogram(binwidth = 1) +
+  xlab("Infection time (in days)") +
+  ylab("Number of infections")
+```
+
+::: {.callout-note}
+You can see that the column `infection_time` is given as a decimal number of days that have passed since the initial infection of the outbreak.
+In reality, data from an outbreak will usually be given as dates, and those will usually not represent infection but an observed outcome such as symptom onset or hospital admission.
+For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
+:::
+
+We would now like to simulate hospitalisations arising from this outbreak.
+We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1, i.e. a mean of 5 days.
+We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1.75 and sdlog 0.5, corresponding to a mean delay of about a week.
+We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
+
+::: {.callout-tip}
+## Take 10 minutes
+Try to add onset and hospitalisation times (in decimal number of days after the first infection) to the infection data.
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+```{r inf_hosp_solution}
+## first, choose random delays
+df <- infection_times |>
+  mutate(
+    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
+    hosp_time = onset_time + rlnorm(n(), meanlog = 1.75, sdlog = 0.5)
+  )
+## next, set 70% of the hospitalization dates to NA because only 30∞ of cases
+## are hospitalized
+df <- df |>
+  mutate(
+    hosp_time = if_else(
+      rbinom(n = n(), size = 1, p = 0.3) == 1,
+      hosp_time,
+      NA_real_
+    )
+  )
+```
+:::
+
+Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
+
+```{r plot_distributions, messages = FALSE}
+dfl <- df |>
+  pivot_longer(
+    cols = c(infection_time, onset_time, hosp_time),
+    names_to = "type", values_to = "time"
+  )
+ggplot(dfl, aes(x = time)) +
+  geom_histogram(position = "dodge", binwidth = 1) +
+  facet_wrap(~ type, ncol = 1) +
+  xlab("Time (in days)") +
+  ylab("Count")
+```
+
+# Estimating delay distributions
+
+As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
+In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
+
+To do this we can use the same model as in the [session on delay distributions](02-delay-distributions), assuming (or knowing, in this instance) that the delays follows a lognormal distribution.
+
+```{r naive_delay_model}
+mod <- cmdstan_model(here("stan", "lognormal.stan"))
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Estimate the onset-to-hospitalisation delay using the simulated data set we created above.
+Do you recover the parameters used for simulation?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+You can _sample_ from the model's posterior distribution by feeding it our simulated data set.
+
+```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+df_oth <- df |>
+  mutate(onset_to_hosp = hosp_time - onset_time)
+res <- mod$sample(
+  data = list(
+    n = nrow(na.omit(df_oth)),
+    y = na.omit(df_oth)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+```
+
+::: {.callout-caution}
+## Reduce the amount of messages printed to the screen
+As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can safely remove them.
+:::
+
+To see the estimates, we can use:
+
+```{r summarise_naive_delay_model}
+res$summary()
+```
+
+Reassuringly, these estimates look similar to what we used in the simulations.
+:::
+
+# Biases in delay distributions
+
+We now consider two types of biases that commonly occur in infectious disease data: _censoring_ and _truncation_.
+
+## Dates, not days: censoring
+
+Data on health outcomes are usually not recorded in the way that we have used so far in this session: as a numeric time since a given start date.
+Instead, we usually deal with _dates_.
+To simulate this, we can round down the infection times in the data set above using the `floor()` function:
+
+```{r censored_times}
+df_dates <- df |>
+  mutate(
+    infection_time = floor(infection_time),
+    onset_time = floor(onset_time),
+    hosp_time = floor(hosp_time)
+  )
+head(df_dates)
+```
+
+::: {.callout-note}
+As before we are still not working with dates but numbers, which makes handling the data easier - we don't have to make any conversions before using the data in stan.
+However, now these are integer numbers because we have rounded down the numbers using the `floor()` function.
+Each of the numbers now represent the number of days that have passed since the start of the outbreak.
+That is, each of the numbers correspond to a day.
+In that sense, the data is more like typical data we get from infectious disease outbreaks.
+:::
+
+## Estimating delay distributions accounting for censoring
+
+A naïve approach to estimating the delay from symptom onset to hospitalisation would be to ignore the fact that we have rounded down the times and just take use difference in days for the estimation.
+
+```{r}
+df_dates <- df_dates |>
+  mutate(
+    incubation_period = onset_time - infection_time,
+    onset_to_hosp = hosp_time - onset_time
+  )
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Fit the lognormal model used above to the estimates from the rounded data, i.e. using the `df_dates` data set.
+Do you still recover the parameters that we put in?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+```{r df_dates_solution}
+res <- mod$sample(
+  data = list(
+    n = nrow(na.omit(df_dates)),
+    y = na.omit(df_dates)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+res
+```
+
+Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
+:::
+
+If we want to modify the model in order to account for censoring, we need to take into account that we don't know when exactly on any given day the event happened.
+For example, if we know that symptom onset of an individual occurred on 20 June, 2024, and they were admitted to hospital on 22 June, 2024, this could mean an onset-to-hospitalisation delay from 1 day (onset at 23:59 on the 20th, admitted at 0:01 on the 22nd) to 3 days (onset at 0:01 on the 20th, admitted at 23:59 on the 22nd).
+We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
+
+```{r censoring_adjusted_delay_model}
+cmod <- cmdstan_model(here("stan", "censored_delay_model.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Familarise yourself with the model above.
+Do you understand all the lines?
+Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) reflect that we have now provided the delay as the difference in integer days?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Lines 21-24 define the parametric prior distributions (for parameters meanlog and sdlog, and the estimates of exact times of events).
+Line 26 defines the likelihood.
+Lines 15-17 reflect the integer delays, adjusted by the estimated times of day
+:::
+
+Now we can use this model to re-estimate the parameters of the delay distribution:
+
+```{r censored_estimate}
+cres <- cmod$sample(
+  data = list(
+    n = nrow(na.omit(df_dates)),
+    onset_to_hosp = na.omit(df_dates)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+cres
+```
+
+::: {.callout-tip}
+## Take 10 minutes
+Try re-simulating the delays using different parameters of the delay distribution.
+Can you establish under which conditions the bias in estimation gets worse?
+:::
+
+## Real-time estimation: truncation
+
+The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
+However, information e.g. on delay distribution is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
+Estimating delays in real time comes with particular challenges as the timing of the cut-off might introduce a bias.
+If, for example, infections are exponentially increasing then there will be disproportionately more people with recent symptom onset, decreasing the estimate of the mean delay.
+This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
+Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40.
+
+```{r truncated_df}
+df_rt <- df_oth |>
+  filter(hosp_time <= 40)
+```
+
+## Estimating delay distributions accounting for censoring
+
+If we take the naïve mean of delays we get an underestimate as expected
+
+```{r mean_truncated}
+  mean(df_rt$onset_to_hosp)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Fit the lognormal model used above to the estimates from the truncated data, i.e. using the `df_rt` data set.
+How far away from the "true" parameters do you end up?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+```{r df_rt_solution}
+res <- mod$sample(
+  data = list(
+    n = nrow(na.omit(df_rt)),
+    y = na.omit(df_rt)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+res
+```
+:::
+
+Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
+
+```{r truncatino_adjusted_delay_model}
+tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
+tmod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Familiarise yourself with the model above.
+Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 40 days?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`
+:::
+
+Now we can use this model to re-estimate the parameters of the delay distribution:
+
+```{r truncated_estimate}
+tres <- tmod$sample(
+  data = list(
+    n = nrow(df_rt),
+    onset_to_hosp = df_rt$onset_to_hosp, 
+    time_since_onset = 40 - df_rt$onset_time
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+tres
+```
+
+::: {.callout-tip}
+## Take 10 minutes
+Try re-simulating the delays using different parameters of the delay distribution.
+Can you establish under which conditions the bias in estimation gets worse?
+:::
+
+# Going further
+
+- We have looked at censoring and truncation separately, but in reality often both are present. Can you combine the two in a model?
+- The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biase from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
