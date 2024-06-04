@@ -33,7 +33,7 @@ It needs to be run inside the course repository so that the `here()` commands be
 
 # Simulating observations from a time series of infections
 
-As above we first simulate the process that generates the data, before using the same model to conduct inference.
+As before we first simulate the process that generates the data, before using the same model to conduct inference.
 
 ## Delay distributions and convolutions
 
@@ -141,7 +141,7 @@ Try it with a few different time series and delay distributions.
 How would you create the time series of infections using the discretised gamma distribution created above and saved in `gamma_pmf`?
 :::
 
-::: {.callout-note collapse="true"]}
+::: {.callout-note collapse="true"}
 ## Solution
 ```{r applied_convolution}
 onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
@@ -177,11 +177,8 @@ Does a plot of these observations look more like the data from the previous sess
 
 We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
 
-```{r stan_deconvolve}
+```{r stan_estimate_infections}
 mod <- cmdstan_model(here("stan", "estimate_infections.stan"))
-```
-
-```{r stan_deconvolve_print}
 mod$print(line_numbers = TRUE)
 ```
 
