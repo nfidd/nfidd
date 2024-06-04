@@ -1,16 +1,17 @@
 // lognormal_model.stan
 data {
-  int<lower=0> N;
-  real y[N];
+  int<lower=0> n; // number of data points
+  array[n] real y; // data
 }
 
 parameters {
-  real mu_log;
-  real<lower=0> sigma_log;
+  real meanlog;
+  real<lower=0> sdlog;
 }
 
 model {
-  mu_log ~ normal(0, 10);
-  sigma_log ~ normal(0, 10);
-  y ~ lognormal(mu_log, sigma_log);
+  meanlog ~ normal(0, 10);  // prior distribution
+  sdlog ~ normal(0, 10) T[0, ]; // prior distribution
+
+  y ~ lognormal(meanlog, sdlog);
 }
