@@ -74,32 +74,7 @@ Another example of a definition is the _case_ reproduction number, where changes
 With the theory out of the way we now turn to simulating an epidemic using the renewal equation.
 We first write a function to simulate the epidemic using the discrete renewal equation.
 
-```{r renewal_equation}
-## function that takes three inputs to simulate using the renewal equation
-## I0: the initial number of infections
-## R: the reproduction number, given as a vector with one entry per time point
-## gen_time: the generation time distribution, given as a vector with one entry
-## per day after infection (the first element corresponding to one day after
-## infection)
-## example: renewal(5, c(rep(3, 4), rep(0.5, 5)), c(0.1, 0.2, 0.3, 0.2, 0.1))
-renewal <- function(I0, R, gen_time) {
-  max_gen_time <- length(gen_time)
-  ## number of time points
-  times <- length(R)
-  I <- c(I0, rep(0, times)) ## set up vector holding number of infected
-  ## iterate over time points
-  for (t in 1:times) {
-    ## calculate convolution
-    first_index <- max(1, t - max_gen_time + 1)
-    I_segment <- I[seq(first_index, t)]
-    ## iterate over generation times
-    ## take reverse of pmf and reverse if needed
-    gen_pmf <- rev(gen_time)[seq_len(t - first_index + 1)]
-    ## convolve infections with generation time
-    I[t + 1] <- sum(I_segment * gen_pmf) * R[t]
-  }
-  return(I[-1]) ## remove I0 from time series
-}
+```{r renewal_equation, file = here::here("functions", "renewal.r")}
 ```
 
 ::: {.callout-note}
@@ -113,20 +88,9 @@ What kind of behaviours do you see depending on the values you put in?
 
 # Estimating R from a time series of infections
 
-We now return to the time series of infections we used in the earlier sesssion on epidemiological delays.
+We now return to the time series of infections we used in the earlier session on epidemiological delays.
 
-```{r load_ts}
-data(infection_times)
-## assume a start date, e.g. 10 May of this year
-start_date <- ymd("2024-05-10")
-df <- infection_times |>
-  mutate(
-    infection_date = floor_date(start_date + infection_time, unit = "day")
-  )
-## infection time series
-inf_time_series <- df |>
-  count(infection_date)
-head(inf_time_series)
+```{r load_ts, file = here::here("snippets", "load-ts.r")}
 ```
 
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
@@ -139,9 +103,9 @@ mod$print(line_numbers = TRUE)
 
 ```{r r_fit}
 data <- list(
-  n = nrow(inf_time_series) - 1,
-  obs = inf_time_series$n[-1],
-  I0 = inf_time_series$n[1],
+  n = nrow(inf_ts) - 1,
+  obs = inf_ts$n[-1],
+  I0 = inf_ts$n[1],
   gen_time_shape = 4,
   gen_time_rate = 1,
   gen_time_max = 14
@@ -162,7 +126,7 @@ r_posterior <- r_fit |>
     upper_90 = quantile(.value, 0.95),
     .groups = "drop"
   ) |>
-  mutate(infection_date = inf_time_series$infection_date[-1])
+  mutate(infection_date = inf_ts$infection_date[-1])
 
 
 ggplot(mapping = aes(x = infection_date)) +
