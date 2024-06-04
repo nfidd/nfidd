@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 name: deploy
 
@@ -38,6 +40,7 @@ jobs:
         run: quarto render
 
       - name: Deploy to GitHub pages 🚀
+        if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.6.1
         with:
           branch: gh-pages
