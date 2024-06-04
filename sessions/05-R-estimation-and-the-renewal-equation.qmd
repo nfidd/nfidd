@@ -134,11 +134,7 @@ We use a renewal equation model in _stan_ to estimate the effective reproduction
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
-mod <- cmdstan_model(
-  here(
-    "sessions", "05-R-estimation-and-the-renewal-equation", "estimate-r.stan"
-  )
-)
+mod <- cmdstan_model(here("stan", "estimate-r.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
