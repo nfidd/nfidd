@@ -196,9 +196,11 @@ df_dates <- df_dates |>
   )
 ```
 
+::: {.callout-tip}
 ## Take 5 minutes
 Fit the lognormal model used above to the estimates from the rounded data, i.e. using the `df_dates` data set.
 Do you still recover the parameters that we put in?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -280,9 +282,11 @@ If we take the naïve mean of delays we get an underestimate as expected
   mean(df_rt$onset_to_hosp)
 ```
 
+::: {.callout-tip}
 ## Take 5 minutes
 Fit the lognormal model used above to the estimates from the truncated data, i.e. using the `df_rt` data set.
 How far away from the "true" parameters do you end up?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -296,6 +300,7 @@ res <- mod$sample(
 )
 res
 ```
+:::
 
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
