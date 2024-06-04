@@ -107,6 +107,13 @@ To approximate the generation time PMF using random draws from the underlying co
 gen_time_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 4, rate = 1)
 ```
 
+The discrete renewal equation is only valid for generation times greater than 0 so we remove the first element of the pmf and re-normalise:
+
+```{r gen_time_renorm}
+gen_time_pmf <- gen_time_pmf[-1] ## remove first element
+gen_time_pmf <- gen_time_pmf / sum(gen_time_pmf) ## renormalise
+```
+
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
