@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::knitr, any::rmarkdown
+          extra-packages: any::knitr, any::rmarkdown, local::.
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1
