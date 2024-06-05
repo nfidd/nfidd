@@ -3,3 +3,6 @@ title: "R, Stan, and statistical concepts"
 order: 1
 ---
 
+# Introduction to R concepts used in the course
+
+# Introduction to stan concepts used in the course

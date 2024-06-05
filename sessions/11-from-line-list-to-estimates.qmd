@@ -3,3 +3,11 @@ title: "From line list to estimates"
 order: 11
 ---
 
+# Objective 
+
+The aim of this session is to put what we have learnt so far into practice using a real line list. We will use the models we have created to produce delay distribution estimates, nowcasts, R estimation and forecasts.
+
+
+# Going further
+
+# Wrap up
