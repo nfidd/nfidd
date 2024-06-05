@@ -185,6 +185,71 @@ Does the model reproduce the simulated R trajectories?
 
 # Estimating R from a time series of symptom onsets
 
+Epidemiological data is rarely, perhaps never, available as a time series of infection events.
+Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
+In the [previous session](04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) we simulated symptom onsets from a time series of infections by convolving with a delay:
+
+```{r add_onsets}
+source(here::here("functions", "convolve-with-delay.r"))
+ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
+onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
+```
+
+We now add this to our renewal equation model:
+
+```{r stan_estimate_r}
+mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
+mod$print(line_numbers = TRUE)
+```
+::: {.callout-tip}
+## Take 5 minutes
+Familiarise yourself with the model above.
+Compare it to the model used earlier in this session, and the one used in the [previous session](04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Does this model have more parameters?
+How do the assumptions about the infections time series differ between the models?
+:::
+
+We then generate estimates from this model:
+
+```{r r_inf_fit}
+data <- list(
+  n = length(onsets) - 1,
+  obs = onsets[-1],
+  I0 = inf_ts$infections[1],
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf
+)
+r_inf_fit <- mod$sample(
+  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+r_inf_fit
+```
+
+
+```{r r_inf_plot}
+# Extract posterior draws
+inf_posterior <- r_inf_fit |>
+  gather_draws(infections[infection_day]) |>
+  group_by(infection_day) |>
+  summarise(
+    median = median(.value),
+    lower_90 = quantile(.value, 0.05),
+    upper_90 = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(infection_day = infection_day - 1)
+
+
+ggplot(mapping = aes(x = infection_day)) +
+  geom_line(data = inf_ts, mapping = aes(y = infections)) +
+  geom_ribbon(
+    data = inf_posterior,
+    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
+  )
+```
+
 
 
 # Going further
