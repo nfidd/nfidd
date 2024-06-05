@@ -184,16 +184,16 @@ mod$print(line_numbers = TRUE)
 
 ::: {.callout-tip}
 ## Take 10 minutes
-Familarise yourself with the model above.
-Unlike before there is now a `functions` block at the beginning of the model (lines 1-33), where we define two functions, `discretise_gamma()` (line 2) and `convolve_with_delay()` (line 18).
-These correspond to our earlier **R** function `discretise()` and the code we used to generate a time series of symptom onsets, respectively.
-Later, these functions are called in the `model` block, to generate a discretised probability mass function of the gamma distribution (lines 48-50), and to generate the time series of symptom onsets (line 51).
+Familiarise yourself with the model above.
+Unlike before there is now a `functions` block at the beginning of the model (lines 1-3), where we load a function called `convolve_with_delay()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/convolve_with_delay.stan).
+The functions correspond exactly to our earlier **R** function of the same name.
+Later, this functions is called in the `model` block, to generate the time series of symptom onsets (line 18).
 Which line defines the likelihood, and how does it relate to the section about observation uncertainty above?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Line 57 defines the likelihood, and it does so using the Poisson observation uncertainty we used above.
+Line 24 defines the likelihood, and it does so using the Poisson observation uncertainty we used above.
 :::
 
 We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
