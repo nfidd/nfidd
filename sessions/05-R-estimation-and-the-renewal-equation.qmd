@@ -227,6 +227,17 @@ r_inf_fit <- mod$sample(
 r_inf_fit
 ```
 
+::: {.callout-tip}
+## Take 10 minutes
+Compare the results between this model, the model
+Which of them provides a better fit?
+Compare it to the model used earlier in this session, and the one used in the [previous session](04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Does this model have more parameters?
+How do the assumptions about the infections time series differ between the models?
+
+::: {.callout-note collapse="true"}
+## Solution
+We can visualise the posterior in the same way as earlier here and in the previous session.
 
 ```{r r_inf_plot}
 # Extract posterior draws
@@ -249,6 +260,9 @@ ggplot(mapping = aes(x = infection_day)) +
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
   )
 ```
+
+:::
+:::
 
 
 
