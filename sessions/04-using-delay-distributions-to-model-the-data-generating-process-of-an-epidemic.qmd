@@ -49,43 +49,15 @@ $$
 In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), again assuming a gamma-distributed incubation period with shape 5 and rate 1 and this time working with symptom onsets:
+We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), but this time we first aggregate this into a daily time series of infections
 
-```{r onsets}
-data(infection_times)
-df <- infection_times |>
-  mutate(
-    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1)
-  )
+```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
 
-We then aggregate this into a daily time series of infections
-
-```{r aggregate}
-## convert to days
-df <- df |>
-  transmute(
-    infection_day = floor(infection_time),
-    onset_day = floor(onset_time)
-  )
-## infection time series
-inf_ts <- df |>
-  count(infection_day, name = "infections")
-head(inf_ts)
-```
-
-The resulting time series does contain any days with no infections.
-We can make our calculations easier (as otherwise we would have to try and detect these in any models that used this data which could be complicated) by adding them:
-
-```{r missing_to_zero}
-all_days <- expand(
-  df, infection_day = seq(min(infection_day), max(infection_day))
-)
-inf_ts <- all_days |>
-  full_join(inf_ts, by = join_by(infection_day)) |>
-  replace_na(list(infections = 0))
-head(inf_ts)
-```
+::: {.callout-note}
+The second part of the code snippet above is used to add days without infections with a zero count.
+This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
+:::
 
 Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a familiar issue.
