@@ -91,8 +91,9 @@ We first write a function to simulate the epidemic using the discrete renewal eq
 ## Take 10 minutes
 Try to understand the `renewal()` function above.
 Compare it to the `convolve_with_delay()` function from the session on convolutions.
+How are they similar?
 Can you explain the key differences between the two?
-Try it with a few different probability distributions and parameters.
+Try calling the function with a few different probability distributions and parameters.
 What kind of behaviours do you see depending on the values you put in?
 :::
 
