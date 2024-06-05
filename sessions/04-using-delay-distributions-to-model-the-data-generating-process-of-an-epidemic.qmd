@@ -49,14 +49,9 @@ $$
 In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), again assuming a gamma-distributed incubation period with shape 5 and rate 1 and this time working with symptom onsets:
+We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), but this time we first aggregate this into a daily time series of infections
 
-```{r onsets}
-data(infection_times)
-df <- infection_times |>
-  mutate(
-    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1)
-  )
+```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
 
 We then aggregate this into a daily time series of infections
@@ -64,14 +59,10 @@ We then aggregate this into a daily time series of infections
 ```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
 
-
 ::: {.callout-note}
 The second part of the code snippet above is used to add days without infections with a zero count.
 This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
 :::
-
-```{r missing_to_zero}
-```
 
 Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a familiar issue.
@@ -97,27 +88,7 @@ gamma_pmf
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections to generate a time series of symptom onsets.
 
-```{r convolution}
-## function that takes two inputs to convolve a time series with a delay
-## ts: vector of the time series to convolve
-## delay: the probability mass function of the delay, given as a vector of
-## probabilities, corresponding to discrete indices 0, 1, 2 of the discretised
-## delay distribution
-## example: convolve_with_delay(c(10, 14, 10, 10), c(0.1, 0.6, 0.3))
-convolve_with_delay <- function(ts, delay) {
-  max_delay <- length(delay) - 1 ## subtract one because zero-indexed
-  convolved <- vapply(seq_along(ts), \(i) {
-    ## get vector of infections (14-day window)
-    first_index <- max(1, i - max_delay)
-    ts_segment <- ts[seq(first_index, i)]
-    ## take reverse of pmf and cut if needed
-    pmf <- rev(delay)[seq_len(i - first_index + 1)]
-    ## convolve with delay distribution
-    ret <- sum(ts_segment * pmf)
-    return(round(ret))
-  }, numeric(1))
-  return(convolved)
-}
+```{r convolution, file = here::here("functions", "convolve-with-delay.r")}
 ```
 
 ::: {.callout-tip}
@@ -164,7 +135,7 @@ Does a plot of these observations look more like the data from the previous sess
 We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
 
 ```{r stan_estimate_infections}
-mod <- cmdstan_model(here("stan", "estimate_infections.stan"))
+mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
