@@ -197,7 +197,7 @@ onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 
 We now add this to our renewal equation model:
 
-```{r stan_estimate_r}
+```{r stan_estimate_inf_and_r}
 mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
 mod$print(line_numbers = TRUE)
 ```
