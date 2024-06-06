@@ -285,6 +285,7 @@ ggplot(mapping = aes(x = infection_day)) +
 Compare the results to ones from the model used earlier in this session, and the one used in the [previous session](04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
 How do the models vary in the number of parameters that need to be estimated?
 How do the assumptions about the infections time series differ between the models?
+What do you notice about the level uncertainty in the esitmates of infections and R over the course of the time series?
 If you have time you could try re-running the experiment with different R trajectories and delay distributions to see whether results change.
 
 ::: {.callout-note collapse="true"}
