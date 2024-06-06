@@ -304,7 +304,7 @@ res
 
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
-```{r truncatino_adjusted_delay_model}
+```{r truncation_adjusted_delay_model}
 tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
 tmod$print(line_numbers = TRUE)
 ```
