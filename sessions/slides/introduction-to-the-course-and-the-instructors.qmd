@@ -1,0 +1,69 @@
+---
+title: "Introduction to the course and the instructors"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/introduction-to-the-course-and-the-instructors.html
+    footer: "Introduction to the course and the instructors"
+---
+
+```{r instructors}
+instructors <- c("sbfnk", "seabbs", "kathsherratt")
+```
+
+```{r get_contributors}
+library("dplyr")
+library("gh")
+library("jsonlite")
+whoarewe <- lapply(sort(instructors), \(instructor) {
+  gh(paste0("GET /users/{username}"), username = instructor)[
+    c("login", "avatar_url", "html_url", "name")
+  ]
+})
+```
+
+# What is this course?
+
+::: {.incremental}
+- delay distributions and how to estimate them (Day 1)
+- Rt estimation and the generation interval (Day 1)
+- nowcasting (day 2)
+- forecasting and evaluation, ensemble methods (day 2)
+- applications (day 3)
+:::
+
+# Why this course?
+
+::: {.incremental}
+- common question in outbreak response
+- easy to make mistakes
+- no comprehensive training resource
+:::
+
+# Who are we?
+
+```{r whoarewe, results='asis'}
+cat(":::: {.columns}\n")
+for (instructor in seq_along(whoarewe)) {
+  cat(
+    "::: {.column width=\"", floor(100 / length(whoarewe)), "%\"}\n",
+    "![](", whoarewe[[instructor]]$avatar_url, ")\n",
+    "[", whoarewe[[instructor]]$name, "](",
+    whoarewe[[instructor]]$html_url, ")\n",
+    ":::\n", sep = ""
+  )
+}
+cat("::::\n")
+```
+
+# Who are you?
+
+Introduce yourself with:
+
+- name
+- where you travelled from
+- why you're here
+
+#
+
+[Return to the session](../00-introduction-and-course-overview)
