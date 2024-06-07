@@ -27,6 +27,15 @@ library("here")
 library("cmdstanr")
 ```
 
+## Create data set
+
+We will use the same simulated data set as in the [previous session](02-delay-distributions) but introduce some typical properties of infectious disease data sets.
+
+If you need to re-load the data, here is the code again from that session:
+
+```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
+```
+
 ## Dates, not days: censoring
 
 Data on health outcomes are usually not recorded in the way that we have used so far in this session: as a numeric time since a given start date.
@@ -65,13 +74,14 @@ df_dates <- df_dates |>
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Fit the lognormal model used above to the estimates from the rounded data, i.e. using the `df_dates` data set.
+Fit the lognormal model used in the previous session to the estimates from the rounded data, i.e. using the `df_dates` data set.
 Do you still recover the parameters that we put in?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
 ```{r df_dates_solution}
+mod <- cmdstan_model(here("stan", "lognormal.stan"))
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
@@ -135,9 +145,11 @@ Estimating delays in real time comes with particular challenges as the timing of
 If, for example, infections are exponentially increasing then there will be disproportionately more people with recent symptom onset, decreasing the estimate of the mean delay.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40.
+Let us work with the un-censored data for the time from onset to hospitalisation so as to look at the issue of truncation in isolation:
 
 ```{r truncated_df}
-df_rt <- df_oth |>
+df_rt <- df |>
+  mutate(onset_to_hosp = hosp_time - onset_time) |>
   filter(hosp_time <= 40)
 ```
 
