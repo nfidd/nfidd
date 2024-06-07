@@ -14,8 +14,8 @@ Monday June 24: 9.00-9.30
 
 Monday June 24: 9.30-10.30
 
-- Introduction to R concepts used in the course (5 mins)
-- Introduction to stan concepts used in the course (25 mins)
+- Introduction to statistical concepts used in the course (15 mins)
+- Introduction to stan concepts used in the course (15 mins)
 - Practice session: introduction to estimation in stan (30 mins)
 
 ## Session 2: Delay distributions
