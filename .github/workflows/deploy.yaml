@@ -30,7 +30,6 @@ jobs:
         with:
           extra-packages:
             any::gh,
-            any::jasonlite,
             any::knitr,
             any::rmarkdown,
             local::.,
