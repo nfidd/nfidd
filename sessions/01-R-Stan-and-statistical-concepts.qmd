@@ -3,6 +3,141 @@ title: "R, Stan, and statistical concepts"
 order: 1
 ---
 
+# Objectives
+
+The aim of this session is to introduce the statistical and computational concepts that will be used throughout the course as well as the teaching philosophy that it will follow.
+
 # Introduction to R concepts used in the course
 
 # Introduction to stan concepts used in the course
+
+# Practice session: Introduction to estimation in stan
+
+## Libraries used
+
+In this session we will use the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+
+```{r libraries, message = FALSE}
+library("here")
+library("cmdstanr")
+```
+
+::: {.callout-tip}
+The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
+It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+Throughout the course your learning will proceed in 2 steps:
+
+1. **simulation** to get an understanding of the process that we typically assume to generate observed infectious disease data, followed by
+2. **estimation** using the statistical programming language [stan](https://mc-stan.org/) as a way to obtain a range of flexible estimates.
+
+We will illustrate this approach using a simple non-epidemiological example before moving on to infectious diseases in the next session.
+We will investigate a scenario where we're observing coin flips but we don't know if the coin is biased towards one side or the other.
+
+## Simulating coin flips
+
+Flipping a coin with a given probability $p$ of landing on a given side is also called a Bernoulli trial, and the corresponding probability distribution is the [Bernoulli distribution](https://en.wikipedia.org/wiki/Bernoulli_distribution) with probability mass function given by
+
+$$
+f(s;p)=\left{
+\begin{cases}
+  p {\text{if }}s=1,\\
+  q=1-p {\text{if }}s=0.\\
+end{cases}
+$$
+
+where $s=1$ for the side that has probability $p$, and $k=0$ for the other side.
+We will call $s=1$ "heads" and $s=0$ "tails".
+
+If this procedure is repeated $n$ times, the probability of observing heads $k$ times is given by the [Binomial distribution](https://en.wikipedia.org/wiki/Binomial_distribution) with probability mass function 
+
+$$
+f(k|n,p)={\binom {n}{k}}p^{k}(1-p)^{n-k}}.
+$$
+
+In R, we can generate random numbers from this distribution using the `rbinom()` command.
+To simulate 25 coin flips where the probability of getting heads is 0.4 you can write
+
+```{r sample_binom}
+k_heads <- rbinom(n = 1, size = 25, p = 0.4)
+```
+
+Note that in `rbinom()` the argument `n` refers to the number of repetitions (of the 25 coin flips), not the number of flips as above, which is given by `size`.
+
+# Estimation of coin bias
+ 
+In [statistical inference](https://en.wikipedia.org/wiki/Statistical_inference) we are dealing with the inverse problem to the one described above:
+Rather than describing the outcomes of a given process, we try to learn something about the world by observing outcomes and making assumptions about the process.
+In Bayesian inference we can do this by modelling the _generative process_, i.e. the process that we believe to generate the data (in other words, the model we would use to simulate).
+Using a model of the generative process we the use Monte-Carlo methods to generate samples from the posterior distribution of parameters, that is parameter combinations that are consistent with the data.
+In order to do so, we need to link the model to observations, and this is commonly done using the _likelihood function_, which describes the probability of observing the data given a set of parameters in our model:
+
+$$
+\mathcal {L} (p \mid \mathrm{Data})= \mathcal {L} (p \mid k, n) = f(k| n, p)
+$$
+
+That is, for a given $n$ (total number of coin flips) the likelihood (which is a function of $p$) is described by the same function as the probability of observing $k$ heads given $p$.
+
+In order to conduct Bayesian inference using we will use [stan](https://mc-stan.org/), a "state-of-the-art platform for statistical modeling and high-performance statistical computation" to generate samples from the posterior distribution.
+
+Using _stan_ may seem a bit over the top for estimating bias from a few coin flips, but it will come in handy later when we look at more complicated problems.
+In order to conduct Bayesian inference, we will need to specify a [prior probability distribution](https://en.wikipedia.org/wiki/Prior_probability) for our parameter $p$ that reflects what we believe about the coin before we confront it with data.
+
+Let us assume we are completely ignorant, i.e. $p$ is equally likely to be any value between 0 and 1.
+In that case, we can use a _uniform prior_ bounded by 0 and 1, or in mathematical notation
+
+$$
+p \sim \mathcal{U}(0, 1)
+$$
+
+This is just another way of saying that any value of $p$ between 0 and 1 has the same _prior probability density_.
+
+When doing statistical inference we're often better off using distributions that don't have sharp edges like the uniform distribution.
+In our case here we could use, for example, a [Beta distribution](https://en.wikipedia.org/wiki/Beta_distribution) which is also bounded by 0 and 1 but tapers off smoothly towards the edges.
+
+_Stan_ is a so-called probabilistic programming language.
+This means that we write down the all the statistical relationships between variables in our model and then can use it to conduct inference on our desired parameters.
+All the stan models used in this course are in the `stan` folder of the [repository](https://github.com/nfidd/nfidd).
+We load them using the `here` package (to find the file) and `cmdstanr_model()` command to load and compile the model:
+
+
+```{r coin_model}
+mod <- cmdstan_model(here("stan", "coin-model.stan"))
+```
+
+We can print the model code by simply typing `mod`, or we can use its `print()` function which has a convenient `line_numbers` argument that we can use to talk about the models:
+
+```{r print_coin_model}
+mod$print(line_numbers = TRUE)
+```
+
+In this model, we have defined three sections:
+- `data` represents all the things that aren't estimated, i.e. the things before the bar (|) in the likelihood function
+- `parameters` are the things that are estimated
+- `model` defines the prior and likelihood
+
+In order to conduct inference, we use the `sample()` function in the `rstan` package
+
+```{r coin_sample}
+res <- mod$sample(data = list(trials = 25, heads = k_heads))
+```
+
+We can inspect the results using
+
+```{r coin_inspect}
+res
+```
+
+**Take 15 minutes*** to experiment with the code above: how does the error of the estimate change with the number of trials, or the given `k_heads`.
+Does the result match what you would expect?
+You could change the prior distribution for the bias to a uniform distribution by changing the `beta` distribution above to a `uniform(lower_bound, upper_bound)` (replacing `lower_bound` and `upper_bound` with the appropriate parameters). 
+Does this change your results?
+
+# Going further
+
+- If you have time, you could try to experiment with the stan code above.
+For example, you could specify a stronger prior on `prob_heads` if your assumption is that the coin is more or less fair.
+Or you could look at having a number of coins and test whether they are, on average, fair.
+
+# References
