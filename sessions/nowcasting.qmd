@@ -1115,6 +1115,108 @@ What about the reproduction number?
 This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
 :::
 
+# Simulating delayed reporting
+
+Epidemiological data is not usually available immediately for analysis.
+Instead, data usually gets collated at different levels of a healthcare or health surveillance system, cleaned, checked before being aggregated and/or anonymised and ultimately shared with an analyst.
+We call the _reporting time_ the time at which a data point (e.g. a time or day of sypmtom onset or a time or day of hospitalisation) has entered the data set used for some analysis.
+Similar to the data discussed in the preceding session, this time is often only available as a date, i.e. censored at the scale of a day.
+
+We can simulate this reporting process.
+Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 2:
+In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](), except now we don't simulate hospitalisations but reports of symptom onsets:
+
+```{r onset_report}
+df <- infection_times |>
+  mutate(
+    onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
+    report_time = onset_time + rlnorm(n(), meanlog = 1, sdlog = 2)
+  )
+```
+
+We then assume that we're 40 days into the outbreak, i.e. we only consider observations with a reporting time less than 41 - other symptom onset may have already happened, but we have not observed them yet.
+
+
+```{r truncate_reports}
+cutoff <- 41
+df_co <- df |>
+  filter(report_time < cutoff)
+```
+
+We can now convert this to a time series of symptom onsets and reports:
+
+```{r aggregate}
+## create time series of onsets and reports
+df_co <- df_co |>
+  transmute(
+    onset_day = floor(onset_time),
+    report_day = floor(report_time)
+  )
+
+onset_ts <- df_co |>
+  count(day = onset_day, name = "onsets")
+reports_ts <- df_co |>
+  count(day = report_day, name = "reports")
+
+all_days <- expand_grid(day = seq(0, cutoff - 1)) |>
+  full_join(onset_ts, by = "day") |>
+  full_join(reports_ts, by = "day") |>
+  replace_na(list(onsets = 0, reports = 0))
+```
+
+Plotting these, we get
+
+```{r ts_plot}
+combined <- all_days |>
+  pivot_longer(c(onsets, reports), names_to = "variable")
+ggplot(combined, aes(x = day, y = value)) +
+  facet_grid(~ variable) +
+  geom_col()
+```
+
+Looking at the two plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattenned off and perhaps are going down, whereas reports increasing rapidly.
+
+This apparent contradiction appears because onsets are reported with a delay.
+By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
+We can see that if we plot the final data set alongside the cut-off one:
+
+```{r plot_cut_final}
+final <- df |>
+  transmute(onset_day = floor(onset_time))
+final_onset_ts <- final |>
+  count(day = onset_day, name = "onsets")
+final_all_days <- expand_grid(day = seq(0, max(final_onset_ts$day))) |>
+  full_join(final_onset_ts, by = "day") |>
+  replace_na(list(onsets = 0)) |>
+  mutate(cutoff = "final")
+intermediate <- combined |>
+  filter(variable == "onsets") |>
+  select(-variable) |>
+  rename(onsets = value) |>
+  mutate(cutoff = "40 days")
+combined_cutoffs <- rbind(
+  intermediate,
+  final_all_days
+)
+ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
+  geom_line() +
+  scale_colour_brewer(palette = "Dark2") +
+  geom_vline(xintercept = cutoff, linetype = "dashed")
+```
+
+As we can see, even though on day 40 it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
+The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
+
+Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
+This can someimtes be a sensible way to visualise the data.
+However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc.
+At the same time, when it comes to capacity or intervention planning we may need to know how many people e.g. become sick on any given day and will thus present to the healthcare system rather than how many will be reported.
+Estimating the "true curve" (i.e. what we expect to see once the data are complete at a future date) of the time series of _epidemiologically relevant events_ from a potentially truncated epidemiological curve and information about the delays is what is usually called "nowcasting".
+
+# Nowcasting with a known delay
+
+# Joint estimation of delay distributions and nowcasting
+
 # Going further
 
 - The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd) and see how it affects the simple nowcast models.
