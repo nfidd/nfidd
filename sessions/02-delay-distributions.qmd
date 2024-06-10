@@ -7,151 +7,143 @@ order: 2
 set.seed(123)
 ```
 
-# Objectives
+## Objectives
 
-The aim of this session is to introduce the concept of probability distributions and how to estimate their parameters using `stan`.
+The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
+You will do this by working in `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
 
-# Libraries used
+## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
+In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("ggplot2")
+library("dplyr")
+library("tidyr")
+library("lubridate")
 library("here")
 library("cmdstanr")
-library("bayesplot")
-library("posterior")
 ```
 
-::: {.callout-tip}
-The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
-It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+## Simulating delayed epidemiological data
+
+We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
+For now we will not concern ourselves with the model used to generate the epidemic.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+
+We will later deal with modelling the infectious process.
+For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
+We will further consider the fact that these observations are *incomplete* (e.g. because not every infection leads to hospitalisations and so focusing on hospitalisations may leave infections unobserved) and happen with a delay (e.g. from infection to symptoms).
+
+We will work with a data set that is included in the `nfidd` R package that you installed initially.
+It can be loaded with the `data` command
+
+```{r}
+data(infection_times)
+head(infection_times)
+
+### visualise the infection curve
+ggplot(infection_times, aes(x = infection_time)) +
+  geom_histogram(binwidth = 1) +
+  xlab("Infection time (in days)") +
+  ylab("Number of infections")
+```
+
+::: {.callout-note}
+You can see that the column `infection_time` is given as a decimal number of days that have passed since the initial infection of the outbreak.
+In reality, data from an outbreak will usually be given as dates, and those will usually not represent infection but an observed outcome such as symptom onset or hospital admission.
+For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
 :::
 
-# Simulating data from a probability distribution
-
-First let us simulate some data from a probability distribution.
-In R, this can is usually done using a family of functions that start with `r`.
-For example, to simulate from a normal distribution you would use the `rnorm()` function.
-All these functions have a first argument `n`, the number of random replicates to generate, and then some further arguments that parameterise the probability distribution.
-
-```{r rnorm}
-rnorm(n = 10, mean = 0, sd = 1)
-```
-
-We will use probability distributions to characterise epidemiological delays.
-These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero (although it is worth noting that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first).
-
-Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
-These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e. gives more probability to occasional very large values, whereas the gamma distribution as more of a tail on the left, i.e. gives more probability to values lower than the mean.
-
-The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$. 
-A gamma distribution with mean 5 and variance 2, for example, has $\alpha = 12.5$ and $\beta = 2.5$.
-To simulate from such a distribution, we can use the following R code.
-
-```{r gammas}
-## simulate gamma with mean 5, variance 2
-gammas <- rgamma(100, shape = 12.5, rate = 2.5)
-head(gammas)
-mean(gammas)
-var(gammas)
-```
-
-The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$. 
-A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sigma = 0.28$.
-
-```{r lognormals}
-## simulate gamma with mean 5, variance 2
-lognormals <- rlnorm(100, meanlog = 1.57, sdlog = 0.28)
-head(lognormals)
-mean(lognormals)
-var(lognormals)
-```
-
-We can now plot the two distributions.
-
-```{r plot_randoms}
-df <- rbind(
-  data.frame(dist = "lognormal", randoms = lognormals),
-  data.frame(dist = "gamma", randoms = gammas)
-)
-ggplot(df, aes(x = randoms, fill = dist)) +
-  geom_density(alpha = 0.5)
-```
-
-We have used `geom_density()` to get smooth lines.
-Alternatively we could have used, e.g., `geom_histogram()` to plot the raw data.
-
-# Estimating the parameters of probability distributions
-
-We will now use stan to estimate the parameters of the probability distribution.
-To do so, we first load in the model 
-
-```{r load_gamma_model}
-## load gamma model from the session directory
-mod <- cmdstan_model(here("stan", "gamma.stan"))
-## show model code with line numbers
-mod$print(line_numbers = TRUE)
-```
+We would now like to simulate hospitalisations arising from this outbreak.
+We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1, i.e. a mean of 5 days.
+We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1.75 and sdlog 0.5, corresponding to a mean delay of about a week.
+We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
 
 ::: {.callout-tip}
-## Take 5 minutes
-Familarise yourself with the model above.
-Do you understand all the lines?
-Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) the data that has to be supplied to the model?
+### Take 10 minutes
+Try to add onset and hospitalisation times (in decimal number of days after the first infection) to the infection data.
+
 :::
 
 ::: {.callout-note collapse="true"}
-## Solution
-Lines 13 and 14 define the parametric prior distributions (for parameters alpha and beta).
-Line 15 defines the likelihood.
-Lines 3 and 4 define the data that has to be supplied to the model.
+### Solution
+```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
+```
 :::
 
-We use the model we have defined in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
-Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
+Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
 
-```{r gamma_inference}
-stan_data <- list(
-  N = length(gammas),
-  y = gammas
+```{r plot_distributions, messages = FALSE}
+dfl <- df |>
+  pivot_longer(
+    cols = c(infection_time, onset_time, hosp_time),
+    names_to = "type", values_to = "time"
+  )
+ggplot(dfl, aes(x = time)) +
+  geom_histogram(position = "dodge", binwidth = 1) +
+  facet_wrap(~ type, ncol = 1) +
+  xlab("Time (in days)") +
+  ylab("Count")
+```
+
+## Estimating delay distributions
+
+As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
+In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
+
+To do this we can use the same model as in the [session on delay distributions](02-delay-distributions), assuming (or knowing, in this instance) that the delays follows a lognormal distribution.
+
+```{r naive_delay_model}
+mod <- cmdstan_model(here("stan", "lognormal.stan"))
+```
+
+::: {.callout-tip}
+### Take 5 minutes
+Estimate the onset-to-hospitalisation delay using the simulated data set we created above.
+Do you recover the parameters used for simulation?
+:::
+
+::: {.callout-note collapse="true"}
+### Solution
+
+You can _sample_ from the model's posterior distribution by feeding it our simulated data set.
+
+```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+df_oth <- df |>
+  mutate(onset_to_hosp = hosp_time - onset_time)
+res <- mod$sample(
+  data = list(
+    n = nrow(na.omit(df_oth)),
+    y = na.omit(df_oth)$onset_to_hosp
+  ),
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
-gamma_fit <- mod$sample(
-  data = stan_data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
-gamma_fit
 ```
 
 ::: {.callout-caution}
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+### Reduce the amount of messages printed to the screen
+As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+You can safely remove them.
 :::
 
-You can see that the estimates are broadly consistent with the parameters we put in.
-To investigate this further, we will conduct a so-called _posterior predictive check_ by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
+To see the estimates, we can use:
 
-```{r gamma_ppc}
-# Extract posterior draws
-gamma_posterior <- as_draws_df(gamma_fit$draws())
-head(gamma_posterior)
-
-# Generate posterior predictive samples
-gamma_ppc <- sapply(seq_along(gammas), function(i) {
-  rgamma(n = length(gammas),
-         shape = gamma_posterior$alpha[i],
-         rate = gamma_posterior$beta[i])
-})
-
-# Plot posterior predictive check
-ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
+```{r summarise_naive_delay_model}
+res$summary()
 ```
 
-We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e. the samples generated earlier that we fitted to.
+Reassuringly, these estimates look similar to what we used in the simulations.
+:::
 
-# Going further
+## Going further
 
-- For the model above we chose truncated normal priors with a mode at 0 and standard deviation 10. If you change the parameters of the prior distributions, does it affect the results?
-- You could try the model included in `lognormal.stan` to estimate parameters of the lognormal distribution.
+- In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
+With real data, of course, we don't have this information available.
+Try using a different distribution for inference (e.g. normal, or gamma).
+Do you get a good fit?
 
-# Wrap up
+## Wrap up
