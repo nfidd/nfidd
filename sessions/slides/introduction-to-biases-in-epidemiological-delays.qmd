@@ -1,0 +1,93 @@
+---
+title: "Introduction to biases in epidemiological delays"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-biases-in-epidemiological-delays.html
+    footer: "Introduction to biases in epidemiological delays"
+---
+
+```{r seed}
+set.seed(123)
+```
+# Biases in epidemiological delays
+
+Why might our estimates of epidemiological delays be biased?
+
+. . .
+
+::: {.fragment .fade-out}
+- data reliability and representativeness
+:::
+- intrinsic issues with data collection and recording
+
+## Issue #1: Double censoring
+
+- reporting of events usually as a **date** (not date + precise time)
+- for short delays this can make quite a difference
+
+## Double censoring: example {.smaller}
+
+We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+
+![](figures/censoring_1.png)
+
+## Double censoring: example {.smaller}
+
+We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+
+![](figures/censoring_2.png)
+
+## Double censoring: example {.smaller}
+
+We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+
+![](figures/censoring_final.png)
+
+## Double censoring: example {.smaller}
+
+We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+
+![](figures/censoring_final.png)
+
+The *true* incubation period of A could be anywhere between 1 and 3 days (but not all equally likely).
+
+## Issue #2: right truncation
+
+- reporting of events can be triggered by the **second** event
+- in that case, longer delays might be missing because they **have not occurred yet**
+
+## Example: right truncation {.smaller}
+
+We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+
+![](figures/truncation_1.png)
+
+## Example: right truncation {.smaller}
+
+We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+
+![](figures/truncation_prefinal.png)
+
+## Example: right truncation {.smaller}
+
+We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+
+![](figures/truncation_final.png)
+
+## Example: right truncation {.smaller}
+
+We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset)
+
+![](figures/truncation_final.png)
+
+On the day of analysis we have not observed some delays yet, and these tended to be longer.
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+- Simulate epidemiological delays with biases
+- Estimate parameters of a delay distribution, correcting for biaess
+
+[Return to the session](../biases-in-delay-distributions)
+
