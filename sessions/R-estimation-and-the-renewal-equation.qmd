@@ -35,7 +35,7 @@ It needs to be run inside the course repository so that the `here()` commands be
 
 In this session we introduce modelling the infection process itself, in addition to modelling observation processes.
 
-Recall that in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) we tried to estimate the number of infections.
+Recall that in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we tried to estimate the number of infections.
 In doing so we assumed that infections every day were independently identically distributed and determined only by the number of symptom onsets that they caused.
 In reality, however, we know that infections are not independent.
 Because infection is dependent on a pathogen being transmitted from one individual to another, we expect infections on any day to depend on existing infections, that is the number of individuals that became infectious in the recent past.
@@ -55,12 +55,12 @@ I_t = R_t \sum_{i=1}^{g_\mathrm{max}} I_{t-i} g_i
 $$
 
 Here, $I_t$ is the number of infected individuals on day $t$, $R_t$ is the current value of the reproduction number and $g_i$ is the probability of a secondary infection occurring $i$ days after the infector became infected themselves, with a maximum $g_\mathrm{max}$.
-Remembering the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) you will be able to identify that the renewal equation represents a convolution of the infection time series with itself, with the delay distribution given by $g_i$ and $R_t$ representing a scaling that is being applied.
+Remembering the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) you will be able to identify that the renewal equation represents a convolution of the infection time series with itself, with the delay distribution given by $g_i$ and $R_t$ representing a scaling that is being applied.
 
 ::: {.callout-tip}
 ## Discrete vs. continuous renewal equation
 The equation shown above represents the discrete version of the reproduction number.
-Similar to discussions in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) this can be interpreted as a discretised version of a continuous one where the sum is replaced by an integral and the generation time distribution is continuous.
+Similar to discussions in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) this can be interpreted as a discretised version of a continuous one where the sum is replaced by an integral and the generation time distribution is continuous.
 Note that in the discrete version we have started the sum at 1 and thus set $g_0=0$ which will make calculations easier.
 :::
 
@@ -89,7 +89,7 @@ We first write a function to simulate the epidemic using the discrete renewal eq
 ::: {.callout-note}
 ## Take 10 minutes
 Try to understand the `renewal()` function above.
-Compare it to the `convolve_with_delay()` function from the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Compare it to the `convolve_with_delay()` function from the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 How are they similar?
 Can you explain the key differences between the two?
 Try calling the function with a few different probability distributions and parameters.
@@ -98,7 +98,7 @@ What kind of behaviours do you see depending on the values you put in?
 
 # Estimating R from a time series of infections
 
-We now return to the time series of infections we used in the earlier session on epidemiological delays.
+We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 
 ```{r load_ts, file = here::here("snippets", "load-ts.r")}
 ```
@@ -106,7 +106,7 @@ We now return to the time series of infections we used in the earlier session on
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
 We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
 From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
-We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) to use this continuous distribution with the discrete renewal equation.
+We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
 If you don't have this available any more, you can load it using
 ```{r source_censored_delay_pmf}
 source(here("functions", "censored-delay-pmf.r"))
@@ -197,7 +197,7 @@ Does the model reproduce the simulated R trajectories?
 
 Epidemiological data is rarely, perhaps never, available as a time series of infection events.
 Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
-In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) we simulated symptom onsets from a time series of infections by convolving with a delay:
+In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay:
 
 ```{r add_onsets}
 source(here::here("functions", "convolve-with-delay.r"))
@@ -214,7 +214,7 @@ mod$print(line_numbers = TRUE)
 ::: {.callout-tip}
 ## Take 5 minutes
 Familiarise yourself with the model above.
-Compare it to the model used earlier in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Compare it to the model used earlier in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections).
 Does this model have more parameters?
 How do the assumptions about the infections time series differ between the models?
 :::
@@ -237,7 +237,7 @@ r_inf_fit <- mod$sample(
 r_inf_fit
 ```
 
-We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic). As an example one could do 
+We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). For example one could do 
 
 ```{r r_inf_posterior}
 # Extract posterior draws

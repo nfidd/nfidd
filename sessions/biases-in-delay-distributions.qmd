@@ -29,7 +29,7 @@ library("cmdstanr")
 
 ## Create data set
 
-We will use the same simulated data set as in the [session on delay distributions](delay-distributions) but introduce some typical properties of infectious disease data sets.
+We will use the same simulated data set as in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data) but introduce some typical properties of infectious disease data sets.
 
 If you need to re-load the data, here is the code again from that session:
 
@@ -74,7 +74,7 @@ df_dates <- df_dates |>
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Fit the lognormal model used in the [session on delay distributions](delay-distributions) to the estimates from the rounded data, i.e. using the `df_dates` data set.
+Fit the lognormal model used in the [session on delay distributions](delay-distributions#estimating-delay-distributions) to the estimates from the rounded data, i.e. using the `df_dates` data set.
 Do you still recover the parameters that we put in?
 :::
 
