@@ -1,0 +1,60 @@
+---
+title: "Forecasting as an epidemiological problem"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/forecasting-as-an-epidemiological-problem.html
+    footer: "Forecasting as an epidemiological problem"
+---
+
+# Motivating example
+
+- During an outbreak but also e.g. during a flu season or a pandemic
+
+# Meterological analogy
+
+perhaps
+
+# What is a forecast?
+
+- an *unconditional* prediction: what **will** happen
+- distinct from a *conditional* or *counterfactual* scenario: what **would** happen under certain conditions
+- sometimes the counterfactual scenario is the forecast: what would happen if we didn't intervene (and then you don't)
+
+# Why forecast?
+
+- to create **situational awareness**
+  - nowcast: where are we now?
+  - forecast: where are we heading?
+
+# Example uses of forecasts
+
+- healthcare capacity planning
+- vaccine trial planning
+
+# Relationship with R estimation
+
+- Commonest assumption is constant R ("no change")
+- Is this a good forecast model?
+
+# Difference to nowcast
+
+- model takes over from data
+
+# Importance of evaluation
+
+- we can score forecasts (because they're unconditional) and nowcasts; this is much harder for conditional forecasts (are the conditions met)?
+
+# Importance of uncertainty
+
+- how certain we are about certain future outcomes is important
+- providing uncertainty allows attributing probabilities to outcomes, i.e. X% chance of exceeding hospital capacity
+- Makes evaluation more complicated (but not impossible)
+
+# Plan for the next few sessions
+
+1. Start with a simple model and use it to make a forecast (using stan)
+2. Evaluate the forecasts
+3. Try a range of forecasts + evaluate
+
+[Return to the session](../forecasting-concepts)
