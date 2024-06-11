@@ -68,7 +68,7 @@ Tuesday June 25: 9.00-10.30
 Tuesday June 25: 11.00-12.30
 
 - Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation (15 mins)
-- Practice session: forecasting with a simple model (15 minutes)
+- Practice session: extending a model into the future (15 minutes)
 - Introduction to forecast evaluation (20 mins)
 - Practice session: evaluate your forecast (30 mins)
 - Wrap up (10 mins)
@@ -80,7 +80,7 @@ Tuesday June 25: 16.00-17.30
 Tuesday June 25: 14.00-15.30
 
 - An overview of forecasting models (15 mins)
-- Practice session: Forecasting with a range of common models (30 mins)
+- Practice session: Forecasting with a mechanistic model (30 mins)
 - Practice session: Evaluating forecasts from a range of common models (45 mins)
 
 ## Session 9: Perspectives on forecasting
