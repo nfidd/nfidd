@@ -66,4 +66,4 @@ Introduce yourself with:
 
 #
 
-[Return to the session](../00-introduction-and-course-overview)
+[Return to the session](../introduction-and-course-overview)
