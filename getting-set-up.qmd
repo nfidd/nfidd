@@ -26,6 +26,11 @@ This requires a separate installation step:
 cmdstanr::install_cmdstan()
 ```
 
+If there are any problems with this, you can try (on Windows) to fix them using
+```{r cmdstan_toolchain, eval = FALSE}
+cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+```
+
 You can test that you have a working `cmdstanr` setup using
 
 ```{r cmdstan_test}```
