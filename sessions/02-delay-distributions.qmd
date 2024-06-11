@@ -3,6 +3,8 @@ title: "Delay distributions"
 order: 2
 ---
 
+[Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays.qmd)
+
 ```{r echo = FALSE}
 set.seed(123)
 ```
