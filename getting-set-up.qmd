@@ -33,7 +33,7 @@ cmdstanr::check_cmdstan_toolchain(fix = TRUE)
 
 You can test that you have a working `cmdstanr` setup using
 
-```{r cmdstan_test}```
+```{r cmdstan_test}
 cmdstanr::cmdstan_version()
 ```
 
