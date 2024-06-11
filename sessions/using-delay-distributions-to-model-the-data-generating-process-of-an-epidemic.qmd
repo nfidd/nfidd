@@ -49,7 +49,7 @@ $$
 In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use exactly the same data as in the [previous session](03-biases-in-delay-distributions), but this time we first aggregate this into a daily time series of infections
+We can use exactly the same data as in the [session on biases in delay distributions](biases-in-delay-distributions), but this time we first aggregate this into a daily time series of infections
 
 ```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
@@ -109,7 +109,7 @@ ggplot(combined, aes(x = time, y = onsets)) +
   geom_bar(stat = "identity")
 ```
 
-Do they look similar to the plot of symptom onsets in the previous session?
+Do they look similar to the plot of symptom onsets in the [session on delay distributions](delay-distributions)?
 
 ## Observation uncertainty
 
@@ -123,7 +123,7 @@ combined <- combined |>
   mutate(observed = rpois(n(), onsets))
 ```
 
-Does a plot of these observations look more like the data from the previous session than the convolution plotted above?
+Does a plot of these observations look more like the plots from the [session on delay distributions](delay-distributions) than the convolution plotted above?
 
 # Estimating a time series of infection
 
