@@ -4,6 +4,7 @@
 .Ruserdata
 _site
 .DS_Store
+*_files/
 /.quarto/
 stan/*
 !stan/functions
