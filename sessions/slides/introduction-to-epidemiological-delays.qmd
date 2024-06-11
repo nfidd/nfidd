@@ -121,8 +121,8 @@ hospital *admission* to *discharge*
 
 ## Warning: Two levels of uncertainty {background-color="#000000" transition="fade-in" .smaller}
 
-- Probability distributions characterise uncertainty in the delays
-- Parameters of the probability distribution themselves can be uncertain
+- Probability distributions characterise variability in the delays *between individuals*
+- *Parameters* of the probability distribution can be uncertain
 
 :::: {.columns}
 
