@@ -1,0 +1,169 @@
+---
+title: "Introduction to epidemiological delays"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-epidemiological-delay-distributions.html
+    footer: "Introduction to epidemiological delays"
+---
+
+```{r seed}
+set.seed(123)
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+```
+# Epidemiological delay
+
+Time between two epidemiological events
+
+## Epidemiological events: disease progression
+- infection
+- symptom onset
+- becoming infectious
+- hospital admission
+- death
+
+## Epidemiological events: recovery
+- pathogen clearance
+- symptoms clearance
+- end of infectiousness
+- discharge from hospital
+
+## Epidemiological events: control
+
+- quarantine
+- isolation
+- treatment
+
+## Epidemiological events: reporting
+
+- specimen taken
+- report added to database
+
+## Some delays have names
+
+*infection* to *symptom onset*
+
+. . .
+
+**Incubation period**
+
+## Some delays have names
+
+*infection* to *becoming infectious*
+
+. . .
+
+**Latent period**
+
+## Some delays have names
+
+*becoming infectious* to *end of infectiousness*
+
+. . .
+
+**Infectious period**
+
+## Some delays have names
+
+hospital *admission* to *discharge*
+
+. . .
+
+**Length of stay**
+
+## Some delays have names
+
+*symptom onset* (person A) to *symptom onset* (person B, infected by A)
+
+. . .
+
+**Serial interval**
+
+## Some delays have names
+
+*infection* (person A) to *infection* (person B, infected by A)
+
+. . .
+
+**Generation interval**
+
+## Why do we want to know these?
+
+## Key parameters in mathematical models {.smaller}
+
+![](figures/ferguson2020.png)
+
+[Ferguson et al., 2020](https://doi.org/10.25561/77482)
+
+## Key parameters in mathematical models {.smaller}
+
+![](figures/ward2022.png)
+
+[Ward et al., 2020](https://doi.org/10.25561/77482)
+
+## Key elements of infectious disease epidemiology {.smaller}
+
+![](figures/nishiura2007.png)
+[Nishiura et al., 2007](https://doi.org/10.1186/1742-7622-4-2)
+
+## Why do we want to know these?
+
+- Key elements of infectious disease epidemiology
+- Intricate relationship with nowcasting/forecasting
+
+## Quantifying delays
+
+- Epidemiological delays are *variable*
+- We can capture their variability using probability distributions
+
+## Warning: Two levels of uncertainty {background-color="#000000" transition="fade-in" .smaller}
+
+- Probability distributions characterise uncertainty in the delays
+- Parameters of the probability distribution themselves can be uncertain
+
+:::: {.columns}
+
+::: {.column width="40%"}
+$$
+\alpha \sim \mathrm{Normal}(mean = 5, sd = 0.1) \\
+\beta \sim \mathrm{Normal}(mean = 1, sd = 0.1) \\
+$$
+
+Showing probability density functions of lognormal distributions with shape $\alpha$ and rate $\beta$.
+
+:::
+
+::: {.column width="60%"}
+```{r plot_multiples, fig.width=5, fig.height=3}
+n <- 20
+df <- tibble(
+  id = seq_len(n), 
+  shape = rnorm(n, mean = 5, sd = 0.1), 
+  rate = rlnorm(n, meanlog = 0, sdlog = 0.1)
+)
+
+## plot 99% of PMF
+max_x <- max(qgamma(0.99, shape = df$shape, rate = df$rate))
+
+## calculate density on grid of x values
+x <- seq(0.1, max_x, length.out = 100)
+df <- df |>
+  crossing(x = x)  |> ## add grid to data frame
+  mutate(density = dgamma(x, shape, rate))
+
+ggplot(df, aes(x = x, y = density, group = id)) +
+  geom_line(alpha = 0.3)
+```
+:::
+
+::::
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+- Simulate epidemiological delays
+- Estimate parameters of a delay distribution
+
+[Return to the session](../02-delay-distributions)
