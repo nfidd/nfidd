@@ -163,6 +163,9 @@ ggplot(combined, aes(x = time, y = observed)) +
 ```
 :::
 
+Does a plot of these observations look more like the plots from the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data) than the convolution plotted above?
+
+
 # Estimating a time series of infections
 
 We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
