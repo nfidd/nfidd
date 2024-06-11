@@ -14,7 +14,7 @@ You will do this by working in `R` to simulate delays in the reporting of cases 
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
+In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, the `cmdstanr` package for using stan, and the `posterior` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -24,6 +24,7 @@ library("tidyr")
 library("lubridate")
 library("here")
 library("cmdstanr")
+library("posterior")
 ```
 
 ## Simulating delayed epidemiological data
@@ -136,7 +137,28 @@ To see the estimates, we can use:
 res$summary()
 ```
 
-Reassuringly, these estimates look similar to what we used in the simulations.
+These estimates should look similar to what we used in the simulations. 
+We can plot the resulting probability density functions.
+
+```{r plot_onset_hospitalisation}
+## get shape and rate samples
+df <- res |>
+  as_draws_df() |>
+  filter(.draw %in% sample(.draw, 20)) ## sample 20 iterations randomly
+
+## find x that includes 99% of the cumulative density
+max_x <- max(qlnorm(0.99, meanlog = df$meanlog, sdlog = df$sdlog))
+
+## calculate density on grid of x values
+x <- seq(0, max_x, length.out = 100)
+df <- df |>
+  crossing(x = x) |> ## add grid to data frame
+  mutate(density = dlnorm(x, meanlog, sdlog))
+
+## plot
+ggplot(df, aes(x = x, y = density, group = .draw)) +
+  geom_line(alpha = 0.3)
+```
 :::
 
 ## Going further
