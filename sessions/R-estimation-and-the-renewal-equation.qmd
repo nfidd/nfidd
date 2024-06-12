@@ -7,6 +7,8 @@ order: 5
 set.seed(123)
 ```
 
+[Introduction to the reproduction number](slides/introduction-to-reproduction-number)
+
 # Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.

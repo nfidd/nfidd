@@ -1,0 +1,75 @@
+---
+title: "Introduction to the time-varying reproduction number"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-reproduction-number.html
+    footer: "Introduction to the time-varying reproduction number"
+execute:
+  echo: true
+---
+
+```{r seed, echo = FALSE}
+set.seed(123)
+```
+
+## Convolution session {.smaller}
+
+```{stan, file = here::here("stan", "estimate-infections.stan"), eval = FALSE, output.var = "mod"}
+#| code-line-numbers: "|23"
+```
+
+. . .
+
+Prior for infections at time $t$ is independent from infections at all other time points. Is this reasonable?
+
+## Infections depend on previous infections
+
+Remember the definition of the generation time distribution $g(t)$:
+
+*infection* (person A) to *infection* (person B, infected by A)
+
+Through this, infections depend on previous infections:
+
+$$
+I_t = \mathrm{scaling} \times \sum_{t' < t} I_t' g(t - t')
+$$
+
+What is this scaling?
+
+## Scaling of infections with previous infections
+
+Let's assume we have $I_0$ infections at time 0, and the scaling doesn't change in time.
+
+Who many people will they go on to infect?
+
+. . .
+
+$$
+I = \mathrm{scaling} \times \sum_{t=0}^\infty I_0 g(t) = \mathrm{scaling} * I_0
+$$
+
+The scaling can be interpreted as the reproduction number $R$.
+
+## The renewal equation
+
+If $R_t$ can change over time, it can still be interpreted as the ("instantaneous") repreoduction number:
+
+$$
+I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
+$$
+
+## The time-varying reproduction number
+
+We can estimate $R_t$ from a time series of infections using the renewal equation.
+
+What are some other ways of estatimating it?
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+- Simulate infections using the renewal equation
+- Estimate reproduction numbers using a time series of infections
+- Combine with delay distributions to jointly infer infections and R from a time series of outcomes
+
+[Return to the session](../R-estimation-and-the-renewal-equation)
