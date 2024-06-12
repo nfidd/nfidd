@@ -1,0 +1,55 @@
+---
+title: "Delay distributions at the population level"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-biases-in-epidemiological-delays.html
+    footer: "Delay distributions at the population level"
+---
+
+# From the individual to the population
+
+## Individual delays
+
+If $f(t)$ is our delay distribution then
+
+$$
+p(y_i) = f(y_i - x_i)
+$$
+
+is the probability that *secondary* event of individual $i$ happens at time $y_i$ given its primary event happened at $x_i$.
+
+## Population level counts
+
+The expected number of individuals $S_t$ that have their secondary event at time $t$ can then be calculated as the sum of these probabilities
+
+$$
+S_t = \sum_i f(t - x_i)
+$$
+
+## Population level counts
+
+If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
+
+$$
+S_t = \sum_{t'} P_t' f(t - t')
+$$
+
+This operation is called a **convolution** of $P$ with $f$.
+
+## Why use a convolution, not individual delays?
+
+- we don't always have individual data available
+- it is quicker to do the calculation at the individual level
+
+::: {.fragment .fade-in}
+- **however, we have lost uncertainty by focusing on the expectation**
+:::
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+- Simulate convolutions with infection counts
+- Estimate parameters numbers of infections from number of symptom onsets, using a convolution model
+
+[Return to the session](../biases-in-delay-distributions)
