@@ -29,6 +29,11 @@ library("cmdstanr")
 library("posterior")
 ```
 
+::: {.callout-tip}
+The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
+It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
 ## Simulating delayed epidemiological data
 
 We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
