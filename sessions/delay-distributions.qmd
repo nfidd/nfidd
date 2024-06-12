@@ -36,11 +36,16 @@ For now we will not concern ourselves with the model used to generate the epidem
 This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
 
 We will later deal with modelling the infectious process.
-For now, we will focus on modelling the *observation* process, in particular the fact that we don't normally observe infections directly but their outcomes as symptomatic cases, hospitalisations or other realisations.
-We will further consider the fact that these observations are *incomplete* (e.g. because not every infection leads to hospitalisations and so focusing on hospitalisations may leave infections unobserved) and happen with a delay (e.g. from infection to symptoms).
+For now, we will focus on modelling how infections get reported in data - the *observation* process.
+This has three issues:
+
+1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
+2.  These observations are *incomplete* (e.g. because not every infection leads to hospitalisation, and so focusing on hospitalisations may leave infections unobserved)
+3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
 We will work with a data set that is included in the `nfidd` R package that you installed initially.
-It can be loaded with the `data` command
+The column `infection_time` is a linelist of infections, given as a decimal number of days that have passed since the initial infection of the outbreak.
+It can be loaded with the `data` command.
 
 ```{r}
 data(infection_times)
@@ -53,30 +58,52 @@ ggplot(infection_times, aes(x = infection_time)) +
   ylab("Number of infections")
 ```
 
-::: {.callout-note}
-You can see that the column `infection_time` is given as a decimal number of days that have passed since the initial infection of the outbreak.
-In reality, data from an outbreak will usually be given as dates, and those will usually not represent infection but an observed outcome such as symptom onset or hospital admission.
+::: callout-note
+In reality, data from an outbreak will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
 :::
 
 We would now like to simulate hospitalisations arising from this outbreak.
-We assume that the incubation period (or the number of days from infection to symptom onset) is gamma-distributed with shape 5 and rate 1, i.e. a mean of 5 days.
-We further assume that the onset-to-hospitalisation period (or the number of days from symptom onset to hospital admission) is lognormally distributed with meanlog 1.75 and sdlog 0.5, corresponding to a mean delay of about a week.
-We lastly assume that all infections cause symptoms, and that 30% of symptomatic cases become hospitalised.
+We will make the following assumptions about the process from infection to hospital admission:
 
-::: {.callout-tip}
+-   Infection to symptoms:
+
+    -   We'll assume all infections cause symptoms.
+
+    -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
+
+-   Symptoms to hospital admission:
+
+    -   We'll assume that 30% of symptomatic cases become hospitalised.
+
+    -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
+
+::: callout-tip
 ### Take 10 minutes
-Try to add onset and hospitalisation times (in decimal number of days after the first infection) to the infection data.
 
+Try to add onset and hospitalisation times (in decimal number of days after the first infection) to the infection data.
+:::
+
+::: {.callout-note collapse="true"}
+### Hints
+
+Tip 1: Create two new columns in the data: `onset_time` and `hosp_time`.
+Each column should add the new time (onset or admission) to the previous time (infection or onset), using random values from the correct probability distribution.
+Use the `rgamma` and `rlnorm` functions we used in the last session.
+
+Tip 2: Cases that don't become hospitalised should have missing (`NA`) values for the admission time.
+This is a binary (1/0) outcome, so try drawing from the binomial distribution with the `rbinom` function to create a random distribution of missing values in your column of admission times.
 :::
 
 ::: {.callout-note collapse="true"}
 ### Solution
+
 ```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
 ```
 :::
 
-Now we can plot infections, hospitalisations and onsets. To do so we first convert our data frame to long format.
+Now we can plot infections, hospitalisations and onsets.
+To do so we first convert our data frame to long format.
 
 ```{r plot_distributions, messages = FALSE}
 dfl <- df |>
@@ -95,6 +122,7 @@ ggplot(dfl, aes(x = time)) +
 
 As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+
 For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
 This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
 
@@ -104,31 +132,42 @@ To do this we can use a similar model to the one used in the [session on probabi
 mod <- cmdstan_model(here("stan", "lognormal.stan"))
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### Take 5 minutes
+
 Estimate the onset-to-hospitalisation delay using the simulated data set we created above.
 Do you recover the parameters used for simulation?
 :::
 
 ::: {.callout-note collapse="true"}
+### Hints
+
+Tip 1: First create a new column giving the time from onset to hospitalisation
+Tip 2: As in the last session, we can use our dataset to sample from the model posterior. Here we also need to exclude infections that didn't result in hospitalisation (try using `na.omit()` around the data).
+:::
+
+::: {.callout-note collapse="true"}
 ### Solution
 
-You can _sample_ from the model's posterior distribution by feeding it our simulated data set.
+You can *sample* from the model's posterior distribution by feeding it our simulated data set.
 
 ```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
-df_oth <- df |>
+## Time from onset to hospitalisation
+df_onset_to_hosp <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time)
+## Use the data to sample from the model posterior
 res <- mod$sample(
   data = list(
-    n = nrow(na.omit(df_oth)),
-    y = na.omit(df_oth)$onset_to_hosp
+    n = nrow(na.omit(df_onset_to_hosp)),
+    y = na.omit(df_onset_to_hosp)$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 ```
 
-::: {.callout-caution}
+::: callout-caution
 ### Reduce the amount of messages printed to the screen
+
 As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
 You can safely remove them.
 :::
@@ -139,7 +178,7 @@ To see the estimates, we can use:
 res$summary()
 ```
 
-These estimates should look similar to what we used in the simulations. 
+These estimates should look similar to what we used in the simulations.
 We can plot the resulting probability density functions.
 
 ```{r plot_onset_hospitalisation}
@@ -148,7 +187,7 @@ df <- res |>
   as_draws_df() |>
   filter(.draw %in% sample(.draw, 20)) ## sample 20 iterations randomly
 
-## find x that includes 99% of the cumulative density
+## find the value (x) that includes 99% of the cumulative density
 max_x <- max(qlnorm(0.99, meanlog = df$meanlog, sdlog = df$sdlog))
 
 ## calculate density on grid of x values
@@ -165,9 +204,6 @@ ggplot(df, aes(x = x, y = density, group = .draw)) +
 
 ## Going further
 
-- In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
-With real data, of course, we don't have this information available.
-Try using a different distribution for inference (e.g. normal, or gamma).
-Do you get a good fit?
+-   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
 
 ## Wrap up
