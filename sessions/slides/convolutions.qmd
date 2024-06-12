@@ -33,7 +33,7 @@ $$
 If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
 
 $$
-S_t = \sum_{t'} P_t' f(t - t')
+S_t = \sum_{t'} P_{t'} f(t - t')
 $$
 
 This operation is called a **convolution** of $P$ with $f$.
