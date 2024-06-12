@@ -69,6 +69,7 @@ What are some other ways of estatimating it?
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 - Simulate infections using the renewal equation
-- Estimate infections and R
+- Estimate reproduction numbers using a time series of infections
+- Combine with delay distributions to jointly infer infections and R from a time series of outcomes
 
 [Return to the session](../R-estimation-and-the-renewal-equation)
