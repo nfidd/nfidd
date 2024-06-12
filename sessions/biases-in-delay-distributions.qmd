@@ -7,6 +7,8 @@ order: 3
 set.seed(123)
 ```
 
+[Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
+
 # Objectives
 
 The aim of this session is to introduce some specific issues that arise when we use delay distributions to describe reporting in infectious disease epidemiology.
