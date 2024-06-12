@@ -60,6 +60,10 @@ $$
 I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
 $$
 
+## The renewal equation as convolution
+
+![](figures/r_convolution_sketch.png)
+
 ## The time-varying reproduction number
 
 We can estimate $R_t$ from a time series of infections using the renewal equation.
