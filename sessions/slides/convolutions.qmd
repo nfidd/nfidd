@@ -41,7 +41,7 @@ This operation is called a **convolution** of $P$ with $f$.
 ## Why use a convolution, not individual delays?
 
 - we don't always have individual data available
-- it is quicker to do the calculation at the individiual level
+- it is quicker to do the calculation at the individual level
 
 ::: {.fragment .fade-in}
 - **however, we have lost uncertainty by focusing on the expectation**
