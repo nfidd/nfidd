@@ -8,10 +8,6 @@ format:
     footer: "Delay distributions at the population level"
 ---
 
-```{r seed}
-set.seed(123)
-```
-
 # From the individual to the population
 
 ## Individual delays
