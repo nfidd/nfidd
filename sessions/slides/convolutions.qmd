@@ -59,10 +59,10 @@ We can use convolutions with the delay distribution that applies at the *individ
 
 Having moved to the population level, we can't estimate individual-level event times any more.
 
-Instead, we discretise the distribution:
+Instead, we discretise the distribution. One way of doing so:
 
 $$
-f_t \propto F(t+1) - F(t - 1)
+f_t \propto F(t + 1) - F(t - 1)
 $$
 
 where $F(t) = 0$ for $t \leq 0$.
