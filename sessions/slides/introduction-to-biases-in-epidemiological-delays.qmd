@@ -26,6 +26,7 @@ Why might our estimates of epidemiological delays be biased?
 
 - reporting of events usually as a **date** (not date + precise time)
 - for short delays this can make quite a difference
+- accounting for it incorrectly can introduce more bias than doing nothing
 
 ## Double censoring: example {.smaller}
 
@@ -55,8 +56,8 @@ The *true* incubation period of A could be anywhere between 1 and 3 days (but no
 
 ## Issue #2: right truncation
 
-- reporting of events can be triggered by the **second** event
-- in that case, longer delays might be missing because they **have not occurred yet**
+- reporting of events can be triggered by the **secondary** event
+- in that case, longer delays might be missing because whilst the *primary events* have occurred the *secondary events* **have not occurred yet**
 
 ## Example: right truncation {.smaller}
 
