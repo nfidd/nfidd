@@ -25,5 +25,5 @@ transformed parameters {
 model {
   // priors
   R ~ normal(1, 1) T[0, ];
-  obs ~ poisson(infections);
+  obs ~ poisson(onsets);
 }
