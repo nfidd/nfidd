@@ -1,6 +1,7 @@
 functions {
   #include "functions/convolve_with_delay.stan"
   #include "functions/renewal.stan"
+  #include "functions/condition_onsets_by_report.stan"
 }
 
 data {
@@ -22,11 +23,11 @@ parameters {
 transformed parameters {
   array[n] real infections = renewal(I0, R, gen_time_pmf);
   array[n] real onsets = convolve_with_delay(infections, ip_pmf);
-  array[n] real reports = observe_onsets_with_delay(onsets, report_cdf);
+  array[n] real reported_onsets = condition_onsets_by_report(onsets, report_cdf);
 }
 
 model {
   // priors
   R ~ normal(1, 1) T[0, ];
-  obs ~ poisson(reports);
+  obs ~ poisson(reported_onsets);
 }
