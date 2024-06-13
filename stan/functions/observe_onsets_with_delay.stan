@@ -1,17 +1,18 @@
-array[] real observe_onsets_with_delay(array[] onsets, array[] delay) {
-    // length of time series
-    n = num_elements(onsets);
-    // length of delay
-    p = num_elements(delay);
-
-    array[n] onsets_with_delay;
-    int m = min(1, n-p);
-
-    if (n > p) {
-      onsets_with_delay[1:m] = onsets[1:m];
+array[] int observe_onsets_with_delay(array[] real onsets, vector[] reporting_delay, array[] int p) {
+  int n = num_elements(onsets);
+  array[n] cum_p = cumulative_sum(p);
+  int m = sum(p);
+  array[m] real onsets_by_report;
+  for (i in 1:n) {
+    int obs_index;
+    if (i == 1) {
+      obs_index = 1;
+    } else{
+      obs_index = cum_p[i - 1];
     }
-    
-    onsets_with_delay[m:n] = onsets[m:n] .* delay[max(1, p - n):p];
-    
-    return onsets_with_delay;
+    for (j in 1:p[i]) {
+      onsets_by_report[obs_index + j] = onsets[i] * reporting_delay[j];
+    }
+  }
+  return
 }
