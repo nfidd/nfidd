@@ -1,3 +1,7 @@
+# Load data if not already loaded
+if(class(try(infection_times, silent=TRUE))=="try-error"){
+  load(here("data", "infection_times.rda"))}
+
 ### first, choose random delays
 df <- infection_times |>
   mutate(
