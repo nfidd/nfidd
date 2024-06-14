@@ -163,7 +163,7 @@ Marginal probabilities:
 $$ p(a) = \int_{} p(a, b) db$$
 
 #### Two directions
-1. Evaluate the probability (density)
+1. Calculate the probability (density)
 2. Randomly sample
 
 ### Calculate probability density {.smaller}
