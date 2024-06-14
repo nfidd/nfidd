@@ -170,7 +170,7 @@ $$ p(a) = \int_{} p(a, b) db$$
 - Extension of probabilities to *continuous* variables
 - E.g., the temperature in Stockholm tomorrow
 
-```{r create_poisson_plot}
+```{r create_normal_plot}
 temp_mean <- 23
 temp_sd <- 2
 temp <- seq(15, 31, by = 0.01)
