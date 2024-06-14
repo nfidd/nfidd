@@ -23,7 +23,7 @@ set.seed(123)
 
 ## Bayesian inference in 15 minutes
 
-picture
+![](figures/bayesian_model_without_distributions.png)
 
 ### Interlude: probabilities
 
@@ -233,11 +233,14 @@ Generate one random sample from the normal probability distribution with mean 23
 1. Calculate the probability
 2. **Randomly sample**
 
-### Bayesian inference
+## Bayesian inference in 15 minutes {.smaller}
 
-picture
+![](figures/bayesian_model_without_distributions.png)
 
-### Bayes' rule
+Idea of Bayesian inference: treat $\theta$ as **random variables** (with a probability distribution) and **condition on data**: posterior probability $p(\theta | \mathrm{data})$ as target of inference.
+
+### Bayes' rule {.smaller}
+
 - We treat the parameters of the a $\theta$ as random with *prior probabilities* given by a distribution $p(\theta)$. Confronting the model with data we obtain *posterior probabilities*  $p(\theta | \mathrm{data})$, our target of inference. Applying the rule of conditional probabilities, we can write this as
 
 $$ p(\theta | \textrm{data}) = \frac{p(\textrm{data} | \theta) p(\theta)}{p(\textrm{data})}$$
@@ -250,11 +253,11 @@ $$ p(\theta | \textrm{data}) = \frac{p(\textrm{data} | \theta) p(\theta)}{p(\tex
 
 ### Bayesian inference
 
-picture
+![](figures/bayesian_model.png)
 
 ### MCMC
 
-- Markov-chain Monte Carlo (MCMC) is a method to generate *samples* from the *posterior distribution*
+- Markov-chain Monte Carlo (MCMC) is a method to generate *samples* from the *posterior distribution*, the **target** of inference
 
 - [stan](https://mc-stan.org/) is a statistical software that implements MCMC samplers
 
