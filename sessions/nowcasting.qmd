@@ -20,6 +20,7 @@ We will also use the `tidybayes` package for extracting results of the inference
 library("nfidd")
 library("dplyr")
 library("tidyr")
+library("purrr")
 library("ggplot2")
 library("here")
 library("cmdstanr")
@@ -1123,14 +1124,14 @@ We call the _reporting time_ the time at which a data point (e.g. a time or day 
 Similar to the data discussed in the preceding session, this time is often only available as a date, i.e. censored at the scale of a day.
 
 We can simulate this reporting process.
-Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 2:
+Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
 In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
 df <- infection_times |>
   mutate(
     onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
-    report_time = onset_time + rlnorm(n(), meanlog = 1, sdlog = 2)
+    report_time = onset_time + rlnorm(n(), meanlog = 1, sdlog = 0.5)
   )
 ```
 
@@ -1141,6 +1142,9 @@ We then assume that we're 40 days into the outbreak, i.e. we only consider obser
 cutoff <- 41
 df_co <- df |>
   filter(report_time < cutoff)
+
+df_on <- df |>
+  filter(onset_time < cutoff)
 ```
 
 We can now convert this to a time series of symptom onsets and reports:
@@ -1149,16 +1153,20 @@ We can now convert this to a time series of symptom onsets and reports:
 ## create time series of onsets and reports
 df_co <- df_co |>
   transmute(
+    infecton_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
   )
 
+infection_ts <- df_co |>
+  count(day = infecton_day, name = "infections")
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
 reports_ts <- df_co |>
   count(day = report_day, name = "reports")
 
 all_days <- expand_grid(day = seq(0, cutoff - 1)) |>
+  full_join(infection_ts, by = "day") |>
   full_join(onset_ts, by = "day") |>
   full_join(reports_ts, by = "day") |>
   replace_na(list(onsets = 0, reports = 0))
@@ -1168,13 +1176,13 @@ Plotting these, we get
 
 ```{r ts_plot}
 combined <- all_days |>
-  pivot_longer(c(onsets, reports), names_to = "variable")
+  pivot_longer(c(onsets, reports, infections), names_to = "variable")
 ggplot(combined, aes(x = day, y = value)) +
   facet_grid(~ variable) +
   geom_col()
 ```
 
-Looking at the two plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattenned off and perhaps are going down, whereas reports increasing rapidly.
+Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
 By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
@@ -1214,6 +1222,167 @@ At the same time, when it comes to capacity or intervention planning we may need
 Estimating the "true curve" (i.e. what we expect to see once the data are complete at a future date) of the time series of _epidemiologically relevant events_ from a potentially truncated epidemiological curve and information about the delays is what is usually called "nowcasting".
 
 # Nowcasting with a known delay
+
+## The simplest possible nowcasting model
+
+Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd).
+
+Previous session we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution:
+
+```{r}
+proportion_reported <- plnorm(1:15, 1, 0.5)
+plot(proportion_reported)
+```
+
+This is similar to the `rlnorm` distribution we used to simulate the individual level reporting delay above, but here we use the cumulative distribution function rather than the probability density function. This gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
+
+We can now construct some simulated data and use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
+
+```{r, load-simulated-onset}
+source(here::here("snippets", "simulate-onsets.r"))
+reported_onset_df <- onset_df |>
+  filter(day < 40) |>
+  mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
+         reported_onsets = map_dbl(onsets * proportion_reported, \(x) rpois(1, x)) 
+  )
+tail(reported_onset_df)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
+:::
+
+::: {.callout-note collapse="true"}
+## The solution
+- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
+- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
+:::
+
+We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
+
+```{r stan-simple-nowcast}
+mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Familiarise yourself with the model above. What does it do?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- On line 2 we define a new function `condition_onsets_by_report.stan` which takes the number of onsets and reports and the delay distribution as input and returns the nowcasted number of onsets.
+- On line 17, this function is used to calculate the nowcasted number of onsets and this is then used in the likelihood.
+- On line 21, we define the generative process for the number of onsets. Here we assume that onsets are independent with each drawn from a normal distribution.
+:::
+
+Once again we can generate estimates from this model:
+
+```{r r_fit}
+data <- list(
+  n = nrow(reported_onset_df) - 1,
+  obs = reported_onset_df$reported_onsets[-1],
+  report_max = length(reporting_delay) - 1,
+  report_cdf = reporting_delay
+)
+simple_nowcast_fit <- mod$sample(
+  data = data,
+)
+simple_nowcast_fit
+```
+
+We can now plot onsets alongside those nowcasted by the model:
+
+```{r nowcast-onsets}
+nowcast_onsets <- simple_nowcast_fit |>
+  gather_draws(onsets[day]) |>
+  group_by(day, .variable) |>
+  summarise(
+    median = median(.value),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(day = day + 1)
+```
+
+```{r plot_nowcast}
+reported_onset_df |> 
+  filter(day > 1) |>
+  left_join(nowcast_onsets, by = "day") |>
+  ggplot(aes(x = day, y = onsets)) +
+  geom_col() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
+  geom_line(aes(y = median))
+```
+
+::: {.callout-tip}
+As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
+:::
+
+## Adding in lessons from previous sessions about the importance of generative process
+
+As in the [renewal session](R-estimation-and-the-renewal-equation), we assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
+
+```{r gt_pmf}
+gen_time_pmf
+```
+
+Finally as in the [renewal session](R-estimation-and-the-renewal-equation) we need an estimate of the incubation period distribution.
+
+```{r ip_pmf}
+ip_pmf
+```
+
+
+As always we first load the stan model and spend some time trying to understand it.
+
+```{r stan-nowcast-with-r}
+rt_mod <- cmdstan_model(here("stan", "estimate-r-rw-with-simple-nowcast.stan"))
+rt_mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Familiarise yourself with the model above. It is based on the model we in the [renewal model session](R-estimation-and-the-renewal-equation). 
+What are the differences?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- On line 4 we define a new function `condition_onsets_by_report.stan` which takes the number of onsets and reports and the delay distribution as input and returns the nowcasted number of onsets.
+- On line 26, this function is used to calculate the nowcasted number of onsets and this is used in the likelihood rather than the onsets as in the original model.
+- In the session on convolutions we saw that using a model that did not capture the generative process of the data (i.e. the transmission process and delays from infection to onset) led to biased estimates. Here we try to avoid that by using the renewal model with delays.
+:::
+
+Once again we can generate estimates from this model:
+
+```{r r_fit}
+data <- list(
+  n = nrow(reported_onset_df) - 1,
+  obs = reported_onset_df$onsets[-1],
+  I0 = reported_onset_df$infections[1],
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  report_max = length(reporting_delay) - 1,
+  report_cdf = rep(1,  length(reporting_delay))
+)
+rt_nowcast_fit <- rt_mod$sample(
+  data = data
+)
+rt_nowcast_fit
+```
+
+## Going further: Addressing limitations in the model for the reproduction number
+
+- What might a better model look like?
+- Introduce random walks
+  - What: A random walk is a model where the value at time t is the value at time t-1 plus some random noise.
+  - Why: This is a simple way to model that the reproduction number on day t is likely to be similar to the reproduction number on day t-1.
 
 # Joint estimation of delay distributions and nowcasting
 

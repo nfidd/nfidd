@@ -15,20 +15,24 @@ data {
 }
 
 parameters {
-  array[n+h] real noise;  // random walk noise
+  real<lower = 0> init_R; // initial reproduction number
+  array[n+h-1] real noise;  // random walk noise
   real<lower = 0> rw_sd; // random walk standard deviation
 }
 
 transformed parameters {
-  # R is now a transformed parameter as we construct it as a 
-  # exponentiated non-centred random walk
-  array[n+h] real<lower = 0> R = exp(cumulative_sum(noise * rw_sd));
+  array[n+h] real<lower = 0> R;
+  R[1] = init_R;
+  R[2:(n+h)] = to_array_1d(exp(
+    rep_vector(init_R, n+h-1) + cumulative_sum(noise * rw_sd)
+  ));
   array[n+h] real infections = renewal(I0, R, gen_time_pmf);
-  array[n+h real onsets = convolve_with_delay(infections, ip_pmf);
+  array[n+h] real onsets = convolve_with_delay(infections, ip_pmf);
 }
 
 model {
   // priors
+  init_R ~ lognormal(1, 1);
   noise ~ std_normal();
   rw_sd ~ std_normal();
   obs ~ poisson(onset[1:n]);
