@@ -1,10 +1,13 @@
-## function that takes two inputs to discretise a continuous delay distribution:
+## function that takes two inputs to discretise a continuous delay distribution
+##
+## function arguments:
 ## rgen: a function that generates random delays, e.g. rgamma, rlognormal
 ## n: the number of replicates to simulate
 ## max: the maximum delay
 ## ...: parameters of the delay distribution
 ## the function returns a vector of probabilities, corresponding to discrete
 ## indices 0, 1, 2 of the discretised delay distribution
+##
 ## example: censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 censored_delay_pmf <- function(rgen, n = 1e+6, max, ...) {
   ## first, simulate exact time of first event (given by day), uniformly
