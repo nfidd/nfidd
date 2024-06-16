@@ -43,5 +43,5 @@ model {
 
 generated quantities {
   array[d*n] real complete_onsets_by_report = observe_onsets_with_delay(onsets, reporting_delay, rep_array(d, n));
-  array[n] int pp_obs_by_day = combine_obs_with_predicted_obs(obs, complete_onsets_by_report, p)
+  array[n] int pp_obs_by_day = combine_obs_with_predicted_obs(obs, complete_onsets_by_report, p);
 }
