@@ -28,6 +28,11 @@ library("here")
 library("cmdstanr")
 ```
 
+::: {.callout-tip}
+The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
+It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
 ## Create data set
 
 We will use the same simulated data set as in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data).

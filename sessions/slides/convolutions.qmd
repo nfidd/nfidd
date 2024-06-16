@@ -8,8 +8,6 @@ format:
     footer: "Delay distributions at the population level"
 ---
 
-# From the individual to the population
-
 ## Individual delays
 
 If $f(t)$ is our delay distribution then
@@ -25,18 +23,28 @@ is the probability that *secondary* event of individual $i$ happens at time $y_i
 The expected number of individuals $S_t$ that have their secondary event at time $t$ can then be calculated as the sum of these probabilities
 
 $$
-S_t = \sum_i f(t - x_i)
+S_t = \sum_i f_{t - x_i}
 $$
+
+. . .
+
+**Note:** If $S_t$ is in discrete time steps then $f_t$ needs to be a discrete probability distribution.
 
 ## Population level counts
 
 If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
 
 $$
-S_t = \sum_{t'} P_t' f(t - t')
+S_t = \sum_{t'} P_{t'} f_{t - t'}
 $$
 
-This operation is called a **convolution** of $P$ with $f$.
+This operation is called a (discrete) **convolution** of $P$ with $f$.
+
+We can use convolutions with the delay distribution that applies at the *individual* level to determine *population-level* counts.
+
+## Example: infections to symptom onsets
+
+![](figures/infections_onset_sketch.png)
 
 ## Why use a convolution, not individual delays?
 
@@ -46,6 +54,18 @@ This operation is called a **convolution** of $P$ with $f$.
 ::: {.fragment .fade-in}
 - **however, we have lost uncertainty by focusing on the expectation**
 :::
+
+## What if $f$ is continuous?
+
+Having moved to the population level, we can't estimate individual-level event times any more.
+
+Instead, we discretise the distribution. One way of doing so:
+
+$$
+f_t \propto F(t + 1) - F(t - 1)
+$$
+
+where $F(t) = 0$ for $t \leq 0$.
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 

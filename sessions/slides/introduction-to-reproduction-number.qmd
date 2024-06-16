@@ -42,7 +42,7 @@ What is this scaling?
 
 Let's assume we have $I_0$ infections at time 0, and the scaling doesn't change in time.
 
-Who many people will they go on to infect?
+How many people will they go on to infect?
 
 . . .
 
@@ -59,6 +59,10 @@ If $R_t$ can change over time, it can still be interpreted as the ("instantaneou
 $$
 I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
 $$
+
+## The renewal equation as convolution
+
+![](figures/r_convolution_sketch.png)
 
 ## The time-varying reproduction number
 
