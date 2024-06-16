@@ -10,7 +10,7 @@
 convolve_with_delay <- function(ts, delay_pmf) {
   max_delay <- length(delay_pmf) - 1 ## subtract one because zero-indexed
   convolved <- vapply(seq_along(ts), \(i) {
-    ## get vector of infections (14-day window)
+    ## get vector of infections over the possible window of the delay period
     first_index <- max(1, i - max_delay)
     ts_segment <- ts[seq(first_index, i)]
     ## take reverse of pmf and cut if needed
