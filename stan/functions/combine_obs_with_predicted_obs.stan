@@ -6,7 +6,7 @@ array[] int combine_obs_with_predicted_obs(array[] int obs, array[] real complet
       if (i == 1) {
         obs_index = 1;
       } else {
-        obs_index = cumsum(p[i - 1]);
+        obs_index = cumulative_sum(p[i - 1]);
       }
       int missing_reports = d - p[i];
       if (missing_reports != d) {
