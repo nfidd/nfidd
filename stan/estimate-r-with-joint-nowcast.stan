@@ -26,11 +26,7 @@ parameters {
 }
 
 transformed parameters {
-  array[n] real<lower = 0> R;
-  R[1] = init_R;
-  R[2:n] = to_array_1d(exp(
-    rep_vector(init_R, n-1) + cumulative_sum(noise * rw_sd)
-  ));
+  array[n] real R = geometric_random_walk(init_R, rw_noise, rw_sd);
   array[n] real infections = renewal(I0, R, gen_time_pmf);
   array[n] real onsets = convolve_with_delay(infections, ip_pmf);
   array[m] real onsets_by_report = observe_onsets_with_delay(onsets, reporting_delay, p);
@@ -40,7 +36,7 @@ model {
   // priors
   init_R ~ lognormal(1, 1);
   noise ~ std_normal();
-  rw_sd ~ std_normal();
+  rw_sd ~ normal(0, 0.1);
   reporting_delay ~ dirichlet()
   // likelihood
   obs ~ poisson(onsets_by_report);

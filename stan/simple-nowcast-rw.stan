@@ -22,9 +22,15 @@ transformed parameters {
 }
 
 model {
+<<<<<<< HEAD
   init_onsets ~ lognormal(0, 1) T[0,];
   rw_noise ~ std_normal();
   rw_sd ~ normal(0, 5) T[0,];
   //Likelihood
+=======
+  init_onsets ~ lognormal(1, 1) T[0,];
+  rw_noise ~ std_normal();
+  rw_sd ~ normal(0, 0.1) T[0,];
+>>>>>>> 02e6d13 (refactor to reduce reliance on renewal session)
   obs ~ poisson(reported_onsets);
 }
