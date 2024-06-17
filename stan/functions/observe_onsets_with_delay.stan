@@ -5,7 +5,7 @@ array[] real observe_onsets_with_delay(array[] real onsets, vector reporting_del
   for (i in 1:n) {
     int obs_index;
     if (i == 1) {
-      obs_index = 1;
+      obs_index = 0;
     } else{
       obs_index = P[i - 1];
     }

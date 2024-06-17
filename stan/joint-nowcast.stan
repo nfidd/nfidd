@@ -10,7 +10,6 @@ data {
   array[n] int p;       // number of observations per day
   array[m] int obs;     // observed symptom onsets
   int d;                // number of reporting delays
-
 }
 
 transformed data{
