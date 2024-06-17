@@ -1295,7 +1295,7 @@ simple_nowcast_fit
 
 We can now plot onsets alongside those nowcasted by the model:
 
-```{r nowcast-onsets}
+```{r simple-nowcast-onsets}
 nowcast_onsets <- simple_nowcast_fit |>
   gather_draws(onsets[day]) |>
   group_by(day, .variable) |>
@@ -1342,7 +1342,7 @@ rw_nowcast_fit <- rw_mod$sample(
 rw_nowcast_fit
 ```
 
-```{r nowcast-onsets}
+```{r rw-nowcast-onsets}
 rw_nowcast_onsets <- rw_nowcast_fit |>
   gather_draws(onsets[day]) |>
   group_by(day, .variable) |>
@@ -1355,7 +1355,7 @@ rw_nowcast_onsets <- rw_nowcast_fit |>
   mutate(day = day + 1)
 ```
 
-```{r plot_nowcast}
+```{r rw-plot_nowcast}
 reported_onset_df |> 
   filter(day > 1) |>
   left_join(rw_nowcast_onsets, by = "day") |>
@@ -1422,8 +1422,24 @@ reporting_triangle <- onset_df |>
     reported_onsets = map2_dbl(onsets, reporting_delay, \(x, y) rpois(1, x * y))
   ) |>
   mutate(reported_day = day + d)
+
+noisy_onsets <- reporting_triangle |>
+  group_by(day) |>
+  summarise(noisy_onsets = sum(reported_onsets)) |>
+  ungroup()
 ```
 
+We also need to update our simulated truth data to inclued the Poisson observation error:
+
+```{r update-simulated-onset}
+noisy_onsets_df <- reporting_triangle |>
+  group_by(day) |>
+  summarise(noisy_onsets = sum(reported_onsets)) |>
+  ungroup()
+
+reporting_triangle <- reporting_triangle |>
+  left_join(noisy_onsets, by = "day")
+``` 
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
 
 ```{r filter-reporting-triangle}
@@ -1481,7 +1497,7 @@ Finally we can plot the nowcast alongside the observed data:
 reported_onset_df |> 
   filter(day > 1) |>
   left_join(joint_nowcast_onsets, by = "day") |>
-  ggplot(aes(x = day, y = onsets)) +
+  ggplot(aes(x = day, y = noisy_onsets)) +
   geom_col() +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
   geom_line(aes(y = median))
@@ -1508,6 +1524,106 @@ This section contains a lot of code and is quite complex. It is not necessary to
 
 In the previous sessions we have seen how to estimate the reproduction number and how to nowcast the data. We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly. This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
+As in the [renewal sesssion](R-estimation-and-the-renewal-equation) we need to define the generation time distribution and a incubation period distribution. We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity. These are: 
+
+```{r gt}
+plot(gen_time_pmf)
+```
+
+and
+
+```{r ip}
+plot(ip_pmf)
+```
+
+We now load in the model:
+
+```{r stan-joint-nowcast-rt}
+joint_rt_mod <- cmdstan_model(here("stan", "joint-nowcast-with-r.stan"))
+joint_rt_mod$print(line_numbers = TRUE)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Familiarise yourself with the model above. Can you see how it combines the nowcasting and the estimation of the reproduction number? Can you suggest how you swap in the simple nowcasting model whilst keeping the estimation of the reproduction number?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+Essentially rather that using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data. This would allow us to use the simple nowcasting model whilst still estimating the reproduction number. We would also remove the `generated quantities` block as we are not nowcasting the data and simplify the observations to just the number of onsets.
+:::
+
+Now lets fit the final model for this session! 
+
+```{r joint-nowcast-rt-fit}
+joint_rt_data <- c(joint_data,
+  list(
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
+    h = 0 # this is a small easter egg for the attentive reader
+  )
+)
+joint_rt_fit <- joint_rt_mod$sample(
+  data = joint_rt_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+joint_rt_fit
+```
+
+First we can extract the nowcast and plot the nowcast alongside the observed data:
+```{r joint-nowcas-with-r}
+joint_nowcast_with_r_onsets <- joint_rt_fit |>
+  gather_draws(nowcast[day]) |>
+  group_by(day, .variable) |>
+  summarise(
+    median = median(.value),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(day = day)
+```
+
+```{r plot-joint-nowcast-with-r}
+reported_onset_df |> 
+  filter(day > 1) |>
+  left_join(joint_nowcast_with_r_onsets, by = "day") |>
+  ggplot(aes(x = day, y = noisy_onsets)) +
+  geom_col() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
+  geom_line(aes(y = median))
+```
+
+We can also extract the reproduction number and plot it:
+
+```{r joint-rt}
+joint_rt <- joint_rt_fit |>
+  gather_draws(R[day]) |>
+  group_by(day, .variable) |>
+  summarise(
+    median = median(.value),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(day = day)
+
+ggplot(joint_rt, aes(x = day, y = median)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you think of the nowcast now? Does it look better than the previous one? What about the reproduction number?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model is able to capture the trend in infections and account for delays from infection to onset and onset to report.
+- The key takeway from the reproductio number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation). This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
+:::
 
 # Going further
 
