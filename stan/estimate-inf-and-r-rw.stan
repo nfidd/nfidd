@@ -38,3 +38,12 @@ model {
   rw_sd ~ normal(0, 0.1) T[0,];
   obs ~ poisson(onsets[1:n]);
 }
+
+generated quantities {
+  array[h] real forecast;
+  if (h > 0) {
+    for (i in 1:h) {
+      forecast[i] = poisson_rng(onsets[n + i]);
+    }
+  }
+}
