@@ -4,17 +4,17 @@
 
 # Installation of the `nfiidd` package
 
-To install the packages needed in the course, including the `nfiidd` package that contains data files used, you can use the `remotes` package:
+To install the packages needed in the course, including the `nfiidd` package that contains data files used, you can use the `pak` package:
 
 ```{r install, eval=FALSE}
-install.packages("remotes")
-remotes::install_github("nfiidd/nfiidd", dependencies = TRUE)
+install.packages("pak")
+pak::pak("nfidd/nfidd")
 ```
 
 Then you can check that the installation completed successfully by loading the package into your **R** session:
 
 ```{r load, eval=FALSE}
-library("nfiidd")
+library("nfidd")
 ```
 
 # Installing `cmdstan`
@@ -23,7 +23,7 @@ The course relies on running stan through the `cmdstanr` **R** package, which it
 This requires a separate installation step:
 
 ```{r cmdstan_install, eval = FALSE}
-cmdstanr::install_cmdstan()
+cmdstanr::install_cmdstan(cores = 2)
 ```
 
 If there are any problems with this, you can try (on Windows) to fix them using
