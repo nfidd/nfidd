@@ -19,6 +19,8 @@ set.seed(123)
 
 - We'll want to correctly specify uncertainty
 
+- We'll want to incorporate our domain expertise
+
 - We'll do this using *Bayesian inference*
 
 ## Bayesian inference in 15 minutes
@@ -259,7 +261,7 @@ $$ p(\theta | \textrm{data}) = \frac{p(\textrm{data} | \theta) p(\theta)}{p(\tex
 
 - Markov-chain Monte Carlo (MCMC) is a method to generate *samples* from the *posterior distribution*, the **target** of inference
 
-- [stan](https://mc-stan.org/) is a statistical software that implements MCMC samplers
+- [stan](https://mc-stan.org/) is a probabilistic programming language that helps you to write down probabilistic models and to fit them using MCMC samplers and other methods.
 
 #
 
