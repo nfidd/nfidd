@@ -338,11 +338,6 @@ reporting_triangle <- onset_df |>
     reported_onsets = map2_dbl(onsets, reporting_delay, \(x, y) rpois(1, x * y))
   ) |>
   mutate(reported_day = day + d)
-
-noisy_onsets <- reporting_triangle |>
-  group_by(day) |>
-  summarise(noisy_onsets = sum(reported_onsets)) |>
-  ungroup()
 ```
 
 We also need to update our simulated truth data to inclued the Poisson observation error:
@@ -352,10 +347,8 @@ noisy_onsets_df <- reporting_triangle |>
   group_by(day) |>
   summarise(noisy_onsets = sum(reported_onsets)) |>
   ungroup()
-
-reporting_triangle <- reporting_triangle |>
-  left_join(noisy_onsets, by = "day")
 ``` 
+
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
 
 ```{r filter-reporting-triangle}
@@ -381,7 +374,7 @@ joint_data <- list(
   p = filtered_reporting_triangle |>
    group_by(day) |>
    filter(d == max(d)) |>
-   mutate(d = d+ 1) |>
+   mutate(d = d + 1) |>
    pull(d),       # number of observations per day
   obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
   d = 16               # number of reporting delays
@@ -410,7 +403,7 @@ joint_nowcast_onsets <- joint_nowcast_fit |>
 Finally we can plot the nowcast alongside the observed data:
 
 ```{r plot-joint-nowcast}
-reported_onset_df |> 
+noisy_onsets_df |> 
   filter(day > 1) |>
   left_join(joint_nowcast_onsets, by = "day") |>
   ggplot(aes(x = day, y = noisy_onsets)) +
@@ -488,21 +481,21 @@ joint_rt_fit
 ```
 
 First we can extract the nowcast and plot the nowcast alongside the observed data:
-```{r joint-nowcas-with-r}
+```{r joint-nowcast-with-r}
 joint_nowcast_with_r_onsets <- joint_rt_fit |>
   gather_draws(nowcast[day]) |>
   group_by(day, .variable) |>
   summarise(
-    median = median(.value),
-    lower = quantile(.value, 0.05),
-    upper = quantile(.value, 0.95),
+    median = median(.value, na.rm = TRUE),
+    lower = quantile(.value, 0.05, na.rm = TRUE),
+    upper = quantile(.value, 0.95, na.rm = TRUE),
     .groups = "drop"
   ) |>
   mutate(day = day)
 ```
 
 ```{r plot-joint-nowcast-with-r}
-reported_onset_df |> 
+noisy_onsets_df |> 
   filter(day > 1) |>
   left_join(joint_nowcast_with_r_onsets, by = "day") |>
   ggplot(aes(x = day, y = noisy_onsets)) +
