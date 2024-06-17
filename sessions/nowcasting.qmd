@@ -1372,12 +1372,14 @@ What do you think of the nowcast now? Does it look better than the previous one?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The nowcast should look better than the previous one. The geometric random walk allows the model to capture the multiplicative growth in the data and so better capture the generative process of the data.
+- The nowcast better matches the ultimately observed data. The geometric random walk allows the model to capture the multiplicative growth in the data and so better capture the generative process of the data.
 - This should be particularly true when the data is more truncated (i.e nearer to the date of the nowcast) as the geometric random walk allows the model to extrapolate the growth in the data rather than relying on the prior distribution as the simpler model did.
 - However, the model is still quite simple and so may struggle to capture more complex patterns in the data. In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day. This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
 # Joint estimation of delay distributions and nowcasting
+
+## Motivation
 
 So far we have assumed that the delay distribution is known. In practice, this is often not the case and we need to estimate it from the data. As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above. However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution. We can instead estimate the delay distribution and nowcast the data jointly.
 
@@ -1396,6 +1398,40 @@ $$
 
 where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t-d$. Here $\lambda_{t}$ is the same as the expected number of onsets on day $t$ in the simple nowcasting model above so we again modelled it using a geometric random walk. We model $p_{t,d}$ as a [Dirichlet distribution](https://distribution-explorer.github.io/multivariate_continuous/dirichlet.html) as it is a distribution over probabilities. $p_{t,d}$ is equivalent to the reporting delays we have been using as fixed quantities so far but now estimated within the model.
 
+## Simulating the reporting triangle
+
+Now that we are aiming to jointly estimate the delay distribution we need additional data. We can simulate this data by using the same generative process as above but now also simulating the reporting delays.
+
+We first need to simulate the reporting delays:
+
+```{r simulate-reporting-delays}
+source(here::here("functions", "censored-delay-pmf.r"))
+reporting_delay <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
+```
+
+We can then simulate the reporting triangle:
+
+```{r simulate-reporting-triangle}
+reporting_triangle <- onset_df |>
+  filter(day < 40) |>
+  mutate(
+    reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay)
+  )) |>
+  unnest(reporting_delay) |>
+  mutate(
+    reported_onsets = map2_dbl(onsets, reporting_delay, \(x, y) rpois(1, x * y))
+  ) |>
+  mutate(reported_day = day + d)
+```
+
+As we only partially observe the reporting triangle we need to filer it to only include the data we have observed:
+
+```{r filter-reporting-triangle}
+filtered_reporting_triangle <- reporting_triangle |>
+  filter(reported_day <= max(day))
+```
+
+## Fitting the joint model
 
 As usual we start by loading the model:
 
@@ -1408,7 +1444,7 @@ and then fit it:
 
 ```{r joint-nowcast-fit}
 joint_data <- list(
-  
+
 )
 joint_nowcast_fit <- joint_mod$sample(
   data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
