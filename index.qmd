@@ -6,11 +6,7 @@ about:
   template: jolla
   links:
     - icon: chat-fill
-<<<<<<< HEAD
       text: Dive into the course
-=======
-      text: Sessions
->>>>>>> 7a766fc (remove locking into session order (#96))
       href: nfidd/sessions/introduction-and-course-overview.html
     - icon: github
       text: Visit us on GitHub
