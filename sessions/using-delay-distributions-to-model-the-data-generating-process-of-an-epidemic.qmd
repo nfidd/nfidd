@@ -111,11 +111,7 @@ ggplot(combined, aes(x = time, y = onsets)) +
   geom_bar(stat = "identity")
 ```
 
-<<<<<<< HEAD:sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd
 Do they look similar to the plot of symptom onsets in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data)?
-=======
-Do they look similar to the plot of symptom onsets in the [session on delay distributions](delay-distributions)?
->>>>>>> 7a766fc (remove locking into session order (#96)):sessions/04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd
 
 ## Observation uncertainty
 
@@ -129,11 +125,7 @@ combined <- combined |>
   mutate(observed = rpois(n(), onsets))
 ```
 
-<<<<<<< HEAD:sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd
 Does a plot of these observations look more like the plots from the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data) than the convolution plotted above?
-=======
-Does a plot of these observations look more like the plots from the [session on delay distributions](delay-distributions) than the convolution plotted above?
->>>>>>> 7a766fc (remove locking into session order (#96)):sessions/04-using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd
 
 # Estimating a time series of infections
 
