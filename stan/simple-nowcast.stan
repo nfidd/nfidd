@@ -18,7 +18,7 @@ transformed parameters {
 }
 
 model {
-  onsets ~ normal(5, 10) T[0,];
+  onsets ~ normal(5, 20) T[0,];
   // Likelihood
   obs ~ poisson(reported_onsets);
 }
