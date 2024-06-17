@@ -7,8 +7,9 @@
 ## per day after infection (the first element corresponding to one day after
 ## infection)
 ##
-## example: renewal(5, c(rep(3, 4), rep(0.5, 5)), c(0.1, 0.2, 0.3, 0.2, 0.1))
+## example: renewal(I0 = 5, R = c(rep(3, 4), rep(0.5, 5)), gen_time = c(0.1, 0.2, 0.3, 0.2, 0.1))
 renewal <- function(I0, R, gen_time) {
+  ## set the maximum generation time
   max_gen_time <- length(gen_time)
   ## number of time points
   times <- length(R)

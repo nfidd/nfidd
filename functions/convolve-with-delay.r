@@ -6,7 +6,7 @@
 ## probabilities, corresponding to discrete indices 0, 1, 2 of the discretised
 ## delay distribution
 ##
-## example: convolve_with_delay(c(10, 14, 10, 10), c(0.1, 0.6, 0.3))
+## example: convolve_with_delay(ts = c(10, 14, 10, 10), delay_pmf = c(0.1, 0.6, 0.3))
 convolve_with_delay <- function(ts, delay_pmf) {
   max_delay <- length(delay_pmf) - 1 ## subtract one because zero-indexed
   convolved <- vapply(seq_along(ts), \(i) {

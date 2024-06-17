@@ -8,8 +8,8 @@
 ## the function returns a vector of probabilities, corresponding to discrete
 ## indices 0, 1, 2 of the discretised delay distribution
 ##
-## example: censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
-censored_delay_pmf <- function(rgen, n = 1e+6, max, ...) {
+## example: censored_delay_pmf(rgen = rgamma, max = 14, shape = 5, rate = 1)
+censored_delay_pmf <- function(rgen, max, n = 1e+6, ...) {
   ## first, simulate exact time of first event (given by day), uniformly
   ## between 0 and 1
   first <- runif(n, min = 0, max = 1)
