@@ -1262,7 +1262,7 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
 ```{r stan-simple-nowcast}
-mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
+mod <- cmdstan_model(here("stan", "simple-nowcast.stan"), include_paths = here("stan"))
 mod$print(line_numbers = TRUE)
 ```
 
@@ -1280,15 +1280,15 @@ Familiarise yourself with the model above. What does it do?
 
 Once again we can generate estimates from this model:
 
-```{r r_fit}
+```{r nowcast_fit}
 data <- list(
   n = nrow(reported_onset_df) - 1,
   obs = reported_onset_df$reported_onsets[-1],
-  report_max = length(reporting_delay) - 1,
-  report_cdf = reporting_delay
+  report_max = length(proportion_reported) - 1,
+  report_cdf = proportion_reported 
 )
 simple_nowcast_fit <- mod$sample(
-  data = data,
+  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 simple_nowcast_fit
 ```
@@ -1322,69 +1322,107 @@ reported_onset_df |>
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
-## Adding in lessons from previous sessions about the importance of generative process
+## Adding in a geometric random walk to the nowcasting model
 
-As in the [renewal session](R-estimation-and-the-renewal-equation), we assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
+As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-equation), a geometric random walk is a simple way to model multiplicative growth. Adding this into our simple nowcasting model may help us to better capture the generative process of the data and so produce a better nowcast.
 
-```{r gt_pmf}
-gen_time_pmf
+We first load the model:
+
+```{r stan-nowcast-with-rw}
+rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
+rw_mod$print(line_numbers = TRUE)
 ```
 
-Finally as in the [renewal session](R-estimation-and-the-renewal-equation) we need an estimate of the incubation period distribution.
+and then fit it:
 
-```{r ip_pmf}
-ip_pmf
+```{r rw-nowcast-fit}
+rw_nowcast_fit <- rw_mod$sample(
+  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+rw_nowcast_fit
 ```
 
+```{r nowcast-onsets}
+rw_nowcast_onsets <- rw_nowcast_fit |>
+  gather_draws(onsets[day]) |>
+  group_by(day, .variable) |>
+  summarise(
+    median = median(.value),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(day = day + 1)
+```
 
-As always we first load the stan model and spend some time trying to understand it.
-
-```{r stan-nowcast-with-r}
-rt_mod <- cmdstan_model(here("stan", "estimate-r-rw-with-simple-nowcast.stan"))
-rt_mod$print(line_numbers = TRUE)
+```{r plot_nowcast}
+reported_onset_df |> 
+  filter(day > 1) |>
+  left_join(rw_nowcast_onsets, by = "day") |>
+  ggplot(aes(x = day, y = onsets)) +
+  geom_col() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
+  geom_line(aes(y = median))
 ```
 
 ::: {.callout-tip}
 ## Take 2 minutes
-Familiarise yourself with the model above. It is based on the model we in the [renewal model session](R-estimation-and-the-renewal-equation). 
-What are the differences?
+What do you think of the nowcast now? Does it look better than the previous one?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- On line 4 we define a new function `condition_onsets_by_report.stan` which takes the number of onsets and reports and the delay distribution as input and returns the nowcasted number of onsets.
-- On line 26, this function is used to calculate the nowcasted number of onsets and this is used in the likelihood rather than the onsets as in the original model.
-- In the session on convolutions we saw that using a model that did not capture the generative process of the data (i.e. the transmission process and delays from infection to onset) led to biased estimates. Here we try to avoid that by using the renewal model with delays.
+- The nowcast should look better than the previous one. The geometric random walk allows the model to capture the multiplicative growth in the data and so better capture the generative process of the data.
+- This should be particularly true when the data is more truncated (i.e nearer to the date of the nowcast) as the geometric random walk allows the model to extrapolate the growth in the data rather than relying on the prior distribution as the simpler model did.
+- However, the model is still quite simple and so may struggle to capture more complex patterns in the data. In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day. This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
-Once again we can generate estimates from this model:
+# Joint estimation of delay distributions and nowcasting
 
-```{r r_fit}
-data <- list(
-  n = nrow(reported_onset_df) - 1,
-  obs = reported_onset_df$onsets[-1],
-  I0 = reported_onset_df$infections[1],
-  gen_time_max = length(gen_time_pmf),
-  gen_time_pmf = gen_time_pmf,
-  ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  report_max = length(reporting_delay) - 1,
-  report_cdf = rep(1,  length(reporting_delay))
-)
-rt_nowcast_fit <- rt_mod$sample(
-  data = data
-)
-rt_nowcast_fit
+So far we have assumed that the delay distribution is known. In practice, this is often not the case and we need to estimate it from the data. As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above. However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution. We can instead estimate the delay distribution and nowcast the data jointly.
+
+In order to do this we need to decompose observations into what is known as the reporting triangle. This is a matrix where the rows are the days of onset and the columns are the days of report. The entries are the number of onsets on day $i$ that are reported on day $j$. We can then use this matrix to estimate the delay distribution and nowcast the data. It is referred to as a triangle because the data for the more recent data entries are incomplete which gives the matrix a triangular shape.
+
+We can construct the reporting triangle from onsets ($N_{t}$) as follows:
+$$
+N_{t} = \sum_{d=0}^{D} n_{t,d}
+$$
+
+Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value in order to make the model identifiable and computationally feasible. We can now construct a model to estimate $n_{t,d}$,
+
+$$
+  n_{t,d} \mid \lambda_{t},p_{t,d}  &\sim \text{Poisson} \left(\lambda_{t} \times p_{t,d} \right),\ t=1,...,T.
+$$
+
+where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t-d$. Here $\lambda_{t}$ is the same as the expected number of onsets on day $t$ in the simple nowcasting model above so we again modelled it using a geometric random walk. We model $p_{t,d}$ as a [Dirichlet distribution](https://distribution-explorer.github.io/multivariate_continuous/dirichlet.html) as it is a distribution over probabilities. $p_{t,d}$ is equivalent to the reporting delays we have been using as fixed quantities so far but now estimated within the model.
+
+
+As usual we start by loading the model:
+
+```{r stan-joint-nowcast}
+joint_mod <- cmdstan_model(here("stan", "joint-nowcast.stan"))
+joint_mod$print(line_numbers = TRUE)
 ```
 
-## Going further: Addressing limitations in the model for the reproduction number
+and then fit it:
 
-- What might a better model look like?
-- Introduce random walks
-  - What: A random walk is a model where the value at time t is the value at time t-1 plus some random noise.
-  - Why: This is a simple way to model that the reproduction number on day t is likely to be similar to the reproduction number on day t-1.
+```{r joint-nowcast-fit}
+joint_data <- list(
+  
+)
+joint_nowcast_fit <- joint_mod$sample(
+  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+)
+```
 
-# Joint estimation of delay distributions and nowcasting
+# Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions
+
+::: {.callout-note}
+This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together but don't worry if you don't understand all of it.
+:::
+
+In the previous sessions we have seen how to estimate the reproduction number and how to nowcast the data. We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly. We will also estimate the delay distribution from the data.
+
 
 # Going further
 
