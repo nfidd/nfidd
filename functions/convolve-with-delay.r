@@ -14,7 +14,7 @@ convolve_with_delay <- function(ts, delay) {
     pmf <- rev(delay)[seq_len(i - first_index + 1)]
     ## convolve with delay distribution
     ret <- sum(ts_segment * pmf)
-    return(round(ret))
+    return(ret)
   }, numeric(1))
   return(convolved)
 }
