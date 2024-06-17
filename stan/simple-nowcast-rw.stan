@@ -25,5 +25,6 @@ model {
   init_onsets ~ lognormal(1, 1) T[0,];
   rw_noise ~ std_normal();
   rw_sd ~ normal(0, 0.1) T[0,];
+  //Likelihood
   obs ~ poisson(reported_onsets);
 }
