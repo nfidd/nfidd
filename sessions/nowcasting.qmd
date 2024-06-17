@@ -1288,7 +1288,7 @@ data <- list(
   report_cdf = proportion_reported 
 )
 simple_nowcast_fit <- mod$sample(
-  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
 )
 simple_nowcast_fit
 ```
@@ -1337,7 +1337,7 @@ and then fit it:
 
 ```{r rw-nowcast-fit}
 rw_nowcast_fit <- rw_mod$sample(
-  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
 )
 rw_nowcast_fit
 ```
@@ -1406,7 +1406,7 @@ We first need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
 source(here::here("functions", "censored-delay-pmf.r"))
-reporting_delay <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
+reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
 ```
 
 We can then simulate the reporting triangle:
@@ -1415,7 +1415,7 @@ We can then simulate the reporting triangle:
 reporting_triangle <- onset_df |>
   filter(day < 40) |>
   mutate(
-    reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay)
+    reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
   )) |>
   unnest(reporting_delay) |>
   mutate(
@@ -1424,7 +1424,7 @@ reporting_triangle <- onset_df |>
   mutate(reported_day = day + d)
 ```
 
-As we only partially observe the reporting triangle we need to filer it to only include the data we have observed:
+As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
 
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
