@@ -21,12 +21,12 @@ transformed data {
 
 parameters {
   real init_R;         // initial reproduction number
-  array[m] real rw_noise;       // random walk noise
+  array[m-1] real rw_noise;       // random walk noise
   real<lower = 0> rw_sd; // random walk standard deviation
 }
 
 transformed parameters {
-  array[m] real R = geometric_random_walk(init_R, noise, rw_sd);
+  array[m] real R = geometric_random_walk(init_R, rw_noise, rw_sd);
   array[m] real infections = renewal(I0, R, gen_time_pmf);
   array[m] real onsets = convolve_with_delay(infections, ip_pmf);
 }
