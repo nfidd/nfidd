@@ -1444,12 +1444,61 @@ and then fit it:
 
 ```{r joint-nowcast-fit}
 joint_data <- list(
-
+  n = length(unique(filtered_reporting_triangle$day)),                # number of days
+  m = nrow(filtered_reporting_triangle),               # number of reports
+  p = filtered_reporting_triangle |>
+   group_by(day) |>
+   filter(d == max(d)) |>
+   mutate(d = d+ 1) |>
+   pull(d),       # number of observations per day
+  obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
+  d = 16               # number of reporting delays
 )
 joint_nowcast_fit <- joint_mod$sample(
-  data = data, parallel_chains = 2, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = joint_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
+joint_nowcast_fit
 ```
+
+One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model. This should give us far more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved). We now extract this nowcast:
+
+```{r joint-nowcast}
+joint_nowcast_onsets <- joint_nowcast_fit |>
+  gather_draws(nowcast[day]) |>
+  group_by(day, .variable) |>
+  summarise(
+    median = median(.value),
+    lower = quantile(.value, 0.05),
+    upper = quantile(.value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(day = day)
+```
+
+Finally we can plot the nowcast alongside the observed data:
+
+```{r plot-joint-nowcast}
+reported_onset_df |> 
+  filter(day > 1) |>
+  left_join(joint_nowcast_onsets, by = "day") |>
+  ggplot(aes(x = day, y = onsets)) +
+  geom_col() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
+  geom_line(aes(y = median))
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Look back at the last three nowcasts. How do they compare? What are the advantages and disadvantages of each? Could we improve the nowcasts further?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The simple nowcast struggled to capture the generative process of the data and so produced poor nowcasts. The nowcast with the geometric random walk was better but still struggled to capture the generative process of the data. The joint nowcast was the best of the three as it properly handled the uncertainty and allowed us to actually fit the delay distribution.
+- However, the joint nowcast is still quite simple and so may struggle to capture more complex patterns in the data. In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day. This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
+- In addition, whilst we say it is "quit simple" as should be clear from the code it is actually quite complex and computationally intensive. This is because we are fitting a model to the reporting triangle which is a large data set and so the model is quite slow to fit.
+:::
+
 
 # Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions
 
@@ -1457,7 +1506,7 @@ joint_nowcast_fit <- joint_mod$sample(
 This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together but don't worry if you don't understand all of it.
 :::
 
-In the previous sessions we have seen how to estimate the reproduction number and how to nowcast the data. We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly. We will also estimate the delay distribution from the data.
+In the previous sessions we have seen how to estimate the reproduction number and how to nowcast the data. We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly. This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
 
 # Going further
