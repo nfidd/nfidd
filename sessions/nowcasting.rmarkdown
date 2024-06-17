@@ -7,6 +7,10 @@ order: 6
 set.seed(123)
 ```
 
+
+
+
+
 # Objectives
 
 The aim of this session is to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
@@ -15,6 +19,10 @@ The aim of this session is to introduce the concept of _nowcasting_, and see how
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
+
+
+
+
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -26,6 +34,10 @@ library("here")
 library("cmdstanr")
 library("tidybayes")
 ```
+
+
+
+
 
 ::: {.callout-tip}
 The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
@@ -43,6 +55,10 @@ We can simulate this reporting process.
 Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
 In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](), except now we don't simulate hospitalisations but reports of symptom onsets:
 
+
+
+
+
 ```{r onset_report}
 df <- infection_times |>
   mutate(
@@ -51,7 +67,15 @@ df <- infection_times |>
   )
 ```
 
+
+
+
+
 We then assume that we're 40 days into the outbreak, i.e. we only consider observations with a reporting time less than 41 - other symptom onset may have already happened, but we have not observed them yet.
+
+
+
+
 
 
 ```{r truncate_reports}
@@ -63,7 +87,15 @@ df_on <- df |>
   filter(onset_time < cutoff)
 ```
 
+
+
+
+
 We can now convert this to a time series of symptom onsets and reports:
+
+
+
+
 
 ```{r aggregate}
 ## create time series of onsets and reports
@@ -88,7 +120,15 @@ all_days <- expand_grid(day = seq(0, cutoff - 1)) |>
   replace_na(list(onsets = 0, reports = 0))
 ```
 
+
+
+
+
 Plotting these, we get
+
+
+
+
 
 ```{r ts_plot}
 combined <- all_days |>
@@ -98,11 +138,19 @@ ggplot(combined, aes(x = day, y = value)) +
   geom_col()
 ```
 
+
+
+
+
 Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
 By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
 We can see that if we plot the final data set alongside the cut-off one:
+
+
+
+
 
 ```{r plot_cut_final}
 final <- df |>
@@ -128,6 +176,10 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
   geom_vline(xintercept = cutoff, linetype = "dashed")
 ```
 
+
+
+
+
 As we can see, even though on day 40 it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
 The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
 
@@ -145,14 +197,26 @@ Here we assume that the delay distribution is known and that we can use it to no
 
 Previous session we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution:
 
+
+
+
+
 ```{r}
 proportion_reported <- plnorm(1:15, 1, 0.5)
 plot(proportion_reported)
 ```
 
+
+
+
+
 This is similar to the `rlnorm` distribution we used to simulate the individual level reporting delay above, but here we use the cumulative distribution function rather than the probability density function. This gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 
 We can now construct some simulated data and use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
+
+
+
+
 
 ```{r, load-simulated-onset}
 source(here::here("snippets", "simulate-onsets.r"))
@@ -163,6 +227,10 @@ reported_onset_df <- onset_df |>
   )
 tail(reported_onset_df)
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 2 minutes
@@ -177,10 +245,18 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
+
+
+
+
 ```{r stan-simple-nowcast}
 mod <- cmdstan_model(here("stan", "simple-nowcast.stan"), include_paths = here("stan"))
 mod$print(line_numbers = TRUE)
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 2 minutes
@@ -196,6 +272,10 @@ Familiarise yourself with the model above. What does it do?
 
 Once again we can generate estimates from this model:
 
+
+
+
+
 ```{r nowcast_fit}
 data <- list(
   n = nrow(reported_onset_df) - 1,
@@ -209,7 +289,15 @@ simple_nowcast_fit <- mod$sample(
 simple_nowcast_fit
 ```
 
+
+
+
+
 We can now plot onsets alongside those nowcasted by the model:
+
+
+
+
 
 ```{r simple-nowcast-onsets}
 nowcast_onsets <- simple_nowcast_fit |>
@@ -234,6 +322,10 @@ reported_onset_df |>
   geom_line(aes(y = median))
 ```
 
+
+
+
+
 ::: {.callout-tip}
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
@@ -244,12 +336,24 @@ As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-
 
 We first load the model:
 
+
+
+
+
 ```{r stan-nowcast-with-rw}
 rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
 rw_mod$print(line_numbers = TRUE)
 ```
 
+
+
+
+
 and then fit it:
+
+
+
+
 
 ```{r rw-nowcast-fit}
 rw_nowcast_fit <- rw_mod$sample(
@@ -280,6 +384,10 @@ reported_onset_df |>
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
   geom_line(aes(y = median))
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 2 minutes
@@ -320,12 +428,24 @@ Now that we are aiming to jointly estimate the delay distribution we need additi
 
 We first need to simulate the reporting delays:
 
+
+
+
+
 ```{r simulate-reporting-delays}
 source(here::here("functions", "censored-delay-pmf.r"))
 reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
 ```
 
+
+
+
+
 We can then simulate the reporting triangle:
+
+
+
+
 
 ```{r simulate-reporting-triangle}
 reporting_triangle <- onset_df |>
@@ -345,7 +465,15 @@ noisy_onsets <- reporting_triangle |>
   ungroup()
 ```
 
+
+
+
+
 We also need to update our simulated truth data to inclued the Poisson observation error:
+
+
+
+
 
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
@@ -356,23 +484,47 @@ noisy_onsets_df <- reporting_triangle |>
 reporting_triangle <- reporting_triangle |>
   left_join(noisy_onsets, by = "day")
 ``` 
+
+
+
+
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
+
+
+
+
 
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
 ```
 
+
+
+
+
 ## Fitting the joint model
 
 As usual we start by loading the model:
+
+
+
+
 
 ```{r stan-joint-nowcast}
 joint_mod <- cmdstan_model(here("stan", "joint-nowcast.stan"))
 joint_mod$print(line_numbers = TRUE)
 ```
 
+
+
+
+
 and then fit it:
+
+
+
+
 
 ```{r joint-nowcast-fit}
 joint_data <- list(
@@ -392,7 +544,15 @@ joint_nowcast_fit <- joint_mod$sample(
 joint_nowcast_fit
 ```
 
+
+
+
+
 One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model. This should give us far more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved). We now extract this nowcast:
+
+
+
+
 
 ```{r joint-nowcast}
 joint_nowcast_onsets <- joint_nowcast_fit |>
@@ -407,7 +567,15 @@ joint_nowcast_onsets <- joint_nowcast_fit |>
   mutate(day = day)
 ```
 
+
+
+
+
 Finally we can plot the nowcast alongside the observed data:
+
+
+
+
 
 ```{r plot-joint-nowcast}
 reported_onset_df |> 
@@ -418,6 +586,10 @@ reported_onset_df |>
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
   geom_line(aes(y = median))
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -442,22 +614,46 @@ In the previous sessions we have seen how to estimate the reproduction number an
 
 As in the [renewal sesssion](R-estimation-and-the-renewal-equation) we need to define the generation time distribution and a incubation period distribution. We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity. These are: 
 
+
+
+
+
 ```{r gt}
 plot(gen_time_pmf)
 ```
 
+
+
+
+
 and
+
+
+
+
 
 ```{r ip}
 plot(ip_pmf)
 ```
 
+
+
+
+
 We now load in the model:
+
+
+
+
 
 ```{r stan-joint-nowcast-rt}
 joint_rt_mod <- cmdstan_model(here("stan", "joint-nowcast-with-r.stan"))
 joint_rt_mod$print(line_numbers = TRUE)
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 2 minutes
@@ -470,6 +666,10 @@ Essentially rather that using `observe_onsets_with_delay.stan` we would use `con
 :::
 
 Now lets fit the final model for this session! 
+
+
+
+
 
 ```{r joint-nowcast-rt-fit}
 joint_rt_data <- c(joint_data,
@@ -487,7 +687,15 @@ joint_rt_fit <- joint_rt_mod$sample(
 joint_rt_fit
 ```
 
+
+
+
+
 First we can extract the nowcast and plot the nowcast alongside the observed data:
+
+
+
+
 ```{r joint-nowcas-with-r}
 joint_nowcast_with_r_onsets <- joint_rt_fit |>
   gather_draws(nowcast[day]) |>
@@ -511,7 +719,15 @@ reported_onset_df |>
   geom_line(aes(y = median))
 ```
 
+
+
+
+
 We can also extract the reproduction number and plot it:
+
+
+
+
 
 ```{r joint-rt}
 joint_rt <- joint_rt_fit |>
@@ -529,6 +745,10 @@ ggplot(joint_rt, aes(x = day, y = median)) +
   geom_line() +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5)
 ```
+
+
+
+
 
 ::: {.callout-tip}
 ## Take 2 minutes
@@ -548,3 +768,4 @@ What do you think of the nowcast now? Does it look better than the previous one?
 - This session focussed on the role of the generative process in nowcasting. This is an area of active research but [this paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012021) gives a good overview of the current state of the art.
 
 # Wrap up
+

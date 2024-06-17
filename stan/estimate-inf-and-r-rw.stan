@@ -33,7 +33,7 @@ transformed parameters {
 
 model {
   // priors
-  init_R ~ lognormal(-.1, 0.5); // Approximatly Normal(1, 0.5)
+  init_R ~ normal(-.1, 0.5); // Approximately Normal(1, 0.5)
   rw_noise ~ std_normal();
   rw_sd ~ normal(0, 0.05) T[0,];
   obs ~ poisson(onsets[1:n]);
