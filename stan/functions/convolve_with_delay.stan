@@ -10,5 +10,5 @@ array[] real convolve_with_delay(array[] real ts, array[] real delay) {
     array[i - first_index + 1] real ts_segment = ts[first_index:i];
     ret[i] = dot_product(ts_segment, pmf);
   }
-  return(round(ret));
+  return(ret);
 }
