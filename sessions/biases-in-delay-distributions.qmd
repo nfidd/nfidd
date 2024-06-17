@@ -14,6 +14,8 @@ set.seed(123)
 The aim of this session is to introduce some specific issues that arise when we use delay distributions to describe reporting in infectious disease epidemiology.
 Specifically, we will consider two types of biases that commonly occur in infectious disease data: *censoring* and *truncation*.
 
+We'll introduce some typical properties of infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
+
 # Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
@@ -28,18 +30,17 @@ library("here")
 library("cmdstanr")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
 It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
-## Create data set
+## Load data
 
 We will use the same simulated data set as in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data).
-In this session, we'll introduce some typical properties of infectious disease data sets.
 
 ::: callout-note
-Remember, in our simulated data:
+Remember, in this outbreak we are assuming:
 
 -   the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days
 

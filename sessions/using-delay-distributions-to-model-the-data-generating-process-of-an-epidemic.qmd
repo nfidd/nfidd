@@ -12,6 +12,7 @@ set.seed(123)
 # Objectives
 
 The aim of this session is to introduce how delay distributions can be used to model the population-level data generating process of an epidemic.
+
 In this session, we'll focus on the delay from infection to symptom onset.
 First, we will use a time series of infections to simulate observed symptom onsets.
 Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
