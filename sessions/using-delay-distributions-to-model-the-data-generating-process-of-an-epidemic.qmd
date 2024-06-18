@@ -5,6 +5,7 @@ order: 4
 
 ```{r echo = FALSE}
 set.seed(123)
+ggplot2::theme_set(theme_bw())
 ```
 
 [Delay distributions at the population level](slides/convolutions)
@@ -249,8 +250,7 @@ ggplot(mapping = aes(x = infection_day)) +
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
   ) +
   labs(subtitle = "Infections per day (black line), 
-       and estimated infections (shaded ribbon, 90% credible interval)") +
-  theme_bw()
+       and estimated infections (shaded ribbon, 90% credible interval)")
 ```
 
 ::: callout-tip

@@ -7,6 +7,7 @@ order: 2
 
 ```{r echo = FALSE}
 set.seed(123)
+ggplot2::theme_set(theme_bw())
 ```
 
 ## Objectives
@@ -29,7 +30,7 @@ library("cmdstanr")
 library("posterior")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
 It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
@@ -218,3 +219,4 @@ ggplot(df, aes(x = x, y = density, group = .draw)) +
 -   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
 
 ## Wrap up
+
