@@ -80,7 +80,7 @@ This makes handling the data easier - we don't have to make any conversions befo
 Each of the numbers now represent the number of days that have passed since the start of the outbreak.
 That is, each of the numbers correspond to a day.
 In that sense, the data is more like typical data we get from infectious disease outbreaks, where we would usually have a line list with key events such as symptom onset or death reported by a *date*.
-However, we have now *censored* the data.
+That is, the data is *censored*.
 
 ## Estimating delay distributions accounting for censoring
 
