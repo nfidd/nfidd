@@ -86,19 +86,54 @@ See the lecure notes for more information on forecast evaluation.
 
 ## Visualising your forecast
 
-- First step is to visualise the forecasts
-- We first might want to forecast all the forecasts across all horizons alongside the data.
-- This can be hard to interpret, so we might want also want to visualise each individual forecast horizon versus the data
-- What do you think of these forecasts? Are they any good? How well do they capture changes in trend? Does the uncertainty seem reasonable? Do they seem to under or over predict consistently?
-- As we have a generative model based on the effective reproduction number we can also visualise the forecasts of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts.
+Our first step is to visualise the forecasts as this can give us a good idea of how well the model is doing without having to calculate any metrics.
+A good first visualisation is to show all the forecasts across all horizons alongside the data.
+
+
+As might be clear, this can be hard to interpret, so we might want also want to visualise each individual forecast horizon versus the data.
+
+
+::: .callout-tip
+What do you think of these forecasts?
+Are they any good?
+How well do they capture changes in trend?
+Does the uncertainty seem reasonable?
+Do they seem to under or over predict consistently?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+
+:::
+
+As we have a generative model based on the effective reproduction number we can also visualise the forecasts of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts.
 
 ## Scoring your forecast
 
-- On top of just visualising the forecasts we can also transform them using scoring metrics to summarise performance. Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model. We will look at some of these metrics in the next section.
-- We will use the `scoringutils` package to calculate these metrics. 
-- Our first step is to convert our forecasts into a format that the `scoringutils` package can use. We will use the `as_forecast` to do this.
-- As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
-- Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default quantile metrics (as our forecasts are in quantile format) and score our forecasts. 
+On top of visualising the forecasts we can also transform them using scoring metrics to summarise performance.
+Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
+We will look at some of these metrics in the next section.
+
+We will use the `{scoringutils}` package to calculate these metrics.
+Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
+We will use `as_forecast` to do this:
+
+
+As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
+
+
+::: .callout-tip
+## Take 2 minutes
+What important information is in the `forecast` object?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+:::
+
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default quantile metrics (as our forecasts are in quantile format) and score our forecasts. 
 
 ### Calibration
 
@@ -110,8 +145,13 @@ See the lecure notes for more information on forecast evaluation.
 
 ## Scoring on the log scale
 
-- We can also score on the log scale. This can be useful if we are interested in the relative performance of the model at different scales of the data. For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
-- We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
+We can also score on the log scale.
+This can be useful if we are interested in the relative performance of the model at different scales of the data.
+For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
+We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
+
+
+For more on scoring on the log scale see [Scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
 
 ### Calibration
 
@@ -122,5 +162,9 @@ See the lecure notes for more information on forecast evaluation.
 ### Weighted interval score decomposition
 
 # Going further
+
+- What other ways could we summarise the performance of the forecasts?
+- What other metrics could we use?
+- There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model  and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
 
 # Wrap up
