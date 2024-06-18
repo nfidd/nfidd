@@ -1427,7 +1427,7 @@ We first need to simulate the reporting delays:
 ```{r simulate-reporting-delays}
 source(here::here("functions", "censored-delay-pmf.r"))
 reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
-plot(report_delay_pmf)
+plot(reporting_delay_pmf)
 ```
 
 We can then simulate the reporting triangle:
