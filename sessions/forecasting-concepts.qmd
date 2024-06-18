@@ -31,6 +31,96 @@ The code in this session can be run as an interactive notebook using RStudio, or
 It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
+# Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
+
+See the lecture slides.
+
+# What is forecasting?
+
+Forecasting is the process of making predictions about the future based on past and present data.
+In the context of infectious disease epidemiology, forecasting is the process of predicting the future course of an epidemic based on past and present data.
+Here we focus on forecasting observed data (i.e. onsets) but forecasts can also be made for other quantities of interest such as the number of infections, the reproduction number, or the number of deaths.
+Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number. In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number. The only difference is that we will extend the model into the future and for the purpose of this session we will remove the nowcasting part of the model.
+
+# Extending a model into the future
+
+The model we introduced in the [renewal session]() the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
+Based on what we found in the [nowcasting session]() this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
+We can do this by extending the model into the future by simulating the model forward in time. 
+This is known as a generative model.
+We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
+So what does this look like in code? Lets load in the model again and take a look.
+
+```{r load_model}
+mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+::: .callout-tip
+## Take 5 minutes
+What have we changed in the model to make it a forecasting model?
+Do you see any limitations of this approach?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- What have we changed in the model to make it a forecasting model?
+  - Added the `h` parameter to the data list to specify the number of days to forecast into the future.
+  - Added the `m` parameter as a piece of transformed data that is the total number of days to include in the model (i.e. the number of days in the data plus the number of days to forecast).
+  - `m` is then used in all arrays in the model rather than `n`. This means that `rw_noise` is now `m-1` long, and  `R`, `onsets`, `infections` and `onsets` are `m` long.
+  - As there are only `n` observations in the data in the likelihood we only use the first `n` elements of `onsets`.
+  - To include observation error in the forecast a `generated quantities` block has been added which takes the last `h` onsets as the mean of a Poisson distribution and samples from this distribution to get the forecasted onsets.
+- Do you see any limitations of this approach?
+  - Including `h` in the `parameters` and `model` blocks increases the number of parameters and amount of work we have to do when fitting the model.
+  It would be more computationally efficient to have a separate model for forecasting.
+:::
+
+# Introduction to forecast evaluation
+
+See the lecure notes for more information on forecast evaluation.
+
+# Evaluate your forecast
+
+- Here are some forecasts we made earlier
+- How do we know if they are any good?
+
+## Visualising your forecast
+
+- First step is to visualise the forecasts
+- We first might want to forecast all the forecasts across all horizons alongside the data.
+- This can be hard to interpret, so we might want also want to visualise each individual forecast horizon versus the data
+- What do you think of these forecasts? Are they any good? How well do they capture changes in trend? Does the uncertainty seem reasonable? Do they seem to under or over predict consistently?
+- As we have a generative model based on the effective reproduction number we can also visualise the forecasts of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts.
+
+## Scoring your forecast
+
+- On top of just visualising the forecasts we can also transform them using scoring metrics to summarise performance. Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model. We will look at some of these metrics in the next section.
+- We will use the `scoringutils` package to calculate these metrics. 
+- Our first step is to convert our forecasts into a format that the `scoringutils` package can use. We will use the `as_forecast` to do this.
+- As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
+- Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default quantile metrics (as our forecasts are in quantile format) and score our forecasts. 
+
+### Calibration
+
+### Bias
+
+### Weighted interval score
+
+### Weighted interval score decomposition
+
+## Scoring on the log scale
+
+- We can also score on the log scale. This can be useful if we are interested in the relative performance of the model at different scales of the data. For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
+- We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
+
+### Calibration
+
+### Bias
+
+### Weighted interval score
+
+### Weighted interval score decomposition
+
 # Going further
 
 # Wrap up
