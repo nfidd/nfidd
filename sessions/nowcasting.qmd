@@ -1215,7 +1215,7 @@ As we can see, even though on day 40 it may much seem like the epidemic curve is
 The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
 
 Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
-This can someimtes be a sensible way to visualise the data.
+This can sometimes be a sensible way to visualise the data.
 However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc.
 At the same time, when it comes to capacity or intervention planning we may need to know how many people e.g. become sick on any given day and will thus present to the healthcare system rather than how many will be reported.
 Estimating the "true curve" (i.e. what we expect to see once the data are complete at a future date) of the time series of _epidemiologically relevant events_ from a potentially truncated epidemiological curve and information about the delays is what is usually called "nowcasting".
