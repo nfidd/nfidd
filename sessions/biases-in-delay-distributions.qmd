@@ -176,7 +176,7 @@ However, information on delay distribution is often important during ongoing out
 
 Estimating delays in real time comes with particular challenges, as the timing of the cut-off might introduce a bias.
 If, for example, infections are exponentially increasing then there will be disproportionately more people with recent symptom onset.
-This would artificially decrease the estimate of the mean delay compared to its true value for all infections.
+Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 
 Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40 of our outbreak.
