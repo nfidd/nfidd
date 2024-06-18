@@ -102,7 +102,8 @@ What kind of behaviours do you see depending on the values you put in?
 
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 
-```{r load_ts, file = here::here("snippets", "load-ts.r")}
+```{r load_ts}
+source(here::here("snippets", "load-ts.r"))
 ```
 
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
@@ -158,7 +159,7 @@ data <- list(
   gen_time_pmf = gen_time_pmf
 )
 r_fit <- mod$sample(
-  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
 )
 r_fit
 ```
@@ -234,7 +235,7 @@ data <- list(
   ip_pmf = ip_pmf
 )
 r_inf_fit <- mod$sample(
-  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE, parallel_chains = 4
 )
 r_inf_fit
 ```
@@ -242,17 +243,10 @@ r_inf_fit
 We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). For example one could do 
 
 ```{r r_inf_posterior}
-# Extract posterior draws
+# To avoid repeating overselves we have put the code to extract the posteriors in a function
+source(here::here("functions", "extract-R-posteriors.r"))
 posteriors <- r_inf_fit |>
-  gather_draws(infections[infection_day], R[infection_day]) |>
-  group_by(infection_day, .variable) |>
-  summarise(
-    median = median(.value),
-    lower = quantile(.value, 0.05),
-    upper = quantile(.value, 0.95),
-    .groups = "drop"
-  ) |>
-  mutate(infection_day = infection_day - 1)
+  extract_R_posteriors()
 ```
 
 This time we extracted both the `infections` and `R` variables by infection day.
@@ -281,35 +275,117 @@ ggplot(mapping = aes(x = infection_day)) +
   )
 ```
 
+# Improving the generative model for the reproduction number
+
+In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
+
+In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
+
+$$
+\sigma \sim HalfNormal(0, 0.05) \\
+$$
+$$
+\log(R_0) \sim \mathcal{Lognormal}(-0.1, 0.5)
+$$
+$$
+\log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
+$$
+
+Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
+
+We can now include this in a stan model,
+
+```{r stan_estimate_inf_and_r_rw}
+rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+rw_mod$print(line_numbers = TRUE)
+```
+
+Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number. See [`stan/functions/geometric_random_walk.stan`]() for the geometric random walk function (note that here we use the [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency).
+
+We can now generate estimates from this model:
+
+```{r r_inf_rw_fit}
+data <- list(
+  n = length(onsets) - 1,
+  obs = onsets[-1],
+  I0 = inf_ts$infections[1],
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = 0 # this is a small easter egg for the attentive reader
+)
+r_rw_inf_fit <- rw_mod$sample(
+  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE,
+  parallel_chains = 4, max_treedepth = 12
+)
+r_rw_inf_fit
+```
+
+We can again extract and visualise the posteriors in the same way as earlier.
+
+```{r r_rw_posterior}
+rw_posteriors <- r_rw_inf_fit |>
+  extract_R_posteriors()
+```
+
+```{r plot_infections_rw}
+rw_inf_posterior <- rw_posteriors |>
+  filter(.variable == "infections")
+ggplot(mapping = aes(x = infection_day)) +
+  geom_line(data = inf_ts, mapping = aes(y = infections)) +
+  geom_ribbon(
+    data = rw_inf_posterior,
+    mapping = aes(ymin = lower, ymax = upper), alpha = 0.25, colour = NA
+  )
+```
+
+and reproduction numbers
+
+```{r plot_rt_rw}
+rw_r_inf_posterior <- rw_posteriors |>
+  filter(.variable == "R")
+ggplot(mapping = aes(x = infection_day)) +
+  geom_ribbon(
+    data = rw_r_inf_posterior,
+    mapping = aes(ymin = lower, ymax = upper), alpha = 0.25, colour = NA
+  )
+```
+
 ::: {.callout-tip}
 ## Take 10 minutes
-Compare the results to ones from the model used earlier in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Compare the results across the models used in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
 How do the models vary in the number of parameters that need to be estimated?
 How do the assumptions about the infections time series differ between the models?
-What do you notice about the level uncertainty in the esitmates of infections and R over the course of the time series?
+What do you notice about the level uncertainty in the estimates of infections and R over the course of the time series?
 If you have time you could try re-running the experiment with different R trajectories and delay distributions to see whether results change.
 
 ::: {.callout-note collapse="true"}
 ## Solution
-We can see that using the renewal model as generative model we recover the time series of infections more accurately compared to previously when we assumed independent numbers of infections each day.
+We can see that using the renewal model as generative model we recover the time series of infections more accurately compared to previously when we assumed independent numbers of infections each day and that using a more believable model (i.e the geometric random walk) for the reproduction number improves things even more.
 Of course, this is helped by the fact that the data was generated by a model similar to the renewal model used for inference.
 
-Comparing the R trajectory to the earlier one
+Comparing the R trajectories
 
 ```{r plot_r_posteriors}
 r_inf_posterior <- r_inf_posterior |>
   select(-.variable) |>
-  mutate(data = "onsets")
+  mutate(data = "onsets (normal)")
+rw_r_inf_posterior <- rw_r_inf_posterior |>
+  select(-.variable) |>
+  mutate(data = "onsets (random walk)")
+
 ## earlier posterior (see previous section)
 r_posterior <- r_posterior |>
   mutate(data = "infections")
-both_posteriors <- rbind(
+all_posteriors <- rbind(
   r_inf_posterior,
+  rw_r_inf_posterior,
   r_posterior
 )
 
 ggplot(
-  both_posteriors,
+  all_posteriors,
   mapping = aes(
     x = infection_day, ymin = lower, ymax = upper, fill = data
   )
@@ -318,7 +394,7 @@ ggplot(
   scale_fill_brewer(palette = "Set1")
 ```
 
-We can see that the estimates are similar, but the onsets one is smoother due to the smoothing induced by the convolution of infections to symptom onsets
+We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
 
 :::
 :::
@@ -326,7 +402,7 @@ We can see that the estimates are similar, but the onsets one is smoother due to
 # Going further
 
 - We have used symptom onsets under the assumption that every infected person develops symptoms. 
-Earlier we also created a time series of hospitalisatoin under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
+Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
 How would you change the model in this case?
 What are the implications for inference?
 
