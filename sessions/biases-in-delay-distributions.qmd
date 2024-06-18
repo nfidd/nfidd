@@ -72,7 +72,7 @@ df_dates <- df |>
 head(df_dates)
 ```
 
-::: callout-note
+::: {.callout-note}
 As before we are still not working with dates but numbers.
 This makes handling the data easier - we don't have to make any conversions before using the data in stan.
 :::
