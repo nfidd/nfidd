@@ -1261,7 +1261,7 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
 ```{r stan-simple-nowcast}
-mod <- cmdstan_model(here("stan", "simple-nowcast.stan"), include_paths = here("stan"))
+mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
