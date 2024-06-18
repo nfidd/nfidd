@@ -138,7 +138,7 @@ Do they look similar to the plot of symptom onsets in the [session on delay dist
 
 Usually not all data are perfectly observed.
 Also, the convolution we applied is a *deterministic* operation that brushes over the fact that individual delays are random.
-We should also model the variation these processes introduce.
+We should therefore find another way to model the variation these processes introduce.
 
 Given that we are now dealing with count data a natural choice is the Poisson distribution.
 We can use this to generate uncertainty around our convolved data.
