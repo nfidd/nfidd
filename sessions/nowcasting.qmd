@@ -20,7 +20,6 @@ We will also use the `tidybayes` package for extracting results of the inference
 library("nfidd")
 library("dplyr")
 library("tidyr")
-library("purrr")
 library("ggplot2")
 library("here")
 library("cmdstanr")
