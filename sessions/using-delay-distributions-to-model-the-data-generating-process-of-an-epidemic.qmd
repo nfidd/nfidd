@@ -78,7 +78,7 @@ The gamma distribution is a *continuous* distribution, but now our delay data ar
 Before we can simulate a time series of symptom onsets, we will first need to generate a discrete probability mass function of the incubation period (in days).
 
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
-In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each day equally likely.
+In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset.
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
 
