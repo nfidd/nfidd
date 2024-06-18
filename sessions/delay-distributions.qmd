@@ -47,7 +47,7 @@ This represents a typical situation in the real world, where we may have a model
 
 We will later deal with modelling the infectious process.
 For now, we will focus on modelling how infections get reported in data - the *observation* process.
-This has three issues:
+Using infectious disease data for analysis comes with three common challenges:
 
 1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
 2.  These observations are *incomplete* (e.g. because not every infection leads to hospitalisation, and so focusing on hospitalisations may leave infections unobserved)
