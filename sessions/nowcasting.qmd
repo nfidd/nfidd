@@ -182,7 +182,7 @@ mod$print(line_numbers = TRUE)
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 5 minutes
 Familiarise yourself with the model above. What does it do?
 :::
 
