@@ -291,7 +291,7 @@ $$
 \log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
 $$
 
-Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal with a mean of 0 and a standard deviation of 0.05. This is a weakly informative prior that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but is centred around a value of 1.
+Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
 
 We can now include this in a stan model,
 
