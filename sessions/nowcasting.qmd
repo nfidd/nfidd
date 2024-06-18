@@ -41,7 +41,7 @@ Similar to the data discussed in the preceding session, this time is often only 
 
 We can simulate this reporting process.
 Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
-In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](), except now we don't simulate hospitalisations but reports of symptom onsets:
+In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
 df <- infection_times |>
