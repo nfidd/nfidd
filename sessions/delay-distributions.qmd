@@ -50,7 +50,7 @@ For now, we will focus on modelling how infections get reported in data - the *o
 Using infectious disease data for analysis comes with three common challenges:
 
 1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
-2.  These observations are *incomplete* (e.g. because not every infection leads to hospitalisation, and so focusing on hospitalisations may leave infections unobserved)
+2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved)
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
 We will work with a data set that is included in the `nfidd` R package that you installed initially.
