@@ -22,7 +22,8 @@ set.seed(123)
 
 . . .
 
-Prior for infections at time $t$ is independent from infections at all other time points. Is this reasonable?
+Prior for infections at time $t$ is independent from infections at all other time points.
+Is this reasonable?
 
 ## Infections depend on previous infections
 
@@ -54,7 +55,7 @@ The scaling can be interpreted as the reproduction number $R$.
 
 ## The renewal equation
 
-If $R_t$ can change over time, it can still be interpreted as the ("instantaneous") repreoduction number:
+If $R_t$ can change over time, it can still be interpreted as the ("instantaneous") reproduction number:
 
 $$
 I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
@@ -68,12 +69,12 @@ $$
 
 We can estimate $R_t$ from a time series of infections using the renewal equation.
 
-What are some other ways of estatimating it?
+What are some other ways of estimating it?
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-- Simulate infections using the renewal equation
-- Estimate reproduction numbers using a time series of infections
-- Combine with delay distributions to jointly infer infections and R from a time series of outcomes
+-   Simulate infections using the renewal equation
+-   Estimate reproduction numbers using a time series of infections
+-   Combine with delay distributions to jointly infer infections and R from a time series of outcomes
 
 [Return to the session](../R-estimation-and-the-renewal-equation)

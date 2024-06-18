@@ -88,7 +88,7 @@ On the day of analysis we have not observed some delays yet, and these tended to
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 - Simulate epidemiological delays with biases
-- Estimate parameters of a delay distribution, correcting for biaess
+- Estimate parameters of a delay distribution, correcting for biases
 
 [Return to the session](../biases-in-delay-distributions)
 

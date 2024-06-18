@@ -1,7 +1,10 @@
+## Load data
 data(infection_times)
+## Censor infection times to days
 df <- infection_times |>
   transmute(infection_day = floor(infection_time))
-## infection time series
+
+## Summarise infections as a time series by day
 inf_ts <- df |>
   count(infection_day, name = "infections")
 head(inf_ts)
