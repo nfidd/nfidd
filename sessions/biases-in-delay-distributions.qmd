@@ -87,7 +87,7 @@ However, we have now *censored* the data.
 Let's estimate the time from symptom onset to hospitalisation with the censored data.
 
 A naïve approach to estimating the delay would be to ignore the fact that the data are censored.
-To estimate the delay from onset to hospitalisation, we could just use the integer difference in days.
+To estimate the delay from onset to hospitalisation, we could just use the difference between the censored times, which is an integer (the number of days).
 
 ```{r integer-delays}
 df_dates <- df_dates |>
