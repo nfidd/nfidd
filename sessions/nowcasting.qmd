@@ -149,7 +149,7 @@ proportion_reported <- plnorm(1:15, 1, 0.5)
 plot(proportion_reported)
 ```
 
-This is similar to the `rlnorm` distribution we used to simulate the individual level reporting delay above, but here we use the cumulative distribution function rather than the probability density function. This gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
+The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 
 We can now construct some simulated data and use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
 
