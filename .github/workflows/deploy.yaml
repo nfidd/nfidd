@@ -3,9 +3,8 @@
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
 
 name: deploy
 
@@ -42,6 +41,14 @@ jobs:
 
       - name: Render site
         run: quarto render
+
+      - name: Upload website
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: site
+          retention-days: 5
+          path: _site
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
