@@ -1434,7 +1434,7 @@ We can then simulate the reporting triangle:
 
 ```{r simulate-reporting-triangle}
 reporting_triangle <- onset_df |>
-  filter(day < 40) |>
+  filter(day < cutoff) |>
   mutate(
     reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
   )) |>
