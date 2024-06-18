@@ -1248,7 +1248,7 @@ tail(reported_onset_df)
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 5 minutes
 Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
 :::
 
