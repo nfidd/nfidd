@@ -13,6 +13,10 @@ set.seed(123)
 
 The aim of this session is to introduce how delay distributions can be used to model the population-level data generating process of an epidemic.
 
+In this session, we'll focus on the delay from infection to symptom onset.
+First, we will use a time series of infections to simulate observed symptom onsets.
+Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
+
 # Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -28,20 +32,23 @@ library("cmdstanr")
 library("tidybayes")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
 It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 # Simulating observations from a time series of infections
 
-As before we first simulate the process that generates the data, before using the same model to conduct inference.
+As before we first simulate the process that generates the data we typically observe.
+In this session, we'll focus on the process from infection to symptom onset.
+Then we'll use the same model to conduct inference.
 
 ## Delay distributions and convolutions
 
-In the last session we simulated _individual outcomes_ from a delay distribution, and then re-estimated the corresponding parameters.
+In the last session we simulated *individual outcomes* from a delay distribution, and then re-estimated the corresponding parameters.
 However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
-At the population level, individual level delays translate into _convolutions_.
+At the population level, individual level delays translate into *convolutions*.
+
 If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
 
 $$
@@ -51,58 +58,72 @@ $$
 In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections.
+We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
 
 ```{r aggregate, file = here::here("snippets", "load-ts.r")}
 ```
 
-::: {.callout-note}
+::: callout-note
 The second part of the code snippet above is used to add days without infections with a zero count.
 This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
 :::
 
-Now we can convolve the time series with a delay distribution of outcomes to get a time series of outcomes as suggested above.
-However, if we want to use the gamma distribution with shape 5 and rate 1 as before we face a familiar issue.
-The gamma distribution is a _continuous_ distribution but now we have data in days which are _discrete_ entities.
-In order to simulate a time series of symptom onsets, we first generate a discrete probability mass function of the incubation period (in days) by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+Now we can convolve the time series with a delay distribution to get a time series of outcomes as suggested above.
 
-In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each day equally likely.
-We then apply the incubation period before once again rounding down to get the day of symptom onset.
-We repeat this many times to get the probabilty mass function that allows us to go from infection days to symptom onset days
+#### Discretising a delay distribution
+
+In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
+However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
+The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
+Before we can simulate a time series of symptom onsets, we will first need to generate a discrete probability mass function of the incubation period (in days).
+
+We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
+We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset.
+We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
 
 ```{r discretise_2_day_window, file = here::here("functions", "censored-delay-pmf.r")}
 ```
 
-::: {.callout-note}
+::: callout-note
 ## Take 5 minutes
+
 Try to understand the `censored_delay_pmf()` function above.
-Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum of 2 weeks (14 days) it would be:
+Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum delay of 2 weeks (14 days) it would be:
+
 ```{r discretised_gamma}
 gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 gamma_pmf
+# plot the probabilities corresponding to each discretised days' delay
+plot(gamma_pmf)
 ```
 :::
 
-Next we apply a convolution with the discretised incubation period distribution to the time series of infections to generate a time series of symptom onsets.
+#### Applying a convolution
+
+Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
 
 ```{r convolution, file = here::here("functions", "convolve-with-delay.r")}
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## Take 5 minutes
+
 Try to understand the `convolve_with_delay()` function above.
 Try it with a few different time series and delay distributions.
-How would you create the time series of infections using the discretised gamma distribution created above and saved in `gamma_pmf`?
+How would you create the time series of symptom onsets from infections, using the discretised gamma distribution created above (saved in `gamma_pmf`)?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 ```{r applied_convolution}
 onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 ```
 :::
 
-We can plot these symptom onsets
+We can plot these symptom onsets:
+
 ```{r convolution_plot}
 combined <- inf_ts |>
   rename(time = infection_day) |>
@@ -116,8 +137,10 @@ Do they look similar to the plot of symptom onsets in the [session on delay dist
 ## Observation uncertainty
 
 Usually not all data are perfectly observed.
-Also, the convolution we applied is a _deterministic_ operation that brushes over the fact that individual delays are random.
-Given that we are now dealing with count data a natural choice for modelling the variation these processes introduce is the Poisson distribution.
+Also, the convolution we applied is a *deterministic* operation that brushes over the fact that individual delays are random.
+We should therefore find another way to model the variation these processes introduce.
+
+Given that we are now dealing with count data a natural choice is the Poisson distribution.
 We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
@@ -125,7 +148,20 @@ combined <- combined |>
   mutate(observed = rpois(n(), onsets))
 ```
 
+::: callout-tip
+## Take 5 minutes
+
 Does a plot of these observations look more like the plots from the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data) than the convolution plotted above?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r plot-with-poisson}
+ggplot(combined, aes(x = time, y = observed)) +
+  geom_bar(stat = "identity")
+```
+:::
 
 # Estimating a time series of infections
 
@@ -136,20 +172,23 @@ mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
 mod$print(line_numbers = TRUE)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## Take 10 minutes
+
 Familiarise yourself with the model above.
 Unlike before there is now a `functions` block at the beginning of the model (lines 1-3), where we load a function called `convolve_with_delay()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/convolve_with_delay.stan).
 The functions correspond exactly to our earlier **R** function of the same name.
 Later, this functions is called in the `model` block, to generate the time series of symptom onsets (line 18).
+
 What is the prior assumption on the daily number of infections?
 Which line defines the likelihood, and how does it relate to the section about observation uncertainty above?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
+The model assumes that infections every day are independent from infections on any other day (line 23) and determined only by the number of symptom onsets that they result in (line 18).
 Line 24 defines the likelihood, and it does so using the Poisson observation uncertainty we used above.
-The model assumes (line 23) that infections every day are independent from infections on any other day and determined only by the number of symptom onsets that they result in (line 18).
 :::
 
 We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
@@ -162,29 +201,31 @@ data <- list(
   ip_pmf = gamma_pmf
 )
 inf_fit <- mod$sample(
-  data = data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = data,
+  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
 ```
 
-::: {.callout-caution}
+::: callout-caution
+Note that this code might take a few minutes to run.
+
 The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
 You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
 :::
 
-
-::: {.callout-tip}
-In this model, we have estimated many more parameters than in the previous models: instead of e.g. 2 parameters of a probability distribution, we now have a total of `r nrow(onsets)` time points for which we estimate the number of infections. 
-This is because we don't have a model for the _process_ that generates infections.
+::: callout-tip
+In this model, we have estimated many more parameters than in the previous models: instead of e.g. 2 parameters of a probability distribution, we now have a total of `r nrow(onsets)` time points for which we estimate the number of infections.
+This is because we don't have a model for the *process* that generates infections.
 How would this be different if we e.g. used an SIR model here?
 :::
 
-We can see the first few estimates of the number of infections using
+We can see the first few estimates of the number of infections using:
 
 ```{r inf_summary}
 inf_fit
 ```
 
-Again, we can do a posterior predictive check by plotting the estimates of the time series of infections (with uncertainy) against the data.
+Again, we can do a posterior predictive check by plotting the modelled estimates of the time series of infections (with uncertainy) against our original data.
 Does it look like a good fit?
 
 ```{r inf_ppc}
@@ -200,29 +241,32 @@ inf_posterior <- inf_fit |>
   ) |>
   mutate(infection_day = infection_day - 1)
 
-
 ggplot(mapping = aes(x = infection_day)) +
+  geom_point(data = inf_ts, mapping = aes(y = infections), size = 0.8) +
   geom_line(data = inf_ts, mapping = aes(y = infections)) +
   geom_ribbon(
     data = inf_posterior,
     mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
-  )
+  ) +
+  labs(subtitle = "Infections per day (black line), 
+       and estimated infections (shaded ribbon, 90% credible interval)") +
+  theme_bw()
 ```
 
-::: {.callout-tip}
-This time we used the `gather_draws()` function included in `tidybayes` to extract the inference results. 
+::: callout-tip
+This time we used the `gather_draws()` function included in `tidybayes` to extract the inference results.
 This is particularly useful when dealing with arrays such as `inference` because it allows to extract them with a given index (here: `[day]`).
 :::
 
 # Going further
 
-- Above, we used a Poisson distribution to characterise uncertainty.
-In the Poisson distribution, the variance is the same as the mean.
-Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
-If you re-did the analysis above with the negative binomail distribution, what would be the difference?
+-   Above, we used a Poisson distribution to characterise uncertainty.
+    In the Poisson distribution, the variance is the same as the mean.
+    Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
+    If you re-did the analysis above with the negative binomial distribution, what would be the difference?
 
-- We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
-How would this look in stan code?
-Would you expect it to yield a different result?
+-   We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
+    How would this look in stan code?
+    Would you expect it to yield a different result?
 
 # Wrap up
