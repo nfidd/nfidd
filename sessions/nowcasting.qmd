@@ -1242,7 +1242,7 @@ source(here::here("snippets", "simulate-onsets.r"))
 reported_onset_df <- onset_df |>
   filter(day < cutoff) |>
   mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
-         reported_onsets = map_dbl(onsets * proportion_reported, \(x) rpois(1, x)) 
+         reported_onsets = rpois(n(), onsets * proportion_reported)
   )
 tail(reported_onset_df)
 ```
@@ -1440,7 +1440,7 @@ reporting_triangle <- onset_df |>
   )) |>
   unnest(reporting_delay) |>
   mutate(
-    reported_onsets = map2_dbl(onsets, reporting_delay, \(x, y) rpois(1, x * y))
+    reported_onsets = rpois(n(), onsets * reporting_delay)
   ) |>
   mutate(reported_day = day + d)
 ```
