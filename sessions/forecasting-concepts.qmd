@@ -341,7 +341,7 @@ sc_forecasts
 As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
 
 
-::: .callout-tip
+::: {.callout-tip}
 ## Take 2 minutes
 What important information is in the `forecast` object?
 :::
@@ -355,16 +355,18 @@ What important information is in the `forecast` object?
 Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
 
 ```{r score-forecasts}
-sc_forecasts <- sc_forecasts |>
+sc_scores <- sc_forecasts |>
   score()
 
-sc_forecasts
+sc_scores
 ```
 
 ### At a glance
 
+Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+
 ```{r}
-sc_forecasts |>
+sc_scores |>
   summarise_scores(by = "model")
 ```
 
@@ -389,8 +391,15 @@ The CRPS can be thought about as the combination of two key aspects of forecasti
 
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
+::: {.callout-tip}
+## Key things to note about the CRPS
+  - Small values are better
+  - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+:::
+
+
 ::: {.callout-tip, collapse="true"}
-#### Mathematical Definition
+#### Mathematical Definition (optional)
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
 
 $$
@@ -422,17 +431,23 @@ This equation can be broke down into the two components:
 - **Second Term ($$ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $$)**: This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
 :::
 
-::: {.callout-tip}
-### Key things to note about the CRPS
-
-- Small values are better
-- As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
-:::
-
 Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
 
+```{r}
+sc_scores |>
+  summarise_scores(by = "horizon") |>
+  ggplot(aes(x = horizon, y = crps)) +
+  geom_point()
+```
 
 and across different forecast horizons.
+
+```{r}
+sc_scores |>
+  summarise_scores(by = "target_day") |>
+  ggplot(aes(x = target_day, y = crps)) +
+  geom_point()
+```
 
 ::: {.callout-tip}
 ## Take 5 minutes 
@@ -443,10 +458,10 @@ What does this tell you about the model?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The CRPS scores increase for forecast dates where incidence is higher. 
-- The CRPS scores increase with forecast horizon.
-- As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
-- However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
+  - The CRPS scores increase for forecast dates where incidence is higher. 
+  - The CRPS scores increase with forecast horizon.
+  - As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
+  - However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
 :::
 
 ### PIT histograms
@@ -462,39 +477,82 @@ There are many ways to assess calibration and bias but one common way is to use 
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
-First for forecast dates
+::: {.callout-tip, collapse="true"}
+## Mathematical Definition (optional)
 
-and then for forecast horizons
+### Continuous Case
 
+For a continuous random variable $$ X $$ with cumulative distribution function (CDF) $$ F_X $$, the PIT is defined as:
 
-### Bias
+$$ Y = F_X(X) $$
 
-We can also look at the bias of the model. Bias is a measure of how likely the model is to over or under predict the observed values.
+where $$ Y $$ is uniformly distributed on $$[0, 1]$$. 
 
-::: {.callout-tip}
-#### Mathematical Definition
-The bias is defined as:
+#### Integer Case
 
-$$
-\text{Bias} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)
-$$
+When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated. To address this, a randomized version of the PIT is used. For an integer-valued random variable $$ X $$ with CDF $$ F_X $$, the randomized PIT is defined as:
+
+$$ U = F_X(k) + v \cdot (F_X(k) - F_X(k-1)) $$
 
 where:
-- $$ N $$ is the number of observations.
-- $$ y_i $$ is the observed value.
-- $$ \hat{y}_i $$ is the forecasted value.
+- $$ k $$ is the observed integer value.
+- $$ F_X(k) $$ is the CDF evaluated at $$ k $$.
+- $$ v $$ is a random variable uniformly distributed on $$[0, 1]$$.
 
+This transformation ensures that $$ U $$ is uniformly distributed on $$[0, 1]$$ if the forecasted distribution $$ F_X $$ is correctly specified.
+:::
+
+Let's first look at the overall PIT histogram.
+
+```{r pit-histogram}
+ sc_forecasts |>
+  get_pit(by = "model") |>
+  plot_pit()
+```
+
+As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
+
+```{r pit-histogram-horizon}
+ sc_forecasts |>
+  filter(horizon %in% c(1, 3, 7, 14)) |>
+  get_pit(by = "horizon") |>
+  plot_pit() +
+  facet_wrap(~horizon)
+```
+
+and then for different forecast dates.
+
+```{r pit-histogram-date}
+ sc_forecasts |>
+  get_pit(by = "target_day") |>
+  plot_pit() +
+  facet_wrap(~target_day)
+ ``` 
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+Do they look well calibrated?
+Do they look biased?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
 
 ## Scoring on the log scale
 
 We can also score on the log scale.
 This can be useful if we are interested in the relative performance of the model at different scales of the data.
 For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
+In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates.
+Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
+
 We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts() |>
+  transform_forecasts(append = FALSE) |>
 
 log_scores <- log_sc_forecasts |>
   score()
@@ -509,11 +567,80 @@ log_scores |>
   summarise_scores(by = "model")
 ```
 
-### Calibration
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you? How do you think they will differ from the scores on the natural scale?
+:::
 
-### Bias
+### CRPS
 
-### Continuous ranked probability score
+```{r}
+log_sc_scores |>
+  summarise_scores(by = "horizon") |>
+  ggplot(aes(x = horizon, y = crps)) +
+  geom_point()
+```
+
+and across different forecast horizons.
+
+```{r}
+log_sc_scores |>
+  summarise_scores(by = "target_day") |>
+  ggplot(aes(x = target_day, y = crps)) +
+  geom_point()
+```
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS scores change based on forecast date?
+How do the CRPS scores change with forecast horizon?
+What does this tell you about the model?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
+
+### PIT histograms
+
+Let's first look at the overall PIT histogram.
+
+```{r pit-histogram}
+ log_sc_forecasts |>
+  get_pit(by = "model") |>
+  plot_pit()
+```
+
+As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
+
+```{r pit-histogram-horizon}
+ log_sc_forecasts |>
+  filter(horizon %in% c(1, 3, 7, 14)) |>
+  get_pit(by = "horizon") |>
+  plot_pit() +
+  facet_wrap(~horizon)
+```
+
+and then for different forecast dates.
+
+```{r pit-histogram-date}
+ log_sc_forecasts |>
+  get_pit(by = "target_day") |>
+  plot_pit() +
+  facet_wrap(~target_day)
+ ``` 
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+Do they look well calibrated?
+Do they look biased?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+:::
 
 # Going further
 
