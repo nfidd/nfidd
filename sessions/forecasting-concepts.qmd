@@ -224,9 +224,7 @@ Can you use this plot to explain why the forecast of onsets looks the way it doe
 - The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
 :::
 
-We managed to learn quite a lot about our models limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
-
-
+We managed to learn quite a lot about our models forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
 
 # Introduction to forecast evaluation
 
