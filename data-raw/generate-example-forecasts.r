@@ -50,7 +50,9 @@ forecast_target_day <- function(
     slice_head(n = 1000) |>
     mutate(horizon = day) |>
     mutate(day = day + target_day) |>
-    mutate(target_day = target_day)
+    mutate(target_day = target_day) |>
+    mutate(.draw = 1:n()) |>
+    select(-.chain, -.iteration)
   return(forecast)
 }
 
