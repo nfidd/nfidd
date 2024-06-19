@@ -343,7 +343,8 @@ and reproduction numbers
 
 ```{r plot_rt_rw}
 rw_r_inf_posterior <- rw_posteriors |>
-  filter(.variable == "R")
+  filter(.variable == "R") |>
+  mutate(.value = exp(.value)) ## transform back to natural scale
 ggplot(mapping = aes(x = infection_day)) +
   geom_ribbon(
     data = rw_r_inf_posterior,
