@@ -75,6 +75,159 @@ Do you see any limitations of this approach?
   It would be more computationally efficient to have a separate model for forecasting.
 :::
 
+Before we can forecast we need some data to fit the model to and the compare the forecasts to. We will use the same simulated data as in the renewal and nowcasting sessions. We also need to pick a point to forecast from. We will use day 41 in line with the nowcasting session.
+
+```{r, load-simulated-onset}
+source(here::here("snippets", "simulate-onsets.r"))
+onset_df
+
+cutoff <- 41
+
+filtered_onset_df <- onset_df |>
+  filter(day <= cutoff)
+```
+
+## Fitting the model and forecast for 28 days into the future
+
+We can now fit the model to the data and then forecast into the future. This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
+
+```{r fit_model}
+horizon <- 28
+
+data <- list(
+  n =nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon # Here we set the number of days to forecast into the future
+)
+rw_forecast <- mod$sample(
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+rw_forecast
+```
+
+## Visualising the forecast
+
+We can now visualise the forecast. We will first extract the forecast and then plot the forecasted onsets alongside the observed onsets.
+
+```{r extract-forecast}
+forecast <- rw_forecast |>
+  gather_draws(forecast[day]) |>
+  mutate(day = day + cutoff)
+
+target_onsets <- onset_df |>
+  filter(day > cutoff) |>
+  filter(day <= cutoff + horizon)
+```
+
+```{r plot_forecast}
+forecast |>
+  filter(.draw <= 100) |>
+  ggplot(aes(x = day)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of this forecast?
+Did the model do a good job?
+Is there another way you could visualise the forecast that might be more informative?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- On the face of it the forecast looks very poor with some very high predictions compared to the data.
+- Based on this visualisation it is hard to tell if the model is doing a good job but it seems like it is not.
+- As outbreaks are generally considered to be exponential processes it might be more informative to plot the forecast on the log scale.
+
+```{r plot_forecast_log}
+forecast |>
+  filter(.draw <= 100) |>
+  ggplot(aes(x = day)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  scale_y_continuous(trans = "log")
+  ```
+
+This should be a lot more informative. We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in onsets. However, we can now  see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast. This is a common pattern in forecasting where the model is good at capturing the short term dynamics but struggles with the longer term dynamics.
+:::
+
+As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts. To get an even better picture here we will fit another model to a longer time series and then compare the forecast and estimated reproduction numbers.
+
+```{r fit_model_long}
+long_onset_df <- onset_df |>
+  filter(day <= cutoff + horizon)
+
+long_data <- list(
+  n =nrow(long_onset_df),
+  I0 = 1,
+  obs = long_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = 0
+)
+
+rw_long <- mod$sample(
+  data = long_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+```
+
+We first need to extract the forecast and estimated reproduction numbers.
+
+```{r extract-Rt}
+forecast_r <- rw_forecast |>
+  gather_draws(R[day]) |>
+  mutate(type = "forecast")
+
+long_r <- rw_long |>
+  gather_draws(R[day]) |>
+  mutate(type = "estimate")
+```
+
+We can now plot the forecast and estimated reproduction numbers.
+
+```{r plot-Rt}
+forecast_r |>
+  bind_rows(long_r) |>
+  filter(.draw <= 50) |>
+  ggplot(aes(x = day)) +
+  geom_vline(xintercept = cutoff, linetype = "dashed") +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_line(aes(y = .value, group = .draw, color = type), alpha = 0.1)
+  ```
+
+::: {.callout-tip}
+The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
+:::
+
+::: {.callout-note}
+The vertical dashed line represents the point at which we started forecasting.
+:::
+
+::: {.callout-tip}
+## Take 5 minutes
+Can you use this plot to explain why the forecast of onsets looks the way it does?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- When both models are being fit to data (i.e before the vertical dashed line) the forecast and estimated reproduction numbers are very similar.
+- For short-term forecasts R estimates continue to be fairly similar.
+- However, the estimates have a consistent downwards trend which is not captured by the forecast (which looks like it has a constant mean value with increasing uncertainty).
+- This explains the divergence between the forecast and the data as the horizon increases.
+- It looks like only a relatively small number of forecast R trajectories grow to be very large but these are enough to visually dominate the forecast of onsets on the natural scale.
+- The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
+:::
+
+We managed to learn quite a lot about our models limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
+
+
+
 # Introduction to forecast evaluation
 
 See the lecure notes for more information on forecast evaluation.
