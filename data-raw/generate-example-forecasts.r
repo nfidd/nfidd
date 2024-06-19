@@ -41,11 +41,13 @@ forecast_target_day <- function(
 
   fit <- mod$sample(
     data = data, chains = 4, parallel_chains = 4, adapt_delta = 0.95,
-    max_treedepth = 15, iter_warmup = 1000, iter_sampling = 250,
+    max_treedepth = 15, iter_warmup = 1000, iter_sampling = 500
   )
 
   forecast <- fit |>
     gather_draws(forecast[day]) |>
+    filter(!is.na(.value)) |>
+    slice_head(n = 1000) |>
     mutate(horizon = day) |>
     mutate(day = day + target_day) |>
     mutate(target_day = target_day)
@@ -67,6 +69,7 @@ target_days <- target_days[seq(1, length(target_days), 7)]
 rw_forecasts <- target_days |>
   map_dfr(
     \(x) forecast_target_day(rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf)
-  )
+  ) |>
+  mutate(model = "Random walk")
 
 usethis::use_data(rw_forecasts, overwrite = TRUE)

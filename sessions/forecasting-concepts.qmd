@@ -13,7 +13,7 @@ The aim of this session is to introduce the concept of forecasting, using a simp
 
 # Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -24,6 +24,7 @@ library("ggplot2")
 library("here")
 library("cmdstanr")
 library("tidybayes")
+library("scoringutils")
 ```
 
 ::: {.callout-tip}
@@ -42,10 +43,17 @@ In the context of infectious disease epidemiology, forecasting is the process of
 Here we focus on forecasting observed data (i.e. onsets) but forecasts can also be made for other quantities of interest such as the number of infections, the reproduction number, or the number of deaths.
 Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number. In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number. The only difference is that we will extend the model into the future and for the purpose of this session we will remove the nowcasting part of the model.
 
+::: {.callout-tip}
+## What do we look for in a good forecast? Some food for thought:
+1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
+2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over or under predict.
+3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
+:::
+
 # Extending a model into the future
 
-The model we introduced in the [renewal session]() the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
-Based on what we found in the [nowcasting session]() this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
+The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
+Based on what we found in the [nowcasting session](nowcasting.qmd) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
 We can do this by extending the model into the future by simulating the model forward in time. 
 This is known as a generative model.
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
@@ -257,7 +265,7 @@ example_onset_df
 
 ## Visualising your forecast
 
-As fore a single forecast, our first step is to visualise the forecasts as this can give us a good idea of how well the model is doing without having to calculate any metrics.
+As for a single forecast, our first step is to visualise the forecasts as this can give us a good idea of how well the model is doing without having to calculate any metrics.
 
 ```{r plot-all-forecasts}
 rw_forecasts |>
@@ -282,11 +290,13 @@ rw_forecasts |>
 ```
 
 ::: {.callout-tip}
+## Take 5 minutes
 What do you think of these forecasts?
 Are they any good?
 How well do they capture changes in trend?
 Does the uncertainty seem reasonable?
 Do they seem to under or over predict consistently?
+Would you visualise the forecast in a different way?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -309,10 +319,24 @@ On top of visualising the forecasts we can also transform them using scoring met
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 We will look at some of these metrics in the next section.
 
-We will use the `{scoringutils}` package to calculate these metrics.
+We will use the [`{scoringutils}`](https://epiforecasts.io/scoringutils/dev/) package to calculate these metrics.
 Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
 We will use `as_forecast` to do this:
 
+```{r convert-forecasts}
+sc_forecasts <- rw_forecasts |>
+  left_join(example_onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast(
+    forecast_unit = c("target_day", "horizon", "model"),
+    forecast_type = "sample",
+    observed = "onsets",
+    predicted = ".value",
+    model = "model",
+    sample_id = ".draw"
+  )
+sc_forecasts
+```
 
 As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
 
@@ -324,18 +348,142 @@ What important information is in the `forecast` object?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-
+ - The forecast unit which is the target day, horizon, and model
+ - The type of forecast which is a sample forecast
 :::
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts. 
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
 
-### Calibration
+```{r score-forecasts}
+sc_forecasts <- sc_forecasts |>
+  score()
+
+sc_forecasts
+```
+
+### At a glance
+
+```{r}
+sc_forecasts |>
+  summarise_scores(by = "model")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you?
+:::
+
+### Continuous ranked probability score
+
+#### What is the Continuous Ranked Probability Score (CRPS)?
+
+The Continuous Ranked Probability Score (CRPS) is a proper scoring rule used to evaluate the accuracy of probabilistic forecasts. It is a generalization of the Mean Absolute Error (MAE) to probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours).
+
+::: {.callout-tip}
+Proper scoring rules are scoring rules that are optimized when the forecasted distribution is equal to the true distribution. In effect, they incentivize forecasters to provide accurate and well-calibrated probabilistic forecasts.
+:::
+
+The CRPS can be thought about as the combination of two key aspects of forecasting:
+1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
+2. The confidence of the forecast in terms of the spread of the predicted values.
+
+By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
+
+::: {.callout-tip, collapse="true"}
+#### Mathematical Definition
+For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
+
+$$
+CRPS(D, y) = \mathbb{E}_{X \sim D}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]
+$$
+
+where $$ X $$ and $$ X' $$ are independent random variables sampled from the distribution $$ D $$. To calculate this we simpley replace $$ X $$ and $$ X' $ by samples from our posterior distribution and sum over all possible combinations.
+
+This equation can be broke down into the two components:
+
+##### Breakdown of the Components
+
+1. **Expected Absolute Error Between Forecast and Observation**:
+   $$
+   \mathbb{E}_{X \sim D}[|X - y|]
+   $$
+   This term represents the average absolute difference between the values predicted by the forecasted distribution $$ D $$ and the actual observed value $$ y $$. It measures how far, on average, the forecasted values are from the observed value. A smaller value indicates that the forecasted distribution is closer to the observed value.
+
+2. **Expected Absolute Error Between Two Forecasted Values**:
+   $$
+   \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]
+   $$
+   This term represents the average absolute difference between two independent samples from the forecasted distribution $$ D $$. It measures the internal variability or spread of the forecasted distribution. A larger value indicates a wider spread of the forecasted values.
+
+##### Interpretation
+
+- **First Term ($$ \mathbb{E}_{X \sim D}[|X - y|] $$)**: This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
+
+- **Second Term ($$ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $$)**: This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
+:::
+
+::: {.callout-tip}
+### Key things to note about the CRPS
+
+- Small values are better
+- As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+:::
+
+Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
+
+
+and across different forecast horizons.
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS scores change based on forecast date?
+How do the CRPS scores change with forecast horizon?
+What does this tell you about the model?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The CRPS scores increase for forecast dates where incidence is higher. 
+- The CRPS scores increase with forecast horizon.
+- As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
+- However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
+:::
+
+### PIT histograms
+
+As well as the CRPS we can also look at the calibration and bias of the model. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
+
+There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
+
+::: {.callout-tip}
+## Interpreting the PIT histogram
+- Ideally PIT histograms should be uniform. 
+- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
+- If it is skewed then the model is biased towards the direction of the skew.
+:::
+
+First for forecast dates
+
+and then for forecast horizons
+
 
 ### Bias
 
-### Weighted interval score
+We can also look at the bias of the model. Bias is a measure of how likely the model is to over or under predict the observed values.
 
-### Weighted interval score decomposition
+::: {.callout-tip}
+#### Mathematical Definition
+The bias is defined as:
+
+$$
+\text{Bias} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)
+$$
+
+where:
+- $$ N $$ is the number of observations.
+- $$ y_i $$ is the observed value.
+- $$ \hat{y}_i $$ is the forecasted value.
+
 
 ## Scoring on the log scale
 
@@ -344,21 +492,35 @@ This can be useful if we are interested in the relative performance of the model
 For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
 We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
 
+```{r log-convert-forecasts}
+log_sc_forecasts <- sc_forecasts |>
+  transform_forecasts() |>
+
+log_scores <- log_sc_forecasts |>
+  score()
+```
 
 For more on scoring on the log scale see [Scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
+
+### At a glance
+
+```{r}
+log_scores |>
+  summarise_scores(by = "model")
+```
 
 ### Calibration
 
 ### Bias
 
-### Weighted interval score
-
-### Weighted interval score decomposition
+### Continuous ranked probability score
 
 # Going further
 
 - What other ways could we summarise the performance of the forecasts?
 - What other metrics could we use?
 - There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model  and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
+- There are many other metrics that can be used to evaluate forecasts. The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-details.html) for the `{scoringutils}` package has a good overview of these metrics and how to use them.
+- One useful way to think about evaluating forecasts is to consider exploring the scores as a data analysis in its own right. For example, you could look at how the scores change over time, how they change with different forecast horizons, or how they change with different models. This can be a useful way to understand the strengths and weaknesses of your model. Explore some of these aspects using the scores from this session.
 
 # Wrap up
