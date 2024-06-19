@@ -9,3 +9,5 @@ _site
 stan/*
 !stan/functions
 !stan/*.stan
+*.html
+*.rmarkdown
