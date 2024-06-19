@@ -198,7 +198,7 @@ forecast_r |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(y = .value, group = .draw, color = type), alpha = 0.1)
+  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
   ```
 
 ::: {.callout-tip}
@@ -232,28 +232,56 @@ See the lecure notes for more information on forecast evaluation.
 
 # Evaluate your forecast
 
-In order to properly evaluate forecasts from this model we really need to forecast over a period of time. Ideally, capturing different epidemic dynamics. To save time we have already fitted the model to day in turn from the data we used above and produced a forecast. We will load these forecasts in now.
+In order to properly evaluate forecasts from this model we really need to forecast over a period of time. Ideally, capturing different epidemic dynamics. This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
 
-```{r load_forecasts
-
+```{r load_forecasts}
+rw_forecasts
 ```
 
+
 ::: {.callout-tip}
-You can see the code that we used to make here forecasts here:
+We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecasts dates.
+
+Some important things to note about these forecasts:
+- We used a 14 day forecast horizon.
+- Each forecast used all the data up to the forecast date.
+- We generated 1000 posterior samples for each forecast.
+- We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
+- We used pregenerated simulated data:
+
+```{r}
+example_onset_df
+```
+
 :::
-- Here are some forecasts we made earlier
-- How do we know if they are any good?
 
 ## Visualising your forecast
 
-Our first step is to visualise the forecasts as this can give us a good idea of how well the model is doing without having to calculate any metrics.
-A good first visualisation is to show all the forecasts across all horizons alongside the data.
+As fore a single forecast, our first step is to visualise the forecasts as this can give us a good idea of how well the model is doing without having to calculate any metrics.
+
+```{r plot-all-forecasts}
+rw_forecasts |>
+  filter(.draw <= 50) |>
+  ggplot(aes(x = day)) +
+  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_point(data = example_onset_df |>
+    filter(day >= 21),
+    aes(x = day, y = onsets), color = "black")
+```
 
 
-As might be clear, this can be hard to interpret, so we might want also want to visualise each individual forecast horizon versus the data.
+As for the single forecast it may be helpful to also plot the forecast on the log scale.
 
+```{r plot-all-forecasts-log}
+rw_forecasts |>
+  filter(.draw <= 50) |>
+  ggplot(aes(x = day)) +
+  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
+  scale_y_continuous(trans = "log")
+```
 
-::: .callout-tip
+::: {.callout-tip}
 What do you think of these forecasts?
 Are they any good?
 How well do they capture changes in trend?
@@ -263,11 +291,17 @@ Do they seem to under or over predict consistently?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-
-
+What do you think of these forecasts?
+  - We think these forecasts are a reasonable place to start but there is definitely room for improvement.
+Are they any good?
+  - They seem to do a reasonable job of capturing the short term dynamics but struggle with the longer term dynamics.
+How well do they capture changes in trend?
+  - There is litle evidence of the model capturing the reduction in onsets before it begins to show in the data.
+Does the uncertainty seem reasonable?
+ - On the natural scale it looks like the model often over predicts. Things seem more balanced on the log scale but the model still seems to be overly uncertain.
+Do they seem to under or over predict consistently?
+  - It looks like the model is consistently over predicting on the natural scale but this is less clear on the log scale.
 :::
-
-As we have a generative model based on the effective reproduction number we can also visualise the forecasts of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts.
 
 ## Scoring your forecast
 
@@ -293,7 +327,7 @@ What important information is in the `forecast` object?
 
 :::
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default quantile metrics (as our forecasts are in quantile format) and score our forecasts. 
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts. 
 
 ### Calibration
 
