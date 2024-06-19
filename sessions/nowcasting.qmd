@@ -54,7 +54,7 @@ We then assume that we're 40 days into the outbreak, i.e. we only consider obser
 
 
 ```{r truncate_reports}
-cutoff <- 41
+cutoff <- 71
 df_co <- df |>
   filter(report_time < cutoff)
 
