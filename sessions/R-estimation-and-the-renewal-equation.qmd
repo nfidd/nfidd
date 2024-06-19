@@ -326,6 +326,15 @@ We can again extract and visualise the posteriors in the same way as earlier.
 ```{r r_rw_posterior}
 rw_posteriors <- r_rw_inf_fit |>
   gather_draws(infections[infection_day], logR[infection_day]) |>
+  mutate(.value = if_else(
+    .variable == "logR",
+    exp(.value),
+    .value,
+    ), .variable = if_else(
+      .variable == "logR",
+      "R",
+      .variable
+    )) |>
   group_by(infection_day, .variable) |>
   summarise(
     median = median(.value),
