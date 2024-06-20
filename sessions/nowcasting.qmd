@@ -1452,7 +1452,7 @@ noisy_onsets_df <- reporting_triangle |>
   group_by(day) |>
   summarise(noisy_onsets = sum(reported_onsets)) |>
   ungroup()
-``` 
+```
 
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
 
