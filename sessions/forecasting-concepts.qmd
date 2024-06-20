@@ -513,11 +513,15 @@ Let's first look at the overall PIT histogram.
 As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
 
 ```{r pit-histogram-horizon}
- sc_forecasts |>
-  filter(horizon %in% c(1, 3, 7, 14)) |>
-  get_pit(by = "horizon") |>
+sc_forecasts |> 
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit(by = "group_horizon") |>
   plot_pit() +
-  facet_wrap(~horizon)
+  facet_wrap(~group_horizon)
 ```
 
 and then for different forecast dates.
@@ -538,6 +542,8 @@ Do they look biased?
 
 ::: {.callout-note collapse="true"}
 ## Solution
+- It looks like the model is biased towards over predicting and that this bias gets worse at longer forecast horizons.
+- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently over predicting but the model is also over predicting at other times.
 :::
 
 ## Scoring on the log scale
@@ -603,6 +609,8 @@ What does this tell you about the model?
 
 ::: {.callout-note collapse="true"}
 ## Solution
+- As for the natural scale CRPS scores increase with forecast horizon but now the increase appears to be linear vs exponential.
+- There has been a reduction in the CRPS scores for forecast dates near the outbreak peak compared to other forecast dates but this is still the period where the model is performing worst.
 :::
 
 ### PIT histograms
@@ -619,10 +627,14 @@ As before lets look at the PIT histogram by forecast horizon (to save space we w
 
 ```{r log-pit-histogram-horizon}
 log_sc_forecasts |>
-  filter(horizon %in% c(1, 3, 7, 14)) |>
-  get_pit(by = "horizon") |>
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit(by = "group_horizon") |>
   plot_pit() +
-  facet_wrap(~horizon)
+  facet_wrap(~group_horizon)
 ```
 
 and then for different forecast dates.
@@ -643,7 +655,10 @@ Do they look biased?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-
+- The overall PIT histograms suggest that the model is less biased to over predict on the log scale than the natural scale but it is still biased. This makes sense when we think back to the comparison of reproduction number estimates and forecasts we made earlier where the model was consistently over predicting on the reproduction number scale.
+- By forecast horizon the model is still biased towards over predicting but this bias is less pronounced than on the natural scale.
+- Towards the end and beginning of the forecast period the model appears to be well calibrated on the log scale but is biased towards over predicting in the middle of the forecast period.
+- This matches with our knowledge of the underlying reproduction number which were initially constant and then began to decrease only to stabilise towards the end of  the outbreak. 
 :::
 
 # Going further
