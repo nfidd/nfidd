@@ -15,14 +15,23 @@ At the same time, there is value in using and contributing to open-source **tool
 These tools have varying levels of flexibility to deal with different kinds of epidemiological problems and data.
 Whilst they will never have the flexibility of completely custom approaches, using and contributing to them avoids duplication, improves the chances of finding errors, and helps discussing and ultimately enforcing best practice.
 
-We are going to suggest trying three tools that implement several or all the concepts introduced in this course.
+We are going to suggest trying three tools that implement several or all the concepts introduced in this course:
 
 ## EpiEstim
 
-[EpiEstim](https://mrc-ide.github.io/EpiEstim/) implements
+[EpiEstim](https://mrc-ide.github.io/EpiEstim/) implements the renewal equation on a time series of infections in a Bayesian framework, i.e. the model in `estimate-r.stan` in the [session on R estimation](R-estimation-and-the-renewal-equation#estimating-R-from-a-time-series-of-infections).
+In combination with the [projections](https://www.repidemicsconsortium.org/projections/) package in can be used for forecasting.
 
 ## EpiNow2
 
+[EpiNow2](https://epiforecasts.io/EpiNow2/dev/) implements the renewal equation on a time series of delayed outcomes including nowcasts with a known reporting delay distribution, as well as forecasts using a Gaussian Process or random walk model, i.e. the models introduced here except the joint inference of nowcasts and delays and/or reproduction numbers.
+
 ## Epinowcast
 
-# Wrap up
+[Epinowcast](https://package.epinowcast.org/) was created to replace EpiNow2.
+It implements all the models discussed in the course except for the ability to make forecasts.
+
+## Going further
+
+There are many other R packages that can be used for R estimation, nowcasting and forecasting.
+We invite readers to suggest further additions on our [discussion board](https://github.com/nfidd/nfidd/discussions).
