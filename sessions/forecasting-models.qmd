@@ -235,8 +235,8 @@ data <- list(
   gen_time_pmf = gen_time_pmf,
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf,
-  h = horizon # Here we set the number of days to forecast into the future
-  N_prior = (10000, 2000) # the prior for the population size
+  h = horizon, # Here we set the number of days to forecast into the future
+  N_prior = c(10000, 2000) # the prior for the population size
 )
 mech_forecast_fit <- mech_mod$sample(
   data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
@@ -257,7 +257,7 @@ data <- list(
   h = horizon # Here we set the number of days to forecast into the future
 )
 stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.9)
 ```
 
 Finally we can extract the forecasts from the models and plot them.
@@ -283,9 +283,9 @@ target_onsets <- onset_df |>
 
 ```{r plot_forecast}
 forecast |>
-  filter(.draw <= 100) |>
+  filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = intersection(.draw, model), col = model) +
+  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
 ```
 
@@ -301,7 +301,7 @@ What do you notice about the forecasts from the mechanistic and statistical mode
 :::
 
 ::: {.callout-tip}
-## What happens we don't know the population size? (optional)
+## What happens when you are very wrong about the population size? (optional)
 
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
 
@@ -317,8 +317,8 @@ data <- list(
   gen_time_pmf = gen_time_pmf,
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf,
-  h = horizon # Here we set the number of days to forecast into the future
-  N_prior = (1000, 200) # the prior for the population size
+  h = horizon, # Here we set the number of days to forecast into the future
+  N_prior = c(100, 20) # the prior for the population size
 )
 
 mech_forecast_fit_diff <- mech_mod$sample(
@@ -343,7 +343,7 @@ mech_forecast_diff |>
 
 As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
 
-```{r load_forecasts}
+```{r load_forecasts, eval = FALSE}
 forecasts <- bind_rows(
   rw_forecasts |>
     mutate(model = "random_walk"),
@@ -374,7 +374,7 @@ example_onset_df
 ## Visualising your forecast
 
 
-```{r plot-all-forecasts}
+```{r plot-all-forecasts, eval = FALSE}
 forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
@@ -388,7 +388,7 @@ forecasts |>
 
 As for the single forecast it is helpful to also plot the forecast on the log scale.
 
-```{r plot-all-forecasts-log}
+```{r plot-all-forecasts-log, eval = FALSE}
 rw_forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
@@ -415,7 +415,7 @@ Do they seem to under or over predict consistently?
 ## Scoring your forecast
 
 
-```{r convert-forecasts}
+```{r convert-forecasts, eval = FALSE}
 sc_forecasts <- forecasts |>
   left_join(example_onset_df, by = "day") |>
   filter(!is.na(.value)) |>
@@ -433,7 +433,7 @@ sc_forecasts
 
 Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting concepts session](forecasting-concepts).
 
-```{r score-forecasts}
+```{r score-forecasts, eval = FALSE}
 sc_scores <- sc_forecasts |>
   score()
 
@@ -444,7 +444,7 @@ sc_scores
 
 Let's summarise the scores by model first.
 
-```{r}
+```{r, eval = FALSE}
 sc_scores |>
   summarise_scores(by = "model")
 ```
@@ -466,7 +466,7 @@ As in the [forecasting concepts session](forecasting-concepts), we will start by
 
 First by forecast horizon.
 
-```{r}
+```{r, eval = FALSE}
 sc_scores |>
   summarise_scores(by = c("model", "horizon")) |>
   ggplot(aes(x = horizon, y = crps, col = model)) +
@@ -475,7 +475,7 @@ sc_scores |>
 
 and across different forecast dates
 
-```{r}
+```{r, eval = FALSE}
 sc_scores |>
   summarise_scores(by = c("target_day", "model")) |>
   ggplot(aes(x = target_day, y = crps, col = model)) +
@@ -505,7 +505,7 @@ What are the key differences between the models?
 
 Let's first look at the overall PIT histogram.
 
-```{r pit-histogram}
+```{r pit-histogram, eval = FALSE}
  sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
@@ -514,7 +514,7 @@ Let's first look at the overall PIT histogram.
 
 As before lets look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
-```{r pit-histogram-horizon}
+```{r pit-histogram-horizon, eval = FALSE}
 sc_forecasts |> 
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
@@ -528,7 +528,7 @@ sc_forecasts |>
 
 and then for different forecast dates.
 
-```{r pit-histogram-date}
+```{r pit-histogram-date, eval = FALSE}
  sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
@@ -551,7 +551,7 @@ Which model do you think is best?
 
 Again as in the [forecasting concepts session](forecasting-concepts), we will also score the forecasts on the log scale.
 
-```{r log-convert-forecasts}
+```{r log-convert-forecasts, eval = FALSE}
 log_sc_forecasts <- sc_forecasts |>
   transform_forecasts(
     fun = log_shift,
@@ -571,7 +571,7 @@ Reminder: For more on scoring on the log scale see [Scoring forecasts on transfo
 
 ### At a glance
 
-```{r}
+```{r, eval = FALSE}
 log_scores |>
   summarise_scores(by = "model")
 ```
@@ -583,14 +583,14 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 ### CRPS
 
-```{r}
+```{r, eval = FALSE}
 log_sc_scores |>
   summarise_scores(by = c("model", "horizon")) |>
   ggplot(aes(x = horizon, y = crps, col = model)) +
   geom_point()
 ```
 
-```{r}
+```{r, eval = FALSE}
 log_sc_scores |>
   summarise_scores(by = c("target_day", "model")) |>
   ggplot(aes(x = target_day, y = crps, col = model)) +
@@ -611,7 +611,7 @@ How does it compare to the scores on the original scale?
 
 ### PIT histograms
 
-```{r pit-histogram}
+```{r pit-histogram, eval = FALSE}
  log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
@@ -619,7 +619,7 @@ How does it compare to the scores on the original scale?
 ```
 
 
-```{r pit-histogram-horizon}
+```{r pit-histogram-horizon, eval = FALSE}
 log_sc_forecasts |> 
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
@@ -632,7 +632,7 @@ log_sc_forecasts |>
 ```
 
 
-```{r pit-histogram-date}
+```{r pit-histogram-date, eval = FALSE}
  log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +

@@ -1,7 +1,7 @@
 functions {
   #include "functions/convolve_with_delay.stan"
   #include "functions/renewal.stan"
-  #include "functions/geometric_random_walk.stan"
+  #include "functions/geometric_diff_ar.stan"
 }
 
 data {

@@ -25,7 +25,7 @@ parameters {
 }
 
 transformed parameters {
-  array[m] real infections = pop_bounded_renewal(I0, R, gen_time_pmf, N);
+  array[m] real infections = pop_bounded_renewal(I0, R, gen_time_pmf, N, m);
   array[m] real onsets = convolve_with_delay(infections, ip_pmf);
 }
 
