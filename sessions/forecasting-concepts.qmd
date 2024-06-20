@@ -552,7 +552,11 @@ We again use `scoringutils` but first transform both the forecasts and observati
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts(append = FALSE)
+  transform_forecasts(
+    fun = log_shift,
+    offset = 1,
+    append = FALSE
+  )
 
 log_scores <- log_sc_forecasts |>
   score()
