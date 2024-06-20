@@ -1,6 +1,7 @@
 # Required software
-* [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
-* [RStudio](http://www.rstudio.com/products/rstudio/download/) (optional) is a popular graphic user interface (GUI).
+
+- [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
+- [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
 
 # Installation of the `nfiidd` package
 
