@@ -257,7 +257,7 @@ Some important things to note about these forecasts:
 - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
 - We used pregenerated simulated data:
 
-```{r}
+```{r show_example_onset_df}
 example_onset_df
 ```
 
@@ -365,7 +365,7 @@ sc_scores
 
 Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
 
-```{r}
+```{r summarise-scores}
 sc_scores |>
   summarise_scores(by = "model")
 ```
@@ -433,7 +433,7 @@ This equation can be broke down into the two components:
 
 Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
 
-```{r}
+```{r plot-scores-by-horizon}
 sc_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
@@ -442,7 +442,7 @@ sc_scores |>
 
 and across different forecast horizons.
 
-```{r}
+```{r plot-scores-by-day}
 sc_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
@@ -566,7 +566,7 @@ For more on scoring on the log scale see [Scoring forecasts on transformed scale
 
 ### At a glance
 
-```{r}
+```{r summarise-log-scores}
 log_sc_scores |>
   summarise_scores(by = "model")
 ```
@@ -578,8 +578,8 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 ### CRPS
 
-```{r}
-log_scores |>
+```{r plot-log-crps-by-horizon}
+log_sc_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
   geom_point()
@@ -587,8 +587,8 @@ log_scores |>
 
 and across different forecast horizons.
 
-```{r}
-log_scores |>
+```{r plot-log-crps-by-day}
+log_sc_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
   geom_point()
