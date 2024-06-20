@@ -31,6 +31,172 @@ The best way to interact with the material is via the [Visual Editor](https://do
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
+# An overview of forecasting models
+
+See the slides for an overview of forecasting models.
+
+# What did we learn about the random walk model from the [forecasting concepts session](forecasting-concepts)?
+
+- It was unbiased when the reproduction number was constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
+- It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
+
+::: {.callout-note, collapse = TRUE}
+## What did a geometric random walk model look like again?
+
+```{r}
+set.seed(123)
+n <- 100
+R <- rep(NA, n)
+R[1] <- rnorm(1, 1, 0.1)
+for (i in 2:n) {
+  R[i] <- R[i-1] + rnorm(1, 0, 0.1)
+}
+
+data <- tibble(t = 1:n, R = exp(R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from a random walk model",
+       x = "Time",
+       y = "R")
+```
+
+:::
+
+# Forecasting models as a spectrum. 
+
+A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
+However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
+The worst case is that we have mistaken beliefs about the underlying mechanisms and use these to make predictions which are systematically wrong and misleading.
+In these cases, forecasters of often use _statistical models_ to make predictions which have little or no mechanistic basis.
+In our work, we have found that a combination of mechanistic and statistical models can be very powerful but that identifying the best model for a given forecasting task can be challenging.
+
+## Adding more mechanistic structure to the renewal model
+
+One way to improve the renewal model is to add more mechanistic structure. In the [forecasting concepts session](forecasting-concepts), we saw that the renewal model was unbiased when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+
+This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
+
+$$
+R_t = \frac{S_{t-1}}{N} R_0
+$$
+
+This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
+
+::: {.callout-note, collapse = TRUE}
+## What behaviour would we expect from this model?
+
+```{r}
+set.seed(123)
+n <- 100
+N <- 1000
+R0 <- 1.5
+S <- rep(NA, n)
+S[1] <- N
+R <- rep(NA, n)
+R[1] <- R0
+I <- rep(NA, n)
+I[1] <- 1
+for (i in 2:n) {
+  R[i] <- (S[i-1]) / N * R0
+  I[i] <- I[i-1] * R[i]
+  S[i] <- S[i-1] - I[i]
+}
+
+data <- tibble(t = 1:n, R = R)
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from an SIR model",
+       x = "Time",
+       y = "R")
+```
+
+## Adding more statistical structure to the renewal model
+
+Rather than adding more mechanistic structure to the renewal model, we can add more statistical structure.
+Before we do this, we need to think about what we want from a forecasting model.
+As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
+We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
+A statistical term that can be used to describe capturing a trend is saying that the time series is _non-stationary_.
+
+The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
+AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
+The random walk model is specfically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multipled by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($ log(R_t) $), the model is:
+
+$$
+log(R_t) = \phi log(R_{t-1}) + \epsilon_t
+$$
+
+where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
+
+::: {.callout-note, collapse = TRUE
+## What behaviour would we expect from this model?
+
+```{r}
+set.seed(123)
+n <- 100
+phi <- 0.4
+sigma <- 0.1
+log_R <- rep(NA, n)
+log_R[1] <- rnorm(1, 0, sigma)
+for (i in 2:n) {
+  log_R[i] <- phi * log_R[i-1] + rnorm(1, 0, sigma)
+}
+data <- tibble(t = 1:n, R = exp(log_R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from an exponentiated AR(1) model",
+       x = "Time",
+       y = "R")
+```
+:::
+
+However, we probably don't want a model which is biased towards a reproduction number of 1 (though as we know the future in this case it actually could be a reasonable choice!). So what should we do?
+
+Returning to the idea that the reproduction number is a _non-stationary_ time series, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
+
+$$
+log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
+$$
+
+
+
+::: {.callout-note, collapse = TRUE}
+## What behaviour would we expect from this model?
+
+```{r}
+set.seed(123)
+n <- 100
+phi <- 0.1
+sigma <- 0.1
+log_R <- rep(NA, n)
+log_R[1] <- rnorm(1, 0, sigma)
+log_R[2] <- log_R[1] + rnorm(1, 0, sigma)
+for (i in 3:n) {
+  log_R[i] <- log_R[i-1] + phi * (log_R[i-1] - log_R[i-2]) + rnorm(1, 0, sigma)
+}
+
+data <- tibble(t = 1:n, R = exp(log_R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from an exponentiated AR(1) model with differencing",
+       x = "Time",
+       y = "R")
+```
+
+:::
+
+
+
+- An overview of forecasting models (15 mins)
+- Practice session: Forecasting with a mechanistic model (30 mins)
+- Practice session: Evaluating forecasts from a range of common models (45 mins)
+
+# 
+
 # Going further
 
 # Wrap up
