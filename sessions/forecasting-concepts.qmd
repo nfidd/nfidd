@@ -575,7 +575,7 @@ Before we look in detail at the scores, what do you think the scores are telling
 ### CRPS
 
 ```{r}
-log_sc_scores |>
+log_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
   geom_point()
@@ -584,7 +584,7 @@ log_sc_scores |>
 and across different forecast horizons.
 
 ```{r}
-log_sc_scores |>
+log_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
   geom_point()
@@ -606,7 +606,7 @@ What does this tell you about the model?
 Let's first look at the overall PIT histogram.
 
 ```{r log-pit-histogram}
- log_sc_forecasts |>
+log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit()
 ```
@@ -614,7 +614,7 @@ Let's first look at the overall PIT histogram.
 As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
 
 ```{r log-pit-histogram-horizon}
- log_sc_forecasts |>
+log_sc_forecasts |>
   filter(horizon %in% c(1, 3, 7, 14)) |>
   get_pit(by = "horizon") |>
   plot_pit() +
@@ -624,7 +624,7 @@ As before lets look at the PIT histogram by forecast horizon (to save space we w
 and then for different forecast dates.
 
 ```{r log-pit-histogram-date}
- log_sc_forecasts |>
+log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
   facet_wrap(~target_day)
