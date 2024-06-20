@@ -3,7 +3,7 @@ title: "Probability distributions and parameter estimation"
 order: 1
 ---
 
-Introduction to statistical concepts used in the course
+[Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
 
 Introduction to stan concepts used in the course
 
