@@ -17,11 +17,6 @@ transformed data{
   array[n] int D = to_int(cumulative_sum(rep_array(d, n)));
 }
 
-transformed data{
-  array[n] int P = to_int(cumulative_sum(p));
-  array[n] int D = to_int(cumulative_sum(rep_array(d, n)));
-}
-
 parameters {
   real<lower=0> init_onsets;
   array[n-1] real rw_noise;
