@@ -33,7 +33,7 @@ library("tidybayes")
 ```
 
 ::: callout-tip
-The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
