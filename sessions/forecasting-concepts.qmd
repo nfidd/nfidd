@@ -558,7 +558,7 @@ log_sc_forecasts <- sc_forecasts |>
     append = FALSE
   )
 
-log_scores <- log_sc_forecasts |>
+log_sc_scores <- log_sc_forecasts |>
   score()
 ```
 
@@ -567,7 +567,7 @@ For more on scoring on the log scale see [Scoring forecasts on transformed scale
 ### At a glance
 
 ```{r}
-log_scores |>
+log_sc_scores |>
   summarise_scores(by = "model")
 ```
 
