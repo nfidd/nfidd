@@ -16,7 +16,7 @@ To add a lesson, add a `.qmd` file in the `sessions` folder with a YAML field `o
 
 The `html` pages can be generated locally using the function
 
-``` {r render, eval = FALSE}
+```{r render, eval = FALSE}
 quarto::quarto_render()
 ```
 

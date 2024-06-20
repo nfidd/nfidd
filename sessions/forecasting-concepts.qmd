@@ -159,7 +159,7 @@ forecast |>
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_continuous(trans = "log")
-  ```
+```
 
 This should be a lot more informative. We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in onsets. However, we can now  see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast. This is a common pattern in forecasting where the model is good at capturing the short term dynamics but struggles with the longer term dynamics.
 :::
@@ -207,7 +207,7 @@ forecast_r |>
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
-  ```
+```
 
 ::: {.callout-tip}
 The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
@@ -527,7 +527,7 @@ and then for different forecast dates.
   get_pit(by = "target_day") |>
   plot_pit() +
   facet_wrap(~target_day)
- ``` 
+```
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -552,7 +552,7 @@ We again use `scoringutils` but first transform both the forecasts and observati
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts(append = FALSE) |>
+  transform_forecasts(append = FALSE)
 
 log_scores <- log_sc_forecasts |>
   score()
@@ -605,7 +605,7 @@ What does this tell you about the model?
 
 Let's first look at the overall PIT histogram.
 
-```{r pit-histogram}
+```{r log-pit-histogram}
  log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit()
@@ -613,7 +613,7 @@ Let's first look at the overall PIT histogram.
 
 As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
 
-```{r pit-histogram-horizon}
+```{r log-pit-histogram-horizon}
  log_sc_forecasts |>
   filter(horizon %in% c(1, 3, 7, 14)) |>
   get_pit(by = "horizon") |>
@@ -623,12 +623,12 @@ As before lets look at the PIT histogram by forecast horizon (to save space we w
 
 and then for different forecast dates.
 
-```{r pit-histogram-date}
+```{r log-pit-histogram-date}
  log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
   facet_wrap(~target_day)
- ``` 
+```
 
 ::: {.callout-tip}
 ## Take 5 minutes
