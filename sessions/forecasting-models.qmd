@@ -112,6 +112,19 @@ ggplot(data, aes(x = t, y = R)) +
        y = "R")
 ```
 
+The key assumptions we are making here are: 
+
+- The population is constant and we rouchgly know the size of the population.
+- The reproduction number is constant (aside from the effect of susceptible depletion)
+- The number of cases is proportional to the number of susceptibles in the population.
+
+We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/susceptible_renewal.stan` for the function which calculates the reproduction number. Lets load the model:
+
+```{r}
+mech_mod <- cmdstan_model(here("stan/mechanistic-r.stan"))
+mech_mod$print(line_numbers = TRUE)
+```
+
 ## Adding more statistical structure to the renewal model
 
 Rather than adding more mechanistic structure to the renewal model, we can add more statistical structure.
@@ -162,7 +175,6 @@ log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
 $$
 
 
-
 ::: {.callout-note, collapse = TRUE}
 ## What behaviour would we expect from this model?
 
@@ -189,13 +201,148 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
+We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/diff-ar1.stan` for the function which calculates the reproduction number. Lets load the model:
+
+```{r}
+stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
+stat_mod$print(line_numbers = TRUE)
+```
 
 
-- An overview of forecasting models (15 mins)
-- Practice session: Forecasting with a mechanistic model (30 mins)
-- Practice session: Evaluating forecasts from a range of common models (45 mins)
+# Forecasting with the mechanistic and statistical models
 
-# 
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using the same data set we used in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
+
+```{r, load-simulated-onset}
+source(here::here("snippets", "simulate-onsets.r"))
+onset_df
+
+cutoff <- 71
+
+filtered_onset_df <- onset_df |>
+  filter(day <= cutoff)
+```
+
+We will now fit the mechanistic model to the data.
+```{r fit_mech_model}
+horizon <- 28
+
+data <- list(
+  n =nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon # Here we set the number of days to forecast into the future
+  N_prior = (10000, 2000) # the prior for the population size
+)
+mech_forecast_fit <- mech_mod$sample(
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+mech_forecast_fit
+```
+
+We will now fit the statistical model to the data.
+
+```{r fit_stat_model}
+data <- list(
+  n =nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon # Here we set the number of days to forecast into the future
+)
+stat_forecast_fit <- stat_mod$sample(
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+```
+
+Finally we can extract the forecasts from the models and plot them.
+
+```{r extract-forecast}
+mech_forecast <- mech_forecast_fit |>
+  gather_draws(forecast[day]) |>
+  mutate(day = day + cutoff)
+
+stat_forecast <- stat_forecast_fit |>
+  gather_draws(forecast[day]) |>
+  mutate(day = day + cutoff)
+
+forecast <- bind_rows(
+  mutate(mech_forecast, model = "mechanistic"),
+  mutate(stat_forecast, model = "statistical")
+)
+
+target_onsets <- onset_df |>
+  filter(day > cutoff) |>
+  filter(day <= cutoff + horizon)
+```
+
+```{r plot_forecast}
+forecast |>
+  filter(.draw <= 100) |>
+  ggplot(aes(x = day)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = intersection(.draw, model), col = model) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you notice about the forecasts from the mechanistic and statistical models?
+:::
+
+::: {.callout-note, collapse = TRUE}
+## Solution
+- The mechanistic model captures the downturn in the data very well.
+- The statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
+:::
+
+::: {.callout-tip}
+## What happens we don't know the population size? (optional)
+
+In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
+
+::: {.callout-note, collapse = TRUE}
+## The solution
+
+```{r}
+data <- list(
+  n =nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon # Here we set the number of days to forecast into the future
+  N_prior = (1000, 200) # the prior for the population size
+)
+
+mech_forecast_fit_diff <- mech_mod$sample(
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+
+mech_forecast_diff <- mech_forecast_fit_diff |>
+  gather_draws(forecast[day]) |>
+  mutate(day = day + cutoff)
+
+
+mech_forecast_diff |>
+  filter(.draw <= 100) |>
+  ggplot(aes(x = day)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = .draw) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+)
+```
+:::
+:::
+
+# Evaluating forecasts from our models
+
+As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
+
 
 # Going further
 
