@@ -26,6 +26,11 @@ This requires a separate installation step:
 cmdstanr::install_cmdstan()
 ```
 
+::: callout-note
+This may take a few minutes.
+Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
+:::
+
 If there are any problems with this, you can try (on Windows) to fix them using
 ```{r cmdstan_toolchain, eval = FALSE}
 cmdstanr::check_cmdstan_toolchain(fix = TRUE)
