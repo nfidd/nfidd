@@ -1,0 +1,105 @@
+---
+title: "Introduction to stan"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/introduction-to-stan.html
+    footer: "Introduction to stan"
+---
+
+```r
+set.seed(12345)
+```
+
+## What is stan and why do we use it
+
+- a *Probabilistic Programming Language* for Bayesian inference
+  (i.e., a way to write down models)
+  
+- models are written in a text file (often ending `.stan`) and then loaded into an R/python/etc interface
+
+- once a model is written down, stan can be used to **generate samples** from the **posterior distribution** (using a variety of methods)
+
+## How to write a model in stan {.smaller}
+
+:::: {.columns}
+
+::: {.column width="40%"}
+In a stan model file we specify:
+
+- Data<br>(types and names)
+
+- Parameters<br>(types and names)
+
+- Model<br>(prior and likelihood)
+:::
+
+::: {.column width="60%"}
+<br>
+
+```{stan empty_model, output.var = "empty", eval = FALSE, echo = TRUE}
+data {
+
+}
+
+parameters {
+
+}
+
+model {
+
+}
+```
+:::
+::::
+
+## Example: fairness of a coin {.smaller}
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+Data:
+
+- $N$ coin flips
+
+- $x$ times heads
+
+Parameters
+
+- $\theta$, probability of getting heads; uniform prior in $[0, 1]$
+
+:::
+
+::: {.column width="60%"}
+<br>
+
+```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = here::here("stan", "coin.stan")}
+
+```
+:::
+::::
+
+## Using stan from R {.smaller}
+
+There are two packages for using stan from R. We will use the `cmdstanr` package:
+
+```{r load_coin_model, echo = TRUE}
+library("cmdstanr")
+mod <- cmdstan_model(here::here("stan", "coin.stan"))
+mod$print(line_numbers = TRUE)
+```
+
+## Sampling from the posterior {.xmaller}
+
+```{r sample_from_coin_model, echo = TRUE}
+data <- list(
+  N = 10, ## 10 coin flips
+  x = 6 ## 6 times heads
+)
+mod$sample(data = data)
+```
+
+#
+
+[Return to the session](../R-Stan-and-statistical-concepts)
