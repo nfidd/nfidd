@@ -137,7 +137,7 @@ In reality, we don't have infection dates, and we also have to deal with missing
 For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
 This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
 
-To do this we can use a similar model to the one used in the [session on probability distributions](R-stan-and-statistical-concepts#estimating-the-parameters-of-probability-distributions), assuming (or knowing, in this instance) that the delays follows a lognormal distribution.
+To do this we can use the same model as in the [session on delay distributions](delay-distributions#estimating-delay-distributions), assuming (or knowing, in this instance) that the delays follows a lognormal distribution.
 
 ```{r naive_delay_model}
 mod <- cmdstan_model(here("stan", "lognormal.stan"))
