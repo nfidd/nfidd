@@ -1,6 +1,7 @@
 # Required software
-* [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
-* [RStudio](http://www.rstudio.com/products/rstudio/download/) (optional) is a popular graphic user interface (GUI).
+
+- [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
+- [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
 
 # Installation of the `nfiidd` package
 
@@ -8,7 +9,7 @@ To install the packages needed in the course, including the `nfiidd` package tha
 
 ```{r install, eval=FALSE}
 install.packages("pak")
-pak::pak("nfidd/nfidd", dependencies = "all")
+pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
 ```
 
 Then you can check that the installation completed successfully by loading the package into your **R** session:
@@ -25,6 +26,11 @@ This requires a separate installation step:
 ```{r cmdstan_install, eval = FALSE}
 cmdstanr::install_cmdstan()
 ```
+
+::: callout-note
+This may take a few minutes.
+Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
+:::
 
 If there are any problems with this, you can try (on Windows) to fix them using
 ```{r cmdstan_toolchain, eval = FALSE}
