@@ -43,3 +43,8 @@ cmdstanr::cmdstan_version()
 ```
 
 For more details, and for links to resources in case something goes wrong, see the [Getting Started with CmdStanr](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette of the package.
+
+# Getting the course materials
+
+You will have to have a local copy of the course materials for the session code to work.
+To do so, you can either use git to clone the [repo](https://github.com/nfidd/nfidd), or [download](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip) its current contents.
