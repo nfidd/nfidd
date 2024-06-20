@@ -54,7 +54,7 @@ We then assume that we're 40 days into the outbreak, i.e. we only consider obser
 
 
 ```{r truncate_reports}
-cutoff <- 71
+cutoff <- 41
 df_co <- df |>
   filter(report_time < cutoff)
 
@@ -89,11 +89,11 @@ all_days <- expand_grid(day = seq(0, cutoff - 1)) |>
 
 Plotting these, we get
 
-```{r ts_plot}
+```{r ts_plot, fig.height = 10}
 combined <- all_days |>
   pivot_longer(c(onsets, reports, infections), names_to = "variable")
 ggplot(combined, aes(x = day, y = value)) +
-  facet_grid(~ variable) +
+  facet_grid(variable ~ .) +
   geom_col()
 ```
 
@@ -169,7 +169,7 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 :::
 
 ::: {.callout-note collapse="true"}
-## The solution
+## Solution
 - The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
 - The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
 :::
@@ -324,7 +324,7 @@ Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d
 We can now construct a model to estimate $n_{t,d}$,
 
 $$
-  n_{t,d} \mid \lambda_{t},p_{t,d}  &\sim \text{Poisson} \left(\lambda_{t} \times p_{t,d} \right),\ t=1,...,T.
+  n_{t,d} \mid \lambda_{t},p_{t,d} \sim \text{Poisson} \left(\lambda_{t} \times p_{t,d} \right),\ t=1,...,T.
 $$
 
 where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t-d$.
