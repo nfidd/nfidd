@@ -1,0 +1,65 @@
+---
+title: "From an epidemiological line list to informing decisions in real-time"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/from-line-list-to-decisions.html
+    footer: "From an epidemiological line list to informing decisions in real-time"
+    slide-level: 3
+---
+
+### "We were losing ourselves in details [...] all we needed to know is, are the number of cases rising, falling or levelling off?"
+
+Hans Rosling, Liberia, 2014
+
+. . .
+
+- what **is** the number of cases now?
+- is it rising/falling and by how much?
+- what does this mean for the near future?
+
+### Data usually looks like this {.smallest}
+
+![](figures/linelist.png)
+
+NOTE: not real data
+
+### Aggregated data can look like this
+
+![](figures/monkeypox_delayed.png)
+
+[UKHSA, 2022](https://www.gov.uk/government/publications/monkeypox-outbreak-technical-briefings/investigation-into-monkeypox-outbreak-in-england-technical-briefing-1) <br>
+[Overton et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011463)
+
+### Aim of this course:
+
+How can we use data typically collected in an outbreak to answer questions like
+
+- what **is** the number of cases now? (*nowcasting*)
+- is it rising/falling and by how much? (*R estimation*)
+- what does this mean for the near future (*forecasting*)
+
+in real time.
+
+### Approach
+
+Throughout the course we will
+
+1. simulate typical infectious disease data in **R** <br>
+(the *generative model*)
+2. apply the generative model to data in **stan** to 
+   - learn about the system (conduct inference)
+   - make predictions (nowcasting/forecasting)
+
+### Timeline
+
+::: {.incremental}
+- delay distributions and how to estimate them (Day 1)
+- R estimation and the generation interval (Day 1)
+- nowcasting (day 2)
+- forecasting and evaluation, ensemble methods (day 2)
+- applications (day 3)
+:::
+
+
