@@ -8,7 +8,7 @@ To install the packages needed in the course, including the `nfiidd` package tha
 
 ```{r install, eval=FALSE}
 install.packages("pak")
-pak::pak("nfidd/nfidd", dependencies = "all")
+pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
 ```
 
 Then you can check that the installation completed successfully by loading the package into your **R** session:
