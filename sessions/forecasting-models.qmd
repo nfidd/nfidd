@@ -344,6 +344,301 @@ mech_forecast_diff |>
 As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
 
 
+```{r load_forecasts}
+rw_forecasts
+```
+
+
+::: {.callout-tip}
+We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecasts dates.
+
+Some important things to note about these forecasts:
+
+  - We used a 14 day forecast horizon.
+  - Each forecast used all the data up to the forecast date.
+  - We generated 1000 posterior samples for each forecast.
+  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
+  - We used pregenerated simulated data:
+
+```{r}
+example_onset_df
+```
+
+:::
+
+## Visualising your forecast
+
+
+```{r plot-all-forecasts}
+rw_forecasts |>
+  filter(.draw <= 50) |>
+  ggplot(aes(x = day)) +
+  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_point(data = example_onset_df |>
+    filter(day >= 21),
+    aes(x = day, y = onsets), color = "black")
+```
+
+
+As for the single forecast it may be helpful to also plot the forecast on the log scale.
+
+```{r plot-all-forecasts-log}
+rw_forecasts |>
+  filter(.draw <= 50) |>
+  ggplot(aes(x = day)) +
+  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
+  scale_y_continuous(trans = "log")
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of these forecasts?
+Are they any good?
+How well do they capture changes in trend?
+Does the uncertainty seem reasonable?
+Do they seem to under or over predict consistently?
+Would you visualise the forecast in a different way?
+:::
+
+::: {.callout-note collapse="true"}
+## Solutio
+:::
+
+## Scoring your forecast
+
+
+```{r convert-forecasts}
+sc_forecasts <- rw_forecasts |>
+  left_join(example_onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast(
+    forecast_unit = c("target_day", "horizon", "model"),
+    forecast_type = "sample",
+    observed = "onsets",
+    predicted = ".value",
+    model = "model",
+    sample_id = ".draw"
+  )
+sc_forecasts
+```
+
+
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics.
+
+```{r score-forecasts}
+sc_scores <- sc_forecasts |>
+  score()
+
+sc_scores
+```
+
+### At a glance
+
+Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+
+```{r}
+sc_scores |>
+  summarise_scores(by = "model")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you?
+:::
+
+### Continuous ranked probability score
+
+
+::: {.callout-tip}
+## Key things to note about the CRPS
+  - Small values are better
+  - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+:::
+
+```{r}
+sc_scores |>
+  summarise_scores(by = "horizon") |>
+  ggplot(aes(x = horizon, y = crps)) +
+  geom_point()
+```
+
+and across different forecast horizons.
+
+```{r}
+sc_scores |>
+  summarise_scores(by = "target_day") |>
+  ggplot(aes(x = target_day, y = crps)) +
+  geom_point()
+```
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS scores change based on forecast date?
+How do the CRPS scores change with forecast horizon?
+What does this tell you about the model?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
+
+### PIT histograms
+
+::: {.callout-tip}
+## Interpreting the PIT histogram
+- Ideally PIT histograms should be uniform. 
+- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
+- If it is skewed then the model is biased towards the direction of the skew.
+:::
+
+
+Let's first look at the overall PIT histogram.
+
+```{r pit-histogram}
+ sc_forecasts |>
+  get_pit(by = "model") |>
+  plot_pit()
+```
+
+As before lets look at the PIT histogram by forecast horizon (to save space we will group horizons)
+
+```{r pit-histogram-horizon}
+sc_forecasts |> 
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit(by = "group_horizon") |>
+  plot_pit() +
+  facet_wrap(~group_horizon)
+```
+
+and then for different forecast dates.
+
+```{r pit-histogram-date}
+ sc_forecasts |>
+  get_pit(by = "target_day") |>
+  plot_pit() +
+  facet_wrap(~target_day)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+Do they look well calibrated?
+Do they look biased?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
+
+## Scoring on the log scale
+
+
+We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
+
+```{r log-convert-forecasts}
+log_sc_forecasts <- sc_forecasts |>
+  transform_forecasts(
+    fun = log_shift,
+    offset = 1,
+    append = FALSE
+  )
+
+log_scores <- log_sc_forecasts |>
+  score()
+```
+
+For more on scoring on the log scale see [Scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
+
+### At a glance
+
+```{r}
+log_scores |>
+  summarise_scores(by = "model")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you? How do you think they will differ from the scores on the natural scale?
+:::
+
+### CRPS
+
+```{r}
+log_scores |>
+  summarise_scores(by = "horizon") |>
+  ggplot(aes(x = horizon, y = crps)) +
+  geom_point()
+```
+
+and across different forecast horizons.
+
+```{r}
+log_scores |>
+  summarise_scores(by = "target_day") |>
+  ggplot(aes(x = target_day, y = crps)) +
+  geom_point()
+```
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS scores change based on forecast date?
+How do the CRPS scores change with forecast horizon?
+What does this tell you about the model?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
+
+### PIT histograms
+
+Let's first look at the overall PIT histogram.
+
+```{r log-pit-histogram}
+log_sc_forecasts |>
+  get_pit(by = "model") |>
+  plot_pit()
+```
+
+As before lets look at the PIT histogram by forecast horizon
+
+```{r log-pit-histogram-horizon}
+log_sc_forecasts |>
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit(by = "group_horizon") |>
+  plot_pit() +
+  facet_wrap(~group_horizon)
+```
+
+and then for different forecast dates.
+
+```{r log-pit-histogram-date}
+log_sc_forecasts |>
+  get_pit(by = "target_day") |>
+  plot_pit() +
+  facet_wrap(~target_day)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+Do they look well calibrated?
+Do they look biased?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+:::
+
 # Going further
 
 # Wrap up
