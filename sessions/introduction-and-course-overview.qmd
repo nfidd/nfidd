@@ -5,4 +5,4 @@ order: 0
 
 [Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors.qmd)
 
-[From an epidemiological line list to informing decisions in real-time][slides/from-line-list-to-decisions.qmd]
+[From an epidemiological line list to informing decisions in real-time](slides/from-line-list-to-decisions.qmd)
