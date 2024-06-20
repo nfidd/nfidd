@@ -28,8 +28,8 @@ library("scoringutils")
 ```
 
 ::: {.callout-tip}
-The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
-It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 # Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
@@ -57,7 +57,7 @@ Based on what we found in the [nowcasting session](nowcasting.qmd) this seems li
 We can do this by extending the model into the future by simulating the model forward in time. 
 This is known as a generative model.
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
-So what does this look like in code? Lets load in the model again and take a look.
+So what does this look like in code? Let's load in the model again and take a look.
 
 ```{r load_model}
 mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
@@ -103,7 +103,7 @@ We can now fit the model to the data and then forecast into the future. This sho
 horizon <- 28
 
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -122,10 +122,11 @@ rw_forecast
 We can now visualise the forecast. We will first extract the forecast and then plot the forecasted onsets alongside the observed onsets.
 
 ```{r extract-forecast}
+# extract "forecast" variable from model output
 forecast <- rw_forecast |>
   gather_draws(forecast[day]) |>
   mutate(day = day + cutoff)
-
+# observed onsets
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
   filter(day <= cutoff + horizon)
@@ -136,7 +137,8 @@ forecast |>
   filter(.draw <= 100) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  labs(title = "Symptom onsets", subtitle = "Forecast (trajectories) and observed (points)")
 ```
 
 ::: {.callout-tip}
@@ -158,13 +160,14 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log")
+  scale_y_continuous(trans = "log") +
+  labs(title = "Symptom onsets, log scale", subtitle = "Forecast and observed")
 ```
 
 This should be a lot more informative. We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in onsets. However, we can now  see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast. This is a common pattern in forecasting where the model is good at capturing the short term dynamics but struggles with the longer term dynamics.
 :::
 
-As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts. To get an even better picture here we will fit another model to a longer time series and then compare the forecast and estimated reproduction numbers.
+As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts. To get an even better picture here we will fit another model to the longer time series that we have just forecast for, and then compare the forecast and estimated reproduction numbers.
 
 ```{r fit_model_long}
 long_onset_df <- onset_df |>
@@ -206,7 +209,9 @@ forecast_r |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
+  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1) +
+  labs(title = "Estimated R", 
+       subtitle = "Estimated over whole time series (red), and forecast at day 41 (blue)")
 ```
 
 ::: {.callout-tip}
@@ -214,7 +219,7 @@ The horizontal dashed line at 1 represents the threshold for epidemic growth. If
 :::
 
 ::: {.callout-note}
-The vertical dashed line represents the point at which we started forecasting.
+The vertical dashed line represents the point at which we started forecasting (blue trajectories).
 :::
 
 ::: {.callout-tip}
@@ -232,11 +237,11 @@ Can you use this plot to explain why the forecast of onsets looks the way it doe
 - The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
 :::
 
-We managed to learn quite a lot about our models forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
+We managed to learn quite a lot about our model's forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
 
 # Introduction to forecast evaluation
 
-See the lecure notes for more information on forecast evaluation.
+See the lecture notes for more information on forecast evaluation.
 
 # Evaluate your forecast
 
@@ -251,11 +256,11 @@ rw_forecasts
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecasts dates.
 
 Some important things to note about these forecasts:
-- We used a 14 day forecast horizon.
+- We used a 14 day forecast horizon starting at each target day.
 - Each forecast used all the data up to the forecast date.
 - We generated 1000 posterior samples for each forecast.
-- We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
-- We used pregenerated simulated data:
+- We started forecasting 3 weeks into the outbreak, and then forecast once a week (every 7 days), i.e., we created forecasts on day 22, day 29, ... to day 71. We excluded the last 14 days to allow a full forecast.
+- We used pregenerated simulated data, which is the same as the outbreak we've been using through the course:
 
 ```{r}
 example_onset_df
@@ -274,7 +279,10 @@ rw_forecasts |>
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df |>
     filter(day >= 21),
-    aes(x = day, y = onsets), color = "black")
+    aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
+  labs(title = "Symptom onset forecasts, created weekly over an outbreak",
+       col = "Forecast start day")
 ```
 
 
@@ -286,7 +294,10 @@ rw_forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log")
+  scale_y_continuous(trans = "log") +
+  scale_color_binned(type = "viridis") +
+  labs(title = "Weekly symptom onset forecasts: log scale",
+       col = "Forecast start day")
 ```
 
 ::: {.callout-tip}
@@ -306,7 +317,7 @@ What do you think of these forecasts?
 Are they any good?
   - They seem to do a reasonable job of capturing the short term dynamics but struggle with the longer term dynamics.
 How well do they capture changes in trend?
-  - There is litle evidence of the model capturing the reduction in onsets before it begins to show in the data.
+  - There is little evidence of the model capturing the reduction in onsets before it begins to show in the data.
 Does the uncertainty seem reasonable?
  - On the natural scale it looks like the model often over predicts. Things seem more balanced on the log scale but the model still seems to be overly uncertain.
 Do they seem to under or over predict consistently?
@@ -352,7 +363,7 @@ What important information is in the `forecast` object?
  - The type of forecast which is a sample forecast
 :::
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default metrics for now and score our forecasts.
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
@@ -406,7 +417,7 @@ $$
 CRPS(D, y) = \mathbb{E}_{X \sim D}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]
 $$
 
-where $$ X $$ and $$ X' $$ are independent random variables sampled from the distribution $$ D $$. To calculate this we simpley replace $$ X $$ and $$ X' $ by samples from our posterior distribution and sum over all possible combinations.
+where $$ X $$ and $$ X' $$ are independent random variables sampled from the distribution $$ D $$. To calculate this we simply replace $$ X $$ and $$ X' $$ by samples from our posterior distribution and sum over all possible combinations.
 
 This equation can be broke down into the two components:
 
@@ -431,35 +442,39 @@ This equation can be broke down into the two components:
 - **Second Term ($$ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $$)**: This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
 :::
 
-Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
+Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models, or to compare the CRPS of the same model under different conditions. For example, let's compare the CRPS across different forecast horizons:
 
 ```{r}
 sc_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by daily forecast horizon", 
+       subtitle = "Summarised across all forecasts")
 ```
 
-and across different forecast horizons.
+and across different forecast start dates:
 
 ```{r}
 sc_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by forecast start date", 
+       subtitle = "Summarised across all forecasts", x = "forecast date")
 ```
 
 ::: {.callout-tip}
 ## Take 5 minutes 
-How do the CRPS scores change based on forecast date?
-How do the CRPS scores change with forecast horizon?
+How do the CRPS scores change based on forecast horizon?
+How do the CRPS scores change with forecast date?
 What does this tell you about the model?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-  - The CRPS scores increase for forecast dates where incidence is higher. 
   - The CRPS scores increase with forecast horizon.
+  - The CRPS scores increase for forecast dates where incidence is higher. 
   - As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
   - However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
 :::
@@ -473,7 +488,7 @@ There are many ways to assess calibration and bias but one common way is to use 
 ::: {.callout-tip}
 ## Interpreting the PIT histogram
 - Ideally PIT histograms should be uniform. 
-- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
+- If it is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
@@ -510,7 +525,7 @@ Let's first look at the overall PIT histogram.
   plot_pit()
 ```
 
-As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
+As before let's look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
 
 ```{r pit-histogram-horizon}
  sc_forecasts |>
@@ -527,7 +542,7 @@ and then for different forecast dates.
   get_pit(by = "target_day") |>
   plot_pit() +
   facet_wrap(~target_day)
-```
+``` 
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -552,11 +567,7 @@ We again use `scoringutils` but first transform both the forecasts and observati
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts(
-    fun = log_shift,
-    offset = 1,
-    append = FALSE
-  )
+  transform_forecasts(append = FALSE)
 
 log_scores <- log_sc_forecasts |>
   score()
@@ -607,7 +618,7 @@ What does this tell you about the model?
 
 ### PIT histograms
 
-Let's first look at the overall PIT histogram.
+Let's first look at the overall PIT histogram for the log-transformed scores.
 
 ```{r log-pit-histogram}
 log_sc_forecasts |>
@@ -615,7 +626,7 @@ log_sc_forecasts |>
   plot_pit()
 ```
 
-As before lets look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
+As before let's look at the PIT histogram by forecast horizon (to save space we will only look at 1, 3, 7, and 14 days)
 
 ```{r log-pit-histogram-horizon}
 log_sc_forecasts |>
