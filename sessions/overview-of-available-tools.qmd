@@ -7,12 +7,22 @@ order: 12
 
 The aim of this session is to try out some of the tools that are available that use some of the ideas we have discussed in this course.
 
-# Suggested tools
+# Tools vs custom approaches
+
+In the course so far we introduced key concepts and methods in nowcasting and forecasting of infectious disease dynamics, using a combination of R and (mostly) stan.
+Being able to understand these concepts and implement them in stan comes with the ability to create and adapt models that are tailor made to any given situation and specific characteristics of any given data set.
+At the same time, there is value in using and contributing to open-source **tools** that implement some or all of the methods we have encountered in the course.
+These tools have varying levels of flexibility to deal with different kinds of epidemiological problems and data.
+Whilst they will never have the flexibility of completely custom approaches, using and contributing to them avoids duplication, improves the chances of finding errors, and helps discussing and ultimately enforcing best practice.
+
+We are going to suggest trying three tools that implement several or all the concepts introduced in this course.
+
+## EpiEstim
+
+[EpiEstim](https://mrc-ide.github.io/EpiEstim/) implements
 
 ## EpiNow2
 
 ## Epinowcast
-
-## EpiEstim
 
 # Wrap up
