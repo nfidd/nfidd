@@ -118,7 +118,7 @@ The key assumptions we are making here are:
 - The reproduction number is constant (aside from the effect of susceptible depletion)
 - The number of cases is proportional to the number of susceptibles in the population.
 
-We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/susceptible_renewal.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
 mech_mod <- cmdstan_model(here("stan/mechanistic-r.stan"))
@@ -201,7 +201,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/diff-ar1.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar1.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
