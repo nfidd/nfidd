@@ -181,8 +181,8 @@ df <- data.frame(temp = temp, prob = prob)
 pn <- ggplot(df, aes(x = temp, y = prob)) +
   theme_bw(20) +
   geom_line(lwd = 2) +
-  ylab("Temperature") +
-  xlab("Probability density")
+  xlab("Temperature") +
+  ylab("Probability density")
 ```
 
 :::: {.columns}
