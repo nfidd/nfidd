@@ -3,6 +3,8 @@ title: "Nowcasting"
 order: 6
 ---
 
+[Introduction to nowcasting](slides/introduction-to-nowcasting)
+
 ```{r echo = FALSE}
 set.seed(123)
 ```
