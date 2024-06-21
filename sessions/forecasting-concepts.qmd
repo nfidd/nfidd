@@ -37,7 +37,8 @@ If not using the Visual Editor please remember that the code in the session need
 See the lecture slides.
 
 ::: {.callout-tip}
-Proper scoring rules are scoring rules that are optimized when the forecasted distribution is equal to the true distribution. In effect, they incentivize forecasters to provide accurate and well-calibrated probabilistic forecasts.
+Proper scoring rules are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
+Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
 :::
 
 # What is forecasting?
