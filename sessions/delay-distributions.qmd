@@ -153,8 +153,11 @@ Do you recover the parameters used for simulation?
 ::: {.callout-note collapse="true"}
 ### Hints
 
-Tip 1: First create a new column giving the time from onset to hospitalisation Tip 2: As in the last session, we can use our dataset to sample from the model posterior.
-Here we also need to exclude infections that didn't result in hospitalisation (try using `na.omit()` around the data).
+- Tip 1: First create a new column giving the time from onset to hospitalisation
+
+- Tip 2: As in the last session, we can use our dataset to sample from the model posterior.
+
+Here we also need to exclude infections that didn't result in hospitalisation (try passing the data to `na.omit()`).
 :::
 
 ::: {.callout-note collapse="true"}
