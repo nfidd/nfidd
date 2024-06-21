@@ -12,7 +12,7 @@ set.seed(123)
 ## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
-You will do this by working in `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
+First we'll look at this working forwards from infections - we'll use `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
 
 ## Libraries used
 
@@ -53,6 +53,8 @@ Using infectious disease data for analysis comes with three common challenges:
 2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved)
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
+### Load the outbreak data
+
 We will work with a data set that is included in the `nfidd` R package that you installed initially.
 The column `infection_time` is a linelist of infections from our example outbreak, given as a decimal number of days that have passed since the initial infection of the outbreak.
 It can be loaded with the `data` command.
@@ -64,9 +66,9 @@ head(infection_times)
 ### visualise the infection curve
 ggplot(infection_times, aes(x = infection_time)) +
   geom_histogram(binwidth = 1) +
-  scale_x_continuous(n.breaks = 45) +
-  xlab("Infection time (in days)") +
-  ylab("Number of infections")
+  scale_x_continuous(limits = c(0, 90), n.breaks = 30) +
+  labs(x = "Infection time (in days)", y = "Number of infections",
+       title = "Infections during an outbreak")
 ```
 
 ::: callout-note
@@ -74,54 +76,34 @@ In reality, data from an outbreak will usually be given as dates, not decimals; 
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
 :::
 
+### Working forwards: creating a sequence of delays after infection
+
 We would now like to simulate hospitalisations arising from this outbreak.
-We will make the following assumptions about the process from infection to hospital admission:
+We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:
 
 -   Infection to symptoms:
-
     -   We'll assume all infections cause symptoms.
-
     -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
 
 -   Symptoms to hospital admission:
-
     -   We'll assume that 30% of symptomatic cases become hospitalised.
-
     -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
 
-::: callout-tip
-### Take 10 minutes
-
-Try to add onset and hospitalisation times (in decimal number of days after the first infection) to the infection data.
-:::
-
-::: {.callout-note collapse="true"}
-### Hints
-
-1.  Create two new columns in the data: `onset_time` and `hosp_time`.
-    Each column should add the new time (onset or admission) to the previous time (infection or onset), using random values from the correct probability distribution.
-    Use the `rgamma` and `rlnorm` functions we used in the last session.
-
-2.  Cases that don't become hospitalised should have missing (`NA`) values for the admission time.
-    This is a binary (1/0) outcome, so try drawing from the binomial distribution with the `rbinom` function to create a random distribution of missing values in your column of admission times.
-:::
-
-::: {.callout-note collapse="true"}
-### Solution
+Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
 ```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
 ```
-:::
 
 Now we can plot infections, hospitalisations and onsets.
-To do so we first convert our data frame to long format.
 
 ```{r plot_distributions, messages = FALSE}
+# convert our data frame to long format
 dfl <- df |>
   pivot_longer(
     cols = c(infection_time, onset_time, hosp_time),
     names_to = "type", values_to = "time"
   )
+# plot
 ggplot(dfl, aes(x = time)) +
   geom_histogram(position = "dodge", binwidth = 1) +
   facet_wrap(~ type, ncol = 1) +
@@ -129,48 +111,38 @@ ggplot(dfl, aes(x = time)) +
   ylab("Count")
 ```
 
-## Estimating delay distributions
+## Working backwards: estimating delay distributions from outcome data
 
 As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
 
-For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+Let's look at a specific problem: we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
 This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
 
-To do this we can use the same model as in the [session on delay distributions](delay-distributions#estimating-delay-distributions), assuming (or knowing, in this instance) that the delays follows a lognormal distribution.
+To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
 
 ```{r naive_delay_model}
 mod <- cmdstan_model(here("stan", "lognormal.stan"))
+mod
 ```
 
-::: callout-tip
-### Take 5 minutes
+Let's estimate the onset-to-hospitalisation delay using the simulated data set we created above. Do we recover the parameters used for simulation?
 
-Estimate the onset-to-hospitalisation delay using the simulated data set we created above.
-Do you recover the parameters used for simulation?
-:::
-
-::: {.callout-note collapse="true"}
-### Hints
-
-Tip 1: First create a new column giving the time from onset to hospitalisation Tip 2: As in the last session, we can use our dataset to sample from the model posterior.
-Here we also need to exclude infections that didn't result in hospitalisation (try using `na.omit()` around the data).
-:::
-
-::: {.callout-note collapse="true"}
-### Solution
-
-You can *sample* from the model's posterior distribution by feeding it our simulated data set.
+We can do this by *sampling* from the model's posterior distribution by feeding it our simulated data set.
 
 ```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
-## Time from onset to hospitalisation
+## Specify the time from onset to hospitalisation
 df_onset_to_hosp <- df |>
-  mutate(onset_to_hosp = hosp_time - onset_time)
+  mutate(onset_to_hosp = hosp_time - onset_time) |> 
+  # exclude infections that didn't result in hospitalisation
+  drop_na(onset_to_hosp)
+
 ## Use the data to sample from the model posterior
 res <- mod$sample(
   data = list(
-    n = nrow(na.omit(df_onset_to_hosp)),
-    y = na.omit(df_onset_to_hosp)$onset_to_hosp
+    n = length(df_onset_to_hosp$onset_to_hosp),
+    y = df_onset_to_hosp$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
@@ -193,25 +165,24 @@ These estimates should look similar to what we used in the simulations.
 We can plot the resulting probability density functions.
 
 ```{r plot_onset_hospitalisation}
-## get shape and rate samples
-df <- res |>
+## get shape and rate samples from the posterior
+res_df <- res |>
   as_draws_df() |>
   filter(.draw %in% sample(.draw, 20)) ## sample 20 iterations randomly
 
 ## find the value (x) that includes 99% of the cumulative density
-max_x <- max(qlnorm(0.99, meanlog = df$meanlog, sdlog = df$sdlog))
+max_x <- max(qlnorm(0.99, meanlog = res_df$meanlog, sdlog = res_df$sdlog))
 
 ## calculate density on grid of x values
 x <- seq(0, max_x, length.out = 100)
-df <- df |>
+res_df <- res_df |>
   crossing(x = x) |> ## add grid to data frame
   mutate(density = dlnorm(x, meanlog, sdlog))
 
 ## plot
-ggplot(df, aes(x = x, y = density, group = .draw)) +
+ggplot(res_df, aes(x = x, y = density, group = .draw)) +
   geom_line(alpha = 0.3)
 ```
-:::
 
 ## Going further
 
