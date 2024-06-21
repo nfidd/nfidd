@@ -4,31 +4,10 @@ Title: Material to support course on nowcasting and forecasting of infectious
 Version: 0.0.0.9999
 Authors@R: c(
     person(
-      given = "Sebastian",
-      family = "Funk",
+      given = "NFIDD course contributors",
+      family = "",
       role = c("cre", "aut"),
-      email = "sebastian.funk@lshtm.ac.uk",
-      comment = c(ORCID = "0000-0002-2842-3406")
-    ),
-    person(
-      given = "Sam Abbott",
-      role = "aut",
-      email = "contact@samabbott.co.uk",
-      comment = c(ORCID = "0000-0001-8057-8037")
-    ),
-    person(
-      given = "Kath",
-      family = "Sherratt",
-      role = "aut",
-      email = "katharine.sherratt@lshtm.ac.uk",
-      comment = c(ORCID = "0000-0003-2049-3423")
-    ),
-    person(
-      given = "James Mba",
-      family = "Azam",
-      role = "aut",
-      email = "james.azam@lshtm.ac.uk",
-      comment = c(ORCID = "0000-0001-5782-7330")
+      email = "epiforecasts@gmail.com"
     )
   )
 Description: Resources to support a short course on nowcasting and forecasting
