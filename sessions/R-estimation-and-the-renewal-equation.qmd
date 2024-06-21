@@ -169,7 +169,7 @@ Once stan has run its chains, we can visualise the estimates:
 ```{r r_plot}
 # Extract posterior draws
 r_posterior <- r_fit |>
-  gather_draws(infections[infection_day], R[infection_day]) |>
+  gather_draws(R[infection_day]) |>
   ungroup() |>
   mutate(infection_day = infection_day - 1)
 
