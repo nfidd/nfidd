@@ -123,7 +123,8 @@ rw_forecast
 
 ## Visualising the forecast
 
-We can now visualise the forecast. We will first extract the forecast and then plot the forecasted onsets alongside the observed onsets.
+We can now visualise the forecast.
+We will first extract the forecast and then plot the forecasted number of symptom onsets alongside the observed number of symptom onsets.
 
 ```{r extract-forecast}
 forecast <- rw_forecast |>
@@ -137,7 +138,7 @@ target_onsets <- onset_df |>
 
 ```{r plot_forecast}
 forecast |>
-  filter(.draw <= 100) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
@@ -158,17 +159,22 @@ Is there another way you could visualise the forecast that might be more informa
 
 ```{r plot_forecast_log}
 forecast |>
-  filter(.draw <= 100) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_continuous(trans = "log")
 ```
 
-This should be a lot more informative. We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in onsets. However, we can now  see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast. This is a common pattern in forecasting where the model is good at capturing the short term dynamics but struggles with the longer term dynamics.
+This should be a lot more informative.
+We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in symptom onsets.
+However, we can now see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast.
+This is a common pattern in forecasting where a model is good at capturing the short term dynamics but struggles with the longer term dynamics.
 :::
 
-As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts. To get an even better picture here we will fit another model to a longer time series and then compare the forecast and estimated reproduction numbers.
+As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number.
+This can be helpful for understanding why our forecasts of symptom onsets look the way they do and for understanding the uncertainty in the forecasts.
+In order to be able to compare this to the "true" reproduction number estimated once all relevant data is available we will fit the model again but with a later cutoff and then compare the reproduction numbers produced as *forecasts* at the earlier time and *estimates* at the later time.
 
 ```{r fit_model_long}
 long_onset_df <- onset_df |>
@@ -213,11 +219,8 @@ forecast_r |>
   geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
 ```
 
-::: {.callout-tip}
-The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
-:::
-
 ::: {.callout-note}
+The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
 The vertical dashed line represents the point at which we started forecasting.
 :::
 
@@ -256,11 +259,11 @@ We generated these forecasts using the code in `data-raw/generate-example-foreca
 
 Some important things to note about these forecasts:
 
-  - We used a 14 day forecast horizon.
-  - Each forecast used all the data up to the forecast date.
-  - We generated 1000 posterior samples for each forecast.
-  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
-  - We used pregenerated simulated data:
+- We used a 14 day forecast horizon.
+- Each forecast used all the data up to the forecast date.
+- We generated 1000 posterior samples for each forecast.
+- We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of the data (excluding the last 14 days to allow a full forecast).
+- We used pregenerated simulated data:
 
 ```{r}
 example_onset_df
@@ -291,7 +294,7 @@ rw_forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log")
+  scale_y_log10()
 ```
 
 ::: {.callout-tip}
@@ -403,7 +406,7 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 :::
 
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip collapse="true"}
 #### Mathematical Definition (optional)
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
 
@@ -439,7 +442,7 @@ sc_scores |>
   geom_point()
 ```
 
-and across different forecast horizons.
+and at different time points.
 
 ```{r}
 sc_scores |>
@@ -476,7 +479,7 @@ There are many ways to assess calibration and bias but one common way is to use 
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip collapse="true"}
 ## Mathematical Definition (optional)
 
 ### Continuous Case
@@ -541,7 +544,7 @@ Do they look biased?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- It looks like the model is biased towards over predicting and that this bias gets worse at longer forecast horizons.
+- It looks like the model is biased towards overpredicting and that this bias gets worse at longer forecast horizons.
 - Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently overpredicting but the model is also over predicting at other times.
 :::
 
