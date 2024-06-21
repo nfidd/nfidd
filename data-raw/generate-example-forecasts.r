@@ -64,7 +64,7 @@ target_days <- onset_df |>
   filter(day > 21) |>
   pull(day)
 
-# only keep forecasts from every 7 days
+# create forecasts every 7 days
 target_days <- target_days[seq(1, length(target_days), 7)]
 
 

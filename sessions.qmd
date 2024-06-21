@@ -57,9 +57,8 @@ Monday June 24: 16.00-17.30
 
 Tuesday June 25: 9.00-10.30
 
-- Introduction to nowcasting as a right-truncation problem (15 mins)
-- Practice session: A simple nowcast model using pre-estimated delay distributions (15 mins)
-- Joint estimation of delay distributions and nowcasting (15 mins)
+- Introduction to nowcasting as a right-truncation problem (10 mins)
+- Practice session: A simple nowcast model using pre-estimated delay distributions (35 mins)
 - Practice session: Joint estimation of delay distributions and nowcasting (35 mins)
 - Wrap up (10 mins)
 
@@ -72,8 +71,6 @@ Tuesday June 25: 11.00-12.30
 - Introduction to forecast evaluation (20 mins)
 - Practice session: evaluate your forecast (30 mins)
 - Wrap up (10 mins)
-
-Tuesday June 25: 16.00-17.30
 
 ## Session 8: Forecasting models
 

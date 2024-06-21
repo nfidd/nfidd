@@ -19,13 +19,11 @@ Hans Rosling, Liberia, 2014
 - is it rising/falling and by how much?
 - what does this mean for the near future?
 
-### Data usually looks like this {.smallest}
+### Data usually looks like this
 
 ![](figures/linelist.png)
 
-NOTE: not real data
-
-### Aggregated data can look like this
+### Aggregated data can look like this {.smaller}
 
 ![](figures/monkeypox_delayed.png)
 

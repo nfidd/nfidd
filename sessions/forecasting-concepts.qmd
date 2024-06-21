@@ -39,23 +39,25 @@ See the lecture slides.
 # What is forecasting?
 
 Forecasting is the process of making predictions about the future based on past and present data.
-In the context of infectious disease epidemiology, forecasting is the process of predicting the future course of an epidemic based on past and present data.
-Here we focus on forecasting observed data (i.e. onsets) but forecasts can also be made for other quantities of interest such as the number of infections, the reproduction number, or the number of deaths.
-Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number. In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number. The only difference is that we will extend the model into the future and for the purpose of this session we will remove the nowcasting part of the model.
+In the context of infectious disease epidemiology, forecasting is usually the process of predicting the future course of some metric of infectious disease incidence or prevalence based on past and present data.
+Here we focus on forecasting observed data (the number of individuals with new symptom onset) but forecasts can also be made for other quantities of interest such as the number of infections, the reproduction number, or the number of deaths.
+Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number. In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number.
+The only difference is that we will extend the model into the future.
+In order to make things simpler we will remove the nowcasting part of the model, but in principle all these approaches could be combined in a single model.
 
 ::: {.callout-tip}
 ## What do we look for in a good forecast? Some food for thought:
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
-2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over or under predict.
+2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
+4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 :::
 
 # Extending a model into the future
 
 The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
 Based on what we found in the [nowcasting session](nowcasting.qmd) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
-We can do this by extending the model into the future by simulating the model forward in time. 
-This is known as a generative model.
+We can do this by simulating the generative model forward in time. 
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
 So what does this look like in code? Lets load in the model again and take a look.
 
@@ -83,21 +85,23 @@ Do you see any limitations of this approach?
   It would be more computationally efficient to have a separate model for forecasting.
 :::
 
-Before we can forecast we need some data to fit the model to and the compare the forecasts to. We will use the same simulated data as in the renewal and nowcasting sessions. We also need to pick a point to forecast from. We will use day 41 in line with the nowcasting session.
+Before we can forecast we need some data to fit the model to.
+In order to assess the quality of the forecasts we will also need some future (or hold-out) data that we can compare the forecasts to.
+We will use the same simulated data as in the renewal and nowcasting sessions.
+We will try to make a forecast on day 41 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
 source(here::here("snippets", "simulate-onsets.r"))
-onset_df
-
 cutoff <- 41
-
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
+tail(onset_df)
 ```
 
 ## Fitting the model and forecast for 28 days into the future
 
-We can now fit the model to the data and then forecast into the future. This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
+We can now fit the model to the data and then make a forecast.
+This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
 
 ```{r fit_model}
 horizon <- 28
@@ -119,7 +123,8 @@ rw_forecast
 
 ## Visualising the forecast
 
-We can now visualise the forecast. We will first extract the forecast and then plot the forecasted onsets alongside the observed onsets.
+We can now visualise the forecast.
+We will first extract the forecast and then plot the forecasted number of symptom onsets alongside the observed number of symptom onsets.
 
 ```{r extract-forecast}
 forecast <- rw_forecast |>
@@ -133,7 +138,7 @@ target_onsets <- onset_df |>
 
 ```{r plot_forecast}
 forecast |>
-  filter(.draw <= 100) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
@@ -154,17 +159,22 @@ Is there another way you could visualise the forecast that might be more informa
 
 ```{r plot_forecast_log}
 forecast |>
-  filter(.draw <= 100) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_continuous(trans = "log")
 ```
 
-This should be a lot more informative. We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in onsets. However, we can now  see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast. This is a common pattern in forecasting where the model is good at capturing the short term dynamics but struggles with the longer term dynamics.
+This should be a lot more informative.
+We see that for longer forecast horizons the model is not doing a great job of capturing the reduction in symptom onsets.
+However, we can now see that the model seems to be producing very reasonable forecasts for the first week or so of the forecast.
+This is a common pattern in forecasting where a model is good at capturing the short term dynamics but struggles with the longer term dynamics.
 :::
 
-As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number. This can be helpful for understanding why our forecasts of onsets look the way they do and for understanding the uncertainty in the forecasts. To get an even better picture here we will fit another model to a longer time series and then compare the forecast and estimated reproduction numbers.
+As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number.
+This can be helpful for understanding why our forecasts of symptom onsets look the way they do and for understanding the uncertainty in the forecasts.
+In order to be able to compare this to the "true" reproduction number estimated once all relevant data is available we will fit the model again but with a later cutoff and then compare the reproduction numbers produced as *forecasts* at the earlier time and *estimates* at the later time.
 
 ```{r fit_model_long}
 long_onset_df <- onset_df |>
@@ -209,11 +219,8 @@ forecast_r |>
   geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
 ```
 
-::: {.callout-tip}
-The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
-:::
-
 ::: {.callout-note}
+The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
 The vertical dashed line represents the point at which we started forecasting.
 :::
 
@@ -252,11 +259,11 @@ We generated these forecasts using the code in `data-raw/generate-example-foreca
 
 Some important things to note about these forecasts:
 
-  - We used a 14 day forecast horizon.
-  - Each forecast used all the data up to the forecast date.
-  - We generated 1000 posterior samples for each forecast.
-  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
-  - We used pregenerated simulated data:
+- We used a 14 day forecast horizon.
+- Each forecast used all the data up to the forecast date.
+- We generated 1000 posterior samples for each forecast.
+- We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of the data (excluding the last 14 days to allow a full forecast).
+- We used pregenerated simulated data:
 
 ```{r}
 example_onset_df
@@ -287,7 +294,7 @@ rw_forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log")
+  scale_y_log10()
 ```
 
 ::: {.callout-tip}
@@ -399,7 +406,7 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 :::
 
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip collapse="true"}
 #### Mathematical Definition (optional)
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
 
@@ -435,7 +442,7 @@ sc_scores |>
   geom_point()
 ```
 
-and across different forecast horizons.
+and at different time points.
 
 ```{r}
 sc_scores |>
@@ -472,7 +479,7 @@ There are many ways to assess calibration and bias but one common way is to use 
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip collapse="true"}
 ## Mathematical Definition (optional)
 
 ### Continuous Case
@@ -537,15 +544,14 @@ Do they look biased?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- It looks like the model is biased towards over predicting and that this bias gets worse at longer forecast horizons.
-- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently over predicting but the model is also over predicting at other times.
+- It looks like the model is biased towards overpredicting and that this bias gets worse at longer forecast horizons.
+- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently overpredicting but the model is also over predicting at other times.
 :::
 
 ## Scoring on the log scale
 
-We can also score on the log scale.
-This can be useful if we are interested in the relative performance of the model at different scales of the data.
-For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
+We can also score on the logarithmic scale.
+This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
 In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates.
 Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
 
@@ -658,9 +664,9 @@ Do they look biased?
 
 # Going further
 
-- What other ways could we summarise the performance of the forecasts?
+- In which other ways could we summarise the performance of the forecasts?
 - What other metrics could we use?
-- There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model  and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
+- There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
 - There are many other metrics that can be used to evaluate forecasts. The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-details.html) for the `{scoringutils}` package has a good overview of these metrics and how to use them.
 - One useful way to think about evaluating forecasts is to consider exploring the scores as a data analysis in its own right. For example, you could look at how the scores change over time, how they change with different forecast horizons, or how they change with different models. This can be a useful way to understand the strengths and weaknesses of your model. Explore some of these aspects using the scores from this session.
 
