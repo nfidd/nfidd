@@ -42,7 +42,7 @@ The outbreak lasted around 90 days after the first infection, with new infection
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.
-This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't necessary know how well this corresponds to what really happened.
 :::
 
 We will later deal with modelling the infectious process.
@@ -50,7 +50,7 @@ For now, we will focus on modelling how infections get reported in data - the *o
 Using infectious disease data for analysis comes with three common challenges:
 
 1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
-2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved)
+2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved).
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
 We will work with a data set that is included in the `nfidd` R package that you installed initially.
@@ -87,7 +87,7 @@ We will make the following assumptions about the process from infection to hospi
 
     -   We'll assume that 30% of symptomatic cases become hospitalised.
 
-    -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
+    -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week (7 days).
 
 ::: callout-tip
 ### Take 10 minutes
@@ -131,7 +131,7 @@ ggplot(dfl, aes(x = time)) +
 
 ## Estimating delay distributions
 
-As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
+As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in outbreaks.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 
 For now, let us just assume we have a data set of symptom onset times and some hospitalisation times, and we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
@@ -179,7 +179,7 @@ res <- mod$sample(
 ::: callout-caution
 ### Reduce the amount of messages printed to the screen
 
-As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+As before, the arguments to `mod$sample()` after the `data` argument are there to remove the amount of messages printed to the screen (and in this document).
 You can safely remove them.
 :::
 
