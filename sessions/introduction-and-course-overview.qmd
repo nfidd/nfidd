@@ -34,9 +34,9 @@ With that, we can start to interpret the present (nowcasting) and predict the fu
 
 ### Why this course?
 
--   common questions in outbreak response
--   easy to make mistakes
--   no comprehensive training resource
+-   These are common questions in outbreak response
+-   Accounting for underlying processes can get surprisingly complicated surprisingly quickly, and it's easy to make mistakes
+-   There's currently no comprehensive training resource that links these common questions and challenges together
 
 ### Approach
 
@@ -49,8 +49,8 @@ Throughout the course we will
 
 ### Timeline for the course
 
--   delay distributions and how to estimate them (day 1)
--   R estimation and the generation interval (day 1)
+-   delay distributions and how to estimate them (Day 1)
+-   R estimation and the generation interval (Day 1)
 -   nowcasting (day 2)
 -   forecasting and evaluation, ensemble methods (day 2)
 -   applications (day 3)
