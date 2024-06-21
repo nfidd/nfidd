@@ -49,23 +49,31 @@ We can use convolutions with the delay distribution that applies at the *individ
 ## Why use a convolution, not individual delays?
 
 - we don't always have individual data available
+- we often model other processes at the population level (such as transmission) and so being able to model delays on the same scale is useful
 - doing the computation at the population level requires fewer calculations (i.e. is faster)
 
 ::: {.fragment .fade-in}
-- **however, we have lost uncertainty by focusing on the expectation**
+- **however, a downside is that we won't have realistic uncertainty for small samples**
 :::
 
 ## What if $f$ is continuous?
 
 Having moved to the population level, we can't estimate individual-level event times any more.
 
-Instead, we discretise the distribution. One way of doing so:
+Instead, we discretise the distribution (remembering that it is **double censored**). One way of doing so:
 
 $$
-f_t \propto F(t + 1) - F(t - 1)
+F^*(t) = \int_0^1 F(t - u) du
+
+$$
+f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
 $$
 
 where $F(t) = 0$ for $t \leq 0$.
+
+::: {.fragment .fade-in}
+- **Don't worry if this seems complicated we will explore this using simulation during the session**
+:::
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
