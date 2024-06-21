@@ -33,7 +33,7 @@ The [example of nowcasting, Rt estimation and forecasting with EpiNow2](https://
 ## Epinowcast
 
 [Epinowcast](https://package.epinowcast.org/) was created to replace EpiNow2.
-It implements all the models discussed in the course with a frontend to work with snapshots of data by reference and reporting date.
+It implements all the models discussed in the course with a frontend to work with line lists, data by reference and report date or cumulative data snapshots.
 Whilst this model can also be used for forecasts (as we have seen) this does not currently have a user-facing interface in the package.
 
 The [vignette on estimating the effective reproduction number in real-time for a single timeseries with reporting delays](https://package.epinowcast.org/articles/single-timeseries-rt-estimation.html) is a good example of joint nowcasting and reproduction number estimation from an aggregated time series of reference (outcome) and reporting counts.
