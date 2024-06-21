@@ -49,10 +49,16 @@ Throughout the course we will
 
 ### Timeline for the course
 
--   delay distributions and how to estimate them (Day 1)
--   R estimation and the generation interval (Day 1)
+-   delay distributions and how to estimate them (day 1)
+-   R estimation and the generation interval (day 1)
 -   nowcasting (day 2)
 -   forecasting and evaluation, ensemble methods (day 2)
 -   applications (day 3)
 
-[Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors.qmd)
+Let's get started!
+
+- Have a more detailed look at the [learning objectives](learning_objectives.qmd)
+
+- [Introduction to the course and the instructors](sessions/slides/introduction-to-the-course-and-instructors.qmd)
+
+- If you haven't already, start with [getting set up for the course](getting-set-up.qmd)
