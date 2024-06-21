@@ -34,9 +34,9 @@ With that, we can start to interpret the present (nowcasting) and predict the fu
 
 ### Why this course?
 
--   common questions in outbreak response
--   easy to make mistakes
--   no comprehensive training resource
+-   These are common questions in outbreak response
+-   Accounting for underlying processes can get surprisingly complicated surprisingly quickly[^1], and it's easy to make mistakes
+-   There's currently no comprehensive training resource that links these common questions and challenges together
 
 ### Approach
 
@@ -55,4 +55,13 @@ Throughout the course we will
 -   forecasting and evaluation, ensemble methods (day 2)
 -   applications (day 3)
 
-[Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors.qmd)
+Let's get started!
+
+-   Have a more detailed look at the [learning objectives](/learning_objectives.qmd)
+
+-   [Introduction to the course and the instructors](slides/introduction-to-the-course-and-instructors.qmd)
+
+-   If you haven't already, start with [getting set up for the course](/getting-set-up.qmd)
+
+
+[^1]: Time travel is [messy stuff](https://youtu.be/q2nNzNo_Xps)
