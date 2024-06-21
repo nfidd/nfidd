@@ -85,7 +85,10 @@ Do you see any limitations of this approach?
   It would be more computationally efficient to have a separate model for forecasting.
 :::
 
-Before we can forecast we need some data to fit the model to and the compare the forecasts to. We will use the same simulated data as in the renewal and nowcasting sessions. We also need to pick a point to forecast from. We will use day 41 in line with the nowcasting session.
+Before we can forecast we need some data to fit the model to.
+In order to assess the quality of the forecasts we will also need some future (or hold-out) data that we can compare the forecasts to.
+We will use the same simulated data as in the renewal and nowcasting sessions.
+We will try to make a forecast on day 41 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
 source(here::here("snippets", "simulate-onsets.r"))
