@@ -13,8 +13,8 @@ The aim of this session is to introduce the concept of probability distributions
 
 ## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
+In this session we will use the `ggplot2` library for plotting, the `here` library to reference files, for example, the stan model, and the `cmdstanr` library for using stan.
+We will also use the `bayesplot` and `posterior` packages to investigate the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("ggplot2")
@@ -32,8 +32,8 @@ If not using the Visual Editor please remember that the code in the session need
 ## Simulating data from a probability distribution
 
 First let us simulate some data from a probability distribution.
-In R, this can is usually done using a family of functions that start with `r`.
-For example, to simulate from a normal distribution you would use the `rnorm()` function.
+In R, this is usually done using a family of random number generation functions that start with `r`.
+For example, to simulate random numbers from a normal distribution you would use the `rnorm()` function.
 All these functions have a first argument `n`, the number of random replicates to generate, and then some further arguments that parameterise the probability distribution.
 
 ```{r rnorm}
@@ -41,12 +41,13 @@ rnorm(n = 10, mean = 0, sd = 1)
 ```
 
 We will use probability distributions to characterise epidemiological delays.
-These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero (although it is worth noting that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first).
+These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
+Note that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first.
 
 Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
-These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e. gives more probability to occasional very large values, whereas the gamma distribution as more of a tail on the left, i.e. gives more probability to values lower than the mean.
+These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e., gives more probability to occasional very large values, whereas the gamma distribution has more of a tail on the left, i.e., gives more probability to values lower than the mean.
 
-The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$. 
+The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$.
 A gamma distribution with mean 5 and variance 2, for example, has $\alpha = 12.5$ and $\beta = 2.5$.
 To simulate from such a distribution, we can use the following R code.
 
@@ -58,7 +59,7 @@ mean(gammas)
 var(gammas)
 ```
 
-The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$. 
+The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$.
 A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sigma = 0.28$.
 
 ```{r lognormals}
@@ -86,7 +87,7 @@ Alternatively we could have used, e.g., `geom_histogram()` to plot the raw data.
 ## Estimating the parameters of probability distributions
 
 We will now use stan to estimate the parameters of the probability distribution.
-To do so, we first load in the model 
+To do so, we first load in the model.
 
 ```{r load_gamma_model}
 ### load gamma model from the session directory
@@ -128,8 +129,8 @@ The arguments to `mod$sample()` after the `data` argument are there to remove th
 You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
 :::
 
-You can see that the estimates are broadly consistent with the parameters we put in.
-To investigate this further, we will conduct a so-called _posterior predictive check_ by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
+You can see that the estimates are broadly consistent with the parameters we specified.
+To investigate this further, we will conduct a so-called *posterior predictive check* by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
 
 ```{r gamma_ppc}
 ## Extract posterior draws
@@ -147,7 +148,7 @@ gamma_ppc <- sapply(seq_along(gammas), function(i) {
 ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
 ```
 
-We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e. the samples generated earlier that we fitted to.
+We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e., the samples generated earlier that we fitted to.
 
 ## Going further
 
