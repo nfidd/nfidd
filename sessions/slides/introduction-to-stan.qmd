@@ -16,7 +16,7 @@ set.seed(12345)
 - a *Probabilistic Programming Language* for Bayesian inference
   (i.e., a way to write down models)
   
-- models are written in a text file (often ending `.stan`) and then loaded into an R/python/etc interface
+- models are written in a text file (ending `.stan`) and then loaded into an R/python/etc interface
 
 - once a model is written down, stan can be used to **generate samples** from the **posterior distribution** (using a variety of methods)
 
