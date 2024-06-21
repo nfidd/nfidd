@@ -12,7 +12,7 @@ df <- infection_times |>
 df <- df |>
   mutate(
     hosp_time = if_else(
-      rbinom(n = n(), size = 1, p = 0.3) == 1,
+      rbinom(n = n(), size = 1, prob = 0.3) == 1,
       hosp_time,
       NA_real_
     )
