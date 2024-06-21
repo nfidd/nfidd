@@ -22,14 +22,20 @@ We are going to suggest trying three tools that implement several or all the con
 [EpiEstim](https://mrc-ide.github.io/EpiEstim/) implements the renewal equation on a time series of infections in a Bayesian framework, i.e. the model in `estimate-r.stan` in the [session on R estimation](R-estimation-and-the-renewal-equation#estimating-R-from-a-time-series-of-infections).
 In combination with the [projections](https://www.repidemicsconsortium.org/projections/) package in can be used for forecasting.
 
+The [EpiEstim vignette](https://mrc-ide.github.io/EpiEstim/articles/full_EpiEstim_vignette.html) is a good starting point for a walkthrough of $R_t$ estimation and forecasting.
+
 ## EpiNow2
 
 [EpiNow2](https://epiforecasts.io/EpiNow2/dev/) implements the renewal equation on a time series of delayed outcomes including nowcasts with a known reporting delay distribution, as well as forecasts using a Gaussian Process or random walk model, i.e. the models introduced here except the joint inference of nowcasts and delays and/or reproduction numbers.
+
+The [example of nowcasting, Rt estimation and forecasting with EpiNow2](https://github.com/epiforecasts/nowcasting.example/blob/main/inst/reports/epinow2.md) is a good place to find out more about how to use EpiNow2 with linelist data.
 
 ## Epinowcast
 
 [Epinowcast](https://package.epinowcast.org/) was created to replace EpiNow2.
 It implements all the models discussed in the course except for the ability to make forecasts.
+
+The [vignette on estimating the effective reproduction number in real-time for a single timeseries with reporting delays](https://package.epinowcast.org/articles/single-timeseries-rt-estimation.html) is a good example of joint nowcasting and reproduction number estimation from an aggregated time series of reference (outcome) and reporting counts.
 
 ## Going further
 
