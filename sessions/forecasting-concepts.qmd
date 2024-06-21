@@ -36,6 +36,10 @@ If not using the Visual Editor please remember that the code in the session need
 
 See the lecture slides.
 
+::: {.callout-tip}
+Proper scoring rules are scoring rules that are optimized when the forecasted distribution is equal to the true distribution. In effect, they incentivize forecasters to provide accurate and well-calibrated probabilistic forecasts.
+:::
+
 # What is forecasting?
 
 Forecasting is the process of making predictions about the future based on past and present data.
@@ -398,10 +402,6 @@ Before we look in detail at the scores, what do you think the scores are telling
 #### What is the Continuous Ranked Probability Score (CRPS)?
 
 The Continuous Ranked Probability Score (CRPS) is a proper scoring rule used to evaluate the accuracy of probabilistic forecasts. It is a generalization of the Mean Absolute Error (MAE) to probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours).
-
-::: {.callout-tip}
-Proper scoring rules are scoring rules that are optimized when the forecasted distribution is equal to the true distribution. In effect, they incentivize forecasters to provide accurate and well-calibrated probabilistic forecasts.
-:::
 
 The CRPS can be thought about as the combination of two key aspects of forecasting:
 1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
