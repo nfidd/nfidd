@@ -64,6 +64,7 @@ Instead, we discretise the distribution (remembering that it is **double censore
 
 $$
 F^*(t) = \int_0^1 F(t - u) du
+$$
 
 $$
 f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
