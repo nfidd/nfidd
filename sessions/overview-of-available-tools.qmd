@@ -37,6 +37,7 @@ It implements all the models discussed in the course with a frontend to work wit
 Whilst this model can also be used for forecasts (as we have seen) this does not currently have a user-facing interface in the package.
 
 The [vignette on estimating the effective reproduction number in real-time for a single timeseries with reporting delays](https://package.epinowcast.org/articles/single-timeseries-rt-estimation.html) is a good example of joint nowcasting and reproduction number estimation from an aggregated time series of reference (outcome) and reporting counts.
+This example does not start from a line list but does contain information about using the package for transforming between line list and appropriately aggregated data.
 
 ## Going further
 
