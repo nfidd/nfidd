@@ -3,13 +3,15 @@ title: "Nowcasting"
 order: 6
 ---
 
+[Introduction to nowcasting](slides/introduction-to-nowcasting)
+
 ```{r echo = FALSE}
 set.seed(123)
 ```
 
 # Objectives
 
-The aim of this session is to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
+This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
 # Libraries used
 
@@ -35,12 +37,12 @@ If not using the Visual Editor please remember that the code in the session need
 
 Epidemiological data is not usually available immediately for analysis.
 Instead, data usually gets collated at different levels of a healthcare or health surveillance system, cleaned, checked before being aggregated and/or anonymised and ultimately shared with an analyst.
-We call the _reporting time_ the time at which a data point (e.g. a time or day of sypmtom onset or a time or day of hospitalisation) has entered the data set used for some analysis.
+We call the _reporting time_ the time a data point (e.g. a time or day of symptom onset or a time or day of hospitalisation) has entered the data set used for some analysis.
 Similar to the data discussed in the preceding session, this time is often only available as a date, i.e. censored at the scale of a day.
 
 We can simulate this reporting process.
-Let us assume that the symptom onsets are reported with a delay, and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
-In order to do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
+Let us assume that the symptom onsets are reported with a delay and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
+To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
 df <- infection_times |>
@@ -276,9 +278,9 @@ What do you think of the nowcast now? Does it look better than the previous one?
 The geometric random walk allows the model to capture the multiplicative growth in the data and so better capture that current indidence is related to past incidence.
 - This should be particularly true when the data is more truncated (i.e nearer to the date of the nowcast) as the geometric random walk allows the model to extrapolate incidence based on previous incidence rather than relying on the prior distribution as the simpler model did.
 - However, the model is still quite simple and so may struggle to capture more complex patterns in the data.
-In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day with statistical noise.
+In particular, the prior model for the geometric random walk assumes that onsets are the same as the previous day with statistical noise.
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
- :::
+:::
 
 # Joint estimation of delay distributions and nowcasting
 
@@ -291,7 +293,7 @@ We can instead estimate the delay distribution and nowcast the data jointly.
 
 ## The reporting triangle
 
-In order to jointly estimate we need to decompose observations into what is known as the reporting triangle.
+To jointly estimate we need to decompose observations into what is known as the reporting triangle.
 This is a matrix where the rows are the days of onset and the columns are the days of report.
 The entries are the number of onsets on day $i$ that are reported on day $j$.
 We can then use this matrix to estimate the delay distribution and nowcast the data.
@@ -302,7 +304,7 @@ $$
 N_{t} = \sum_{d=0}^{D} n_{t,d}
 $$
 
-Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value in order to make the model identifiable and computationally feasible.
+Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value to make the model identifiable and computationally feasible.
 We can now construct a model to estimate $n_{t,d}$,
 
 $$
@@ -313,7 +315,7 @@ where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is
 Here $\lambda_{t}$ is the same as the expected number of onsets on day $t$ in the simple nowcasting model above so we again modelled it using a geometric random walk for now.
 We model $p_{t,d}$ as a [Dirichlet distribution](https://distribution-explorer.github.io/multivariate_continuous/dirichlet.html) as it is a distribution over probabilities.
 $p_{t,d}$ is equivalent to the reporting delays we have been using as fixed quantities so far but now estimated within the model.
-In most real world settings we would want to use our domain expertise to inform the prior distribution of $p_{t,d}$.
+In most real-world settings we would want to use our domain expertise to inform the prior distribution of $p_{t,d}$.
 
 ## Simulating the reporting triangle
 
@@ -399,7 +401,7 @@ joint_nowcast_onsets <- joint_nowcast_fit |>
   filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
 ```
 
-Finally we can plot the nowcast alongside the observed data:
+Finally, we can plot the nowcast alongside the observed data:
 
 ```{r plot-joint-nowcast}
 ggplot(joint_nowcast_onsets, aes(x = day)) +
@@ -417,11 +419,11 @@ Look back at the last three nowcasts. How do they compare? What are the advantag
 - The simple nowcast struggled to capture the generative process of the data and so produced poor nowcasts.
 The nowcast with the geometric random walk was better but still struggled to capture the generative process of the data.
 The joint nowcast was the best of the three as it properly handled the uncertainty and allowed us to fit the delay distribution versus relying on known delays.
-- However, the joint nowcast is still quite simple and so may struggle to capture more complex patterns in the data.
+- However, the joint nowcast is still quite simple (in the sense that no detailed mechanism or reporting process is being modelled) and so may struggle to capture more complex patterns in the data.
 In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day with some statistical noise.
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
-- In addition, whilst we say it is "quit simple" as should be clear from the code it is actually quite complex and computationally intensive.
-This is because we are fitting a model to the reporting triangle which is a mucher larger data set and so the model is relatively quite slow to fit.
+- In addition, whilst we say it is "quite simple" as should be clear from the code it is quite complex and computationally intensive.
+This is because we are fitting a model to the reporting triangle which is a much larger data set and so the model is relatively quite slow to fit.
 :::
 
 
@@ -431,7 +433,7 @@ This is because we are fitting a model to the reporting triangle which is a much
 This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together but don't worry if you don't understand all of it.
 :::
 
-In the previous sessions we have seen how to estimate the reproduction number and how to nowcast the data.
+In the previous sessions, we have seen how to estimate the reproduction number and how to nowcast the data.
 We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly.
 This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
@@ -465,12 +467,12 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Essentially rather that using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
+Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
 We would also remove the `generated quantities` block as we are not nowcasting the data and simplify the observations to just the number of onsets.
 :::
 
-Now lets fit the final model for this session! 
+Now let's fit the final model for this session! 
 
 ```{r joint-nowcast-rt-fit}
 joint_rt_data <- c(joint_data,
@@ -523,8 +525,8 @@ What about the reproduction number?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model is able to capture the trend in infections and account for delays from infection to onset and onset to report.
-- The key takeway from the reproductio number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation).
+- Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model can capture the trend in infections and account for delays from infection to onset and onset to report.
+- The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation).
 This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
 :::
 

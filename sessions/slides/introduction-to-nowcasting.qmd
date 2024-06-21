@@ -1,0 +1,76 @@
+---
+title: "Introduction to nowcasting"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/introduction-to-nowcasting.html
+    footer: "Introduction to nowcasting"
+    slide-level: 3
+---
+
+### Motivating example {.smaller}
+
+Often we see data like this
+
+![](figures/monkeypox_delayed.png)
+
+Data after the dashed line are marked as uncertain. What, if anything, do they tell us about current trends?
+
+### second example {.samller}
+
+... or like this
+
+![](figures/germany_historical.png)
+
+### second example {.samller}
+
+... or like this
+
+![](figures/germany_early.png)
+
+[RKI COVID-19 Situation Report, 8 March 2020](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-03-08-en.pdf?__blob=publicationFile)
+
+### 
+
+These patterns arise because:
+
+- Epidemiological time series are aggregated by the *epidemiologically meaningful date*
+  (e.g. symptom onset, hospital admission, death)
+- There is a *delay* between this date, and the events showing up in the data
+- This leads to an "articifial" *dip* in the most recent data
+
+### The aim of nowcasting
+
+Predict what an epidemiological time series will look like *after all delayed reports* are in.
+
+![](figures/nowcasting.png)
+
+(slide courtesy of Johannes Bracher)
+
+### Nowcasting as right truncation
+
+Remember from [biases in delay estimation](../biases-in-delay-distributions):
+
+**Right truncation**
+
+- reporting of events can be triggered by the **secondary** event
+- in that case, longer delays might be missing because whilst the *primary events* have occurred the *secondary events* **have not occurred yet**
+
+Nowcasting is exactly this if the seondary event is the data being available for analysis.
+
+### Nowcasting as a population-level problem
+
+If we don't have individual-level data, we can estimate the delay distribution of reporting from multiple snapshots
+
+![](figures/germany_historical.png)
+
+### This session
+
+1. Perform nowcast with a known reporting delay distribution
+2. Joint estimation of delay and nowcast
+3. Joint estimation of R_t, delay and nowcast
+
+###
+
+[Return to the session](../nowcasting)
+
