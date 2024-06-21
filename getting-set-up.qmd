@@ -21,7 +21,7 @@ To be able to use the code in each session, you will need a local copy of the co
 
 ### Interacting with the course
 
-In this course, all content is contained in an [R Notebook](https://bookdown.org/yihui/rmarkdown/notebook.html).
+In this course, all content is written using [R Notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html).
 This means that we can combine text with code and see the output directly.
 The notebooks are then directly reproduced on the course website (for example, this page).
 
