@@ -50,6 +50,7 @@ In order to make things simpler we will remove the nowcasting part of the model,
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
 2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
+4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 :::
 
 # Extending a model into the future
