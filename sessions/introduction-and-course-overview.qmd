@@ -3,6 +3,56 @@ title: "Introduction and course overview"
 order: 0
 ---
 
-[Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors.qmd)
-
 [From an epidemiological line list to informing decisions in real-time](slides/from-line-list-to-decisions.qmd)
+
+### Aim of the course
+
+How can we use data typically collected in an outbreak to answer questions like
+
+-   what is the number of cases now (*nowcasting*)
+-   is the outbreak rising/falling and by how much (*R estimation*)
+-   what does this mean for the near future (*forecasting*)
+
+in real time?
+
+To answer these questions, we need to understand the epidemiological processes that create the kinds of data that we typically have available for outbreak analysis.
+
+::: callout
+Let's look at outbreak data from the perspective of an individual infection.
+There are two types of processes happening:
+
+-   upwards, from an individual infection through to being recorded in outbreak data; and
+
+-   outwards, from each infection spreading to cause new infections in the outbreak.
+
+Both of these processes involve time delays and potential biases, which makes analysing data in real time during an outbreak especially tricky.
+:::
+
+In this course, we first focus on making sense of the delays and biases in the data we are able to access in real time during an outbreak.
+We'll combine this with the process of infectious disease transmission, with the reproduction number as the key.
+With that, we can start to interpret the present (nowcasting) and predict the future (forecasting).
+
+### Why this course?
+
+-   common questions in outbreak response
+-   easy to make mistakes
+-   no comprehensive training resource
+
+### Approach
+
+Throughout the course we will
+
+1.  simulate typical infectious disease data in **R** (the *generative model*)
+2.  apply the generative model to data in the probabilistic programming language **stan**, to
+    -   learn about the system (conduct inference)
+    -   make predictions (nowcasting/forecasting)
+
+### Timeline for the course
+
+-   delay distributions and how to estimate them (Day 1)
+-   R estimation and the generation interval (Day 1)
+-   nowcasting (day 2)
+-   forecasting and evaluation, ensemble methods (day 2)
+-   applications (day 3)
+
+[Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors.qmd)
