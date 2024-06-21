@@ -658,7 +658,7 @@ Do they look biased?
 
 # Going further
 
-- What other ways could we summarise the performance of the forecasts?
+- In which other ways could we summarise the performance of the forecasts?
 - What other metrics could we use?
 - There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model  and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
 - There are many other metrics that can be used to evaluate forecasts. The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-details.html) for the `{scoringutils}` package has a good overview of these metrics and how to use them.
