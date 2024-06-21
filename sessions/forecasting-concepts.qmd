@@ -92,12 +92,10 @@ We will try to make a forecast on day 41 (assuming we don't know what the data l
 
 ```{r, load-simulated-onset}
 source(here::here("snippets", "simulate-onsets.r"))
-onset_df
-
 cutoff <- 41
-
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
+tail(onset_df)
 ```
 
 ## Fitting the model and forecast for 28 days into the future
