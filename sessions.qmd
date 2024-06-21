@@ -28,13 +28,12 @@ Monday June 24: 11.00-11.45
 
 ## Session 3: Biases in delay distributions
 
-Monday June 24: 11.45-12.30
+Monday June 24: 11.45-12.30 and 14.00-14.45
 
-- Introduction to biases in delay distributions (15 mins)
-- Practice session: Simulating biases in delay distributions and estimating delays without adjustment on these data (30 mins)
-- Methods to adjust for biases in delay distributions (10 mins)
-- Practice session: estimating delay distributions with adjustments for bias (30 mins)
-- Wrap up (5 mins)
+- Introduction to biases in delay distributions (10 mins)
+- Practice session: Simulating biases in delay distributions and estimating delays without adjustment on these data (35 mins)
+- Practice session: estimating delay distributions with adjustments for bias (35 mins)
+- Wrap up (10 mins)
 
 ## Session 4: Using delay distributions to model the data generating process of an epidemic
 
@@ -48,76 +47,63 @@ Monday June 24: 14.45-15.30
 Monday June 24: 16.00-17.30
 
 - Introduction to the time-varying reproduction number (10 mins)
-- Practice session: using the renewal equation to estimate R (30 mins)
-- Combining R estimation with delay distribution convolutions (10 mins)
-- Practice session: combining R estimation with delay distribution convolutions (30 mins)
+- Practice session: using the renewal equation to estimate R (35 mins)
+- Practice session: combining R estimation with delay distribution convolutions (35 mins)
 - Wrap up (10 mins)
 
-## Session 6: Nowcasting
+## Session 6: Nowcasting concepts
 
 Tuesday June 25: 9.00-10.30
 
 - Introduction to nowcasting as a right-truncation problem (10 mins)
-- Practice session: A simple nowcast model using pre-estimated delay distributions (35 mins)
-- Practice session: Joint estimation of delay distributions and nowcasting (35 mins)
+- Practice session: Simulating the delay distribution (35 mins)
+- Practice session: Nowcasting using pre-estimated delay distributions (35 mins)
 - Wrap up (10 mins)
 
-## Session 7: Forecasting concepts
+## Session 7: Nowcasting with an unknown reporting delay
 
 Tuesday June 25: 11.00-12.30
 
-- Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation (15 mins)
-- Practice session: extending a model into the future (15 minutes)
-- Introduction to forecast evaluation (20 mins)
-- Practice session: evaluate your forecast (30 mins)
+- Introduction to joint estimation of delays and nowcasts (10 mins)
+- Practice session: Joint estimation of delays and nowcasts (35 mins)
+- Practice session: Joint estimation of delays, nowcasts and reproduction numbers (35 mins)
 - Wrap up (10 mins)
 
-## Session 8: Forecasting models
+## Session 8: Forecasting concepts
 
 Tuesday June 25: 14.00-15.30
 
-- An overview of forecasting models (15 mins)
-- Practice session: Forecasting with a mechanistic model (30 mins)
-- Practice session: Evaluating forecasts from a range of common models (45 mins)
+- Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation (10 mins)
+- Practice session: extending a model into the future (35 minutes)
+- Practice session: evaluate your forecast (35 mins)
+- Wrap up (10 mins)
 
-## Session 9: Perspectives on forecasting
+## Session 9: Forecasting models
 
-Tuesday June 25: 16.00-16.45
+Tuesday June 25: 16.00-17.30
 
-- Instructor-led participant discussion about the evaluated forecasts (30 mins)
-- The unreasonable success of ensemble models (15 mins)
+- An overview of forecasting models (10 mins)
+- Practice session: Evaluating forecasts from a range of common models (60 mins)
+- Wrap up and discussion (20 mins)
 
 ## Session 10: Methods in the real world
 
-Tuesday June 25: 16.45-17.30
+Tuesday June 25: 9.00-10.30
 
-- Instructor panel: How do you use these methods in your work? Short talks and Q and A (45 mins)
+- Presentations on uses of forecasts in the real world (45 mins)
+- Q & A about course contents and their relationship to outbreak response work (45 mins)
 
-## Session 11: From line list to estimates
+## Session 11: Overview of available tools
 
-Wednesday June 26: 9.00-10.30
+Wednesday June 26: 11.00-12.15
 
-- Using what we have learned to solve epidemiological problems (10 mins)
-- Practice session: starting from a line list, produce:
-  - delay distribution estimates
-  - nowcasts
-  - R estimation
-  - forecasts
-  using the models created in this course (70 mins)
-- Wrap up (10 mins)
+- Practice session: Choose from one an open source example, run through it,
+and relate it to the material in this course.  (60 mins)
+- Wrap up and discussion (15 mins)
 
-## Session 12: Overview of available tools
+## Session 12: End of course summary
 
-Wednesday June 26: 11.00-12.00
+Wednesday June 26: 12.15-12.30
 
-- Introduction to common packages for delay estimation, R estimation, nowcasting and forecasting (20 mins)
-- Practice session: Choose from one of our suggested open source examples, run through it,
-and related it to the material in this course.  (30 mins)
-- Wrap up (10 mins)
-
-## Session 13: End of course summary and discussion
-
-Wednesday June 26: 12.00-12.30
-
-- Summary of the course (15 mins)
-- Discussion of future directions and how to continue learning (15 mins)
+- Summary of the course (5 mins)
+- Discussion of future directions and how to continue learning (10 mins)
