@@ -26,11 +26,14 @@ Suggests:
     here,
     lubridate,
     posterior,
+    purrr,
     rmarkdown,
+    scoringutils,
     tidybayes,
     tidyr
 Remotes:
-    stan-dev/cmdstanr
+    stan-dev/cmdstanr,
+    epiforecasts/scoringutils@d3cf08d
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
