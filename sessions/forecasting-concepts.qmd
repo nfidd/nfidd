@@ -141,7 +141,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  labs(title = "Symptom onsets", subtitle = "Forecast (trajectories) and observed (points)")
 ```
 
 ::: {.callout-tip}
@@ -163,7 +164,8 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log")
+  scale_y_continuous(trans = "log") +
+  labs(title = "Symptom onsets, log scale", subtitle = "Forecast and observed")
 ```
 
 This should be a lot more informative.
@@ -172,9 +174,9 @@ However, we can now see that the model seems to be producing very reasonable for
 This is a common pattern in forecasting where a model is good at capturing the short term dynamics but struggles with the longer term dynamics.
 :::
 
-As our forecasting model is based on the effective reproduction number we can also visualise the forecast of the reproduction number.
+As our forecasting model is based on the reproduction number, we can also visualise the forecast of the reproduction number.
 This can be helpful for understanding why our forecasts of symptom onsets look the way they do and for understanding the uncertainty in the forecasts.
-In order to be able to compare this to the "true" reproduction number estimated once all relevant data is available we will fit the model again but with a later cutoff and then compare the reproduction numbers produced as *forecasts* at the earlier time and *estimates* at the later time.
+We can also compare this to the "true" reproduction number, estimated once all relevant data is available. To do this, we will fit the model again but with a later cutoff. Then we can compare the reproduction numbers produced as *forecasts* at the earlier time, with *estimates* at the later time that used more of the data.
 
 ```{r fit_model_long}
 long_onset_df <- onset_df |>
@@ -216,7 +218,9 @@ forecast_r |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)
+  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)+
+  labs(title = "Estimated R", 
+       subtitle = "Estimated over whole time series (red), and forecast at day 41 (blue)")
 ```
 
 ::: {.callout-note}
@@ -239,11 +243,11 @@ Can you use this plot to explain why the forecast of onsets looks the way it doe
 - The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
 :::
 
-We managed to learn quite a lot about our models forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
+We managed to learn quite a lot about our model's forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? This is where forecast evaluation comes in which we will cover in the next section.
 
 # Introduction to forecast evaluation
 
-See the lecure notes for more information on forecast evaluation.
+See the lecture notes for more information on forecast evaluation.
 
 # Evaluate your forecast
 
@@ -262,8 +266,8 @@ Some important things to note about these forecasts:
 - We used a 14 day forecast horizon.
 - Each forecast used all the data up to the forecast date.
 - We generated 1000 posterior samples for each forecast.
-- We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of the data (excluding the last 14 days to allow a full forecast).
-- We used pregenerated simulated data:
+- We started forecasting 3 weeks into the outbreak, and then forecast once a week (every 7 days), i.e., we created forecasts on day 22, day 29, ... to day 71. We excluded the last 14 days to allow a full forecast.
+- We used pregenerated simulated data, which is the same as the outbreak we've been using through the course:
 
 ```{r}
 example_onset_df
@@ -282,7 +286,10 @@ rw_forecasts |>
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df |>
     filter(day >= 21),
-    aes(x = day, y = onsets), color = "black")
+    aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
+  labs(title = "Weekly forecasts of symptom onsets over an outbreak",
+       col = "Forecast start day")
 ```
 
 
@@ -294,7 +301,10 @@ rw_forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10()
+  scale_y_log10() +
+  scale_color_binned(type = "viridis") +
+  labs(title = "Weekly symptom onset forecasts: log scale",
+       col = "Forecast start day")
 ```
 
 ::: {.callout-tip}
@@ -314,7 +324,7 @@ What do you think of these forecasts?
 Are they any good?
   - They seem to do a reasonable job of capturing the short term dynamics but struggle with the longer term dynamics.
 How well do they capture changes in trend?
-  - There is litle evidence of the model capturing the reduction in onsets before it begins to show in the data.
+  - There is little evidence of the model capturing the reduction in onsets before it begins to show in the data.
 Does the uncertainty seem reasonable?
  - On the natural scale it looks like the model often over predicts. Things seem more balanced on the log scale but the model still seems to be overly uncertain.
 Do they seem to under or over predict consistently?
@@ -323,7 +333,7 @@ Do they seem to under or over predict consistently?
 
 ## Scoring your forecast
 
-On top of visualising the forecasts we can also transform them using scoring metrics to summarise performance.
+On top of visualising the forecasts, we can also summarise performance quantitatively by transforming them using scoring metrics.
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 We will look at some of these metrics in the next section.
 
@@ -439,7 +449,9 @@ Whilst the CRPS is a very useful metric it can be difficult to interpret in isol
 sc_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by daily forecast horizon", 
+       subtitle = "Summarised across all forecasts")
 ```
 
 and at different time points.
@@ -448,7 +460,9 @@ and at different time points.
 sc_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by forecast start date", 
+       subtitle = "Summarised across all forecasts", x = "forecast date")
 ```
 
 ::: {.callout-tip}
@@ -509,10 +523,11 @@ Let's first look at the overall PIT histogram.
 ```{r pit-histogram}
  sc_forecasts |>
   get_pit(by = "model") |>
-  plot_pit()
+  plot_pit() +
+  labs(title = "PIT histogram")
 ```
 
-As before lets look at the PIT histogram by forecast horizon (to save space we will group horizons)
+As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
 
 ```{r pit-histogram-horizon}
 sc_forecasts |> 
@@ -523,7 +538,8 @@ sc_forecasts |>
   )) |>
   get_pit(by = "group_horizon") |>
   plot_pit() +
-  facet_wrap(~group_horizon)
+  facet_wrap(~group_horizon) +
+  labs(title = "PIT by forecast horizon (days)")
 ```
 
 and then for different forecast dates.
@@ -532,7 +548,8 @@ and then for different forecast dates.
  sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
-  facet_wrap(~target_day)
+  facet_wrap(~target_day) +
+  labs(title = "PIT by forecast date")
 ```
 
 ::: {.callout-tip}
@@ -589,16 +606,18 @@ Before we look in detail at the scores, what do you think the scores are telling
 log_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by daily forecast horizon, scored on the log scale")
 ```
 
-and across different forecast horizons.
+and across different forecast dates
 
 ```{r}
 log_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
-  geom_point()
+  geom_point() +
+  labs(title = "CRPS by forecast date, scored on the log scale")
 ```
 
 ::: {.callout-tip}
@@ -621,7 +640,8 @@ Let's first look at the overall PIT histogram.
 ```{r log-pit-histogram}
 log_sc_forecasts |>
   get_pit(by = "model") |>
-  plot_pit()
+  plot_pit() +
+  labs(title = "PIT histogram, scored on the log scale")
 ```
 
 As before lets look at the PIT histogram by forecast horizon
@@ -635,7 +655,8 @@ log_sc_forecasts |>
   )) |>
   get_pit(by = "group_horizon") |>
   plot_pit() +
-  facet_wrap(~group_horizon)
+  facet_wrap(~group_horizon) +
+  labs(title = "PIT by forecast horizon, scored on the log scale")
 ```
 
 and then for different forecast dates.
@@ -644,7 +665,8 @@ and then for different forecast dates.
 log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
-  facet_wrap(~target_day)
+  facet_wrap(~target_day) +
+  labs(title = "PIT by forecast date, scored on the log scale")
 ```
 
 ::: {.callout-tip}
@@ -656,7 +678,7 @@ Do they look biased?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The overall PIT histograms suggest that the model is less biased to over predict on the log scale than the natural scale but it is still biased. This makes sense when we think back to the comparison of reproduction number estimates and forecasts we made earlier where the model was consistently over predicting on the reproduction number scale.
+- The overall PIT histograms suggest that the model is less biased to over predict when scored on the log scale than the natural scale, but it is still biased. This makes sense when we think back to the comparison of reproduction number estimates and forecasts we made earlier where the model was consistently over predicting on the reproduction number.
 - By forecast horizon the model is still biased towards over predicting but this bias is less pronounced than on the natural scale.
 - Towards the end and beginning of the forecast period the model appears to be well calibrated on the log scale but is biased towards over predicting in the middle of the forecast period.
 - This matches with our knowledge of the underlying reproduction number which were initially constant and then began to decrease only to stabilise towards the end of  the outbreak. 
