@@ -417,7 +417,7 @@ Look back at the last three nowcasts. How do they compare? What are the advantag
 - The simple nowcast struggled to capture the generative process of the data and so produced poor nowcasts.
 The nowcast with the geometric random walk was better but still struggled to capture the generative process of the data.
 The joint nowcast was the best of the three as it properly handled the uncertainty and allowed us to fit the delay distribution versus relying on known delays.
-- However, the joint nowcast is still quite simple and so may struggle to capture more complex patterns in the data.
+- However, the joint nowcast is still quite simple (in the sense that no detailed mechanism or reporting process is being modelled) and so may struggle to capture more complex patterns in the data.
 In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day with some statistical noise.
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 - In addition, whilst we say it is "quite simple" as should be clear from the code it is quite complex and computationally intensive.
