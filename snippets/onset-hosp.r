@@ -17,7 +17,7 @@ df <- df |>
   mutate(
     hosp_time = if_else(
       # use the binomial distribution for random binary outcomes
-      rbinom(n = n(), size = 1, p = 0.3) == 1,
+      rbinom(n = n(), size = 1, prob = 0.3) == 1,
       hosp_time,
       NA_real_
     )

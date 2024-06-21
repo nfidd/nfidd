@@ -42,7 +42,7 @@ The outbreak lasted around 90 days after the first infection, with new infection
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.
-This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't know necessary know how well this corresponds to what really happened.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't necessarily know how well this corresponds to what really happened.
 :::
 
 We will later deal with modelling the infectious process.
@@ -50,7 +50,7 @@ For now, we will focus on modelling how infections get reported in data - the *o
 Using infectious disease data for analysis comes with three common challenges:
 
 1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
-2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved)
+2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved).
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
 ### Load the outbreak data
@@ -66,7 +66,7 @@ head(infection_times)
 ### visualise the infection curve
 ggplot(infection_times, aes(x = infection_time)) +
   geom_histogram(binwidth = 1) +
-  scale_x_continuous(limits = c(0, 90), n.breaks = 30) +
+  scale_x_continuous(n.breaks = 45, expand = c(0, 0)) +
   labs(x = "Infection time (in days)", y = "Number of infections",
        title = "Infections during an outbreak")
 ```
@@ -113,7 +113,7 @@ ggplot(dfl, aes(x = time)) +
 
 ## Working backwards: estimating delay distributions from outcome data
 
-As mentioned above, our data set of infection, onset and hospitalisation times is not the typical data set we encounter in outbreaks.
+As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in outbreaks.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
 
@@ -137,11 +137,10 @@ df_onset_to_hosp <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time) |> 
   # exclude infections that didn't result in hospitalisation
   drop_na(onset_to_hosp)
-
 ## Use the data to sample from the model posterior
 res <- mod$sample(
   data = list(
-    n = length(df_onset_to_hosp$onset_to_hosp),
+    n = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
@@ -151,7 +150,7 @@ res <- mod$sample(
 ::: callout-caution
 ### Reduce the amount of messages printed to the screen
 
-As before the arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
+As before, the arguments to `mod$sample()` after the `data` argument are there to remove the amount of messages printed to the screen (and in this document).
 You can safely remove them.
 :::
 
