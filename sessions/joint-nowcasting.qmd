@@ -73,7 +73,15 @@ In most real-world settings we would want to use our domain expertise to inform 
 Now that we are aiming to jointly estimate the delay distribution we need additional data.
 We can simulate this data by using the same generative process as above but now also simulating the reporting delays.
 
-We first need to simulate the reporting delays:
+Once again we generate our simulated onset dataset:
+
+```{r, load-simulated-onset}
+source(here::here("snippets", "simulate-onsets.r")) ## generates `onset_df`
+head(onset_df)
+cutoff <- 71
+```
+
+We also need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
 source(here::here("functions", "censored-delay-pmf.r"))
