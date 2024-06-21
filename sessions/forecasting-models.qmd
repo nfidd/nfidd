@@ -73,7 +73,7 @@ In our work, we have found that a combination of mechanistic and statistical mod
 
 ## Adding more mechanistic structure to the renewal model
 
-One way to improve the renewal model is to add more mechanistic structure. In the [forecasting concepts session](forecasting-concepts), we saw that the renewal model was unbiased when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+One way to improve the renewal model is to add more mechanistic structure. In the [forecasting concepts session](forecasting-concepts), we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
 
 This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
 
@@ -115,27 +115,30 @@ ggplot(data, aes(x = t, y = R)) +
 The key assumptions we are making here are: 
 
 - The population is constant and we rouchgly know the size of the population.
-- The reproduction number is constant (aside from the effect of susceptible depletion)
-- The number of cases is proportional to the number of susceptibles in the population.
+- The reproduction number only changes due to susceptible depletion
+- The number of new cases at each time is proportional to the number of susceptibles in the population.
 
 We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
-mech_mod <- cmdstan_model(here("stan/mechanistic-r.stan"))
+mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
 mech_mod$print(line_numbers = TRUE)
 ```
 
 ## Adding more statistical structure to the renewal model
 
-Rather than adding more mechanistic structure to the renewal model, we can add more statistical structure.
+Adding more mechanistic structure is not always possible and, if we don't specify mechanisms correctly, might make forecasts worse.
+Rather than adding more mechanistic structure to the renewal model, we could add more statistical structure.
 Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
 We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
 A statistical term that can be used to describe capturing a trend is saying that the time series is _non-stationary_.
+More specifically, a _stationary_ time series is defined as one that looks indistinguishable at all times.
+In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
-The random walk model is specfically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multipled by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($ log(R_t) $), the model is:
+The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($ log(R_t) $), the model is:
 
 $$
 log(R_t) = \phi log(R_{t-1}) + \epsilon_t
@@ -166,7 +169,7 @@ ggplot(data, aes(x = t, y = R)) +
 ```
 :::
 
-However, we probably don't want a model which is biased towards a reproduction number of 1 (though as we know the future in this case it actually could be a reasonable choice!). So what should we do?
+However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
 
 Returning to the idea that the reproduction number is a _non-stationary_ time series, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
 
