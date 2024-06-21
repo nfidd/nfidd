@@ -6,9 +6,29 @@ Authors@R: c(
     person(
       given = "Sebastian",
       family = "Funk",
-      role = c("cre", "cph", "aut"),
+      role = c("cre", "aut"),
       email = "sebastian.funk@lshtm.ac.uk",
       comment = c(ORCID = "0000-0002-2842-3406")
+    ),
+    person(
+      given = "Sam Abbott",
+      role = "aut",
+      email = "contact@samabbott.co.uk",
+      comment = c(ORCID = "0000-0001-8057-8037")
+    ),
+    person(
+      given = "Kath",
+      family = "Sherratt",
+      role = "aut",
+      email = "katharine.sherratt@lshtm.ac.uk",
+      comment = c(ORCID = "0000-0003-2049-3423")
+    ),
+    person(
+      given = "James Mba",
+      family = "Azam",
+      role = "ctb",
+      email = "james.azam@lshtm.ac.uk",
+      comment = c(ORCID = "0000-0001-5782-7330")
     )
   )
 Description: Resources to support a short course on nowcasting and forecasting
@@ -18,7 +38,7 @@ URL: https://github.com/nfidd/nfidd
 BugReports: https://github.com/nfidd/nfiidd/issues
 Depends:
     R (>= 4.2.0)
-Suggests:
+Imports:
     bayesplot,
     cmdstanr,
     dplyr,
