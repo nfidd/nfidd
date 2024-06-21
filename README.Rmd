@@ -27,6 +27,7 @@ quarto::quarto_render()
 
 
 
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -43,15 +44,23 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 
 
 
-### Issues
+### Issue Authors
 
 
 <a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>
 
 
+
+### Issue Contributors
+
+
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+commenter%3Ajamesmbaazam">jamesmbaazam</a>
+
+
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
 
 
 

@@ -38,9 +38,13 @@ Contributions of any kind are welcome!
 <a href="https://github.com/nfidd/nfidd/commits?author=kathsherratt">kathsherratt</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=ManuelStapper">ManuelStapper</a>
 
-### Issues
+### Issue Authors
 
 <a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>
+
+### Issue Contributors
+
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+commenter%3Ajamesmbaazam">jamesmbaazam</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
