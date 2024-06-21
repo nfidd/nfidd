@@ -11,7 +11,7 @@ set.seed(123)
 
 # Objectives
 
-This session aims to introduce how to do _nowcasting_ if the reporting delay distribution is unknown.
+This session aims to introduce how to do nowcasting if the reporting delay distribution is unknown.
 
 # Libraries used
 
