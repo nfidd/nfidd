@@ -100,7 +100,8 @@ tail(onset_df)
 
 ## Fitting the model and forecast for 28 days into the future
 
-We can now fit the model to the data and then forecast into the future. This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
+We can now fit the model to the data and then make a forecast.
+This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
 
 ```{r fit_model}
 horizon <- 28
