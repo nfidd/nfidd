@@ -37,7 +37,7 @@ See the slides for an overview of forecasting models.
 
 # What did we learn about the random walk model from the [forecasting concepts session](forecasting-concepts)?
 
-- It was unbiased when the reproduction number was constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
+- It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
 
 ::: {.callout-note, collapse = TRUE}
@@ -133,7 +133,7 @@ Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
 We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
 A statistical term that can be used to describe capturing a trend is saying that the time series is _non-stationary_.
-More specifically, a _stationary_ time series is defined as one that looks indistinguishable at all times.
+More specifically, a _stationary_ time series is defined as one that does not have a trend over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
@@ -171,7 +171,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
 
-Returning to the idea that the reproduction number is a _non-stationary_ time series, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
+Returning to the idea that the reproduction number is a _non-stationary_ time series, as we have a trend in the reproduction number we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
 
 $$
 log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
@@ -288,7 +288,7 @@ target_onsets <- onset_df |>
 forecast |>
   filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model) +
+  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
 ```
 

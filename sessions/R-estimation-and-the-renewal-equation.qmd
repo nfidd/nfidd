@@ -289,6 +289,28 @@ $$
 
 Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
 
+::: {.callout-note, collapse = TRUE}
+## What does a geometric random walk model look like?
+
+```{r}
+set.seed(123)
+n <- 100
+R <- rep(NA, n)
+R[1] <- rnorm(1, 1, 0.1)
+for (i in 2:n) {
+  R[i] <- R[i-1] + rnorm(1, 0, 0.1)
+}
+
+data <- tibble(t = 1:n, R = exp(R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from a random walk model",
+       x = "Time",
+       y = "R")
+```
+:::
+
 We can now include this in a stan model,
 
 ```{r stan_estimate_inf_and_r_rw}
