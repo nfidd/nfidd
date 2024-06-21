@@ -346,14 +346,11 @@ mech_forecast_diff |>
 
 As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
 
-```{r load_forecasts, eval = FALSE}
+```{r load_forecasts}
 forecasts <- bind_rows(
-  rw_forecasts |>
-    mutate(model = "random_walk"),
-  mech_forecasts |>
-    mutate(model = "mechanistic"),
-  stat_forecasts |>
-    mutate(model = "statistical")
+  rw_forecasts,
+  mech_forecasts,
+  stat_forecasts
 )
 ```
 
@@ -377,7 +374,7 @@ example_onset_df
 ## Visualising your forecast
 
 
-```{r plot-all-forecasts, eval = FALSE}
+```{r plot-all-forecasts}
 forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
@@ -391,7 +388,7 @@ forecasts |>
 
 As for the single forecast it is helpful to also plot the forecast on the log scale.
 
-```{r plot-all-forecasts-log, eval = FALSE}
+```{r plot-all-forecasts-log}
 rw_forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
@@ -418,7 +415,7 @@ Do they seem to under or over predict consistently?
 ## Scoring your forecast
 
 
-```{r convert-forecasts, eval = FALSE}
+```{r convert-forecasts}
 sc_forecasts <- forecasts |>
   left_join(example_onset_df, by = "day") |>
   filter(!is.na(.value)) |>
@@ -436,7 +433,7 @@ sc_forecasts
 
 Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting concepts session](forecasting-concepts).
 
-```{r score-forecasts, eval = FALSE}
+```{r score-forecasts}
 sc_scores <- sc_forecasts |>
   score()
 
@@ -447,7 +444,7 @@ sc_scores
 
 Let's summarise the scores by model first.
 
-```{r, eval = FALSE}
+```{r}
 sc_scores |>
   summarise_scores(by = "model")
 ```
@@ -469,7 +466,7 @@ As in the [forecasting concepts session](forecasting-concepts), we will start by
 
 First by forecast horizon.
 
-```{r, eval = FALSE}
+```{r}
 sc_scores |>
   summarise_scores(by = c("model", "horizon")) |>
   ggplot(aes(x = horizon, y = crps, col = model)) +
@@ -478,7 +475,7 @@ sc_scores |>
 
 and across different forecast dates
 
-```{r, eval = FALSE}
+```{r}
 sc_scores |>
   summarise_scores(by = c("target_day", "model")) |>
   ggplot(aes(x = target_day, y = crps, col = model)) +
@@ -508,7 +505,7 @@ What are the key differences between the models?
 
 Let's first look at the overall PIT histogram.
 
-```{r pit-histogram, eval = FALSE}
+```{r pit-histogram}
  sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
@@ -517,7 +514,7 @@ Let's first look at the overall PIT histogram.
 
 As before lets look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
-```{r pit-histogram-horizon, eval = FALSE}
+```{r pit-histogram-horizon}
 sc_forecasts |> 
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
@@ -531,7 +528,7 @@ sc_forecasts |>
 
 and then for different forecast dates.
 
-```{r pit-histogram-date, eval = FALSE}
+```{r pit-histogram-date}
  sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
@@ -554,7 +551,7 @@ Which model do you think is best?
 
 Again as in the [forecasting concepts session](forecasting-concepts), we will also score the forecasts on the log scale.
 
-```{r log-convert-forecasts, eval = FALSE}
+```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
   transform_forecasts(
     fun = log_shift,
@@ -574,7 +571,7 @@ Reminder: For more on scoring on the log scale see [Scoring forecasts on transfo
 
 ### At a glance
 
-```{r, eval = FALSE}
+```{r}
 log_scores |>
   summarise_scores(by = "model")
 ```
@@ -586,14 +583,14 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 ### CRPS
 
-```{r, eval = FALSE}
+```{r}
 log_sc_scores |>
   summarise_scores(by = c("model", "horizon")) |>
   ggplot(aes(x = horizon, y = crps, col = model)) +
   geom_point()
 ```
 
-```{r, eval = FALSE}
+```{r}
 log_sc_scores |>
   summarise_scores(by = c("target_day", "model")) |>
   ggplot(aes(x = target_day, y = crps, col = model)) +
@@ -614,7 +611,7 @@ How does it compare to the scores on the original scale?
 
 ### PIT histograms
 
-```{r pit-histogram, eval = FALSE}
+```{r pit-histogram}
  log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
@@ -622,7 +619,7 @@ How does it compare to the scores on the original scale?
 ```
 
 
-```{r pit-histogram-horizon, eval = FALSE}
+```{r pit-histogram-horizon}
 log_sc_forecasts |> 
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
@@ -635,7 +632,7 @@ log_sc_forecasts |>
 ```
 
 
-```{r pit-histogram-date, eval = FALSE}
+```{r pit-histogram-date}
  log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +

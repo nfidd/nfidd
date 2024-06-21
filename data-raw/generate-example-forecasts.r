@@ -87,7 +87,9 @@ stat_mod <- cmdstan_model(here("stan", "statistical-r.stan"))
 
 stat_forecasts <- target_days |>
   map_dfr(
-    \(x) forecast_target_day(stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw)
+    \(x) forecast_target_day(
+      stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw
+    )
   ) |>
   mutate(model = "Statistical")
 
@@ -105,7 +107,9 @@ data_to_list_mech <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
 
 mech_forecasts <- target_days |>
   map_dfr(
-    \(x) forecast_target_day(mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech)
+    \(x) forecast_target_day(
+      mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech
+    )
   ) |>
   mutate(model = "Mechanistic")
 
