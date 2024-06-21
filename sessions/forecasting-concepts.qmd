@@ -57,7 +57,7 @@ In order to make things simpler we will remove the nowcasting part of the model,
 
 The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
 Based on what we found in the [nowcasting session](nowcasting.qmd) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
-We can do this by extending the model into the future by simulating the model forward in time. 
+We can do this by simulating the generative model forward in time. 
 This is known as a generative model.
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
 So what does this look like in code? Lets load in the model again and take a look.
