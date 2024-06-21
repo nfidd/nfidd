@@ -6,8 +6,7 @@ library("tidybayes")
 library("purrr")
 library("usethis")
 
-# load the model
-rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+set.seed(12345)
 
 # simulate data
 source(here::here("snippets", "simulate-onsets.r"))
@@ -17,7 +16,7 @@ usethis::use_data(example_onset_df, overwrite = TRUE)
 
 # define a function to fit and forecast for a single date
 forecast_target_day <- function(
-  mod, onset_df, target_day, horizon, gen_time_pmf, ip_pmf
+  mod, onset_df, target_day, horizon, gen_time_pmf, ip_pmf, data_to_list
 ) {
 
   message("Fitting and forecasting for target day: ", target_day)
@@ -28,16 +27,7 @@ forecast_target_day <- function(
   test_df <- onset_df |>
     filter(day > target_day, day <= target_day + horizon)
 
-  data <- list(
-    n = nrow(train_df),
-    I0 = 1,
-    obs = train_df$onsets,
-    gen_time_max = length(gen_time_pmf),
-    gen_time_pmf = gen_time_pmf,
-    ip_max = length(ip_pmf) - 1,
-    ip_pmf = ip_pmf,
-    h = horizon
-  )
+  data <- data_to_list(train_df, horizon, gen_time_pmf, ip_pmf)
 
   fit <- mod$sample(
     data = data, chains = 4, parallel_chains = 4, adapt_delta = 0.95,
@@ -67,6 +57,22 @@ target_days <- onset_df |>
 # create forecasts every 7 days
 target_days <- target_days[seq(1, length(target_days), 7)]
 
+# load the model
+rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+
+data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
+  data <- list(
+    n = nrow(train_df),
+    I0 = 1,
+    obs = train_df$onsets,
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
+    h = horizon
+  )
+  return(data)
+}
 
 rw_forecasts <- target_days |>
   map_dfr(
@@ -75,3 +81,32 @@ rw_forecasts <- target_days |>
   mutate(model = "Random walk")
 
 usethis::use_data(rw_forecasts, overwrite = TRUE)
+
+# AR model forecass
+stat_mod <- cmdstan_model(here("stan", "statistical-r.stan"))
+
+stat_forecasts <- target_days |>
+  map_dfr(
+    \(x) forecast_target_day(stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw)
+  ) |>
+  mutate(model = "Statistical")
+
+usethis::use_data(stat_forecasts, overwrite = TRUE)
+
+# Mechanistic model forecasts
+
+mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
+
+data_to_list_mech <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
+  data <- data_to_list_rw(train_df, horizon, gen_time_pmf, ip_pmf)
+  data$N_prior <- c(10000, 2000)
+  return(data)
+}
+
+mech_forecasts <- target_days |>
+  map_dfr(
+    \(x) forecast_target_day(mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech)
+  ) |>
+  mutate(model = "Mechanistic")
+
+usethis::use_data(mech_forecasts, overwrite = TRUE)
