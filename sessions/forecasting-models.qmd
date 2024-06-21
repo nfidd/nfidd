@@ -24,6 +24,7 @@ library("ggplot2")
 library("here")
 library("cmdstanr")
 library("tidybayes")
+library("scoringutils")
 ```
 
 ::: {.callout-tip}
@@ -331,13 +332,14 @@ mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
   mutate(day = day + cutoff)
 
-
 mech_forecast_diff |>
-  filter(.draw %in% sample(.draw, 50)) |>
-  ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = .draw) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
-)
+  filter(.draw %in% sample(.draw, 1000)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_line(alpha = 0.1, aes(group = .draw)) +
+  geom_point(
+    data = target_onsets, aes(x = day, y = onsets),
+    color = "black"
+  )
 ```
 :::
 :::
@@ -382,19 +384,20 @@ forecasts |>
     filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
   scale_color_binned(type = "viridis") +
-  facet_wrap(~model)
+  facet_wrap(~model) +
+  lims(y = c(0, 500))
 ```
 
 
 As for the single forecast it is helpful to also plot the forecast on the log scale.
 
 ```{r plot-all-forecasts-log}
-rw_forecasts |>
+forecasts |>
   filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log") +
+  scale_y_continuous(trans = "log", limits = c(NA, 500)) +
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
@@ -411,6 +414,13 @@ Do they seem to under or over predict consistently?
 
 ::: {.callout-note collapse="true"}
 ## Solution
+How do these forecasts compare?
+  - The mechanistic model captures the downturn in the data very well.
+  - Past the peak all models were comparable.
+Which do you prefer?
+How well do they capture changes in trend?
+Does the uncertainty seem reasonable?
+Do they seem to under or over predict consistently?
 :::
 
 ## Scoring your forecast
@@ -659,18 +669,24 @@ How does it compare to the scores on the original scale?
 - We could also combine the mechanistic and statistical models to create a hybrid model which captures the best of both worlds (maybe).
 
 ::: {.callout-note collapse="true"}
-## What happens when we use a forecast of statistical and mechanistic models? (optional)
+## What happens when we average forecasts from statistical and mechanistic models? (optional)
 
-In the above we have compared the mechanistic and statistical models. What happens if we use a forecast which is a combination of the two models? We can do this by combining the forecasts from the two models and then scoring the combined forecast.
+In the above we have compared the mechanistic and statistical models. What happens if we use a forecast which is a average of the two models? We can do this by combining the forecasts from the two models and then scoring the combined forecast.
 
 ```{r}
 combined_forecasts <- bind_rows(
-  mutate(mech_forecasts, model = "combined"),
-  mutate(stat_forecasts, model = "combined"),
-  rw_forecasts,
-  stat_forecasts,
-  mech_forecasts
-)
+    mutate(mech_forecasts, model = "combined") |>
+    mutate(sample = 1:n()),
+    mutate(stat_forecasts, model = "combined") |>
+    mutate(sample = 1:n())
+  ) |>
+  group_by(target_day, horizon, sample, model) |>
+  summarise(.value = mean(.value)) |>
+  bind_rows(
+    rw_forecasts,
+    stat_forecasts,
+    mech_forecasts
+  )
 
 combined_forecasts |>
   as_forecast(
