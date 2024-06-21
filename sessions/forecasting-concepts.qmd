@@ -538,7 +538,7 @@ Do they look biased?
 ::: {.callout-note collapse="true"}
 ## Solution
 - It looks like the model is biased towards over predicting and that this bias gets worse at longer forecast horizons.
-- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently over predicting but the model is also over predicting at other times.
+- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently overpredicting but the model is also over predicting at other times.
 :::
 
 ## Scoring on the log scale
