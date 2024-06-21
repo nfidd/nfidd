@@ -286,7 +286,7 @@ target_onsets <- onset_df |>
 
 ```{r plot_forecast}
 forecast |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
@@ -333,7 +333,7 @@ mech_forecast_diff <- mech_forecast_fit_diff |>
 
 
 mech_forecast_diff |>
-  filter(.draw <= 100) |>
+  filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
@@ -349,8 +349,7 @@ As in the [forecasting concepts session](forecasting-concepts), we have fit thes
 ```{r load_forecasts}
 forecasts <- bind_rows(
   rw_forecasts,
-  mech_forecasts,
-  stat_forecasts
+  mech_forecasts
 )
 ```
 
@@ -376,12 +375,13 @@ example_onset_df
 
 ```{r plot-all-forecasts}
 forecasts |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df |>
     filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
 
@@ -390,11 +390,12 @@ As for the single forecast it is helpful to also plot the forecast on the log sc
 
 ```{r plot-all-forecasts-log}
 rw_forecasts |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_continuous(trans = "log") +
+  scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
 
@@ -568,7 +569,6 @@ log_scores <- log_sc_forecasts |>
 Reminder: For more on scoring on the log scale see [Scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
 :::
 
-
 ### At a glance
 
 ```{r}
@@ -652,10 +652,48 @@ How does it compare to the scores on the original scale?
 ## Solution
 :::
 
+:::
 # Going further
 
 - We have only looked at two forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
 - We could also combine the mechanistic and statistical models to create a hybrid model which captures the best of both worlds (maybe).
+
+::: {.callout-note collapse="true"}
+## What happens when we use a forecast of statistical and mechanistic models? (optional)
+
+In the above we have compared the mechanistic and statistical models. What happens if we use a forecast which is a combination of the two models? We can do this by combining the forecasts from the two models and then scoring the combined forecast.
+
+```{r}
+combined_forecasts <- bind_rows(
+  mutate(mech_forecasts, model = "combined"),
+  mutate(stat_forecasts, model = "combined"),
+  rw_forecasts,
+  stat_forecasts,
+  mech_forecasts
+)
+
+combined_forecasts |>
+  as_forecast(
+    forecast_unit = c("target_day", "horizon", "model"),
+    forecast_type = "sample",
+    observed = "onsets",
+    predicted = ".value",
+    model = "model",
+    sample_id = ".draw"
+  ) |>
+  score() |>
+  summarise_scores(by = "model")
+```
+
+What do you think of the combined forecast?
+
+::: .callout-note collapse="true"
+## Solution
+:::
+
+We could also make a truely combined joint model which uses the mechanistic model to inform the statistical model and vice versa. This is a more complex model but would likely give better forecasts.
+:::
+
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
 
 # Wrap up
