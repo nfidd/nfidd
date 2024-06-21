@@ -3,9 +3,9 @@ title: "Probability distributions and parameter estimation"
 order: 1
 ---
 
-Introduction to statistical concepts used in the course
+[Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
 
-Introduction to stan concepts used in the course
+[Introduction to stan concepts used in the course](slides/introduction-to-stan)
 
 ## Objectives
 
@@ -25,8 +25,8 @@ library("posterior")
 ```
 
 ::: {.callout-tip}
-The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
-It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Simulating data from a probability distribution
@@ -62,7 +62,7 @@ The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog`
 A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sigma = 0.28$.
 
 ```{r lognormals}
-### simulate gamma with mean 5, variance 2
+### simulate lognormals with mean 5, variance 2
 lognormals <- rlnorm(100, meanlog = 1.57, sdlog = 0.28)
 head(lognormals)
 mean(lognormals)

@@ -33,8 +33,8 @@ library("tidybayes")
 ```
 
 ::: callout-tip
-The code in this session can be run as an interactive notebook using RStudio, or copied-and-pasted into an R session.
-It needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 # Simulating observations from a time series of infections
@@ -232,25 +232,19 @@ Does it look like a good fit?
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
-  group_by(infection_day) |>
-  summarise(
-    median = median(.value),
-    lower_90 = quantile(.value, 0.05),
-    upper_90 = quantile(.value, 0.95),
-    .groups = "drop"
-  ) |>
   mutate(infection_day = infection_day - 1)
 
+# sample 100 trajectories for plotting
+inf_posterior <- inf_posterior |>
+  filter(.draw %in% sample(.draw, 100))
+
 ggplot(mapping = aes(x = infection_day)) +
-  geom_point(data = inf_ts, mapping = aes(y = infections), size = 0.8) +
-  geom_line(data = inf_ts, mapping = aes(y = infections)) +
-  geom_ribbon(
-    data = inf_posterior,
-    mapping = aes(ymin = lower_90, ymax = upper_90), alpha = 0.25, colour = NA
+  geom_line(
+    data = inf_posterior, mapping = aes(y = .value, group = .draw), alpha = 0.1
   ) +
-  labs(subtitle = "Infections per day (black line), 
-       and estimated infections (shaded ribbon, 90% credible interval)") +
-  theme_bw()
+  geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
+  labs(subtitle = "Infections per day (red),
+       and sampled infection trajectories (lback)")
 ```
 
 ::: callout-tip

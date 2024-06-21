@@ -22,16 +22,6 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 })
 ```
 
-# What is this course?
-
-::: {.incremental}
-- delay distributions and how to estimate them (Day 1)
-- Rt estimation and the generation interval (Day 1)
-- nowcasting (day 2)
-- forecasting and evaluation, ensemble methods (day 2)
-- applications (day 3)
-:::
-
 # Why this course?
 
 ::: {.incremental}
