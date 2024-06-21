@@ -35,7 +35,7 @@ If not using the Visual Editor please remember that the code in the session need
 
 Epidemiological data is not usually available immediately for analysis.
 Instead, data usually gets collated at different levels of a healthcare or health surveillance system, cleaned, checked before being aggregated and/or anonymised and ultimately shared with an analyst.
-We call the _reporting time_ the time a data point (e.g. a time or day of sypmtom onset or a time or day of hospitalisation) has entered the data set used for some analysis.
+We call the _reporting time_ the time a data point (e.g. a time or day of symptom onset or a time or day of hospitalisation) has entered the data set used for some analysis.
 Similar to the data discussed in the preceding session, this time is often only available as a date, i.e. censored at the scale of a day.
 
 We can simulate this reporting process.
