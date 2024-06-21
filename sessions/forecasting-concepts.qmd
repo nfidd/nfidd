@@ -544,8 +544,7 @@ Do they look biased?
 ## Scoring on the log scale
 
 We can also score on the log scale.
-This can be useful if we are interested in the relative performance of the model at different scales of the data.
-For example, if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
+This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
 In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates.
 Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
 
