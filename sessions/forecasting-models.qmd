@@ -614,7 +614,7 @@ How does it compare to the scores on the original scale?
 
 ### PIT histograms
 
-```{r pit-histogram, eval = FALSE}
+```{r pit-histogram-log, eval = FALSE}
  log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
@@ -622,7 +622,7 @@ How does it compare to the scores on the original scale?
 ```
 
 
-```{r pit-histogram-horizon, eval = FALSE}
+```{r pit-histogram-horizon-log, eval = FALSE}
 log_sc_forecasts |> 
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
@@ -635,7 +635,7 @@ log_sc_forecasts |>
 ```
 
 
-```{r pit-histogram-date, eval = FALSE}
+```{r pit-histogram-date-log, eval = FALSE}
  log_sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
