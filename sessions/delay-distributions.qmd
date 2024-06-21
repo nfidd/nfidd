@@ -169,11 +169,14 @@ You can *sample* from the model's posterior distribution by feeding it our simul
 ## Time from onset to hospitalisation
 df_onset_to_hosp <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time)
+
+# Get data complete data
+df_complete <- na.omit(df_onset_to_hosp)
 ## Use the data to sample from the model posterior
 res <- mod$sample(
   data = list(
-    n = nrow(na.omit(df_onset_to_hosp)),
-    y = na.omit(df_onset_to_hosp)$onset_to_hosp
+    n = nrow(df_complete),
+    y = df_complete$onset_to_hosp
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
