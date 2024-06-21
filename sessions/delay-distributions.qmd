@@ -9,10 +9,14 @@ order: 2
 set.seed(123)
 ```
 
-## Objectives
+## Introduction
+
+Every outbreak starts with an infection, but we rarely observe these directly. Instead,  there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc. The length of time between any of these events might be highly variable and uncertain. However, we often need to have some estimate for these delays in order to understand what's happening now and predict what might happen in the future. We capture this variability using probability distributions, which is the focus of this session.
+
+### Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
-First we'll look at this working forwards from infections - we'll use `R` to simulate delays in the reporting of cases in an infectious disease outbreak, before using the simulation model in stan to estimate delays from a data set of outcomes.
+First we'll look at this working forwards from infections in an outbreak. We'll use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations. Then we'll work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
 
 ## Libraries used
 
@@ -76,7 +80,7 @@ In reality, data from an outbreak will usually be given as dates, not decimals; 
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
 :::
 
-### Working forwards: creating a sequence of delays after infection
+### Working forwards: simulating a sequence of delays after infection
 
 We would now like to simulate hospitalisations arising from this outbreak.
 We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:
@@ -111,7 +115,7 @@ ggplot(dfl, aes(x = time)) +
   ylab("Count")
 ```
 
-## Working backwards: estimating delay distributions from outcome data
+## Estimating delay distributions from outcome data
 
 As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in outbreaks.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
