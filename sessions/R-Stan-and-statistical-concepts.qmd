@@ -100,7 +100,7 @@ mod$print(line_numbers = TRUE)
 ### Take 5 minutes
 Familarise yourself with the model above.
 Do you understand all the lines?
-Which line(s) define the parameter prior distribution(s), likelihood, and the data that has to be supplied to the model?
+Which line(s) define the parameter prior distribution(s), which one(s) the likelihood, and which one(s) the data that has to be supplied to the model?
 :::
 
 ::: {.callout-note collapse="true"}
