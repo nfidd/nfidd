@@ -42,7 +42,7 @@ The outbreak lasted around 90 days after the first infection, with new infection
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.
-This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't necessary know how well this corresponds to what really happened.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't necessarily know how well this corresponds to what really happened.
 :::
 
 We will later deal with modelling the infectious process.
