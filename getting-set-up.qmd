@@ -1,4 +1,6 @@
-All content in this course is self-contained and designed to work within R and RStudio.
+Each session in this course uses R code for demonstration.
+This content is self-contained within a software package designed for the course.
+To get the most out of this course, you will need to use R and the following instructions to interact with the course material.
 
 # Required software
 
