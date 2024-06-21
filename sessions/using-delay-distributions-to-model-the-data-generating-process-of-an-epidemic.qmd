@@ -75,7 +75,7 @@ Now we can convolve the time series with a delay distribution to get a time seri
 In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities. In addition to this, we are assuming that both events that make up the delay (here infections and onsets) are observed as daily counts.
-This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd) and so we can need to use the same ideas introduced in that session. The important point to remember is that the cumulative distribution functon ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. The important point to remember is that the cumulative distribution function ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
 $$
 F^*(t) = \int_0^1 F(t - u) du
 $$
