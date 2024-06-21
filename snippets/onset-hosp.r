@@ -1,6 +1,3 @@
-# Load data
-data(infection_times)
-
 ### first, choose random delays
 df <- infection_times |>
   mutate(

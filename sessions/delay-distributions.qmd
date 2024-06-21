@@ -58,7 +58,6 @@ The column `infection_time` is a linelist of infections from our example outbrea
 It can be loaded with the `data` command.
 
 ```{r}
-data(infection_times)
 head(infection_times)
 
 ### visualise the infection curve

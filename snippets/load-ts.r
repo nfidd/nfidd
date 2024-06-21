@@ -1,5 +1,3 @@
-## Load data
-data(infection_times)
 ## Censor infection times to days
 df <- infection_times |>
   transmute(infection_day = floor(infection_time))
