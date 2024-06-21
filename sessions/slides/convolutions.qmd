@@ -78,6 +78,7 @@ where $F(t) = 0$ for $t \leq 0$.
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 - Simulate convolutions with infection counts
+- Discretise continuous distributions
 - Estimate parameters numbers of infections from number of symptom onsets, using a convolution model
 
 [Return to the session](../biases-in-delay-distributions)

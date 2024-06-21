@@ -74,11 +74,23 @@ Now we can convolve the time series with a delay distribution to get a time seri
 
 In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
-The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
-Before we can simulate a time series of symptom onsets, we will first need to generate a discrete probability mass function of the incubation period (in days).
+The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities. In addition to this, we are assuming that both events that make up the delay (here infections and onsets) are observed as daily counts.
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd) and so we can need to use the same ideas introduced in that session. The important point to remember is that the cumulative distribution functon ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+$$
+F^*(t) = \int_0^1 F(t - u) du
+$$
 
+The probability mass function (PMF) is then
+
+$$
+f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
+$$
+
+which you may be familiar with from single censored (i.e. for the secondary event) discretised distributions.
+
+We can also think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
-This means that discretising a delay in this context is **double censoring** as we discussed in [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd) and so we can need to use the same ideas introduced in that session.
+This means that discretising a delay in this context is **double censoring** as we discussed i
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
@@ -95,7 +107,7 @@ Try it with a few different probability distributions and parameters, e.g. for t
 ```{r discretised_gamma}
 gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 gamma_pmf
-# plot the probabilities corresponding to each discretised days' delay
+
 plot(gamma_pmf)
 ```
 :::
