@@ -66,7 +66,7 @@ head(infection_times)
 ### visualise the infection curve
 ggplot(infection_times, aes(x = infection_time)) +
   geom_histogram(binwidth = 1) +
-  scale_x_continuous(n.breaks = 45, expand = c(0, 0)) +
+  scale_x_continuous(n.breaks = 30, expand = c(0, 0)) +
   labs(x = "Infection time (in days)", y = "Number of infections",
        title = "Infections during an outbreak")
 ```
