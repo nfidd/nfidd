@@ -80,9 +80,10 @@ Therefore, both observations are **censored** (as events are rounded to the near
 This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. 
 
 ::: .callout-note collapse=true
-## Reminder: **Double interval censoring**
+#### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
 
 The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+
 $$
 F^*(t) = \int_0^1 F(t - u) du
 $$
@@ -95,7 +96,6 @@ $$
 f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
 $$
 
-which you may be familiar with from single censored (i.e. for the secondary event) discretised distributions.
 The important point is that the ultimately observed PMF is a combination of a primary event daily censoring process and a secondary event daily censoring process.
 :::
 
