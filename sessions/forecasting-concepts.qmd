@@ -328,7 +328,7 @@ rw_forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log") +
+  scale_y_log() +
   scale_color_binned(type = "viridis") +
   labs(title = "Weekly symptom onset forecasts: log scale",
        col = "Forecast start day")
