@@ -282,5 +282,62 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
+## What happens if we get the delay distribution wrong?
+
+In practice, we often do not know the delay distribution and so need to estimate it from the data. In the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd) we saw how we could estimate the delay distribution from the data.
+Here we will see what happens if we get the delay distribution wrong.
+
+W use the same data as before but now assume that the delay distribution is a gamma distribution with shape 2 and rate 3.
+This is a very different distribution to the lognormal distribution we used to simulate the data.
+
+```{r gamma-dist}
+wrong_proportion_reported <- pgamma(1:15, 2, 3)
+plot(wrong_proportion_reported)
+```
+
+We first need to update the data to use this new delay distribution:
+
+```{r wrong-delay-data}
+wrong_delay_data <- data
+wrong_delay_data$report_cdf <- wrong_proportion_reported
+```
+
+We now fit the nowcasting model with the wrong delay distribution:
+
+```{r gamma-nowcast-fit}
+gamma_nowcast_fit <- rw_mod$sample(
+  data = wrong_delay_data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
+)
+gamma_nowcast_fit
+```
+
+
+Again we can extract the nowcast onsets and plot them alongside the observed data:
+
+```{r gamma-nowcast-onsets}
+gamma_nowcast_onsets <- gamma_nowcast_fit |>
+  gather_draws(onsets[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  mutate(day = day + 1)
+```
+
+```{r gamma-plot_nowcast}
+ggplot(gamma_nowcast_onsets, aes(x = day)) +
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets)) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The nowcast now looks very different to the observed data. This is because the model is now using the wrong delay distribution to nowcast the data.
+- If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
+- In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
+:::
 
 # Wrap up
