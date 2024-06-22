@@ -53,7 +53,7 @@ We can use convolutions with the delay distribution that applies at the *individ
 - doing the computation at the population level requires fewer calculations (i.e. is faster)
 
 ::: {.fragment .fade-in}
-- **however, a downside is that we won't have realistic uncertainty for small samples**
+- **however, a downside is that we won't have realistic uncertainty, especially if the number of individuals is small**
 :::
 
 ## What if $f$ is continuous?
