@@ -351,7 +351,7 @@ data <- list(
 )
 r_rw_inf_fit <- rw_mod$sample(
   data = data, parallel_chains = 4, max_treedepth = 12, 
-  init = \() list(init_R = 0, rw_sd = 0.01
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
 
