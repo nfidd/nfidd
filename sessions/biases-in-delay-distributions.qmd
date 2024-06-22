@@ -94,7 +94,7 @@ This makes handling the data easier - we don't have to make any conversions befo
 Each of the numbers now represent the number of days that have passed since the start of the outbreak.
 That is, each of the numbers correspond to a day.
 In that sense, the data is more like typical data we get from infectious disease outbreaks, where we would usually have a line list with key events such as symptom onset or death reported by a *date*.
-That is, the data is *censored*.
+In statistical terms, we call the delay *double interval censored*: "double" because the delays represent the time between two events that are both censored; and "interval" because all we know about the timings of the events is that they happened in a certain time interval (between 0:00 and 23:59 on the recorded day).
 
 ## Estimating delay distributions accounting for censoring
 
@@ -121,28 +121,30 @@ Do you still recover the parameters that we put in?
 ::: {.callout-note collapse="true"}
 ## Solution
 
-```{r df_dates_solution}
+```{r df_dates_solution, results = 'hide', message = FALSE}
 mod <- cmdstan_model(here("stan", "lognormal.stan"))
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
     y = na.omit(df_dates)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r df_dates_solution_summary}
 res
 ```
 
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
 :::
 
-To account for censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
+To account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
 For example, if we know that symptom onset of an individual occurred on 20 June, 2024, and they were admitted to hospital on 22 June, 2024, this could mean an onset-to-hospitalisation delay from 1 day (onset at 23:59 on the 20th, admitted at 0:01 on the 22nd) to 3 days (onset at 0:01 on the 20th, admitted at 23:59 on the 22nd).
 
 We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
 
 ```{r censoring_adjusted_delay_model}
-cmod <- cmdstan_model(here("stan", "censored_delay_model.stan"))
+cmod <- cmdstan_model(here("stan", "censored-delay-model.stan"))
 cmod
 ```
 
@@ -164,14 +166,16 @@ Lines 15-17 reflect the integer delays, adjusted by the estimated times of day.
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
-```{r censored_estimate}
+```{r censored_estimate, results = 'hide', message = FALSE}
 cres <- cmod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
     onset_to_hosp = na.omit(df_dates)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r censored_estimate_summary}
 cres
 ```
 
@@ -192,13 +196,13 @@ If, for example, infections are exponentially increasing then there will be disp
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 
-Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40 of our outbreak.
+Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 70 of our outbreak.
 Let us work with the original, un-censored data for the time from onset to hospitalisation so as to look at the issue of truncation in isolation:
 
 ```{r truncated_df}
 df_realtime <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time) |>
-  filter(hosp_time <= 40)
+  filter(hosp_time <= 70)
 ```
 
 ## Estimating delay distributions accounting for truncation
@@ -222,14 +226,16 @@ How far away from the "true" parameters do you end up?
 ::: {.callout-note collapse="true"}
 ## Solution
 
-```{r df_realtime_solution}
+```{r df_realtime_solution, results = 'hide', message = FALSE}
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_realtime)),
     y = na.omit(df_realtime)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r df_realtime_solution_summary}
 res
 ```
 :::
@@ -237,7 +243,7 @@ res
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
 ```{r truncation_adjusted_delay_model}
-tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
+tmod <- cmdstan_model(here("stan", "truncated-delay-model.stan"))
 tmod
 ```
 
@@ -245,7 +251,7 @@ tmod
 ## Take 5 minutes
 
 Familiarise yourself with the model above.
-Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 40 days?
+Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 70 days?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -256,15 +262,17 @@ Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`.
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
-```{r truncated_estimate}
+```{r truncated_estimate, results = 'hide', message = FALSE}
 tres <- tmod$sample(
   data = list(
     n = nrow(df_realtime),
     onset_to_hosp = df_realtime$onset_to_hosp, 
-    time_since_onset = 40 - df_realtime$onset_time
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+    time_since_onset = 70 - df_realtime$onset_time
+  )
 )
+```
+
+```{r truncated_estimate_summary}
 tres
 ```
 

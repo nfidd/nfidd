@@ -211,16 +211,17 @@ Familiarise yourself with the model above. What does it do?
 
 Once again we can generate estimates from this model:
 
-```{r nowcast_fit}
+```{r nowcast_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(reported_onset_df) - 1,
   obs = reported_onset_df$reported_onsets[-1],
   report_max = length(proportion_reported) - 1,
   report_cdf = proportion_reported 
 )
-simple_nowcast_fit <- mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+simple_nowcast_fit <- mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r nowcast_fit_summary}
 simple_nowcast_fit
 ```
 
@@ -257,10 +258,11 @@ rw_mod
 
 and then fit it
 
-```{r rw-nowcast-fit}
-rw_nowcast_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+```{r rw-nowcast-fit, results = 'hide', message = FALSE}
+rw_nowcast_fit <- rw_mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r rw-nowcast-fit-summary}
 rw_nowcast_fit
 ```
 
@@ -319,10 +321,11 @@ wrong_delay_data$report_cdf <- wrong_proportion_reported
 
 We now fit the nowcasting model with the wrong delay distribution:
 
-```{r gamma-nowcast-fit}
-gamma_nowcast_fit <- rw_mod$sample(
-  data = wrong_delay_data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+```{r gamma-nowcast-fit, results = 'hide', message = FALSE}
+gamma_nowcast_fit <- rw_mod$sample(data = wrong_delay_data, parallel_chains = 4)
+```
+
+```{r gamma-nowcast-fit-summary}
 gamma_nowcast_fit
 ```
 
