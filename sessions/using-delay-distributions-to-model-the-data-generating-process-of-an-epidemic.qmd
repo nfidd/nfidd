@@ -47,7 +47,7 @@ Then we'll use the same model to conduct inference.
 
 In the last session we simulated *individual outcomes* from a delay distribution, and then re-estimated the corresponding parameters.
 However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
-At the population level, individual level delays translate into *convolutions*.
+At the population level, individual-level delays translate into *convolutions*.
 
 If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
 
@@ -76,6 +76,7 @@ In our first session, we decided to assume the delay from infection to symptom o
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
 We will assume that both events that make up the delay (here infection and symptom onset) are observed as daily counts (e.g. as number of infections/symptom onsets by calendar date).
+Therefore, both observations are **censored** (as events are rounded to the nearest date).
 This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. 
 
 ::: .callout-note collapse=true
