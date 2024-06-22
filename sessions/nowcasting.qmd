@@ -5,15 +5,15 @@ order: 6
 
 [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -31,6 +31,20 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating delayed reporting
@@ -180,7 +194,7 @@ We can now fit our first nowcasting model. Here we assume exactly the same gener
 
 ```{r stan-simple-nowcast}
 mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: {.callout-tip}
@@ -238,7 +252,7 @@ We first load the model
 
 ```{r stan-nowcast-with-rw}
 rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod
 ```
 
 and then fit it
@@ -284,10 +298,11 @@ This may not be a good assumption in a rapidly changing epidemic (where the repr
 
 ## What happens if we get the delay distribution wrong?
 
-In practice, we often do not know the delay distribution and so need to estimate it from the data. In the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd) we saw how we could estimate the delay distribution from the data.
-Here we will see what happens if we get the delay distribution wrong.
+In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
+In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.
+We will now look at what happens if we get the delay distribution wrong.
 
-W use the same data as before but now assume that the delay distribution is a gamma distribution with shape 2 and rate 3.
+We use the same data as before but now assume that the delay distribution is a gamma distribution with shape 2 and rate 3.
 This is a very different distribution to the lognormal distribution we used to simulate the data.
 
 ```{r gamma-dist}
@@ -312,7 +327,7 @@ gamma_nowcast_fit
 ```
 
 
-Again we can extract the nowcast onsets and plot them alongside the observed data:
+Again we can extract the nowcast of symptom onsets and plot it alongside the observed data:
 
 ```{r gamma-nowcast-onsets}
 gamma_nowcast_onsets <- gamma_nowcast_fit |>
@@ -335,7 +350,7 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The nowcast now looks very different to the observed data. This is because the model is now using the wrong delay distribution to nowcast the data.
+- The nowcast now looks very different to the observed data. This is because the model is using the wrong delay distribution to nowcast the data.
 - If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
 - In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
 :::
