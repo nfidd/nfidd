@@ -70,7 +70,7 @@ If we don't have individual-level data, we can estimate the delay distribution o
 2. Joint estimation of delay and nowcast
 3. Joint estimation of R_t, delay and nowcast
 
-###
+#
 
 [Return to the session](../nowcasting)
 
