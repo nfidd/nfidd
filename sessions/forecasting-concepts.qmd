@@ -451,7 +451,7 @@ This equation can be broke down into the two components:
    This term represents the average absolute difference between the values predicted by the forecasted distribution $D$ and the actual observed value $y$. It measures how far, on average, the forecasted values are from the observed value. A smaller value indicates that the forecasted distribution is closer to the observed value.
 
 2. **Expected Absolute Error Between Two Forecasted Values**: $\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$
-   This term represents the average absolute difference between two independent samples from the forecasted distribution $$ D $$. It measures the internal variability or spread of the forecasted distribution. A larger value indicates a wider spread of the forecasted values.
+   This term represents the average absolute difference between two independent samples from the forecasted distribution $D$. It measures the internal variability or spread of the forecasted distribution. A larger value indicates a wider spread of the forecasted values.
 
 ##### Interpretation
 
