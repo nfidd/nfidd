@@ -441,23 +441,23 @@ $$
 CRPS(D, y) = \mathbb{E}_{X \sim D}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]
 $$
 
-where $ X $ and $ X' $ are independent random variables sampled from the distribution $ D $. To calculate this we simpley replace $ X $ and $ X' $ by samples from our posterior distribution and sum over all possible combinations.
+where $X$ and $X'$ are independent random variables sampled from the distribution $D$. To calculate this we simpley replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
 
 This equation can be broke down into the two components:
 
 ##### Breakdown of the Components
 
 1. **Expected Absolute Error Between Forecast and Observation**: $\mathbb{E}_{X \sim D}[|X - y|]$
-   This term represents the average absolute difference between the values predicted by the forecasted distribution $$ D $$ and the actual observed value $$ y $$. It measures how far, on average, the forecasted values are from the observed value. A smaller value indicates that the forecasted distribution is closer to the observed value.
+   This term represents the average absolute difference between the values predicted by the forecasted distribution $D$ and the actual observed value $y$. It measures how far, on average, the forecasted values are from the observed value. A smaller value indicates that the forecasted distribution is closer to the observed value.
 
-2. **Expected Absolute Error Between Two Forecasted Values**:$\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$
+2. **Expected Absolute Error Between Two Forecasted Values**: $\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$
    This term represents the average absolute difference between two independent samples from the forecasted distribution $$ D $$. It measures the internal variability or spread of the forecasted distribution. A larger value indicates a wider spread of the forecasted values.
 
 ##### Interpretation
 
-- **First Term ($ \mathbb{E}_{X \sim D}[|X - y|] $)**: This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
+- **First Term** ($ \mathbb{E}_{X \sim D}[|X - y|] $): This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
 
-- **Second Term ($ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $)**: This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
+- **Second Term** ($ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $): This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
 :::
 
 Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
@@ -515,24 +515,28 @@ There are many ways to assess calibration and bias but one common way is to use 
 
 ### Continuous Case
 
-For a continuous random variable $ X $ with cumulative distribution function (CDF) $ F_X $, the PIT is defined as:
+For a continuous random variable $X$ with cumulative distribution function (CDF) $F_X$, the PIT is defined as:
 
-$ Y = F_X(X) $
+$$
+Y = F_X(X) 
+$$
 
-where $ Y $ is uniformly distributed on $[0, 1]$. 
+where $Y$ is uniformly distributed on $[0, 1]$. 
 
 #### Integer Case
 
-When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated. To address this, a randomized version of the PIT is used. For an integer-valued random variable $ X $ with CDF $ F_X $, the randomized PIT is defined as:
+When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated. To address this, a randomized version of the PIT is used. For an integer-valued random variable $X$ with CDF $F_X$, the randomized PIT is defined as:
 
-$$ U = F_X(k) + v \cdot (F_X(k) - F_X(k-1)) $$
+$$
+U = F_X(k) + v \cdot (F_X(k) - F_X(k-1))
+$$
 
 where:
-- $ k $ is the observed integer value.
-- $ F_X(k) $ is the CDF evaluated at $ k $.
-- $ v $ is a random variable uniformly distributed on $[0, 1]$.
+- $k$ is the observed integer value.
+- $F_X(k)$ is the CDF evaluated at $k$.
+- $v$ is a random variable uniformly distributed on $[0, 1]$.
 
-This transformation ensures that $ U $ is uniformly distributed on $[0, 1]$ if the forecasted distribution $ F_X $ is correctly specified.
+This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the forecasted distribution $F_X$ is correctly specified.
 :::
 
 Let's first look at the overall PIT histogram.
