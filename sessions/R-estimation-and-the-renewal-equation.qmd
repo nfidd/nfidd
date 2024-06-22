@@ -172,7 +172,7 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
-r_fit <- mod$sample(data = data, parallel_chains = 4)
+r_fit <- r_mod$sample(data = data, parallel_chains = 4)
 ```
 
 ```{r r_fit_summary}
@@ -244,7 +244,7 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- mod$sample(data = data, parallel_chains = 4)
+r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4)
 ```
 
 ```{r r_inf_fit_summary}
