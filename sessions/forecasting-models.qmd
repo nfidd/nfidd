@@ -261,7 +261,9 @@ data <- list(
   h = horizon # Here we set the number of days to forecast into the future
 )
 stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.9)
+  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.9,
+  init = \() list(init_R = 0, rw_sd = 0.01) # again set the initial values to make fitting more numerically stable
+  )
 ```
 
 Finally we can extract the forecasts from the models and plot them.
@@ -668,6 +670,7 @@ What do you think of the PIT histograms?
 :::
 
 :::
+
 # Going further
 
 - We have only looked at two forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.

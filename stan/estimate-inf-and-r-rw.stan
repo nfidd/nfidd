@@ -20,7 +20,7 @@ transformed data {
 }
 
 parameters {
-  real<lower = -2, upper = 2> init_R;         // initial reproduction number
+  real<lower = -1, upper = 1> init_R;         // initial reproduction number
   array[m-1] real rw_noise; // random walk noise
   real<lower = 0, upper = 1> rw_sd; // random walk standard deviation
 }

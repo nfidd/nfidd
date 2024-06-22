@@ -77,7 +77,7 @@ rw_forecasts <- target_days |>
   map_dfr(
     \(x) forecast_target_day(
       rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf,
-      init = \() list(init_R = 0, rw_sd = 0.01)
+      data_to_list_rw, init = \() list(init_R = 0, rw_sd = 0.01)
     )
   ) |>
   mutate(model = "Random walk")
