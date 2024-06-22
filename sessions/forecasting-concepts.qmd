@@ -5,15 +5,15 @@ order: 7
 
 [Forecasting as an epidemiological problem](slides/forecasting-as-an-epidemiological-problem)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 The aim of this session is to introduce the concept of forecasting, using a simple model, and forecasting evaluation.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -32,6 +32,20 @@ library("scoringutils")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
@@ -70,7 +84,7 @@ So what does this look like in code? Lets load in the model again and take a loo
 
 ```{r load_model}
 mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: .callout-tip
