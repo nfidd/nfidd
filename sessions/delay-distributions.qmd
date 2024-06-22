@@ -149,7 +149,7 @@ Let's estimate the onset-to-hospitalisation delay using the simulated data set w
 
 We can do this by *sampling* from the model's posterior distribution by feeding it our simulated data set.
 
-```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+```{r sample_naive_delay_model, results = 'hide', message = FALSE}
 ## Specify the time from onset to hospitalisation
 df_onset_to_hosp <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time) |> 
@@ -160,22 +160,14 @@ res <- mod$sample(
   data = list(
     n = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
 ```
-
-::: callout-caution
-## Reduce the amount of messages printed to the screen
-
-As before, the arguments to `mod$sample()` after the `data` argument are there to remove the amount of messages printed to the screen (and in this document).
-You can safely remove them.
-:::
 
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
-res$summary()
+res$summary() ## could also simply type `res`
 ```
 
 These estimates should look similar to what we used in the simulations.

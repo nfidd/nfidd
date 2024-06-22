@@ -203,24 +203,18 @@ Line 24 defines the likelihood, and it does so using the Poisson observation unc
 
 We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
 
-```{r inf_fit}
+```{r inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(combined),
   obs = combined$observed,
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(
-  data = data,
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+inf_fit <- mod$sample(data = data, parallel_chains = 4)
 ```
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
-
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
 :::
 
 ::: callout-tip
