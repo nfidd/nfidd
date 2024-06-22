@@ -8,7 +8,7 @@ format:
     slide-level: 3
 ---
 
-### Motivating example {.smaller}
+### Motivating example
 
 Often we see data like this
 
@@ -26,7 +26,7 @@ Predict what an epidemiological time series will look like *after all delayed re
 
 In the last session we introduced the idea of nowcasting and demonstrated how it can be done using a simple model.
 
-What probems does this approach have:
+What problems does this approach have?
 
   - Hard to propagate uncertainty
   - Doesn't account for observation error in the primary events
