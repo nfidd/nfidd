@@ -27,10 +27,11 @@ Predict what an epidemiological time series will look like *after all delayed re
 In the last session we introduced the idea of nowcasting and demonstrated how it can be done using a simple model.
 
 What probems does this approach have:
-- Hard to propagate uncertainty
-- Doesn't account for observation error in the primary events
-- Not a fully generative model of the data reporting process
-- If we get the delay wrong, we can get the nowcast wrong
+
+  - Hard to propagate uncertainty
+  - Doesn't account for observation error in the primary events
+  - Not a fully generative model of the data reporting process
+  - If we get the delay wrong, we can get the nowcast wrong
 
 ### Jointly estimating reporting delays and nowcasting
 
@@ -49,8 +50,7 @@ The reporting triangle is the name given to the data structure that arises when 
 ### The reporting triangle
 
 Here the rows represent the time of the primary event, and the columns represent the time of the report.
-
-It is a lower triangular matrix because we can't report events that haven't happened yet.
+Some events are missing because they are yet to happen.
 
 ![](figures/reporting_triangle.png)
 
@@ -60,7 +60,7 @@ It is a lower triangular matrix because we can't report events that haven't happ
 
 The aim of nowcasting is to complete the reporting triangle. This means filling in the missing entries in the lower triangle and then summing the rows to get the nowcast.
 
-![](figures/completed_reporting_triangle.png)
+![](figures/complete_reporting_triangle.png)
 
 (reporting triangle courtesy of Johannes Bracher)
 
