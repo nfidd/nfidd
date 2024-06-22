@@ -407,10 +407,6 @@ forecasts |>
 ## Take 5 minutes
 How do these forecasts compare?
 Which do you prefer?
-How well do they capture changes in trend?
-Does the uncertainty seem reasonable?
-Do they seem to under or over predict consistently?
-
 :::
 
 ::: {.callout-note collapse="true"}
@@ -418,10 +414,10 @@ Do they seem to under or over predict consistently?
 How do these forecasts compare?
   - The mechanistic model captures the downturn in the data very well.
   - Past the peak all models were comparable.
+  - The statistical model does a very poor job of capturing the downturn in the data extending the current trend.
+  - The statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
 Which do you prefer?
-How well do they capture changes in trend?
-Does the uncertainty seem reasonable?
-Do they seem to under or over predict consistently?
+  - The mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
 :::
 
 ## Scoring your forecast
@@ -498,11 +494,17 @@ sc_scores |>
 ## Take 5 minutes 
 How do the CRPS scores change based on forecast date?
 How do the CRPS scores change with forecast horizon?
-What are the key differences between the models?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+How do the CRPS scores change based on forecast horizon?
+- All models have increasing CRPS with forecast horizon.
+- The mechanistic model has the lowest CRPS at all forecast horizon.
+- The stastical model forms notably worse at all forecast horizons.
+How do the CRPS scores change with forecast date?
+- The statistical model does particularly poorly around the peak of the outbreak.
+- The mechanistic model does particularly well around the peak of the outbreak versus all other models
 :::
 
 ### PIT histograms
@@ -542,21 +544,24 @@ and then for different forecast dates.
 
 ```{r pit-histogram-date}
  sc_forecasts |>
-  get_pit(by = "target_day") |>
+  get_pit(by = c("model", "target_day")) |>
   plot_pit() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(target_day))
 ```
 
 ::: {.callout-tip}
 ## Take 5 minutes
 What do you think of the PIT histograms?
-Do they look well calibrated?
-Do they look biased?
-Which model do you think is best?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+What do you think of the PIT histograms?
+- The mechanistic model is reasonably well calibrated but has a tendency to underpredict.
+- Both the random walk and statistical model are biased towards overpredicting with the statistical model also being poorly calibrated (liable to both under and overpredict).
+- Across horizons the mechanistic model is only liable to underpredict at the longest horizons.
+- Similarly, the statistical and random walk models are more biased at longer horizons.
+- The forecast date stratified PIT histograms are hard to interpret but the mechanistic model seems to be the best calibrated across forecast date.
 :::
 
 ## Scoring on the log scale
@@ -571,7 +576,7 @@ log_sc_forecasts <- sc_forecasts |>
     append = FALSE
   )
 
-log_scores <- log_sc_forecasts |>
+log_sc_scores <- log_sc_forecasts |>
   score()
 ```
 
@@ -610,14 +615,15 @@ log_sc_scores |>
 
 ::: {.callout-tip}
 ## Take 5 minutes 
-How do the CRPS scores change based on forecast date?
-How do the CRPS scores change with forecast horizon?
-What does this tell you about the model?
-How does it compare to the scores on the original scale?
+How do the CRPS scores on the log scale compare to the scores on the original scale?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+- The random walk and mechanistic models have much similar performance.
+- Even at the peak this is true as the log scale approach more evenly weights the over and underpredictions.
+- The statistical model is still notably worse than the other models.
+- In particular, it is much worse at the peak of the outbreak and at longer horizons.
 :::
 
 ### PIT histograms
@@ -645,22 +651,20 @@ log_sc_forecasts |>
 
 ```{r pit-histogram-date-log}
  log_sc_forecasts |>
-  get_pit(by = "target_day") |>
+  get_pit(by = c("model", "target_day")) |>
   plot_pit() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(target_day))
 ```
 
 ::: {.callout-tip}
 ## Take 5 minutes
 What do you think of the PIT histograms?
-Do they look well calibrated?
-Do they look biased?
-Which model do you think is best?
-How does it compare to the scores on the original scale?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
+What do you think of the PIT histograms?
+  - The PIT histograms are similar to the original scale PIT histograms.
 :::
 
 :::
@@ -668,49 +672,6 @@ How does it compare to the scores on the original scale?
 
 - We have only looked at two forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
 - We could also combine the mechanistic and statistical models to create a hybrid model which captures the best of both worlds (maybe).
-
-::: {.callout-note collapse="true"}
-## What happens when we average forecasts from statistical and mechanistic models? (optional)
-
-In the above we have compared the mechanistic and statistical models. What happens if we use a forecast which is a average of the two models? We can do this by combining the forecasts from the two models and then scoring the combined forecast.
-
-```{r}
-combined_forecasts <- bind_rows(
-    mutate(mech_forecasts, model = "combined") |>
-    mutate(sample = 1:n()),
-    mutate(stat_forecasts, model = "combined") |>
-    mutate(sample = 1:n())
-  ) |>
-  group_by(target_day, horizon, sample, model) |>
-  summarise(.value = mean(.value)) |>
-  bind_rows(
-    rw_forecasts,
-    stat_forecasts,
-    mech_forecasts
-  )
-
-combined_forecasts |>
-  as_forecast(
-    forecast_unit = c("target_day", "horizon", "model"),
-    forecast_type = "sample",
-    observed = "onsets",
-    predicted = ".value",
-    model = "model",
-    sample_id = ".draw"
-  ) |>
-  score() |>
-  summarise_scores(by = "model")
-```
-
-What do you think of the combined forecast?
-
-::: .callout-note collapse="true"
-## Solution
-:::
-
-We could also make a truely combined joint model which uses the mechanistic model to inform the statistical model and vice versa. This is a more complex model but would likely give better forecasts.
-:::
-
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
 
 # Wrap up
