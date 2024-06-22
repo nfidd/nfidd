@@ -5,56 +5,81 @@ format:
   revealjs:
     output: slides/forecasting-as-an-epidemiological-problem.html
     footer: "Forecasting as an epidemiological problem"
+    slide-level: 3
 ---
 
-# Motivating example
+### Forecasting in infectious disease epidemiology
 
-- During an outbreak but also e.g. during a flu season or a pandemic
+![](figures/metcalf_lessler_fraught.png){width=50%}
 
-# Meterological analogy
+[Metcalf & Lessler, *Science*, 2017](https://doi.org/10.1126/science.aam8335)
 
-perhaps
+### Using models for statements about the future {.smaller}
 
-# What is a forecast?
+Modelling the future can help decision making:
 
-- an *unconditional* prediction: what **will** happen
-- distinct from a *conditional* or *counterfactual* scenario: what **would** happen under certain conditions
-- sometimes the counterfactual scenario is the forecast: what would happen if we didn't intervene (and then you don't)
+- how many beds to we need?
+- where should we allocate vaccines?
+- where should we trial vaccines?
 
-# Why forecast?
+However:
+
+- not all modelling is prediction
+- not all modelling of the future is forecasting
+
+### Different ways of modelling the future {.smaller}
+
+- **Nowcasts** make statements about current trends based on partial data
+
+- **Forecasts** are *unconditional* statements about the future: what *will happen*
+
+- **Scenarios** state what *would* happen under certain conditions
+
+### Why nowcast/forecast? {.smaller}
 
 - to create **situational awareness**
   - nowcast: where are we now?
   - forecast: where are we heading?
 
-# Example uses of forecasts
+### CDC use of influenza forecasts
 
-- healthcare capacity planning
-- vaccine trial planning
+![](figures/cdc_flu_forecast_use.png)
 
-# Relationship with R estimation
+[CDC: About Flu Forecasting](https://www.cdc.gov/flu/weekly/flusight/how-flu-forecasting.htm)
 
-- Commonest assumption is constant R ("no change")
-- Is this a good forecast model?
+### Relationship with $R_t$ estimation {.smaller}
 
-# Difference to nowcast
+- In infectious disease epidemiology, "no change" means no change in $R_t$
+- In that sense, predicting infections comes down to predicting $R_t$
+- Commonly, forecast models assume no change in $R_t$. Is this a good assumption?
 
-- model takes over from data
+### Relationship with nowcasting {.smaller}
 
-# Importance of evaluation
+- Nowcast: we have **some** data from the dates we're predicting
+- Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
 
-- we can score forecasts (because they're unconditional) and nowcasts; this is much harder for conditional forecasts (are the conditions met)?
+### Forecasts are usually *probabilistic* {.smaller}
 
-# Importance of uncertainty
+- Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
 
-- how certain we are about certain future outcomes is important
-- providing uncertainty allows attributing probabilities to outcomes, i.e. X% chance of exceeding hospital capacity
-- Makes evaluation more complicated (but not impossible)
+![](figures/weather_forecast.png)
 
-# Plan for the next few sessions
+### Importance of evaluation {.smaller}
+
+- Because forecasts are *unconditional* (what will happen) we can compare them to data and see how well they did
+- So-called **proper scoring rules** incentivise forecasters to express an honest belief about the future
+- Many proper scoring rules (and other metrics) are available to assess probabilistic forecasts
+
+### Forecasting paradigm {.smaller}
+
+Maximise *sharpness* subject to *calibration*
+
+- Statements about the future should be **correct** ("calibration")
+- statements about the future should aim to have **narrow uncertainty** ("sharpness")
+
+### Plan for this session
 
 1. Start with a simple model and use it to make a forecast (using stan)
-2. Evaluate the forecasts
-3. Try a range of forecasts + evaluate
+2. Evaluate the forecasts using proper scoring rules
 
 [Return to the session](../forecasting-concepts)

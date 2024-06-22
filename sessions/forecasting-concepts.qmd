@@ -3,6 +3,8 @@ title: "Forecasting concepts"
 order: 7
 ---
 
+[Forecasting as an epidemiological problem](slides/forecasting-as-an-epidemiological-problem)
+
 ```{r echo = FALSE}
 set.seed(123)
 ```
