@@ -219,8 +219,8 @@ We then generate estimates from this model:
 
 ```{r r_inf_fit}
 data <- list(
-  n = length(onsets) - 1,
-  obs = onsets[-1],
+  n = length(obs) - 1,
+  obs = obs[-1],
   I0 = inf_ts$infections[1],
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf,
@@ -324,8 +324,8 @@ We can now generate estimates from this model:
 
 ```{r r_inf_rw_fit}
 data <- list(
-  n = length(onsets) - 1,
-  obs = onsets[-1],
+  n = length(obs) - 1,
+  obs = obs[-1],
   I0 = inf_ts$infections[1],
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf,
