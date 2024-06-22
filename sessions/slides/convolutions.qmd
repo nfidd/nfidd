@@ -60,21 +60,9 @@ We can use convolutions with the delay distribution that applies at the *individ
 
 Having moved to the population level, we can't estimate individual-level event times any more.
 
-Instead, we discretise the distribution (remembering that it is **double censored** - as both events are censored). One way of doing so:
+Instead, we *discretise* the distribution (remembering that it is **double censored** - as both events are censored). 
 
-$$
-F^*(t) = \int_0^1 F(t - u) du
-$$
-
-$$
-f_t \propto F^*(t + 1) - F^*(t - 1)
-$$
-
-where $F(t) = 0$ for $t \leq 0$.
-
-::: {.fragment .fade-in}
-- **Don't worry if this seems complicated we will explore this using simulation during the session**
-:::
+This can be solved mathematically but in the session we will use simulation.
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
