@@ -258,7 +258,9 @@ joint_rt_data <- c(joint_data,
   )
 )
 joint_rt_fit <- joint_rt_mod$sample(
-  data = joint_rt_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = joint_rt_data, parallel_chains = 4, refresh = 0,
+  show_exceptions = FALSE, show_messages = FALSE,
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 joint_rt_fit
 ```

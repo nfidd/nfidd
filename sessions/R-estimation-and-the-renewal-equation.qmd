@@ -349,10 +349,14 @@ data <- list(
 )
 r_rw_inf_fit <- rw_mod$sample(
   data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE,
-  parallel_chains = 4, max_treedepth = 12
+  parallel_chains = 4, max_treedepth = 12, init = \() list(init_R = 0, rw_sd = 0.01)
 )
 r_rw_inf_fit
 ```
+
+::: {.callout-tip}
+As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
+:::
 
 We can again extract and visualise the posteriors in the same way as earlier.
 
