@@ -532,6 +532,7 @@ U = F_X(k) + v \cdot (F_X(k) - F_X(k-1))
 $$
 
 where:
+
 - $k$ is the observed integer value.
 - $F_X(k)$ is the CDF evaluated at $k$.
 - $v$ is a random variable uniformly distributed on $[0, 1]$.
