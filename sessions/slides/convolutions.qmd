@@ -72,4 +72,6 @@ where $F(t) = 0$ for $t \leq 0$.
 - Simulate convolutions with infection counts
 - Estimate parameters numbers of infections from number of symptom onsets, using a convolution model
 
+#
+
 [Return to the session](../biases-in-delay-distributions)

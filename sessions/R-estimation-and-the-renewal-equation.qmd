@@ -3,17 +3,17 @@ title: "R estimation and the renewal equation"
 order: 5
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
 
 # Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -31,6 +31,20 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # The renewal equation as a process model for infectious diseases
@@ -131,7 +145,7 @@ As always we first load the stan model and spend some time trying to understand 
 
 ```{r stan_estimate_r}
 mod <- cmdstan_model(here("stan", "estimate-r.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: {.callout-tip}
@@ -205,7 +219,7 @@ We now add this to our renewal equation model:
 
 ```{r stan_estimate_inf_and_r}
 mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -288,10 +302,10 @@ $$
 Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
 
 ::: {.callout-note, collapse = TRUE}
+
 ## What does a geometric random walk model look like?
 
 ```{r}
-set.seed(123)
 n <- 100
 R <- rep(NA, n)
 R[1] <- rnorm(1, 1, 0.1)
@@ -313,7 +327,7 @@ We can now include this in a stan model,
 
 ```{r stan_estimate_inf_and_r_rw}
 rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod
 ```
 
 Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number. See [`stan/functions/geometric_random_walk.stan`]() for the geometric random walk function (note that here we use the [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency).

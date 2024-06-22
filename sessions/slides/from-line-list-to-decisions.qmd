@@ -60,4 +60,6 @@ Throughout the course we will
 - applications (day 3)
 :::
 
+#
 
+[Return to the session](../introduction-and-course-overview)

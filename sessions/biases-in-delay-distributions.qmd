@@ -3,10 +3,6 @@ title: "Biases in delay distributions"
 order: 3
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 [Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
 # Objectives
@@ -16,7 +12,11 @@ Specifically, we will consider two types of biases that commonly occur in infect
 
 We'll introduce some typical properties of infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
 
@@ -35,7 +35,21 @@ The best way to interact with the material is via the [Visual Editor](https://do
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
-## Load data
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
+:::
+
+# Load data
 
 We will use the same simulated data set as in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data).
 
@@ -54,7 +68,7 @@ If you need to re-load the data, here is the code again from that session:
 ```
 :::
 
-## Dates, not days: censoring
+# Dates, not days: censoring
 
 Data on health outcomes are usually not recorded in the way that we have used so far in this session: as a numeric time since a given start date.
 Instead, we usually deal with *dates*.
@@ -101,7 +115,6 @@ df_dates <- df_dates |>
 ## Take 5 minutes
 
 Fit the lognormal model used in the [session on delay distributions](delay-distributions#estimating-delay-distributions) to the estimates from the rounded data, i.e. using the `df_dates` data set.
-
 Do you still recover the parameters that we put in?
 :::
 
@@ -130,7 +143,7 @@ We can use this in our delay estimation by making the exact time of the events b
 
 ```{r censoring_adjusted_delay_model}
 cmod <- cmdstan_model(here("stan", "censored_delay_model.stan"))
-cmod$print(line_numbers = TRUE)
+cmod
 ```
 
 ::: callout-tip
@@ -169,7 +182,7 @@ Try re-simulating the delays using different parameters of the delay distributio
 Can you establish under which conditions the bias in estimation gets worse?
 :::
 
-## Real-time estimation: truncation
+# Real-time estimation: truncation
 
 The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
 However, information on delay distribution is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
@@ -225,7 +238,7 @@ Once again, we can write a model that adjusts for truncation, by re-creating the
 
 ```{r truncation_adjusted_delay_model}
 tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
-tmod$print(line_numbers = TRUE)
+tmod
 ```
 
 ::: callout-tip
