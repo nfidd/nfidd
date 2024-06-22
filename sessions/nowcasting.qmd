@@ -304,7 +304,7 @@ wrong_delay_data$report_cdf <- wrong_proportion_reported
 
 We now fit the nowcasting model with the wrong delay distribution:
 
-```{r rw-nowcast-fit}
+```{r gamma-nowcast-fit}
 gamma_nowcast_fit <- rw_mod$sample(
   data = wrong_delay_data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
 )
@@ -312,7 +312,7 @@ gamma_nowcast_fit
 ```
 
 
-Again we can extract the nowcasted onsets and plot them alongside the observed data:
+Again we can extract the nowcast onsets and plot them alongside the observed data:
 
 ```{r gamma-nowcast-onsets}
 gamma_nowcast_onsets <- gamma_nowcast_fit |>
