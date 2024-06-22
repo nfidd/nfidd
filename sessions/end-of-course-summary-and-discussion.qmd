@@ -5,7 +5,7 @@ order: 13
 
 # Objective
 
-The aim of this session is to summarize the course and discuss future directions.
+The aim of this session is to summarise the course and discuss future directions.
 
 # Summary of the course
 

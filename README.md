@@ -15,7 +15,7 @@ field `order:` corresponding to where it fits in, and edit
 
 The `html` pages can be generated locally using the function
 
-```r
+``` r
 quarto::quarto_render()
 ```
 
@@ -40,7 +40,8 @@ Contributions of any kind are welcome!
 
 ### Issues
 
-<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>,
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
