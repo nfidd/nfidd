@@ -7,17 +7,21 @@ order: 4
 set.seed(123)
 ```
 
+## Introduction
+
 [Delay distributions at the population level](slides/convolutions)
 
-# Objectives
+We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak. So far, we've been working with individual line-list data. However, we usually want to model how an outbreak evolves through a whole population. The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
 
-The aim of this session is to introduce how delay distributions can be used to model the population-level data generating process of an epidemic.
+This means working with aggregated count data. This creates some new issues in correctly accounting for uncertainty. We handle population-level data using *convolutions* as a way of combining count data with a distribution of individual probabilities. We will have to adjust our continuous probability distributions to work with this using *discretisation*. We'll then need to re-introduce additional uncertainty to account for the observation process at a population level.
 
-In this session, we'll focus on the delay from infection to symptom onset.
-First, we will use a time series of infections to simulate observed symptom onsets.
+### Objectives
+
+In this session, we'll focus on the delay from infection to symptom onset at a population level.
+First, we will introduce the techniques of convolution and discretisation. We'll apply these to an aggregated time series of infections in order to simulate observed symptom onsets.
 Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
 
-# Libraries used
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -165,7 +169,7 @@ ggplot(combined, aes(x = time, y = observed)) +
 
 # Estimating a time series of infections
 
-We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
+As in previous sessions, we don't usually have data on infections. We now create a model that uses symptom onsets to estimate the number of infections over time. We'll base the model on an uninformed prior and work forward from what we know about the observation process.
 
 ```{r stan_estimate_infections}
 mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
@@ -225,7 +229,7 @@ We can see the first few estimates of the number of infections using:
 inf_fit
 ```
 
-Again, we can do a posterior predictive check by plotting the modelled estimates of the time series of infections (with uncertainy) against our original data.
+Again, we can do a posterior predictive check by plotting the modelled estimates of the time series of infections (with uncertainty) against our original data.
 Does it look like a good fit?
 
 ```{r inf_ppc}
@@ -243,8 +247,8 @@ ggplot(mapping = aes(x = infection_day)) +
     data = inf_posterior, mapping = aes(y = .value, group = .draw), alpha = 0.1
   ) +
   geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
-  labs(subtitle = "Infections per day (red),
-       and sampled infection trajectories (lback)")
+  labs(title = "Infections per day",
+       subtitle = "True data (red), and sample of estimated trajectories (black)")
 ```
 
 ::: callout-tip
