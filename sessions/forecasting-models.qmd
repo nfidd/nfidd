@@ -588,7 +588,7 @@ Reminder: For more on scoring on the log scale see [Scoring forecasts on transfo
 ### At a glance
 
 ```{r}
-log_scores |>
+log_sc_scores |>
   summarise_scores(by = "model")
 ```
 
