@@ -60,7 +60,7 @@ Nowcasting is exactly this!.
 
 ### A simple approach to nowcasting
 
-1. Estimate the delay distribution from external data
+1. Estimate the delay distribution from other data
 2. Specify a model for the epidemic dynamics
 3. Use the estimated delay distribution to model the expected right truncation in the data
 4. Fit the model to the truncated data
@@ -69,9 +69,8 @@ Nowcasting is exactly this!.
 ### This session
 
 1. Perform nowcast with a known reporting delay distribution
-2. Understand the limitations of the data generating process
-3. Perform a nowcast using a more realistic data generating process
-4. Explore the impact of getting the delay distribution wrong
+2. Perform a nowcast using a more realistic data generating process
+3. Explore the impact of getting the delay distribution wrong
 
 #
 
