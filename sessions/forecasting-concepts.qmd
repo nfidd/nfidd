@@ -455,9 +455,9 @@ This equation can be broke down into the two components:
 
 ##### Interpretation
 
-- **First Term** ($ \mathbb{E}_{X \sim D}[|X - y|] $): This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
+- **First Term** ($\mathbb{E}_{X \sim D}[|X - y|]$): This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
 
-- **Second Term** ($ \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|] $): This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
+- **Second Term** ($\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$): This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
 :::
 
 Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
