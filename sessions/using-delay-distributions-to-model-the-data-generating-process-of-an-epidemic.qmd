@@ -55,7 +55,7 @@ $$
 C_t = \sum_{i=0}^{i=p_\mathrm{max}} I_{t-i} p_i
 $$
 
-In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
+In other words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
 We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
@@ -76,20 +76,29 @@ In our first session, we decided to assume the delay from infection to symptom o
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
 We will assume that both events that make up the delay (here infection and symptom onset) are observed as daily counts (e.g. as number of infections/symptom onsets by calendar date).
-This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. The important point to remember is that the cumulative distribution function ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. 
+
+::: .callout-note collapse=true
+## Reminder: **Double interval censoring**
+
+The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
 $$
 F^*(t) = \int_0^1 F(t - u) du
 $$
 
-The probability mass function (PMF) is then
+In effect, this is saying that the daily censored CDF is the average of the continuous distributions CDF over all possible event times (here between 0 and 1).
+
+The probability mass function (PMF) of this distribution when observed as a daily process (i.e. the secondary event is also daily censored) is then
 
 $$
 f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
 $$
 
 which you may be familiar with from single censored (i.e. for the secondary event) discretised distributions.
+The important point is that the ultimately observed PMF is a combination of a primary event daily censoring process and a secondary event daily censoring process.
+:::
 
-We can also think about this via simulation.
+We can think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
 This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
