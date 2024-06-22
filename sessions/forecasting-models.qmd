@@ -242,7 +242,7 @@ filtered_onset_df <- onset_df |>
 ```
 
 We will now fit the mechanistic model to the data.
-```{r fit_mech_model}
+```{r fit_mech_model, results = 'hide', message = FALSE}
 horizon <- 28
 
 data <- list(
@@ -257,13 +257,17 @@ data <- list(
   N_prior = c(10000, 2000) # the prior for the population size
 )
 mech_forecast_fit <- mech_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+  data = data, parallel_chains = 4, adapt_delta = 0.95
+)
+```
+
+```{r fit_mech_model_summary}
 mech_forecast_fit
 ```
 
 We will now fit the statistical model to the data.
 
-```{r fit_stat_model}
+```{r fit_stat_model, results = 'hide', message = FALSE}
 data <- list(
   n =nrow(filtered_onset_df),
   I0 = 1,
@@ -275,7 +279,8 @@ data <- list(
   h = horizon # Here we set the number of days to forecast into the future
 )
 stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.9)
+  data = data, parallel_chains = 4, adapt_delta = 0.9
+)
 ```
 
 Finally we can extract the forecasts from the models and plot them.
@@ -326,7 +331,7 @@ In the above we assumed that we knew the population size roughly. In practice, w
 ::: {.callout-note, collapse = TRUE}
 ## The solution
 
-```{r}
+```{r very-wrong, results = 'hide', message = FALSE}
 data <- list(
   n =nrow(filtered_onset_df),
   I0 = 1,
@@ -340,12 +345,15 @@ data <- list(
 )
 
 mech_forecast_fit_diff <- mech_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+  data = data, parallel_chains = 4, adapt_delta = 0.95
+)
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
   mutate(day = day + cutoff)
+```
 
+```{r very-wrong-plot}
 mech_forecast_diff |>
   filter(.draw %in% sample(.draw, 1000)) |>
   ggplot(aes(y = .value, x = day)) +

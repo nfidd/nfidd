@@ -124,11 +124,11 @@ tail(onset_df)
 We can now fit the model to the data and then make a forecast.
 This should look very similar to the code we used in the renewal session but with the addition of a non-zero `h` in the data list.
 
-```{r fit_model}
+```{r fit_model, results = 'hide', message = FALSE}
 horizon <- 28
 
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -137,10 +137,17 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-rw_forecast <- mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+rw_forecast <- mod$sample(data = data, parallel_chains = 4, adapt_delta = 0.95)
+```
+
+```{r rw_forecast_summary}
 rw_forecast
 ```
+
+::: callout-note
+Because this model can struggle to fit to the data, we have increased the value of  `adapt_delta` from its default value of 0.8.
+This is, a tuning parameter that affects the step size of the sampler in exploring the posterior (higher `adapt_delta` leading to smaller step sizes meaning posterior exploration is slower but more careful).
+:::
 
 ## Visualising the forecast
 
@@ -199,7 +206,7 @@ As our forecasting model is based on the reproduction number, we can also visual
 This can be helpful for understanding why our forecasts of symptom onsets look the way they do and for understanding the uncertainty in the forecasts.
 We can also compare this to the "true" reproduction number, estimated once all relevant data is available. To do this, we will fit the model again but with a later cutoff. Then we can compare the reproduction numbers produced as *forecasts* at the earlier time, with *estimates* at the later time that used more of the data.
 
-```{r fit_model_long}
+```{r fit_model_long, results = 'hide', message = FALSE}
 long_onset_df <- onset_df |>
   filter(day <= cutoff + horizon)
 
@@ -214,8 +221,7 @@ long_data <- list(
   h = 0
 )
 
-rw_long <- mod$sample(
-  data = long_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+rw_long <- mod$sample(data = long_data, parallel_chains = 4, adapt_delta = 0.95)
 ```
 
 We first need to extract the forecast and estimated reproduction numbers.

@@ -121,15 +121,17 @@ Do you still recover the parameters that we put in?
 ::: {.callout-note collapse="true"}
 ## Solution
 
-```{r df_dates_solution}
+```{r df_dates_solution, results = 'hide', message = FALSE}
 mod <- cmdstan_model(here("stan", "lognormal.stan"))
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
     y = na.omit(df_dates)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r df_dates_solution_summary}
 res
 ```
 
@@ -164,14 +166,16 @@ Lines 15-17 reflect the integer delays, adjusted by the estimated times of day.
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
-```{r censored_estimate}
+```{r censored_estimate, results = 'hide', message = FALSE}
 cres <- cmod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
     onset_to_hosp = na.omit(df_dates)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r censored_estimate_summary}
 cres
 ```
 
@@ -222,14 +226,16 @@ How far away from the "true" parameters do you end up?
 ::: {.callout-note collapse="true"}
 ## Solution
 
-```{r df_realtime_solution}
+```{r df_realtime_solution, results = 'hide', message = FALSE}
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_realtime)),
     y = na.omit(df_realtime)$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r df_realtime_solution_summary}
 res
 ```
 :::
@@ -256,15 +262,17 @@ Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`.
 
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
-```{r truncated_estimate}
+```{r truncated_estimate, results = 'hide', message = FALSE}
 tres <- tmod$sample(
   data = list(
     n = nrow(df_realtime),
     onset_to_hosp = df_realtime$onset_to_hosp, 
     time_since_onset = 70 - df_realtime$onset_time
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
+```
+
+```{r truncated_estimate_summary}
 tres
 ```
 
