@@ -9,9 +9,11 @@ set.seed(123)
 
 ## Introduction
 
-[Introduction to the reproduction number](slides/introduction-to-reproduction-number)
-
 In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.
+
+#### Slides 
+
+- [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
 
 ### Objectives
 

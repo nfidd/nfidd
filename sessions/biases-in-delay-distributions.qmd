@@ -9,12 +9,14 @@ set.seed(123)
 
 ## Introduction
 
-[Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
-
 So far, we've looked at the uncertainty of the time delays between epidemiological events. The next challenge is that our information on these delays is usually biased, especially when we're analysing data in real time. We'll consider two types of biases that commonly occur in reported infectious disease data: 
 - *Censoring*: when we know an event occurred at some time, but not exactly when.
 - *Truncation*: when not enough time has passed for all the relevant epidemiological events to occur or be observed.
 We can again handle these by including them as uncertain parameters in the modelling process.
+
+#### Slides
+
+[Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
 ### Objectives
 

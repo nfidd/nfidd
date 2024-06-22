@@ -5,13 +5,11 @@ order: 1
 
 ## Introduction
 
-### Parameters and probabilities
-
 Many important characteristics, or parameters, of epidemiological processes are not fully observed - and are therefore uncertain. For example, in this course this might include time delays, reproduction numbers, or case numbers now and in the future. We can specify the shape of uncertainty around a specific parameter using a probability distribution. 
 
 We'll want to correctly specify this uncertainty. We can do this best by combining our own prior understanding with the data that we have available. In this course, we'll use this Bayesian approach to modelling. A useful tool for creating these models is the `stan` probabilistic programming language. 
 
-### Slides
+#### Slides
 
 -   [Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
 -   [Introduction to stan concepts used in the course](slides/introduction-to-stan)
