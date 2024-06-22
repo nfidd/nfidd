@@ -351,6 +351,7 @@ As in the [forecasting concepts session](forecasting-concepts), we have fit thes
 ```{r load_forecasts}
 forecasts <- bind_rows(
   rw_forecasts,
+  stat_forecasts,
   mech_forecasts
 )
 ```
