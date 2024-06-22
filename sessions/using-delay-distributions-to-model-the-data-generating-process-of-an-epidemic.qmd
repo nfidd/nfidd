@@ -3,10 +3,6 @@ title: "Using delay distributions to model the data generating process"
 order: 4
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 [Delay distributions at the population level](slides/convolutions)
 
 # Objectives
@@ -17,7 +13,9 @@ In this session, we'll focus on the delay from infection to symptom onset.
 First, we will use a time series of infections to simulate observed symptom onsets.
 Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
 
-# Libraries used
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -36,6 +34,18 @@ library("tidybayes")
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
 
 # Simulating observations from a time series of infections
 
@@ -169,7 +179,7 @@ We now estimate the number of infections over time based on an uninformed prior 
 
 ```{r stan_estimate_infections}
 mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: callout-tip

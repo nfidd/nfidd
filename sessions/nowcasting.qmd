@@ -5,15 +5,15 @@ order: 6
 
 [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -31,6 +31,20 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating delayed reporting
@@ -180,7 +194,7 @@ We can now fit our first nowcasting model. Here we assume exactly the same gener
 
 ```{r stan-simple-nowcast}
 mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: {.callout-tip}
@@ -238,7 +252,7 @@ We first load the model
 
 ```{r stan-nowcast-with-rw}
 rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod
 ```
 
 and then fit it
