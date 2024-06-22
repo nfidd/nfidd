@@ -67,7 +67,7 @@ F^*(t) = \int_0^1 F(t - u) du
 $$
 
 $$
-f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
+f_t \propto F^*(t + 1) - F^*(t - 1)
 $$
 
 where $F(t) = 0$ for $t \leq 0$.
