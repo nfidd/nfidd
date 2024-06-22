@@ -233,18 +233,16 @@ r_inf_fit <- mod$sample(
 r_inf_fit
 ```
 
-We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). For example one could do 
+This time we can extract estimates from the posterior for both the `infections` and `R` variables by infection day:
 
 ```{r r_inf_posterior}
-# To avoid repeating overselves we have put the code to extract the posteriors in a function
-source(here::here("functions", "extract-R-posteriors.r"))
 posteriors <- r_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
   mutate(infection_day = infection_day - 1)
 ```
 
-This time we extracted both the `infections` and `R` variables by infection day.
+
 We again use this to visualise infections compared to the data used to generate the time series of onsets
 
 ```{r plot_infections}
