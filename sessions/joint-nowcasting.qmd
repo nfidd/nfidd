@@ -145,7 +145,7 @@ joint_mod
 
 and then fit it:
 
-```{r joint-nowcast-fit}
+```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(
   n = length(unique(filtered_reporting_triangle$day)),                # number of days
   m = nrow(filtered_reporting_triangle),               # number of reports
@@ -157,9 +157,10 @@ joint_data <- list(
   obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
   d = 16               # number of reporting delays
 )
-joint_nowcast_fit <- joint_mod$sample(
-  data = joint_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
+```
+
+```{r joint-nowcast-fit-summary}
 joint_nowcast_fit
 ```
 
@@ -247,7 +248,7 @@ We would also remove the `generated quantities` block as we are not nowcasting t
 
 Now let's fit the final model for this session!
 
-```{r joint-nowcast-rt-fit}
+```{r joint-nowcast-rt-fit, results = 'hide', message = FALSE}
 joint_rt_data <- c(joint_data,
   list(
     gen_time_max = length(gen_time_pmf),
@@ -258,10 +259,12 @@ joint_rt_data <- c(joint_data,
   )
 )
 joint_rt_fit <- joint_rt_mod$sample(
-  data = joint_rt_data, parallel_chains = 4, refresh = 0,
-  show_exceptions = FALSE, show_messages = FALSE,
+  data = joint_rt_data, parallel_chains = 4.
   init = \() list(init_R = 0, rw_sd = 0.01)
 )
+```
+
+```{r joint-nowcast-rt-fit-summary}
 joint_rt_fit
 ```
 

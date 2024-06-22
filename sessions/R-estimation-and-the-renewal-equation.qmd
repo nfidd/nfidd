@@ -164,7 +164,7 @@ Line 24 defines the prior distribution of R at each time point, and Line 25 defi
 
 Once again we can generate estimates from this model:
 
-```{r r_fit}
+```{r r_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(inf_ts) - 1,
   obs = inf_ts$infections[-1],
@@ -172,9 +172,10 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
-r_fit <- mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+r_fit <- mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r r_fit_summary}
 r_fit
 ```
 
@@ -231,7 +232,7 @@ How do the assumptions about the infections time series differ between the model
 
 We then generate estimates from this model:
 
-```{r r_inf_fit}
+```{r r_inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = length(obs) - 1,
   obs = obs[-1],
@@ -241,9 +242,10 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE, parallel_chains = 4
-)
+r_inf_fit <- mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r r_inf_fit_summary}
 r_inf_fit
 ```
 
@@ -336,7 +338,7 @@ Note that the model is very similar to the one we used earlier, but with the add
 
 We can now generate estimates from this model:
 
-```{r r_inf_rw_fit}
+```{r r_inf_rw_fit, results = 'hide', message = FALSE}
 data <- list(
   n = length(obs) - 1,
   obs = obs[-1],
@@ -348,9 +350,12 @@ data <- list(
   h = 0 # this is a small easter egg for the attentive reader
 )
 r_rw_inf_fit <- rw_mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE,
-  parallel_chains = 4, max_treedepth = 12, init = \() list(init_R = 0, rw_sd = 0.01)
+  data = data, parallel_chains = 4, max_treedepth = 12, 
+  init = \() list(init_R = 0, rw_sd = 0.01
 )
+```
+
+```{r r_inf_rw_fit_summary}
 r_rw_inf_fit
 ```
 
