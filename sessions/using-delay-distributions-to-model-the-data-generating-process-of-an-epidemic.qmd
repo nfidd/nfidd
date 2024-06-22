@@ -91,7 +91,7 @@ which you may be familiar with from single censored (i.e. for the secondary even
 
 We can also think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
-This means that discretising a delay in this context is **double censoring** as we discussed i
+This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
