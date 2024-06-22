@@ -7,13 +7,17 @@ order: 5
 set.seed(123)
 ```
 
+## Introduction
+
 [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
 
-# Objectives
+In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.
+
+### Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.
 
-# Libraries used
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -44,7 +48,7 @@ Because infection is dependent on a pathogen being transmitted from one individu
 We know express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R$.
 
 Remember that this is a more general concept than the _basic_ reproduction number $R_0$ which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
-The reproduction number $R$ (sometimes called the _effective_ reproduction number) *more generally describes the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+The reproduction number $R$ (sometimes called the _effective_ reproduction number)* more generally describes the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
 In most mechanistic models of infectious diseases (starting with the simplest SIR model), *$* arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
 By fitting such models to data it is then possible to calculate the value of $R$ at any point in time.
