@@ -142,7 +142,7 @@ For example, if we know that symptom onset of an individual occurred on 20 June,
 We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
 
 ```{r censoring_adjusted_delay_model}
-cmod <- cmdstan_model(here("stan", "censored_delay_model.stan"))
+cmod <- cmdstan_model(here("stan", "censored-delay-model.stan"))
 cmod
 ```
 
@@ -237,7 +237,7 @@ res
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
 ```{r truncation_adjusted_delay_model}
-tmod <- cmdstan_model(here("stan", "truncated_delay_model.stan"))
+tmod <- cmdstan_model(here("stan", "truncated-delay-model.stan"))
 tmod
 ```
 
