@@ -56,19 +56,22 @@ Remember from [biases in delay estimation](../biases-in-delay-distributions):
 - reporting of events can be triggered by the **secondary** event
 - in that case, longer delays might be missing because whilst the *primary events* have occurred the *secondary events* **have not occurred yet**
 
-Nowcasting is exactly this if the seondary event is the data being available for analysis.
+Nowcasting is exactly this!.
 
-### Nowcasting as a population-level problem
+### A simple approach to nowcasting
 
-If we don't have individual-level data, we can estimate the delay distribution of reporting from multiple snapshots
-
-![](figures/germany_historical.png)
+1. Estimate the delay distribution from external data
+2. Specify a model for the epidemic dynamics
+3. Use the estimated delay distribution to model the expected right truncation in the data
+4. Fit the model to the truncated data
+5. Use the untruncated estimates from the model as the nowcast
 
 ### This session
 
 1. Perform nowcast with a known reporting delay distribution
-2. Joint estimation of delay and nowcast
-3. Joint estimation of R_t, delay and nowcast
+2. Understand the limitations of the data generating process
+3. Perform a nowcast using a more realistic data generating process
+4. Explore the impact of getting the delay distribution wrong
 
 ###
 
