@@ -2,18 +2,23 @@
 title: "Nowcasting concepts"
 order: 6
 ---
-
-[Introduction to nowcasting](slides/introduction-to-nowcasting)
-
 ```{r echo = FALSE}
 set.seed(123)
 ```
 
-# Objectives
+## Introduction
+
+[Introduction to nowcasting](slides/introduction-to-nowcasting)
+
+So far we've explored the delays and biases of real-time outbreak data, started to correct for these, and considered the underlying process that drives the evolution of an outbreak (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how an outbreak is evolving in the present and future. 
+
+We know that we have incomplete information in the present because of delays in the observation process (reporting delays). The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
+
+### Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
-# Libraries used
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
