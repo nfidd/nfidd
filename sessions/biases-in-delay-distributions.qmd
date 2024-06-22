@@ -178,13 +178,13 @@ If, for example, infections are exponentially increasing then there will be disp
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 
-Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 40 of our outbreak.
+Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 70 of our outbreak.
 Let us work with the original, un-censored data for the time from onset to hospitalisation so as to look at the issue of truncation in isolation:
 
 ```{r truncated_df}
 df_realtime <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time) |>
-  filter(hosp_time <= 40)
+  filter(hosp_time <= 70)
 ```
 
 ## Estimating delay distributions accounting for truncation
@@ -231,7 +231,7 @@ tmod$print(line_numbers = TRUE)
 ## Take 5 minutes
 
 Familiarise yourself with the model above.
-Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 40 days?
+Which line introduces the truncation, i.e. the fact that we have not been able to observe hospitalisation times beyond the cutoff of (here) 70 days?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -247,7 +247,7 @@ tres <- tmod$sample(
   data = list(
     n = nrow(df_realtime),
     onset_to_hosp = df_realtime$onset_to_hosp, 
-    time_since_onset = 40 - df_realtime$onset_time
+    time_since_onset = 70 - df_realtime$onset_time
   ),
   refresh = 0, show_exceptions = FALSE, show_messages = FALSE
 )
