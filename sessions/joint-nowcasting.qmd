@@ -98,7 +98,7 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r")) ## generates `onset_df`
+source(here::here("snippets", "simulate-onsets.r"))
 head(onset_df)
 cutoff <- 71
 ```
@@ -185,7 +185,7 @@ We now extract this nowcast:
 joint_nowcast_onsets <- joint_nowcast_fit |>
   gather_draws(nowcast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 Finally, we can plot the nowcast alongside the observed data:
@@ -296,7 +296,7 @@ First we can extract the nowcast and plot the nowcast alongside the observed dat
 joint_nowcast_with_r_onsets <- joint_rt_fit |>
   gather_draws(nowcast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 ```{r plot-joint-nowcast-with-r}
@@ -312,7 +312,7 @@ We can also extract the reproduction number and plot it:
 joint_rt <- joint_rt_fit |>
   gather_draws(R[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 
 ggplot(joint_rt, aes(x = day, y = .value, group = .draw)) +
   geom_line(alpha = 0.1)

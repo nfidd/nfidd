@@ -67,6 +67,7 @@ Let us assume that the symptom onsets are reported with a delay and that this de
 To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
+data(infection_times)
 df <- infection_times |>
   mutate(
     onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
@@ -239,7 +240,7 @@ We can now plot onsets alongside those nowcasted by the model:
 nowcast_onsets <- simple_nowcast_fit |>
   gather_draws(onsets[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100)) |>
   mutate(day = day + 1)
 ```
 
@@ -350,7 +351,7 @@ Again we can extract the nowcast of symptom onsets and plot it alongside the obs
 gamma_nowcast_onsets <- gamma_nowcast_fit |>
   gather_draws(onsets[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100)) |>
   mutate(day = day + 1)
 ```
 

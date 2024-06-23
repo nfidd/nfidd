@@ -80,13 +80,21 @@ For example, the observable outcomes $C_t$ could be the number of symptom onsets
 
 We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
 
-```{r aggregate, file = here::here("snippets", "load-ts.r")}
+```{r aggregate}
+source(here::here("snippets", "load-ts.r"),
+       echo=TRUE, max.deparse.length=1000)
 ```
 
 ::: callout-note
 The second part of the code snippet above is used to add days without infections with a zero count.
 This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
 :::
+
+And look at the first few rows of the daily aggregated data:
+
+```{r display-aggregate}
+head(inf_ts)
+```
 
 Now we can convolve the time series with a delay distribution to get a time series of outcomes as suggested above.
 
@@ -272,10 +280,7 @@ Does it look like a good fit?
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
-  mutate(infection_day = infection_day - 1)
-
-# sample 100 trajectories for plotting
-inf_posterior <- inf_posterior |>
+  mutate(infection_day = infection_day - 1) |>
   filter(.draw %in% sample(.draw, 100))
 
 ggplot(mapping = aes(x = infection_day)) +
