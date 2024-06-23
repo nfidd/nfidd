@@ -126,6 +126,7 @@ We now return to the time series of infections we used in the [session on convol
 
 ```{r load_ts}
 source(here::here("snippets", "load-ts.r"))
+head(inf_ts)
 ```
 
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
