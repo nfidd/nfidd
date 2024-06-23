@@ -650,7 +650,7 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 - The random walk and mechanistic models have much similar performance.
 - Even at the peak this is true as the log scale approach more evenly weights the over and underpredictions.
 - The statistical model is still notably worse than the other models.
-- In particular, it is much worse at the peak sof the outbreak and at longer horizons.
+- In particular, it is much worse at the peak of the outbreak and at longer horizons.
 :::
 
 ### PIT histograms
