@@ -5,5 +5,24 @@ order: 13
 
 [End of course summary](slides/closing)
 
-For any questions or comments about please feel free to use the [course discussion board].
+For any questions or comments about please feel free to use the [course discussion board]().
 
+## Further reading
+
+The following is a highly subjective list of papers we would recommend to read for those interested in engaging further with the topics discussed here.
+
+### Delay estimation
+- Park et al., [Estimating epidemiological delay distributions for infectious diseases](https://doi.org/10.1101/2024.01.12.24301247).
+- Ainslie et al., [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://doi.org/10.48550/arXiv.2405.08841).
+
+### $R_t$ estimation
+- Gostic et al., [Practical considerations for measuring the effective reproductive number, $R_t$](https://doi.org/10.1371/journal.pcbi.1008409).
+- Brockhaus et al., [Why are different estimates of the effective reproductive number so different? A case study on COVID-19 in Germany](https://doi.org/10.1371/journal.pcbi.1011653).
+
+### Nowcasting
+- Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394).
+- Lison et al., [Generative Bayesian modeling to nowcast the effective reproduction number from line list data with missing symptom onset dates](https://doi.org/10.1371/journal.pcbi.1012021).
+
+### Forecasting
+- Lopez et al., [Challenges of COVID-19 Case Forecasting in the US, 2020-2021](https://doi.org/10.1101/2023.05.30.23290732).
+- Hyndman and Athanasopoulos, [Forecasting: Principles and Practice (free online text book)](https://otexts.com/fpp3/).
