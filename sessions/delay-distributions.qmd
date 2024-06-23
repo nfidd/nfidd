@@ -176,7 +176,7 @@ These estimates should look similar to what we used in the simulations.
 We can plot the resulting probability density functions.
 
 :::{.callout note}
-Every time we sample from the model posterior, we create 4000 draws. That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 draws from the posterior each time. You'll see this throughout the course.
+Every time we sample from the model posterior, we create 4000 iterations. That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations. You'll see this throughout the course.
 :::
 
 ```{r plot_onset_hospitalisation}
