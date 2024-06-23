@@ -232,8 +232,8 @@ We will now use the mechanistic and statistical models to forecast the number of
 source(here::here("snippets", "simulate-onsets.r"))
 onset_df
 
-# we'll make a forecast on day non day 41, pretending we haven't seen the later data
-cutoff <- 41
+# we'll again make a forecast on day 71, pretending we haven't seen the later data
+cutoff <- 71
 
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
