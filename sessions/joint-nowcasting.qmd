@@ -229,7 +229,7 @@ In the previous sessions, we have seen how to estimate the reproduction number a
 We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly.
 This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
-As in the [renewal sesssion](R-estimation-and-the-renewal-equation) we need to define the generation time distribution and a incubation period distribution.
+As in the [renewal session](R-estimation-and-the-renewal-equation) we need to define the generation time distribution and a incubation period distribution.
 We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity.
 These are:
 
@@ -262,6 +262,10 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
 We would also remove the `generated quantities` block as we are not nowcasting the data and simplify the observations to just the number of onsets.
+:::
+
+::: {.callout-note}
+Have another look at the model in comparison to the models of the reproduction number we used in the [renewal session](R-estimation-and-the-renewal-equation). Notice there's an extra change in the `data` block: we are no longer passing in the initial number of infected (`I0`). Instead, we are inferring this within the model as a parameter (line 27) with a prior (line 43). Normally during an outbreak we wouldn't know the initial number infected, so inferring it allows us to be more realistic. 
 :::
 
 Now let's fit the final model for this session!
