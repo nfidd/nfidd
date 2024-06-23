@@ -234,7 +234,7 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using the same data set we used in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"))
 onset_df
 
 # we'll make a forecast on day non day 41, pretending we haven't seen the later data

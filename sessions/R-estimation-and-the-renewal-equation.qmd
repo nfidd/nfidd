@@ -125,7 +125,7 @@ What kind of behaviours do you see depending on the values you put in?
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 
 ```{r load_ts}
-source(here::here("snippets", "load-ts.r"))
+source(here("snippets", "load-ts.r"))
 head(inf_ts)
 ```
 
@@ -221,7 +221,7 @@ Instead, we usually observe outcomes such as symptom onsets when individuals int
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
 
 ```{r add_onsets}
-source(here::here("functions", "convolve-with-delay.r"))
+source(here("functions", "convolve-with-delay.r"))
 ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
