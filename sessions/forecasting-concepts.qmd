@@ -74,11 +74,12 @@ In order to make things simpler we will remove the nowcasting part of the model,
 
 # Extending a model into the future
 
-The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
+The model we introduced in the [renewal equation session](R-estimation-and-the-renewal-equation) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
 Based on what we found in the [nowcasting session](nowcasting) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
 
 We can do this by simulating the generative model forward in time. 
-We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
+To do this we use the same model as in the renewal equation session but add a `generated quantities` block to create the forecasts.
+This is used for in a stan model for any calculations that only depend on other parameter estimates but are not themselves constrained by the data.
 So what does this look like in code? Lets load in the model again and take a look.
 
 ```{r load_model}
@@ -96,8 +97,8 @@ Do you see any limitations of this approach?
 ## Solution
 - What have we changed in the model to make it a forecasting model?
   - Added the `h` parameter to the data list to specify the number of days to forecast into the future.
-  - Added the `m` parameter as a piece of transformed data that is the total number of days to include in the model (i.e. the number of days in the data plus the number of days to forecast).
-  - `m` is then used in all arrays in the model rather than `n`. This means that `rw_noise` is now `m-1` long, and  `R`, `onsets`, `infections` and `onsets` are `m` long.
+  - Added the `m` parameter as a piece of `transformed data` (i.e. a calculation that only uses data) that is the total number of days to include in the model (i.e. the number of days in the data plus the number of days to forecast).
+  - `m` is then used in all arrays in the model rather than `n`. This means that `rw_noise` is now `m - 1` long, and  `R`, `onsets`, `infections` and `onsets` are `m` long.
   - As there are only `n` observations in the data in the likelihood we only use the first `n` elements of `onsets`.
   - To include observation error in the forecast a `generated quantities` block has been added which takes the last `h` onsets as the mean of a Poisson distribution and samples from this distribution to get the forecasted onsets.
 - Do you see any limitations of this approach?
