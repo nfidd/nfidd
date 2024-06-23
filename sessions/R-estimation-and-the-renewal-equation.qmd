@@ -460,6 +460,8 @@ We can see that the estimates are smoother when using the random walk model for 
 Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
 How would you change the model in this case?
 What are the implications for inference?
+- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
+
 
 
 
