@@ -10,7 +10,7 @@ parameters {
 }
 
 model {
-  alpha ~ normal(0, 10);
-  beta ~ normal(0, 10);
+  alpha ~ normal(0, 10) T[0,];
+  beta ~ normal(0, 10) T[0,];
   y ~ gamma(alpha, beta);
 }
