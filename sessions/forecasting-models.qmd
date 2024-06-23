@@ -301,7 +301,8 @@ stat_forecast <- stat_forecast_fit |>
 forecast <- bind_rows(
   mutate(mech_forecast, model = "mechanistic"),
   mutate(stat_forecast, model = "statistical")
-)
+) |> 
+  ungroup()
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
@@ -354,7 +355,8 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
-  mutate(day = day + cutoff)
+  mutate(day = day + cutoff) |> 
+  ungroup()
 ```
 
 ```{r very-wrong-plot}
@@ -380,7 +382,8 @@ forecasts <- bind_rows(
   rw_forecasts,
   stat_forecasts,
   mech_forecasts
-)
+) |> 
+  ungroup()
 ```
 
 ::: {.callout-tip}
