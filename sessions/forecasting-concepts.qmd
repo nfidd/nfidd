@@ -280,7 +280,9 @@ We managed to learn quite a lot about our model's forecasting limitations just l
 
 # Introduction to forecast evaluation
 
-See the lecture notes for more information on forecast evaluation.
+An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in which situation.
+In this section you will get to know several ways of assessing different aspects of forecast performance.
+You will then use them to evaluate your forecasts.
 
 # Evaluate your forecast
 
