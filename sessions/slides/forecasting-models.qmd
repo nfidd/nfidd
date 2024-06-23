@@ -117,14 +117,14 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 **Statistical models**
 
-- Models that don't include any epidemiological background e.g. ARIMA
-- The random walk model we have used on its own (without going via $R_t$) is called a "stochastic volatility model"
+- Models that don't include any epidemiological background e.g. ARIMA; also called *time-series models*
+- The random walk model when used on its own (without going via $R_t$) is called a [stochastic volatility model](https://mc-stan.org/docs/stan-users-guide/time-series.html#stochastic-volatility-models)
 
 :::
 
 ::: {.column}
 
-
+![](figures/muni_model.png)
 
 :::
 
@@ -132,7 +132,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ### {.smaller}
 
-![](figures/mechanism4.png){width="70%"}
+![](figures/mechanism.png){width="70%"}
 
 :::: {.columns}
 
