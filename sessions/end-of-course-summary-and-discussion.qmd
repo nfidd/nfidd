@@ -13,7 +13,7 @@ The following is a highly subjective list of papers we would recommend to read f
 
 ### Delay estimation
 - Park et al., [Estimating epidemiological delay distributions for infectious diseases](https://doi.org/10.1101/2024.01.12.24301247).
-- Ainslie et al., [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://doi.org/10.48550/arXiv.2405.08841).
+- Charniga et al., [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://doi.org/10.48550/arXiv.2405.08841).
 
 ### $R_t$ estimation
 - Gostic et al., [Practical considerations for measuring the effective reproductive number, $R_t$](https://doi.org/10.1371/journal.pcbi.1008409).
