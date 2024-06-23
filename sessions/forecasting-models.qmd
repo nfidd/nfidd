@@ -78,7 +78,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-# Forecasting models as a spectrum. 
+# Forecasting models as a spectrum
 
 A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
 However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
@@ -102,7 +102,6 @@ This approximates susceptible depletion as a linear function of the number of su
 ## What behaviour would we expect from this model?
 
 ```{r}
-set.seed(123)
 n <- 100
 N <- 1000
 R0 <- 1.5
@@ -129,11 +128,11 @@ ggplot(data, aes(x = t, y = R)) +
 
 The key assumptions we are making here are: 
 
-- The population is constant and we rouchgly know the size of the population.
+- The population is constant and we roughly know the size of the population.
 - The reproduction number only changes due to susceptible depletion
 - The number of new cases at each time is proportional to the number of susceptibles in the population.
 
-We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Let's load the model:
 
 ```{r}
 mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
@@ -159,13 +158,12 @@ $$
 log(R_t) = \phi log(R_{t-1}) + \epsilon_t
 $$
 
-where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
+where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
 
 ::: {.callout-note, collapse = TRUE
 ## What behaviour would we expect from this model?
 
 ```{r}
-set.seed(123)
 n <- 100
 phi <- 0.4
 sigma <- 0.1
@@ -197,7 +195,6 @@ $$
 ## What behaviour would we expect from this model?
 
 ```{r}
-set.seed(123)
 n <- 100
 phi <- 0.1
 sigma <- 0.1
@@ -329,11 +326,11 @@ What do you notice about the forecasts from the mechanistic and statistical mode
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
 
 ::: {.callout-note, collapse = TRUE}
-## The solution
+## Solution
 
 ```{r very-wrong, results = 'hide', message = FALSE}
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -371,6 +368,7 @@ mech_forecast_diff |>
 As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
+data(rw_forecasts, stat_forecasts, mech_forecasts)
 forecasts <- bind_rows(
   rw_forecasts,
   stat_forecasts,
@@ -379,7 +377,7 @@ forecasts <- bind_rows(
 ```
 
 ::: {.callout-tip}
-We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecasts dates.
+We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
 
 Some important things to note about these forecasts:
 
@@ -532,7 +530,7 @@ How do the CRPS scores change with forecast date?
 ### PIT histograms
 
 ::: {.callout-tip}
-## ReminderL: Interpreting the PIT histogram
+## Reminder: Interpreting the PIT histogram
 - Ideally PIT histograms should be uniform. 
 - If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
 - If it is skewed then the model is biased towards the direction of the skew.
@@ -548,7 +546,7 @@ Let's first look at the overall PIT histogram.
   facet_wrap(~model)
 ```
 
-As before lets look at the PIT histogram by forecast horizon (to save space we will group horizons)
+As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
 ```{r pit-histogram-horizon}
 sc_forecasts |> 
@@ -692,7 +690,7 @@ What do you think of the PIT histograms?
 :::
 # Going further
 
-- We have only looked at two forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
+- We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
 - We could also combine the mechanistic and statistical models to create a hybrid model which captures the best of both worlds (maybe).
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
 
