@@ -5,15 +5,15 @@ order: 6.5
 
 [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 This session aims to introduce how to do nowcasting if the reporting delay distribution is unknown.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -31,6 +31,20 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Joint estimation of delay distributions and nowcasting
@@ -126,12 +140,12 @@ As usual we start by loading the model:
 
 ```{r stan-joint-nowcast}
 joint_mod <- cmdstan_model(here("stan", "joint-nowcast.stan"))
-joint_mod$print(line_numbers = TRUE)
+joint_mod
 ```
 
 and then fit it:
 
-```{r joint-nowcast-fit}
+```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(
   n = length(unique(filtered_reporting_triangle$day)),                # number of days
   m = nrow(filtered_reporting_triangle),               # number of reports
@@ -143,9 +157,10 @@ joint_data <- list(
   obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
   d = 16               # number of reporting delays
 )
-joint_nowcast_fit <- joint_mod$sample(
-  data = joint_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
+```
+
+```{r joint-nowcast-fit-summary}
 joint_nowcast_fit
 ```
 
@@ -214,7 +229,7 @@ We now load in the model:
 
 ```{r stan-joint-nowcast-rt}
 joint_rt_mod <- cmdstan_model(here("stan", "joint-nowcast-with-r.stan"))
-joint_rt_mod$print(line_numbers = TRUE)
+joint_rt_mod
 ```
 
 ::: {.callout-tip}
@@ -233,7 +248,7 @@ We would also remove the `generated quantities` block as we are not nowcasting t
 
 Now let's fit the final model for this session!
 
-```{r joint-nowcast-rt-fit}
+```{r joint-nowcast-rt-fit, results = 'hide', message = FALSE}
 joint_rt_data <- c(joint_data,
   list(
     gen_time_max = length(gen_time_pmf),
@@ -244,8 +259,12 @@ joint_rt_data <- c(joint_data,
   )
 )
 joint_rt_fit <- joint_rt_mod$sample(
-  data = joint_rt_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = joint_rt_data, parallel_chains = 4,
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
+```
+
+```{r joint-nowcast-rt-fit-summary}
 joint_rt_fit
 ```
 

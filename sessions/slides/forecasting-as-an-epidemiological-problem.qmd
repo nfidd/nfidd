@@ -82,4 +82,6 @@ Maximise *sharpness* subject to *calibration*
 1. Start with a simple model and use it to make a forecast (using stan)
 2. Evaluate the forecasts using proper scoring rules
 
+#
+
 [Return to the session](../forecasting-concepts)

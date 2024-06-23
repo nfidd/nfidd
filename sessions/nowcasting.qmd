@@ -5,15 +5,15 @@ order: 6
 
 [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -31,6 +31,20 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating delayed reporting
@@ -52,11 +66,11 @@ df <- infection_times |>
   )
 ```
 
-We then assume that we're 40 days into the outbreak, i.e. we only consider observations with a reporting time less than 41 - other symptom onset may have already happened, but we have not observed them yet.
+We then assume that we're 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
 
 
 ```{r truncate_reports}
-cutoff <- 41
+cutoff <- 71
 df_co <- df |>
   filter(report_time < cutoff)
 
@@ -118,7 +132,7 @@ intermediate <- combined |>
   filter(variable == "onsets") |>
   select(-variable) |>
   rename(onsets = value) |>
-  mutate(cutoff = "40 days")
+  mutate(cutoff = "70 days")
 combined_cutoffs <- rbind(
   intermediate,
   final_all_days
@@ -129,8 +143,8 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
   geom_vline(xintercept = cutoff, linetype = "dashed")
 ```
 
-As we can see, even though on day 40 it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
-The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
+As we can see, even though it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
+The apparent decline towards the present (indicated by a dashed vertical line) was caused by the delay in reporting.
 
 Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
 This can sometimes be a sensible way to visualise the data.
@@ -180,7 +194,7 @@ We can now fit our first nowcasting model. Here we assume exactly the same gener
 
 ```{r stan-simple-nowcast}
 mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: {.callout-tip}
@@ -197,16 +211,17 @@ Familiarise yourself with the model above. What does it do?
 
 Once again we can generate estimates from this model:
 
-```{r nowcast_fit}
+```{r nowcast_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(reported_onset_df) - 1,
   obs = reported_onset_df$reported_onsets[-1],
   report_max = length(proportion_reported) - 1,
   report_cdf = proportion_reported 
 )
-simple_nowcast_fit <- mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+simple_nowcast_fit <- mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r nowcast_fit_summary}
 simple_nowcast_fit
 ```
 
@@ -238,15 +253,16 @@ We first load the model
 
 ```{r stan-nowcast-with-rw}
 rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod
 ```
 
 and then fit it
 
-```{r rw-nowcast-fit}
-rw_nowcast_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+```{r rw-nowcast-fit, results = 'hide', message = FALSE}
+rw_nowcast_fit <- rw_mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r rw-nowcast-fit-summary}
 rw_nowcast_fit
 ```
 
@@ -282,5 +298,64 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
+## What happens if we get the delay distribution wrong?
+
+In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
+In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.
+We will now look at what happens if we get the delay distribution wrong.
+
+We use the same data as before but now assume that the delay distribution is a gamma distribution with shape 2 and rate 3.
+This is a very different distribution to the lognormal distribution we used to simulate the data.
+
+```{r gamma-dist}
+wrong_proportion_reported <- pgamma(1:15, 2, 3)
+plot(wrong_proportion_reported)
+```
+
+We first need to update the data to use this new delay distribution:
+
+```{r wrong-delay-data}
+wrong_delay_data <- data
+wrong_delay_data$report_cdf <- wrong_proportion_reported
+```
+
+We now fit the nowcasting model with the wrong delay distribution:
+
+```{r gamma-nowcast-fit, results = 'hide', message = FALSE}
+gamma_nowcast_fit <- rw_mod$sample(data = wrong_delay_data, parallel_chains = 4)
+```
+
+```{r gamma-nowcast-fit-summary}
+gamma_nowcast_fit
+```
+
+
+Again we can extract the nowcast of symptom onsets and plot it alongside the observed data:
+
+```{r gamma-nowcast-onsets}
+gamma_nowcast_onsets <- gamma_nowcast_fit |>
+  gather_draws(onsets[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  mutate(day = day + 1)
+```
+
+```{r gamma-plot_nowcast}
+ggplot(gamma_nowcast_onsets, aes(x = day)) +
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets)) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The nowcast now looks very different to the observed data. This is because the model is using the wrong delay distribution to nowcast the data.
+- If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
+- In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
+:::
 
 # Wrap up

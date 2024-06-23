@@ -5,18 +5,18 @@ order: 2
 
 [Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays.qmd)
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
-## Introduction
+# Introduction
 
 Every outbreak starts with an infection, but we rarely observe these directly. Instead,  there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc. The length of time between any of these events might be highly variable and uncertain. However, we often need to have some estimate for these delays in order to understand what's happening now and predict what might happen in the future. We capture this variability using probability distributions, which is the focus of this session.
 
-### Objectives
+## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
 First we'll look at this working forwards from infections in an outbreak. We'll use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations. Then we'll work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
+
+::: {.callout-note collapse="true"}
+
+# Setup
 
 ## Libraries used
 
@@ -38,11 +38,25 @@ The best way to interact with the material is via the [Visual Editor](https://do
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
-## Simulating delayed epidemiological data
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
+:::
+
+# Simulating delayed epidemiological data
 
 We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
-In our example outbreak, there were 649 infections.
-The outbreak lasted around 90 days after the first infection, with new infections peaking roughly around day 40.
+In our example outbreak, there were 6383 infections.
+The outbreak lasted 140 days after the first infection, with new infections peaking roughly around day 80.
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.
@@ -57,7 +71,7 @@ Using infectious disease data for analysis comes with three common challenges:
 2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved).
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
 
-### Load the outbreak data
+## Load the outbreak data
 
 We will work with a data set that is included in the `nfidd` R package that you installed initially.
 The column `infection_time` is a linelist of infections from our example outbreak, given as a decimal number of days that have passed since the initial infection of the outbreak.
@@ -80,7 +94,7 @@ In reality, data from an outbreak will usually be given as dates, not decimals; 
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
 :::
 
-### Working forwards: simulating a sequence of delays after infection
+## Working forwards: simulating a sequence of delays after infection
 
 We would now like to simulate hospitalisations arising from this outbreak.
 We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:
@@ -135,7 +149,7 @@ Let's estimate the onset-to-hospitalisation delay using the simulated data set w
 
 We can do this by *sampling* from the model's posterior distribution by feeding it our simulated data set.
 
-```{r sample_naive_delay_model, results = 'hide', message = FALSE, warning = FALSE}
+```{r sample_naive_delay_model, results = 'hide', message = FALSE}
 ## Specify the time from onset to hospitalisation
 df_onset_to_hosp <- df |>
   mutate(onset_to_hosp = hosp_time - onset_time) |> 
@@ -146,22 +160,14 @@ res <- mod$sample(
   data = list(
     n = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
-  ),
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  )
 )
 ```
-
-::: callout-caution
-### Reduce the amount of messages printed to the screen
-
-As before, the arguments to `mod$sample()` after the `data` argument are there to remove the amount of messages printed to the screen (and in this document).
-You can safely remove them.
-:::
 
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
-res$summary()
+res$summary() ## could also simply type `res`
 ```
 
 These estimates should look similar to what we used in the simulations.
@@ -187,8 +193,8 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
   geom_line(alpha = 0.3)
 ```
 
-## Going further
+# Going further
 
 -   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
 
-## Wrap up
+# Wrap up

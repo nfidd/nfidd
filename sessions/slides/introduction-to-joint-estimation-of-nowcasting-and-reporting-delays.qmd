@@ -1,0 +1,77 @@
+---
+title: "Introduction to joint estimation of nowcasting and reporting delays"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays.html
+    footer: "Introduction to joint estimation of nowcasting and reporting delays"
+    slide-level: 3
+---
+
+### Motivating example
+
+Often we see data like this
+
+![](figures/germany_historical.png)
+
+### The aim of nowcasting
+
+Predict what an epidemiological time series will look like *after all delayed reports* are in.
+
+![](figures/nowcasting.png)
+
+(slide courtesy of Johannes Bracher)
+
+### The problems with simple nowcasting
+
+In the last session we introduced the idea of nowcasting and demonstrated how it can be done using a simple model.
+
+What problems does this approach have?
+
+  - Hard to propagate uncertainty
+  - Doesn't account for observation error in the primary events
+  - Not a fully generative model of the data reporting process
+  - If we get the delay wrong, we can get the nowcast wrong
+
+### Jointly estimating reporting delays and nowcasting
+
+One potential solution is to jointly estimate the reporting delays and the nowcast. We can do this if we have multiple snapshots of the data.
+
+![](figures/germany_historical.png)
+
+### The reporting triangle
+
+The reporting triangle is the name given to the data structure that arises when we have multiple snapshots of the data.
+
+![](figures/reporting_triangle.png)
+
+(reporting triangle courtesy of Johannes Bracher)
+
+### The reporting triangle
+
+Here the rows represent the time of the primary event, and the columns represent the time of the report.
+Some events are missing because they are yet to happen.
+
+![](figures/reporting_triangle.png)
+
+(reporting triangle courtesy of Johannes Bracher)
+
+### Completing the reporting triangle
+
+The aim of nowcasting is to complete the reporting triangle. This means filling in the missing entries in the lower triangle and then summing the rows to get the nowcast.
+
+![](figures/complete_reporting_triangle.png)
+
+(reporting triangle courtesy of Johannes Bracher)
+
+### This session
+
+1. Simulate the reporting triangle
+2. Perform a joint estimation of the delay and nowcast
+3. Understand the limitations of the data generating process
+4. Perform a joint estimation of the delay, nowcast, and reproduction number
+
+###
+
+[Return to the session](../joint-nowcasting)
+
