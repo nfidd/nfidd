@@ -183,7 +183,7 @@ Every time we sample from the model posterior, we create 4000 draws. That is a l
 ## get shape and rate samples from the posterior
 res_df <- res |>
   as_draws_df() |>
-  filter(.draw %in% sample(.draw, 100))
+  filter(.draw %in% sample(.draw, 100)) # sample 100 draws
 
 ## find the value (x) that includes 99% of the cumulative density
 max_x <- max(qlnorm(0.99, meanlog = res_df$meanlog, sdlog = res_df$sdlog))
