@@ -111,7 +111,13 @@ We will start with our data on infection times, and work forwards to symptom ons
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
-```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
+::: {.callout-tip}
+Throughout the course, we repeat some small chunks of code. Instead of copying these between sessions, we've put them into separate R scripts and source them when needed. You can find these files in the `snippets` and `functions` directories.
+:::
+
+```{r inf_hosp_solution}
+source(here::here("snippets", "onset-hosp.r"), 
+       echo=TRUE, max.deparse.length=1000)
 ```
 
 Now we can plot infections, hospitalisations and onsets.

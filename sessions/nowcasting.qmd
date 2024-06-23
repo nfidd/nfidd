@@ -67,6 +67,7 @@ Let us assume that the symptom onsets are reported with a delay and that this de
 To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
+data(infection_times)
 df <- infection_times |>
   mutate(
     onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
@@ -246,8 +247,13 @@ nowcast_onsets <- simple_nowcast_fit |>
 ```{r plot_nowcast}
 ggplot(nowcast_onsets, aes(x = day)) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
-  geom_col(data = reported_onset_df, mapping = aes(y = onsets))
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
+
+:::{.callout-tip}
+The points in this plot represent the data available when the nowcast was made (and so are truncated) whilst the bars represent the finally reported data (a perfect nowcast would exactly reproduce these).
+:::
 
 ::: {.callout-tip}
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
@@ -287,8 +293,9 @@ rw_nowcast_onsets <- rw_nowcast_fit |>
 
 ```{r rw-plot_nowcast}
 ggplot(rw_nowcast_onsets, aes(x = day)) +
-  geom_col(data = reported_onset_df, mapping = aes(y = onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
 
 ::: {.callout-tip}
@@ -350,8 +357,9 @@ gamma_nowcast_onsets <- gamma_nowcast_fit |>
 
 ```{r gamma-plot_nowcast}
 ggplot(gamma_nowcast_onsets, aes(x = day)) +
-  geom_col(data = reported_onset_df, mapping = aes(y = onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
 
 ::: {.callout-tip}

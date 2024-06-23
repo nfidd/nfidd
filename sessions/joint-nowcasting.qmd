@@ -98,7 +98,7 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r")) ## generates `onset_df`
+source(here::here("snippets", "simulate-onsets.r"))
 head(onset_df)
 cutoff <- 71
 ```
@@ -130,9 +130,7 @@ We also need to update our simulated truth data to include the Poisson observati
 
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
-  group_by(day) |>
-  summarise(noisy_onsets = sum(reported_onsets)) |>
-  ungroup()
+  summarise(noisy_onsets = sum(reported_onsets), .by = day)
 ```
 
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
@@ -140,6 +138,13 @@ As we only partially observe the reporting triangle we need to filter it to only
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
+```
+
+Finally, we sum the filtered reporting triangle to get the counts we actually observe.
+
+```{r counts-observed}
+available_onsets <- filtered_reporting_triangle |>
+  summarise(available_onsets = sum(reported_onsets), .by = day)
 ```
 
 ## Fitting the joint model
@@ -187,9 +192,14 @@ Finally, we can plot the nowcast alongside the observed data:
 
 ```{r plot-joint-nowcast}
 ggplot(joint_nowcast_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```
+
+:::{.callout-tip}
+Reminder: The points in this plot represent the data available when the nowcast was made (and so are truncated) whilst the bars represent the finally reported data (a perfect nowcast would exactly reproduce these).
+:::
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -268,9 +278,14 @@ joint_rt_data <- c(joint_data,
 )
 joint_rt_fit <- joint_rt_mod$sample(
   data = joint_rt_data, parallel_chains = 4,
+  adapt_delta = 0.95,
   init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
+
+::: {.callout-tip}
+We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult to explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
+:::
 
 ```{r joint-nowcast-rt-fit-summary}
 joint_rt_fit
@@ -286,8 +301,9 @@ joint_nowcast_with_r_onsets <- joint_rt_fit |>
 
 ```{r plot-joint-nowcast-with-r}
 ggplot(joint_nowcast_with_r_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```
 
 We can also extract the reproduction number and plot it:

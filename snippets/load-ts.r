@@ -16,4 +16,3 @@ all_days <- expand(
 inf_ts <- all_days |>
   full_join(inf_ts, by = join_by(infection_day)) |>
   replace_na(list(infections = 0))
-head(inf_ts)
