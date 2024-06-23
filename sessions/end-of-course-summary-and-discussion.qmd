@@ -22,7 +22,12 @@ The following is a highly subjective list of papers we would recommend to read f
 ### Nowcasting
 - Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394).
 - Lison et al., [Generative Bayesian modeling to nowcast the effective reproduction number from line list data with missing symptom onset dates](https://doi.org/10.1371/journal.pcbi.1012021).
+- Stoner et al., [A Powerful Modelling Framework for Nowcasting and Forecasting COVID-19 and Other Diseases](https://doi.org/10.48550/arXiv.1912.05965).
 
 ### Forecasting
+- Funk et al., [Assessing the performance of real-time epidemic forecasts: A case study of Ebola in the Western Area region of Sierra Leone, 2014-15](https://doi.org/10.1371/journal.pcbi.1006785).
+- Held et al, [Probabilistic forecasting in infectious disease epidemiology: the 13th Armitage lecture](https://doi.org/10.1002/sim.7363).
 - Lopez et al., [Challenges of COVID-19 Case Forecasting in the US, 2020-2021](https://doi.org/10.1101/2023.05.30.23290732).
+- Sherratt et al., [Predictive performance of multi-model ensemble forecasts of COVID-19 across European nations](https://doi.org/10.7554/eLife.81916).
+- Asher, [Forecasting Ebola with a regression transmission model](10.1016/j.epidem.2017.02.009).
 - Hyndman and Athanasopoulos, [Forecasting: Principles and Practice (free online text book)](https://otexts.com/fpp3/).
