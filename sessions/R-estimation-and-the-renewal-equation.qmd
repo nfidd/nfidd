@@ -384,8 +384,7 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf,
   ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = 0 # this is a small easter egg for the attentive reader
+  ip_pmf = ip_pmf
 )
 r_rw_inf_fit <- rw_mod$sample(
   data = data, parallel_chains = 4, max_treedepth = 12, 
