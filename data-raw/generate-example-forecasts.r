@@ -11,8 +11,6 @@ set.seed(12345)
 # simulate data
 source(here::here("snippets", "simulate-onsets.r"))
 
-example_onset_df <- onset_df
-usethis::use_data(example_onset_df, overwrite = TRUE)
 
 # define a function to fit and forecast for a single date
 forecast_target_day <- function(
