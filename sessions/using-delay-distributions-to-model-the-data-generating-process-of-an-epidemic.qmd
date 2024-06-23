@@ -280,6 +280,7 @@ Does it look like a good fit?
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
+  ungroup() |> 
   mutate(infection_day = infection_day - 1) |>
   filter(.draw %in% sample(.draw, 100))
 
