@@ -253,7 +253,8 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4)
+r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4,
+                              init = \() list(init_R = 0))
 ```
 
 ```{r r_inf_fit_summary}
