@@ -294,7 +294,7 @@ Some important things to note about these forecasts:
 - Each forecast used all the data up to the forecast date.
 - We generated 1000 posterior samples for each forecast.
 - We started forecasting 3 weeks into the outbreak, and then forecast once a week (every 7 days), i.e., we created forecasts on day 22, day 29, ... to day 71. We excluded the last 14 days to allow a full forecast.
-- We used the same simulated outbreak data we've been using through the course:
+- We used the outbreak data simulated in the same way as the one we've been using through the course:
 
 ```{r}
 head(onset_df)
