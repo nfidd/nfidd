@@ -159,8 +159,8 @@ We will first extract the forecast and then plot the forecasted number of sympto
 ```{r extract-forecast}
 forecast <- rw_forecast |>
   gather_draws(forecast[day]) |>
-  mutate(day = day + cutoff) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(day = day + cutoff)
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
