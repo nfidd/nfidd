@@ -82,11 +82,14 @@ $$
 In other words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
+We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections.
+You can do this by sourcing the following code snippet:
 
 ```{r aggregate}
-source(here::here("snippets", "load-ts.r"),
-       echo=TRUE, max.deparse.length=1000)
+source(
+  here::here("snippets", "load-ts.r"),
+  echo = TRUE, max.deparse.length = 1000
+)
 ```
 
 ::: callout-note

@@ -127,9 +127,16 @@ What kind of behaviours do you see depending on the values you put in?
 # Estimating $R_t$ from a time series of infections
 
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
+This is saved in a snippet called `load-ts.r` which we can run using
 
 ```{r load_ts}
 source(here("snippets", "load-ts.r"))
+head(inf_ts)
+```
+
+This creates the `inf_ts` data set which we can look at e.g. using
+
+```{r load_ts_inspect}
 head(inf_ts)
 ```
 
@@ -137,7 +144,7 @@ We use a renewal equation model in _stan_ to estimate the effective reproduction
 We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
 From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
 We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
-If you don't have this available any more, you can load it using
+You can load it using
 ```{r source_censored_delay_pmf}
 source(here("functions", "censored-delay-pmf.r"))
 ```
@@ -223,9 +230,15 @@ Does the model reproduce the simulated $R_t$ trajectories?
 Epidemiological data is rarely, perhaps never, available as a time series of infection events.
 Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
+For this we used the `convolved_with_delay()` function which you can load using
 
 ```{r add_onsets}
 source(here("functions", "convolve-with-delay.r"))
+```
+
+We then simulate observations again using:
+
+```{r generate_obs}
 ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
