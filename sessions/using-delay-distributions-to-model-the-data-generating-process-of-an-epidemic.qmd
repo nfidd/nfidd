@@ -81,7 +81,8 @@ For example, the observable outcomes $C_t$ could be the number of symptom onsets
 We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
 
 ```{r aggregate}
-source(here::here("snippets", "load-ts.r"), echo=TRUE,max.deparse.length=1000)
+source(here::here("snippets", "load-ts.r"),
+       echo=TRUE, max.deparse.length=1000)
 ```
 
 ::: callout-note

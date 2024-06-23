@@ -98,7 +98,7 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r")) ## generates `onset_df`
+source(here::here("snippets", "simulate-onsets.r"))
 head(onset_df)
 cutoff <- 71
 ```
