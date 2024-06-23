@@ -122,6 +122,14 @@ mod
 ```
 
 ::: {.callout-tip}
+### Arrays in stan
+On line 4 there is a data declaration starting with `array[n]`.
+This declares an array of size `n` of the type given aftewards (here: `real`).
+Arrays work in a similar way as arrays or vectors in R and its elements be accessed with the bracket operator `[`.
+For example, to get the third element of the array `y` you would write `y[3]`.
+:::
+
+::: {.callout-tip}
 ### Take 5 minutes
 Familarise yourself with the model above.
 Do you understand all the lines?
@@ -145,6 +153,13 @@ stan_data <- list(
 )
 gamma_fit <- mod$sample(data = stan_data)
 ```
+
+::: {.callout-note}
+### Passing data to the stan model
+The `stan_data` object is a list with elements that will is passed to the stan model as the `data` argument to `sample`.
+The names and types of the elements need to correspond to the data block in the model (see lines 3 and 4 in the model).
+Here, we pass the length of `gammas` as `N` and the vector `gammas` itself as `y`.
+:::
 
 ::: {.callout-note}
 ### Stan messages
