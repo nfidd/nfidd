@@ -61,17 +61,17 @@ Recall that in the [session on convolutions](using-delay-distributions-to-model-
 In doing so we assumed that infections every day were independently identically distributed and determined only by the number of symptom onsets that they caused.
 In reality, however, we know that infections are not independent.
 Because infection is dependent on a pathogen being transmitted from one individual to another, we expect infections on any day to depend on existing infections, that is the number of individuals that became infectious in the recent past.
-We now express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R$.
+We now express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R_t$.
 
 Remember that this is a more general concept than the _basic_ reproduction number $R_0$ which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
 
-The reproduction number $R$ (sometimes called the _effective_ reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual and can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+The reproduction number $R_t$ (sometimes called the _effective_ reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual and can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
-In most mechanistic models of infectious diseases (starting with the simplest SIR model), $R$ arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
-By fitting such models to data it is then possible to calculate the value of $R$ at any point in time.
+In most mechanistic models of infectious diseases (starting with the simplest SIR model), $R_t$ arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
+By fitting such models to data it is then possible to calculate the value of $R_t$ at any point in time.
 
 The _renewal equation_ represents a more general model which includes the SIR model as a special case.
-In its basic form it makes no assumption about the specific processes that cause $R$ to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time.
+In its basic form it makes no assumption about the specific processes that cause $R_t$ to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time.
 Mathematically, it can be written as
 
 $$

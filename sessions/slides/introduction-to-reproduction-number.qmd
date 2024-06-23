@@ -51,7 +51,7 @@ $$
 I = \mathrm{scaling} \times \sum_{t=0}^\infty I_0 g(t) = \mathrm{scaling} * I_0
 $$
 
-The scaling can be interpreted as the reproduction number $R$.
+The scaling can be interpreted as the (time-varying) reproduction number $R_t$.
 
 ## The renewal equation
 
