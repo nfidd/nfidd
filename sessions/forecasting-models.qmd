@@ -292,17 +292,18 @@ Finally we can extract the forecasts from the models and plot them.
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 stat_forecast <- stat_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 forecast <- bind_rows(
   mutate(mech_forecast, model = "mechanistic"),
   mutate(stat_forecast, model = "statistical")
-) |> 
-  ungroup()
+)
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
@@ -355,8 +356,8 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
-  mutate(day = day + cutoff) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(day = day + cutoff)
 ```
 
 ```{r very-wrong-plot}

@@ -236,13 +236,13 @@ We first need to extract the forecast and estimated reproduction numbers.
 ```{r extract-Rt}
 forecast_r <- rw_forecast |>
   gather_draws(R[day]) |>
-  mutate(type = "forecast") |> 
-  ungroup()
+  ungroup() |> 
+  mutate(type = "forecast")
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
-  mutate(type = "estimate") |> 
-  ungroup()
+  ungroup() |> 
+  mutate(type = "estimate")
 ```
 
 We can now plot the forecast and estimated reproduction numbers.
