@@ -107,7 +107,8 @@ $$
 
 This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note, collapse = "true"}
+
 ## What behaviour would we expect from this model?
 
 ```{r}
@@ -116,23 +117,23 @@ N <- 1000
 R0 <- 1.5
 S <- rep(NA, n)
 S[1] <- N
-R <- rep(NA, n)
-R[1] <- R0
+Rt <- rep(NA, n) ## reproduction number
+Rt[1] <- R0
 I <- rep(NA, n)
 I[1] <- 1
 for (i in 2:n) {
-  R[i] <- (S[i-1]) / N * R0
-  I[i] <- I[i-1] * R[i]
+  Rt[i] <- (S[i-1]) / N * R0
+  I[i] <- I[i-1] * Rt[i]
   S[i] <- S[i-1] - I[i]
 }
 
-data <- tibble(t = 1:n, R = R)
+data <- tibble(t = 1:n, Rt = Rt)
 
-ggplot(data, aes(x = t, y = R)) +
+ggplot(data, aes(x = t, y = Rt)) +
   geom_line() +
   labs(title = "Simulated data from an SIR model",
        x = "Time",
-       y = "R")
+       y = "Rt")
 ```
 
 The key assumptions we are making here are: 
@@ -161,7 +162,7 @@ In infectious disease epidemiology, this would only be expected for endemic dise
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
-The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($ log(R_t) $), the model is:
+The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($log(R_t)$), the model is:
 
 $$
 log(R_t) = \phi log(R_{t-1}) + \epsilon_t
@@ -169,7 +170,7 @@ $$
 
 where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
 
-::: {.callout-note, collapse = TRUE
+::: {.callout-note, collapse = "true"}
 ## What behaviour would we expect from this model?
 
 ```{r}
@@ -236,7 +237,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using the same data set we used in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using a data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
 source(here("snippets", "simulate-onsets.r"))
@@ -320,9 +321,10 @@ target_onsets <- onset_df |>
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10()
+  scale_y_log10() +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
 ::: {.callout-tip}
@@ -330,13 +332,13 @@ forecast |>
 What do you notice about the forecasts from the mechanistic and statistical models?
 :::
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note, collapse = "true"}
 ## Solution
 - The mechanistic model captures the downturn in the data very well.
 - The statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
 :::
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note, collapse = "true"}
 As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
 
 ```{r plot-stat-rt}
@@ -355,7 +357,7 @@ stat_forecast_fit |>
 
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note, collapse = "true"}
 ## Solution
 
 ```{r very-wrong, results = 'hide', message = FALSE}
@@ -450,7 +452,7 @@ forecasts |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log", limits = c(NA, 500)) +
+  scale_y_log10(limits = c(NA, 500)) +
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
@@ -464,12 +466,15 @@ Which do you prefer?
 ::: {.callout-note collapse="true"}
 ## Solution
 How do these forecasts compare?
-  - The mechanistic model captures the downturn in the data very well.
-  - Past the peak all models were comparable.
-  - The statistical model does a very poor job of capturing the downturn in the data extending the current trend.
-  - The statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
+
+- The mechanistic model captures the downturn in the data very well.
+- Past the peak all models were comparable.
+- The statistical model does a very poor job of capturing the downturn in the data extending the current trend.
+- The statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
+
 Which do you prefer?
-  - The mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
+
+- The mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
 :::
 
 ## Scoring your forecast
@@ -551,12 +556,16 @@ How do the CRPS scores change with forecast horizon?
 ::: {.callout-note collapse="true"}
 ## Solution
 How do the CRPS scores change based on forecast horizon?
+
 - All models have increasing CRPS with forecast horizon.
 - The mechanistic model has the lowest CRPS at all forecast horizon.
 - The stastical model forms notably worse at all forecast horizons.
+
 How do the CRPS scores change with forecast date?
+
 - The statistical model does particularly poorly around the peak of the outbreak.
 - The mechanistic model does particularly well around the peak of the outbreak versus all other models
+
 :::
 
 ### PIT histograms
@@ -594,7 +603,7 @@ sc_forecasts |>
 
 and then for different forecast dates.
 
-```{r pit-histogram-date}
+```{r pit-histogram-date, fig.width = 10}
  sc_forecasts |>
   get_pit(by = c("model", "target_day")) |>
   plot_pit() +
@@ -609,11 +618,13 @@ What do you think of the PIT histograms?
 ::: {.callout-note collapse="true"}
 ## Solution
 What do you think of the PIT histograms?
+
 - The mechanistic model is reasonably well calibrated but has a tendency to underpredict.
 - Both the random walk and statistical model are biased towards overpredicting with the statistical model also being poorly calibrated (liable to both under and overpredict).
 - Across horizons the mechanistic model is only liable to underpredict at the longest horizons.
 - Similarly, the statistical and random walk models are more biased at longer horizons.
 - The forecast date stratified PIT histograms are hard to interpret but the mechanistic model seems to be the best calibrated across forecast date.
+
 :::
 
 ## Scoring on the log scale
@@ -701,7 +712,7 @@ log_sc_forecasts |>
 ```
 
 
-```{r pit-histogram-date-log}
+```{r pit-histogram-date-log, fig.width = 10}
  log_sc_forecasts |>
   get_pit(by = c("model", "target_day")) |>
   plot_pit() +
