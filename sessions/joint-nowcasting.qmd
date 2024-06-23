@@ -98,7 +98,7 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r")) ## generates `onset_df`
 head(onset_df)
 cutoff <- 71
 ```
@@ -106,7 +106,7 @@ cutoff <- 71
 We also need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
-source(here::here("functions", "censored-delay-pmf.r"))
+source(here("functions", "censored-delay-pmf.r"))
 reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
 plot(reporting_delay_pmf)
 ```
