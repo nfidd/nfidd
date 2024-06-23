@@ -83,7 +83,7 @@ Tuesday June 25: 14.00-15.30
 Tuesday June 25: 16.00-17.30
 
 - An overview of forecasting models (10 mins)
-- Practice session: Evaluating forecasts from a range of common models (60 mins)
+- Practice session: Evaluating forecasts from a range of models (60 mins)
 - Wrap up and discussion (20 mins)
 
 ## Session 10: Methods in the real world

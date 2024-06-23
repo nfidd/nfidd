@@ -3,15 +3,15 @@ title: "Forecasting models"
 order: 8
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
 # Objectives
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
-# Libraries used
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
@@ -30,6 +30,20 @@ library("scoringutils")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # An overview of forecasting models
@@ -123,7 +137,7 @@ We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/func
 
 ```{r}
 mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
-mech_mod$print(line_numbers = TRUE)
+mech_mod
 ```
 
 ## Adding more statistical structure to the renewal model
@@ -209,7 +223,7 @@ We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/func
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
-stat_mod$print(line_numbers = TRUE)
+stat_mod
 ```
 
 
@@ -228,7 +242,7 @@ filtered_onset_df <- onset_df |>
 ```
 
 We will now fit the mechanistic model to the data.
-```{r fit_mech_model}
+```{r fit_mech_model, results = 'hide', message = FALSE}
 horizon <- 28
 
 data <- list(
@@ -243,13 +257,17 @@ data <- list(
   N_prior = c(10000, 2000) # the prior for the population size
 )
 mech_forecast_fit <- mech_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+  data = data, parallel_chains = 4, adapt_delta = 0.95
+)
+```
+
+```{r fit_mech_model_summary}
 mech_forecast_fit
 ```
 
 We will now fit the statistical model to the data.
 
-```{r fit_stat_model}
+```{r fit_stat_model, results = 'hide', message = FALSE}
 data <- list(
   n =nrow(filtered_onset_df),
   I0 = 1,
@@ -261,7 +279,8 @@ data <- list(
   h = horizon # Here we set the number of days to forecast into the future
 )
 stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.9)
+  data = data, parallel_chains = 4, adapt_delta = 0.9
+)
 ```
 
 Finally we can extract the forecasts from the models and plot them.
@@ -312,7 +331,7 @@ In the above we assumed that we knew the population size roughly. In practice, w
 ::: {.callout-note, collapse = TRUE}
 ## The solution
 
-```{r}
+```{r very-wrong, results = 'hide', message = FALSE}
 data <- list(
   n =nrow(filtered_onset_df),
   I0 = 1,
@@ -326,12 +345,15 @@ data <- list(
 )
 
 mech_forecast_fit_diff <- mech_mod$sample(
-  data = data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE, adapt_delta = 0.95)
+  data = data, parallel_chains = 4, adapt_delta = 0.95
+)
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
   mutate(day = day + cutoff)
+```
 
+```{r very-wrong-plot}
 mech_forecast_diff |>
   filter(.draw %in% sample(.draw, 1000)) |>
   ggplot(aes(y = .value, x = day)) +

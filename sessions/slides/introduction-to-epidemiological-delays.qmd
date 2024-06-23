@@ -166,4 +166,6 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 - Simulate epidemiological delays
 - Estimate parameters of a delay distribution
 
+#
+
 [Return to the session](../delay-distributions)

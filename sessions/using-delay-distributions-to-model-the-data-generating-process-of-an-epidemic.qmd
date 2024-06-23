@@ -3,25 +3,25 @@ title: "Using delay distributions to model the data generating process"
 order: 4
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
-
-## Introduction
+# Introduction
 
 We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak. So far, we've been working with individual line-list data. However, we usually want to model how an outbreak evolves through a whole population. The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
 
 This means working with aggregated count data. This creates some new issues in correctly accounting for uncertainty. We handle population-level data using *convolutions* as a way of combining count data with a distribution of individual probabilities. We will have to adjust our continuous probability distributions to work with this using *discretisation*. We'll then need to re-introduce additional uncertainty to account for the observation process at a population level.
 
-#### Slides
+## Slides
 
-[Delay distributions at the population level](slides/convolutions)
+- [Delay distributions at the population level](slides/convolutions)
 
-### Objectives
+## Objectives
 
 In this session, we'll focus on the delay from infection to symptom onset at a population level.
 First, we will introduce the techniques of convolution and discretisation. We'll apply these to an aggregated time series of infections in order to simulate observed symptom onsets.
 Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
+
+::: {.callout-note collapse="true"}
+
+# Setup
 
 ## Libraries used
 
@@ -41,6 +41,20 @@ library("tidybayes")
 ::: callout-tip
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating observations from a time series of infections
@@ -175,7 +189,7 @@ As in previous sessions, we don't usually have data on infections. We now create
 
 ```{r stan_estimate_infections}
 mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
-mod$print(line_numbers = TRUE)
+mod
 ```
 
 ::: callout-tip
@@ -199,24 +213,20 @@ Line 24 defines the likelihood, and it does so using the Poisson observation unc
 
 We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
 
-```{r inf_fit}
+```{r inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(combined),
   obs = combined$observed,
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(
-  data = data,
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+inf_fit <- mod$sample(data = data, parallel_chains = 4)
 ```
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
-
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+We have added the `parallel_chains` option to make use of any paralle hardware you may ave.
+If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 500, iter_sampling = 500`).
 :::
 
 ::: callout-tip
