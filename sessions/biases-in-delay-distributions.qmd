@@ -22,6 +22,10 @@ In this session, we'll introduce censoring and right truncation as typical prope
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/biases-in-delay-distributions.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.

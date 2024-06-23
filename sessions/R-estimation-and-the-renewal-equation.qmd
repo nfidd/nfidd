@@ -19,6 +19,10 @@ The aim of this session is to introduce the renewal equation as an infection gen
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/R-estimation-and-the-renewal-equation.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -126,7 +130,7 @@ We now return to the time series of infections we used in the [session on convol
 This is saved in a snippet called `load-ts.r` which we can run using
 
 ```{r load_ts}
-source(here::here("snippets", "load-ts.r"))
+source(here("snippets", "load-ts.r"))
 head(inf_ts)
 ```
 
@@ -229,7 +233,7 @@ In the [session on convolutions](using-delay-distributions-to-model-the-data-gen
 For this we used the `convolved_with_delay()` function which you can load using
 
 ```{r add_onsets}
-source(here::here("functions", "convolve-with-delay.r"))
+source(here("functions", "convolve-with-delay.r"))
 ```
 
 We then simulate observations again using:
@@ -266,7 +270,8 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4)
+r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4,
+                              init = \() list(init_R = 0))
 ```
 
 ```{r r_inf_fit_summary}

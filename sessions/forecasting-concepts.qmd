@@ -19,6 +19,10 @@ The aim of this session is to introduce the concept of forecasting, using a simp
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/forecasting-concepts.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
@@ -111,7 +115,7 @@ We will use the same simulated data as in the renewal and nowcasting sessions.
 We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"))
 cutoff <- 71
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
@@ -159,6 +163,7 @@ We will first extract the forecast and then plot the forecasted number of sympto
 ```{r extract-forecast}
 forecast <- rw_forecast |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 target_onsets <- onset_df |>
@@ -235,10 +240,12 @@ We first need to extract the forecast and estimated reproduction numbers.
 ```{r extract-Rt}
 forecast_r <- rw_forecast |>
   gather_draws(R[day]) |>
+  ungroup() |> 
   mutate(type = "forecast")
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
+  ungroup() |> 
   mutate(type = "estimate")
 ```
 
@@ -280,14 +287,17 @@ We managed to learn quite a lot about our model's forecasting limitations just l
 
 # Introduction to forecast evaluation
 
-See the lecture notes for more information on forecast evaluation.
+An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in which situation.
+In this section you will get to know several ways of assessing different aspects of forecast performance.
+You will then use them to evaluate your forecasts.
 
 # Evaluate your forecast
 
 In order to properly evaluate forecasts from this model we really need to forecast over a period of time. Ideally, capturing different epidemic dynamics. This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
 
 ```{r load_forecasts}
-rw_forecasts
+rw_forecasts |> 
+  ungroup()
 ```
 
 

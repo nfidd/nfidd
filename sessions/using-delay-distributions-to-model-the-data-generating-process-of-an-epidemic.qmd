@@ -23,6 +23,10 @@ Then, we'll use those simulated symptom onsets to try and reconstruct a time ser
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -283,6 +287,7 @@ Does it look like a good fit?
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
+  ungroup() |> 
   mutate(infection_day = infection_day - 1) |>
   filter(.draw %in% sample(.draw, 100))
 
