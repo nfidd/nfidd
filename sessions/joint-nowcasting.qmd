@@ -3,9 +3,17 @@ title: "Nowcasting with an unknown reporting delay"
 order: 6.5
 ---
 
-[Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
+# Introduction
 
-# Objectives
+In the last session we introduced the idea of nowcasting using a simple model. However, this approach had problems: we didn't fully account for uncertainty, or for example observation error in the primary events, and it's not a fully generative model of the data reporting process. And as we saw, if we get the delay distribution wrong, we can get the nowcast very wrong. 
+
+A better approach is to jointly estimate the delay distribution together with the nowcast. We can do this by using information from multiple snapshots of the data as it changes over time (using a data structure called the "reporting triangle"). In this session, we'll introduce this approach to joint estimation in nowcasting. At the end we'll then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
+
+## Slides
+
+- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
+
+## Objectives
 
 This session aims to introduce how to do nowcasting if the reporting delay distribution is unknown.
 

@@ -3,7 +3,16 @@ title: "Forecasting models"
 order: 8
 ---
 
-# Objectives
+# Introduction
+
+We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
+In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model. We'll again evaluate these models to see what effect these different approaches might have.
+
+## Slides
+
+- [Forecasting models](slides/forecasting-models)
+
+## Objectives
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
@@ -45,10 +54,6 @@ options(cmdstanr_print_line_numbers = TRUE)
 ```
 
 :::
-
-# An overview of forecasting models
-
-See the slides for an overview of forecasting models.
 
 # What did we learn about the random walk model from the [forecasting concepts session](forecasting-concepts)?
 
