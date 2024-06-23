@@ -82,7 +82,7 @@ We actually already introduced a model that could do this in the renewal session
 So what does this look like in code? Lets load in the model again and take a look.
 
 ```{r load_model}
-mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw-forecast.stan"))
 mod
 ```
 
