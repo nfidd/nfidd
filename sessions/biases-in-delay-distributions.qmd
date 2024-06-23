@@ -67,12 +67,17 @@ Remember, in this outbreak we are assuming:
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
-::: callout-tip
-If you need to re-load the data, here is the code again from that session:
+We saved the code we used in that session to simulate symptom onset and hospitalisation data in a snippet that can be loaded using.
 
-```{r inf_hosp_solution, file = here::here("snippets", "onset-hosp.r")}
+```{r inf_hosp_solution}
+source(here("snippets", "onset-hosp.r"))
 ```
-:::
+
+This creates the `df` data frame that we can inspect e.g. using
+
+```{r show_df}
+head(df)
+```
 
 # Dates, not days: censoring
 
