@@ -137,7 +137,10 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-rw_forecast <- mod$sample(data = data, parallel_chains = 4, adapt_delta = 0.95)
+rw_forecast <- mod$sample(
+  data = data, parallel_chains = 4, adapt_delta = 0.95,
+  init = \() list(init_R = 0, rw_sd = 0.01)
+)
 ```
 
 ```{r rw_forecast_summary}
@@ -221,7 +224,11 @@ long_data <- list(
   h = 0
 )
 
-rw_long <- mod$sample(data = long_data, parallel_chains = 4, adapt_delta = 0.95)
+
+rw_long <- mod$sample(
+  data = long_data, parallel_chains = 4, adapt_delta = 0.95,
+  init = \() list(init_R = 0, rw_sd = 0.01)
+)
 ```
 
 We first need to extract the forecast and estimated reproduction numbers.
