@@ -203,18 +203,19 @@ $$
 ::: {.callout-note, collapse = TRUE}
 ## What behaviour would we expect from this model?
 
-```{r}
-n <- 100
-phi <- 0.1
-sigma <- 0.1
-log_R <- rep(NA, n)
-log_R[1] <- rnorm(1, 0, sigma)
-log_R[2] <- log_R[1] + rnorm(1, 0, sigma)
-for (i in 3:n) {
-  log_R[i] <- log_R[i-1] + phi * (log_R[i-1] - log_R[i-2]) + rnorm(1, 0, sigma)
-}
+Again we look at an R function that implements this model:
 
-data <- tibble(t = 1:n, R = exp(log_R))
+```{r geometric-diff-ar}
+source(here("functions", "geometric-diff-ar.r"))
+geometric_diff_ar
+```
+
+We can use this function to simulate a differenced random walk:
+
+```{r}
+log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
+
+data <- tibble(t = seq_along(log_R), R = exp(log_R))
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
@@ -225,7 +226,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar1.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded up a model that uses this random walk as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
