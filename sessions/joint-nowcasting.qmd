@@ -264,7 +264,7 @@ This would allow us to use the simple nowcasting model whilst still estimating t
 We would also remove the `generated quantities` block as we are not nowcasting the data and simplify the observations to just the number of onsets.
 :::
 
-::: {.callout-note}
+::: {.callout-tip}
 Have another look at the model in comparison to the models of the reproduction number we used in the [renewal session](R-estimation-and-the-renewal-equation). Notice there's an extra change in the `data` block: we are no longer passing in the initial number of infected (`I0`). Instead, we are inferring this within the model as a parameter (line 27) with a prior (line 43). Normally during an outbreak we wouldn't know the initial number infected, so inferring it allows us to be more realistic. 
 :::
 
