@@ -232,7 +232,8 @@ We will now use the mechanistic and statistical models to forecast the number of
 source(here::here("snippets", "simulate-onsets.r"))
 onset_df
 
-cutoff <- 71
+# we'll make a forecast on day non day 41, pretending we haven't seen the later data
+cutoff <- 41
 
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
@@ -254,11 +255,11 @@ data <- list(
   N_prior = c(10000, 2000) # the prior for the population size
 )
 mech_forecast_fit <- mech_mod$sample(
-  data = data, parallel_chains = 4, adapt_delta = 0.95
+  data = data, parallel_chains = 4
 )
 ```
 
-```{r fit_mech_model_summary}
+```{r mech-forcast-print}
 mech_forecast_fit
 ```
 
@@ -276,7 +277,8 @@ data <- list(
   h = horizon # Here we set the number of days to forecast into the future
 )
 stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4, adapt_delta = 0.9
+  data = data, parallel_chains = 4,
+  init = \() list(init_R = 0, rw_sd = 0.01) # again set the initial values to make fitting more numerically stable
 )
 ```
 
@@ -342,7 +344,7 @@ data <- list(
 )
 
 mech_forecast_fit_diff <- mech_mod$sample(
-  data = data, parallel_chains = 4, adapt_delta = 0.95
+  data = data, parallel_chains = 4
 )
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
@@ -688,6 +690,7 @@ What do you think of the PIT histograms?
 :::
 
 :::
+
 # Going further
 
 - We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
