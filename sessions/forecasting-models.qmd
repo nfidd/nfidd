@@ -310,7 +310,7 @@ target_onsets <- onset_df |>
 
 ```{r plot_forecast}
 forecast |>
-  filter(.draw %in% sample(.draw, 50)) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
@@ -359,7 +359,7 @@ mech_forecast_diff <- mech_forecast_fit_diff |>
 
 ```{r very-wrong-plot}
 mech_forecast_diff |>
-  filter(.draw %in% sample(.draw, 1000)) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(y = .value, x = day)) +
   geom_line(alpha = 0.1, aes(group = .draw)) +
   geom_point(
@@ -405,7 +405,7 @@ head(onset_df)
 
 ```{r plot-all-forecasts}
 forecasts |>
-  filter(.draw %in% sample(.draw, 50)) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = onset_df |>
@@ -421,7 +421,7 @@ As for the single forecast it is helpful to also plot the forecast on the log sc
 
 ```{r plot-all-forecasts-log}
 forecasts |>
-  filter(.draw %in% sample(.draw, 50)) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +

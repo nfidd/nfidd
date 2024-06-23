@@ -195,7 +195,7 @@ r_posterior <- r_fit |>
   gather_draws(R[infection_day]) |>
   ungroup() |>
   mutate(infection_day = infection_day - 1) |> 
-  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
+  filter(.draw %in% sample(.draw, 100))
 
 ggplot(
   data = r_posterior,
@@ -266,7 +266,7 @@ r_inf_posteriors <- r_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
   mutate(infection_day = infection_day - 1) |> 
-  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 We can visualise infections compared to the data used to generate the time series of onsets
@@ -377,7 +377,7 @@ rw_posteriors <- r_rw_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
   mutate(infection_day = infection_day - 1) |>
-  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 ```{r plot_infections_rw}
@@ -397,7 +397,7 @@ and reproduction numbers
 ```{r plot_rt_rw}
 rw_r_inf_posterior <- rw_posteriors |>
   filter(.variable == "R") |>
-  filter(.draw %in% sample(.draw, 100)) ## extract 100 draws
+  filter(.draw %in% sample(.draw, 100))
 ggplot(
   data = rw_r_inf_posterior,
   mapping = aes(x = infection_day, y = .value, group = .draw)
