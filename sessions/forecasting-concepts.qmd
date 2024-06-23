@@ -111,8 +111,7 @@ We will use the same simulated data as in the renewal and nowcasting sessions.
 We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"), 
-       echo=TRUE, max.deparse.length=1000)
+source(here::here("snippets", "simulate-onsets.r"))
 cutoff <- 71
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
