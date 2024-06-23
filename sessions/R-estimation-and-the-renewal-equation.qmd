@@ -316,9 +316,11 @@ The last line is the geometric random walk.
 
 ## Simulating a geometric random walk
 
-We can write a function for performing the geometric random walk:
+You can have a look at an R function for performing the geometric random walk:
 
-```{r geometric-random-walk, file = here::here("functions", "geometric-random-walk.r")}
+```{r geometric-random-walk}
+source(here("functions", "geometric-random-walk.r"))
+geometric_random_walk
 ```
 
 ::: {.callout-tip}

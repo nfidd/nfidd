@@ -201,11 +201,12 @@ $$
 
 Again we look at an R function that performs this random walk
 
-```{r geometric-diff-ar, file = here::here("functions", "geometric-diff-ar.r")}
+```{r geometric-diff-ar}
+source(here("functions", "geometric-diff-ar.r"))
+geometric_diff_ar
 ```
 
 We can use this function to simulate a differenced random walk:
-
 
 ```{r}
 log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), phi = 0.1,  std = 0.1)
