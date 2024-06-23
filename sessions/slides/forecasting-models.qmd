@@ -1,0 +1,165 @@
+---
+title: "Forecasting models"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/forecasting-as-an-epidemiological-problem.html
+    footer: "Forecasting as an epidemiological problem"
+    slide-level: 3
+---
+
+###  {.smaller}
+
+![](figures/mechanism.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+- We can classify models by the level of mechanism they include
+- All of the model types we will introduce in the next few slides have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
+
+**NOTE:**  level of mechanism $\neq$ model complexity
+
+:::
+
+::: {.column}
+
+![](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41597-022-01517-w/MediaObjects/41597_2022_1517_Fig4_HTML.png?as=webp)
+
+[Cramer *et al.*, *Scientific Data*, 2022](https://doi.org/10.1038/s41597-022-01517-w)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism1.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Complex agent-based models**
+
+Conceptually probably the closest to metereological forecasting, if with much less real-time data.
+
+:::
+
+::: {.column}
+
+![](https://ars.els-cdn.com/content/image/1-s2.0-S1755436517300221-gr1.jpg)
+
+[Venkatramanan *et al.*, *Epidemics*, 2018](https://doi.org/10.1016/j.epidem.2017.02.010)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism2.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Compartmental models**
+
+Aim to capture relevant mechanisms but without going to the individual level.
+
+:::
+
+::: {.column}
+
+![](https://journals.plos.org/ploscompbiol/article/figure/image?size=large&id=10.1371/journal.pcbi.1008619.g001)
+
+[Keeling *et al.*, *PLOS Comp Biol*, 2021](https://doi.org/10.1371/journal.pcbi.1008619)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism3.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Semi-mechanistic models**
+
+- Include some epidemiological mechanism (e.g. SIR or the renewal equation)
+- Add a nonmechanistic time component inspired by statistical models (e.g. random walk)
+- e.g., the model we have worked with so far
+
+:::
+
+::: {.column}
+
+![](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/biostatistics/14/3/10.1093_biostatistics_kxs052/1/kxs05202.gif?Expires=1722167238&Signature=jV-HNL5VRrTpanqfOydjV~RcZSNMvaS6ENMD6vGNuJUBR-aar7NImeJ44fkzLBm6HEJPVtH6N6VORbIDZk8au5dzM5~XEjrGSxkdMxYxLW2L4S8PGaNHhFEf0lEJH6WrvlsJat9eN8716ULDcNgbrNr7N4Kjah1erborOZODCbNyaL8e-2SChcSxMTU1Lf2s~OADpKzmADukH4PFv--rF4iShx4ppQwm~9~s-E3YAPBYaHpTISjl3oj7s97Z~ROFYLqBJ2PRQsyJXrDomXEtl5mwWPGzEt32kPRwNumZUJD0wN1M3GwadWZL1FB6CqBPu8qA5Vo365tiox58lr1Esg__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA)
+
+[Dureau *et al.*, *Biostatistics*, 2013](https://doi.org/10.1093/biostatistics/kxs052)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism4.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Statistical models**
+
+- Models that don't include any epidemiological background e.g. ARIMA
+- The random walk model we have used on its own (without going via $R_t$) is called a "stochastic volatility model"
+
+:::
+
+::: {.column}
+
+
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism4.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Other models**
+
+- Expert or crowd opinion
+- Machine learning
+- ...
+
+:::
+
+::: {.column}
+
+![](figures/crowdforecastr.png)
+
+[Bosse *et al.*, *Wellcome Open Res*, 2024](https://doi.org/10.12688/wellcomeopenres.19380.2)
+
+:::
+
+::::
+
+# Plan for the this session
+
+1. Try a range of forecasts + evaluate
+
+# 
+
+[Return to the session](../forecasting-concepts)
