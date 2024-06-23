@@ -334,7 +334,7 @@ We can use this function to simulate a random walk:
 
 ```{r simulate-geometric-walk}
 R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
-data <- tibble(t = 1:n, R = exp(R))
+data <- tibble(t = seq_along(R), R = exp(R))
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +

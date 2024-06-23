@@ -211,7 +211,7 @@ We can use this function to simulate a differenced random walk:
 ```{r}
 log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), phi = 0.1,  std = 0.1)
 
-data <- tibble(t = 1:n, R = exp(log_R))
+data <- tibble(t = seq_along(log_R), R = exp(log_R))
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
