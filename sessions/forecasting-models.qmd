@@ -17,7 +17,6 @@ In this session, we'll start with the renewal model that we've been using and ex
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
 ::: {.callout-note collapse="true"}
-
 # Setup
 
 ## Libraries used
@@ -52,16 +51,18 @@ This is not strictly necessary but will help us talk about the models.
 set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
-
 :::
+
 
 # What did we learn about the random walk model from the [forecasting concepts session](forecasting-concepts)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
 
-::: {.callout-note, collapse = TRUE}
-## What did a geometric random walk model look like again?
+
+::: {.callout-note collapse="true"}
+
+What did a geometric random walk model look like again?
 
 ```{r}
 set.seed(123)
@@ -80,8 +81,8 @@ ggplot(data, aes(x = t, y = R)) +
        x = "Time",
        y = "R")
 ```
-
 :::
+
 
 # Forecasting models as a spectrum
 
@@ -130,6 +131,7 @@ ggplot(data, aes(x = t, y = R)) +
        x = "Time",
        y = "R")
 ```
+:::
 
 The key assumptions we are making here are: 
 
@@ -151,9 +153,13 @@ Rather than adding more mechanistic structure to the renewal model, we could add
 Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
 We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
+
+::: {.callout-tip, collapse = TRUE}
 A statistical term that can be used to describe capturing a trend is saying that the time series is _non-stationary_.
 More specifically, a _stationary_ time series is defined as one that does not have a trend over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
+Instead, we would normally consider the reproduction number as a _non-stationary_ time series as it has trends over time.
+:::
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
@@ -183,7 +189,7 @@ ggplot(data, aes(x = t, y = R)) +
   geom_line() +
   labs(title = "Simulated data from an exponentiated AR(1) model",
        x = "Time",
-       y = "R")
+       y = "Rt")
 ```
 :::
 
@@ -216,12 +222,11 @@ ggplot(data, aes(x = t, y = R)) +
   geom_line() +
   labs(title = "Simulated data from an exponentiated AR(1) model with differencing",
        x = "Time",
-       y = "R")
+       y = "Rt")
 ```
-
 :::
 
-We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar1.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar1.stan` for the function which calculates the reproduction number. Let's load the model:
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
@@ -330,7 +335,7 @@ What do you notice about the forecasts from the mechanistic and statistical mode
 :::
 
 ::: {.callout-tip}
-## What happens when you are very wrong about the population size? (optional)
+## What happens when we are very wrong about the population size? (optional)
 
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
 
@@ -532,7 +537,7 @@ How do the CRPS scores change with forecast horizon?
 How do the CRPS scores change based on forecast horizon?
 - All models have increasing CRPS with forecast horizon.
 - The mechanistic model has the lowest CRPS at all forecast horizon.
-- The stastical model forms notably worse at all forecast horizons.
+- The statistical model performs notably worse at all forecast horizons.
 How do the CRPS scores change with forecast date?
 - The statistical model does particularly poorly around the peak of the outbreak.
 - The mechanistic model does particularly well around the peak of the outbreak versus all other models
