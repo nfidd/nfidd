@@ -67,6 +67,7 @@ Let us assume that the symptom onsets are reported with a delay and that this de
 To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
+data(infection_times)
 df <- infection_times |>
   mutate(
     onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),

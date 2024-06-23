@@ -272,10 +272,10 @@ Can you use this plot to explain why the forecast of onsets looks the way it doe
 ::: {.callout-note collapse="true"}
 ## Solution
 - When both models are being fit to data (i.e before the vertical dashed line) the forecast and estimated reproduction numbers are very similar.
-- For short-term forecasts R estimates continue to be fairly similar.
+- For short-term forecasts $R_t$ estimates continue to be fairly similar.
 - However, the estimates have a consistent downwards trend which is not captured by the forecast (which looks like it has a constant mean value with increasing uncertainty).
 - This explains the divergence between the forecast and the data as the horizon increases.
-- It looks like only a relatively small number of forecast R trajectories grow to be very large but these are enough to visually dominate the forecast of onsets on the natural scale.
+- It looks like only a relatively small number of forecast $R_t$ trajectories grow to be very large but these are enough to visually dominate the forecast of onsets on the natural scale.
 - The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
 :::
 
