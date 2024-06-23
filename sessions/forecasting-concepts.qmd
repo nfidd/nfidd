@@ -3,9 +3,15 @@ title: "Forecasting concepts"
 order: 7
 ---
 
-[Forecasting as an epidemiological problem](slides/forecasting-as-an-epidemiological-problem)
+# Introduction
 
-# Objectives
+So far we've looked at epidemiological processes and events up until the present. Now we'll start to forecast into the future, while considering what we might want from a "good" forecast. After enough time has passed to observe events, we can then retrospectively evaluate how well forecasts performed. We'll introduce evaluating forecasts qualitatively by visual inspection, and quantitatively using scoring metrics.
+
+## Slides
+
+- [Forecasting as an epidemiological problem](slides/forecasting-as-an-epidemiological-problem)
+
+## Objectives
 
 The aim of this session is to introduce the concept of forecasting, using a simple model, and forecasting evaluation.
 
@@ -48,15 +54,6 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 :::
 
-# Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
-
-See the lecture slides.
-
-::: {.callout-tip}
-Proper scoring rules are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
-Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
-:::
-
 # What is forecasting?
 
 Forecasting is the process of making predictions about the future based on past and present data.
@@ -74,9 +71,10 @@ In order to make things simpler we will remove the nowcasting part of the model,
 4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 :::
 
+
 # Extending a model into the future
 
-The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
+In the model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) we estimated the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
 Based on what we found in the [nowcasting session](nowcasting.qmd) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
 We can do this by simulating the generative model forward in time. 
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
@@ -363,6 +361,11 @@ Do they seem to under or over predict consistently?
 On top of visualising the forecasts, we can also summarise performance quantitatively by transforming them using scoring metrics.
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 We will look at some of these metrics in the next section.
+
+::: {.callout-tip}
+In this session, we'll use "proper" scoring rules: these are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
+Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
+:::
 
 We will use the [`{scoringutils}`](https://epiforecasts.io/scoringutils/dev/) package to calculate these metrics.
 Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
