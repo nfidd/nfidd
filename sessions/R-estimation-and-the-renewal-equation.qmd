@@ -450,8 +450,14 @@ ggplot(
 ) +
   geom_line(alpha = 0.1) +
   scale_fill_brewer(palette = "Set1") +
-  labs(title = "Rt estimates from renewal equation models",
-       subtitle = "Estimates from infections, from symptom onsets, and from onsets with a random walk")
+  labs(
+    title = "Rt estimates from renewal equation models",
+    subtitle = paste(
+      "Estimates from infections, from symptom onsets, and from onsets with a",
+      "random walk"
+    )
+  ) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
 We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
