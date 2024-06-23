@@ -272,10 +272,7 @@ Does it look like a good fit?
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
-  mutate(infection_day = infection_day - 1)
-
-# sample 100 trajectories for plotting
-inf_posterior <- inf_posterior |>
+  mutate(infection_day = infection_day - 1) |>
   filter(.draw %in% sample(.draw, 100))
 
 ggplot(mapping = aes(x = infection_day)) +

@@ -240,7 +240,7 @@ We can now plot onsets alongside those nowcasted by the model:
 nowcast_onsets <- simple_nowcast_fit |>
   gather_draws(onsets[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100)) |>
   mutate(day = day + 1)
 ```
 
@@ -345,7 +345,7 @@ Again we can extract the nowcast of symptom onsets and plot it alongside the obs
 gamma_nowcast_onsets <- gamma_nowcast_fit |>
   gather_draws(onsets[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100)) |>
   mutate(day = day + 1)
 ```
 
