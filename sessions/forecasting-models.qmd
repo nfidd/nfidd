@@ -199,7 +199,7 @@ $$
 ::: {.callout-note, collapse = TRUE}
 ## What behaviour would we expect from this model?
 
-Again we look at an R function that performs this random walk
+Again we look at an R function that implements this model:
 
 ```{r geometric-diff-ar}
 source(here("functions", "geometric-diff-ar.r"))
