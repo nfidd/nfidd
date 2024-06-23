@@ -21,6 +21,10 @@ This session aims to introduce the concept of _nowcasting_, and see how we can p
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/nowcasting.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.

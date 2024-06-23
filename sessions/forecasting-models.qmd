@@ -20,6 +20,10 @@ The aim of this session is to introduce some common forecasting models and to ev
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/forecasting-models.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
