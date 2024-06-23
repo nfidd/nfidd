@@ -54,7 +54,5 @@ comments: false
 
 ## Evaluating forecasts (and nowcasts)
 
-- familiarity with metrics for evaluating deterministic forecasts (e.g. MAE)
-- ability to score deterministic forecasts in R
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
 - ability to score probabilistic forecasts in R
