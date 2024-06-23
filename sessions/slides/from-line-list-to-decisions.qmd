@@ -62,4 +62,10 @@ Throughout the course we will
 
 #
 
+To start the course go to:
+[https://nfidd.github.io/nfidd/](https://nfidd.github.io/nfidd/)
+and get started on the first sesion (*Probability distributions and parameter estimation*)
+
+#
+
 [Return to the session](../introduction-and-course-overview)
