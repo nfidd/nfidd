@@ -11,7 +11,7 @@ format:
 set.seed(12345)
 ```
 
-## What is stan and why do we use it
+## What is stan and why do we use it?
 
 - a *Probabilistic Programming Language* for Bayesian inference
   (i.e., a way to write down models)

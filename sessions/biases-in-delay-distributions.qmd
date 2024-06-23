@@ -3,14 +3,20 @@ title: "Biases in delay distributions"
 order: 3
 ---
 
+# Introduction
+
+So far, we've looked at the uncertainty of the time delays between epidemiological events. The next challenge is that our information on these delays is usually biased, especially when we're analysing data in real time. We'll consider two types of biases that commonly occur in reported infectious disease data: 
+- *Censoring*: when we know an event occurred at some time, but not exactly when.
+- *Truncation*: when not enough time has passed for all the relevant epidemiological events to occur or be observed.
+We can again handle these by including them as uncertain parameters in the modelling process.
+
+## Slides
+
 [Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
-# Objectives
+## Objectives
 
-The aim of this session is to introduce some specific issues that arise when we use delay distributions to describe reporting in infectious disease epidemiology.
-Specifically, we will consider two types of biases that commonly occur in infectious disease data: *censoring* and *truncation*.
-
-We'll introduce some typical properties of infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
+In this session, we'll introduce censoring and right truncation as typical properties of infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
 
 ::: {.callout-note collapse="true"}
 
