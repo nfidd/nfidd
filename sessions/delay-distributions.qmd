@@ -9,7 +9,7 @@ Every outbreak starts with an infection, but we rarely observe these directly. I
 
 ## Slides
 
-[Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays.qmd)
+[Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays)
 
 ## Objectives
 
