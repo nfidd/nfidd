@@ -159,7 +159,8 @@ We will first extract the forecast and then plot the forecasted number of sympto
 ```{r extract-forecast}
 forecast <- rw_forecast |>
   gather_draws(forecast[day]) |>
-  mutate(day = day + cutoff)
+  mutate(day = day + cutoff) |> 
+  ungroup()
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
@@ -235,11 +236,13 @@ We first need to extract the forecast and estimated reproduction numbers.
 ```{r extract-Rt}
 forecast_r <- rw_forecast |>
   gather_draws(R[day]) |>
-  mutate(type = "forecast")
+  mutate(type = "forecast") |> 
+  ungroup()
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
-  mutate(type = "estimate")
+  mutate(type = "estimate") |> 
+  ungroup()
 ```
 
 We can now plot the forecast and estimated reproduction numbers.
@@ -287,7 +290,8 @@ See the lecture notes for more information on forecast evaluation.
 In order to properly evaluate forecasts from this model we really need to forecast over a period of time. Ideally, capturing different epidemic dynamics. This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
 
 ```{r load_forecasts}
-rw_forecasts
+rw_forecasts |> 
+  ungroup()
 ```
 
 
