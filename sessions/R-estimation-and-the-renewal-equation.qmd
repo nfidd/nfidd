@@ -125,7 +125,8 @@ What kind of behaviours do you see depending on the values you put in?
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 
 ```{r load_ts}
-source(here::here("snippets", "load-ts.r"))
+source(here::here("snippets", "load-ts.r"), 
+       echo=TRUE, max.deparse.length=1000)
 head(inf_ts)
 ```
 
@@ -135,7 +136,8 @@ From this we can calculate that the parameters of the distribution are shape 4 a
 We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
 If you don't have this available any more, you can load it using
 ```{r source_censored_delay_pmf}
-source(here("functions", "censored-delay-pmf.r"))
+source(here("functions", "censored-delay-pmf.r"), 
+       echo=TRUE, max.deparse.length=1000)
 ```
 
 To approximate the generation time PMF using random draws from the underlying continuous distribution use
@@ -221,7 +223,8 @@ Instead, we usually observe outcomes such as symptom onsets when individuals int
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
 
 ```{r add_onsets}
-source(here::here("functions", "convolve-with-delay.r"))
+source(here::here("functions", "convolve-with-delay.r"), 
+       echo=TRUE, max.deparse.length=1000)
 ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
