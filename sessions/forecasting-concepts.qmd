@@ -287,6 +287,7 @@ See the lecture notes for more information on forecast evaluation.
 In order to properly evaluate forecasts from this model we really need to forecast over a period of time. Ideally, capturing different epidemic dynamics. This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
 
 ```{r load_forecasts}
+data(rw_forecasts)
 rw_forecasts
 ```
 
