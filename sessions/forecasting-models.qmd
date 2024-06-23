@@ -19,6 +19,10 @@ The aim of this session is to introduce some common forecasting models and to ev
 ::: {.callout-note collapse="true"}
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/forecasting-models.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -205,18 +209,19 @@ $$
 ::: {.callout-note, collapse = TRUE}
 ## What behaviour would we expect from this model?
 
-```{r}
-n <- 100
-phi <- 0.1
-sigma <- 0.1
-log_R <- rep(NA, n)
-log_R[1] <- rnorm(1, 0, sigma)
-log_R[2] <- log_R[1] + rnorm(1, 0, sigma)
-for (i in 3:n) {
-  log_R[i] <- log_R[i-1] + phi * (log_R[i-1] - log_R[i-2]) + rnorm(1, 0, sigma)
-}
+Again we look at an R function that implements this model:
 
-data <- tibble(t = 1:n, R = exp(log_R))
+```{r geometric-diff-ar}
+source(here("functions", "geometric-diff-ar.r"))
+geometric_diff_ar
+```
+
+We can use this function to simulate a differenced random walk:
+
+```{r}
+log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
+
+data <- tibble(t = seq_along(log_R), R = exp(log_R))
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
@@ -226,7 +231,7 @@ ggplot(data, aes(x = t, y = R)) +
 ```
 :::
 
-We've coded this up as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar1.stan` for the function which calculates the reproduction number. Let's load the model:
+We've coded up a model that uses this random walk as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
@@ -239,7 +244,7 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using the same data set we used in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"))
 onset_df
 
 # we'll make a forecast on day non day 41, pretending we haven't seen the later data
@@ -308,7 +313,8 @@ stat_forecast <- stat_forecast_fit |>
 forecast <- bind_rows(
   mutate(mech_forecast, model = "mechanistic"),
   mutate(stat_forecast, model = "statistical")
-)
+) |>
+  ungroup()
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
@@ -320,7 +326,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model)) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  scale_y_log10()
 ```
 
 ::: {.callout-tip}
@@ -332,6 +339,20 @@ What do you notice about the forecasts from the mechanistic and statistical mode
 ## Solution
 - The mechanistic model captures the downturn in the data very well.
 - The statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
+:::
+
+::: {.callout-note, collapse = TRUE}
+As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
+
+```{r plot-stat-rt}
+stat_forecast_fit |>
+  gather_draws(R[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_line(aes(group = .draw), alpha = 0.1)
+```
 :::
 
 ::: {.callout-tip}

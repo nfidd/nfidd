@@ -19,6 +19,10 @@ The aim of this session is to introduce the renewal equation as an infection gen
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/R-estimation-and-the-renewal-equation.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -123,9 +127,16 @@ What kind of behaviours do you see depending on the values you put in?
 # Estimating $R_t$ from a time series of infections
 
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
+This is saved in a snippet called `load-ts.r` which we can run using
 
 ```{r load_ts}
-source(here::here("snippets", "load-ts.r"))
+source(here("snippets", "load-ts.r"))
+head(inf_ts)
+```
+
+This creates the `inf_ts` data set which we can look at e.g. using
+
+```{r load_ts_inspect}
 head(inf_ts)
 ```
 
@@ -133,7 +144,7 @@ We use a renewal equation model in _stan_ to estimate the effective reproduction
 We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
 From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
 We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
-If you don't have this available any more, you can load it using
+You can load it using
 ```{r source_censored_delay_pmf}
 source(here("functions", "censored-delay-pmf.r"))
 ```
@@ -219,9 +230,15 @@ Does the model reproduce the simulated $R_t$ trajectories?
 Epidemiological data is rarely, perhaps never, available as a time series of infection events.
 Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
+For this we used the `convolved_with_delay()` function which you can load using
 
 ```{r add_onsets}
-source(here::here("functions", "convolve-with-delay.r"))
+source(here("functions", "convolve-with-delay.r"))
+```
+
+We then simulate observations again using:
+
+```{r generate_obs}
 ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
@@ -253,8 +270,17 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4)
+r_inf_fit <- r_inf_mod$sample(
+  data = data, parallel_chains = 4, init = \() list(init_R = 0)
+)
 ```
+
+::: {.callout-note}
+Generally one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
+When testing this model we noticed that sometimes the model failed to fit the data at all.
+Because of this we added an argument to start sampling with `init_R` set to 0.
+This makes sure the sampler starts fitting the model from a sensible value and avoids fitting failiures.
+:::
 
 ```{r r_inf_fit_summary}
 r_inf_fit
@@ -299,7 +325,7 @@ ggplot(
 
 In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
 
-In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
+In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
 
 $$
 \sigma \sim HalfNormal(0, 0.05) \\
@@ -312,20 +338,29 @@ $$
 $$
 
 Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
+The last line is the geometric random walk.
 
-::: {.callout-note, collapse = TRUE}
+## Simulating a geometric random walk
 
-## What does a geometric random walk model look like?
+You can have a look at an R function for performing the geometric random walk:
 
-```{r rw-plot}
-n <- 100
-R <- rep(NA, n)
-R[1] <- rnorm(1, 1, 0.1)
-for (i in 2:n) {
-  R[i] <- R[i-1] + rnorm(1, 0, 0.1)
-}
+```{r geometric-random-walk}
+source(here("functions", "geometric-random-walk.r"))
+geometric_random_walk
+```
 
-data <- tibble(t = 1:n, R = exp(R))
+::: {.callout-tip}
+## Take 5 minutes
+Look at this function and try to understand what it does.
+Note that we use the fact that we can generate a random normally distributed variable $X$ with mean 0 and standard deviation $\sigma$ by mutiplying a standard normally distributed variable (i.e., mean 0 and standard deviation 1) $Y$ with $\sigma$.
+Using this [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency) will improve our computational efficency later when using an equivalent function in stan 
+:::
+
+We can use this function to simulate a random walk:
+
+```{r simulate-geometric-walk}
+R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
+data <- tibble(t = seq_along(R), R = exp(R))
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
@@ -333,7 +368,10 @@ ggplot(data, aes(x = t, y = R)) +
        x = "Time",
        y = "R")
 ```
-:::
+
+You can repeat this multiple times either with the same parameters or changing some to get a feeling for what this does.
+
+## Estimating $R_t$ with a geometric random walk prior
 
 We can now include this in a stan model,
 
@@ -342,7 +380,7 @@ rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
 rw_mod
 ```
 
-Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number. See [`stan/functions/geometric_random_walk.stan`]() for the geometric random walk function (note that here we use the [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency).
+Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number using a function in stan that does the same as our R function of the same name we defined.
 
 We can now generate estimates from this model:
 
@@ -354,8 +392,7 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf,
   ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = 0 # this is a small easter egg for the attentive reader
+  ip_pmf = ip_pmf
 )
 r_rw_inf_fit <- rw_mod$sample(
   data = data, parallel_chains = 4, max_treedepth = 12, 
@@ -367,7 +404,7 @@ r_rw_inf_fit <- rw_mod$sample(
 r_rw_inf_fit
 ```
 
-::: {.callout-tip}
+::: {.callout-note}
 As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
 :::
 
@@ -445,8 +482,14 @@ ggplot(
 ) +
   geom_line(alpha = 0.1) +
   scale_fill_brewer(palette = "Set1") +
-  labs(title = "Rt estimates from renewal equation models",
-       subtitle = "Estimates from infections, from symptom onsets, and from onsets with a random walk")
+  labs(
+    title = "Rt estimates from renewal equation models",
+    subtitle = paste(
+      "Estimates from infections, from symptom onsets, and from onsets with a",
+      "random walk"
+    )
+  ) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
 We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.

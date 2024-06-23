@@ -21,6 +21,10 @@ This session aims to introduce how to do nowcasting if the reporting delay distr
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/joint-nowcasting.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -98,7 +102,7 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r")) ## generates `onset_df`
 head(onset_df)
 cutoff <- 71
 ```
@@ -106,7 +110,7 @@ cutoff <- 71
 We also need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
-source(here::here("functions", "censored-delay-pmf.r"))
+source(here("functions", "censored-delay-pmf.r"))
 reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
 plot(reporting_delay_pmf)
 ```
@@ -156,7 +160,17 @@ joint_mod <- cmdstan_model(here("stan", "joint-nowcast.stan"))
 joint_mod
 ```
 
-and then fit it:
+::: {.callout-tip collapse="true"}
+## Model details
+This time we won't go into details of the model.
+For now, it is important that you understand the concept but as the models get more complex we hope that you trust us that the model does what we describe above.
+
+Once thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
+This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
+In most situations this number would be unknown so what we do here is closer to what one would do in the real world.
+:::
+
+We then fit it do data:
 
 ```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(

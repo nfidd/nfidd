@@ -7,7 +7,6 @@ df <- infection_times |>
 ## Summarise infections as a time series by day
 inf_ts <- df |>
   count(infection_day, name = "infections")
-head(inf_ts)
 
 ## fill data frame with zeroes for days without infection
 all_days <- expand(

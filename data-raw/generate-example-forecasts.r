@@ -55,7 +55,7 @@ target_days <- onset_df |>
 target_days <- target_days[seq(1, length(target_days), 7)]
 
 # load the model
-rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw-forecast.stan"))
 
 data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   data <- list(

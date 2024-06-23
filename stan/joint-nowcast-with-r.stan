@@ -25,9 +25,9 @@ transformed data{
 
 parameters {
   real<lower = 0> init_I;         // initial number of infected
-  real<lower = -2, upper = 2> init_R;         // initial reproduction number
+  real init_R;         // initial reproduction number
   array[n-1] real rw_noise;       // random walk noise
-  real<lower = 0, upper = 1> rw_sd; // random walk standard deviation
+  real<lower = 0> rw_sd; // random walk standard deviation
   simplex[d] reporting_delay; // reporting delay distribution
 }
 
