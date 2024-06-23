@@ -20,6 +20,10 @@ The aim of this session is to introduce some common forecasting models and to ev
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/forecasting-models.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
@@ -235,7 +239,7 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using the same data set we used in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"))
 onset_df
 
 # we'll make a forecast on day non day 41, pretending we haven't seen the later data
@@ -293,16 +297,19 @@ Finally we can extract the forecasts from the models and plot them.
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 stat_forecast <- stat_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 forecast <- bind_rows(
   mutate(mech_forecast, model = "mechanistic"),
   mutate(stat_forecast, model = "statistical")
-)
+) |>
+  ungroup()
 
 target_onsets <- onset_df |>
   filter(day > cutoff) |>
@@ -314,7 +321,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), col = model)) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black")
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  scale_y_log10()
 ```
 
 ::: {.callout-tip}
@@ -326,6 +334,20 @@ What do you notice about the forecasts from the mechanistic and statistical mode
 ## Solution
 - The mechanistic model captures the downturn in the data very well.
 - The statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
+:::
+
+::: {.callout-note, collapse = TRUE}
+As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
+
+```{r plot-stat-rt}
+stat_forecast_fit |>
+  gather_draws(R[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_line(aes(group = .draw), alpha = 0.1)
+```
 :::
 
 ::: {.callout-tip}
@@ -355,6 +377,7 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 ```
 
@@ -381,7 +404,8 @@ forecasts <- bind_rows(
   rw_forecasts,
   stat_forecasts,
   mech_forecasts
-)
+) |> 
+  ungroup()
 ```
 
 ::: {.callout-tip}

@@ -20,6 +20,10 @@ First we'll look at this working forwards from infections in an outbreak. We'll 
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/delay-distributions.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, the `cmdstanr` package for using stan, and the `posterior` packages for investigating the results of the inference conducted with stan.
