@@ -11,7 +11,7 @@ format:
 ```{r seed}
 set.seed(123)
 ```
-# Biases in epidemiological delays
+## Biases in epidemiological delays
 
 Why might our estimates of epidemiological delays be biased?
 
@@ -83,12 +83,18 @@ We are trying to estimate an incubation period. Each arrow represents one person
 
 ![](figures/truncation_final.png)
 
-On the day of analysis we have not observed some delays yet, and these tended to be longer.
+On the day of analysis we have not observed some delays yet, and these tended to be **longer**. This is made worse during periods of **exponential growth**. 
+
+## Censoring and right truncation {.smaller}
+
+- When analysing data from an outbreak in real time, we are likely to have double censoring **and** right truncation, making things worse
+- In the practical we will only look at the two separately to keep things simple
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-- Simulate epidemiological delays with biases
-- Estimate parameters of a delay distribution, correcting for biases
+1. Simulate epidemiological delays with biases
+2. Estimate parameters of a delay distribution, correcting for biases
+
 
 #
 
