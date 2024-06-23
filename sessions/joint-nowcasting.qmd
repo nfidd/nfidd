@@ -52,7 +52,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## Motivation
 
 So far we have assumed that the delay distribution is known. In practice, this is often not the case and we need to estimate it from the data.
-As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above.
+As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above.
 However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution or observation error of the primary events.
 We can instead estimate the delay distribution and nowcast the data jointly.
 
@@ -310,7 +310,7 @@ This is because we have accounted for the truncation (otherwise it would be spur
 
 # Going further
 
-- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd) and see how it affects the simple nowcast models.
+- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions) and see how it affects the simple nowcast models.
 - Despite being fairly involved the joint nowcast model we used here is still quite simple and may struggle to capture more complex patterns in the data.
 In practice more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases).
 - The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets.\

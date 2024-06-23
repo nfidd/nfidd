@@ -97,7 +97,7 @@ However, if we want to use the gamma distribution with shape 5 and rate 1 as bef
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
 We will assume that both events that make up the delay (here infection and symptom onset) are observed as daily counts (e.g. as number of infections/symptom onsets by calendar date).
 Therefore, both observations are **censored** (as events are rounded to the nearest date).
-This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. 
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions), so we need to use the same ideas introduced in that session. 
 
 ::: .callout-note collapse=true
 #### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
@@ -121,7 +121,7 @@ The important point is that the ultimately observed PMF is a combination of a pr
 
 We can think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
-This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd).
+This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
