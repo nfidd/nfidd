@@ -158,7 +158,11 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 # Plan for the this session
 
-1. Try a range of forecasts + evaluate
+1. Review the performance of the random walk model from the last session
+2. Motivate a mechanism to include in order to address some of the issues we identified
+3. Motivate a statistical approach aiming to address the same issues without introducing epidemiological mechanism
+4. Compare the performance of these models for a single forecast
+5. Evaluate many forecast from these models and compare their performance to the random walk model
 
 # 
 
