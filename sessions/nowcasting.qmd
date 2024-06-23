@@ -3,9 +3,17 @@ title: "Nowcasting concepts"
 order: 6
 ---
 
-[Introduction to nowcasting](slides/introduction-to-nowcasting)
+# Introduction
 
-# Objectives
+So far we've explored the delays and biases of real-time outbreak data, started to correct for these, and considered the underlying process that drives the evolution of an outbreak (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how an outbreak is evolving in the present and future. 
+
+We know that we have incomplete information in the present because of delays in the observation process (reporting delays). The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
+
+## Slides
+
+- [Introduction to nowcasting](slides/introduction-to-nowcasting)
+
+## Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
@@ -66,11 +74,11 @@ df <- infection_times |>
   )
 ```
 
-We then assume that we're 40 days into the outbreak, i.e. we only consider observations with a reporting time less than 41 - other symptom onset may have already happened, but we have not observed them yet.
+We then assume that we're 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
 
 
 ```{r truncate_reports}
-cutoff <- 41
+cutoff <- 71
 df_co <- df |>
   filter(report_time < cutoff)
 
@@ -132,7 +140,7 @@ intermediate <- combined |>
   filter(variable == "onsets") |>
   select(-variable) |>
   rename(onsets = value) |>
-  mutate(cutoff = "40 days")
+  mutate(cutoff = "70 days")
 combined_cutoffs <- rbind(
   intermediate,
   final_all_days
@@ -143,8 +151,8 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
   geom_vline(xintercept = cutoff, linetype = "dashed")
 ```
 
-As we can see, even though on day 40 it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
-The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
+As we can see, even though it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
+The apparent decline towards the present (indicated by a dashed vertical line) was caused by the delay in reporting.
 
 Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
 This can sometimes be a sensible way to visualise the data.

@@ -3,9 +3,15 @@ title: "R estimation and the renewal equation"
 order: 5
 ---
 
-[Introduction to the reproduction number](slides/introduction-to-reproduction-number)
+# Introduction
 
-# Objectives
+In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.
+
+## Slides 
+
+- [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
+
+## Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.
 
@@ -55,13 +61,15 @@ Recall that in the [session on convolutions](using-delay-distributions-to-model-
 In doing so we assumed that infections every day were independently identically distributed and determined only by the number of symptom onsets that they caused.
 In reality, however, we know that infections are not independent.
 Because infection is dependent on a pathogen being transmitted from one individual to another, we expect infections on any day to depend on existing infections, that is the number of individuals that became infectious in the recent past.
-We know express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R$.
+We now express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R$.
 
 Remember that this is a more general concept than the _basic_ reproduction number $R_0$ which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
-The reproduction number $R$ (sometimes called the _effective_ reproduction number) *more generally describes the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
-In most mechanistic models of infectious diseases (starting with the simplest SIR model), *$* arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
+The reproduction number $R$ (sometimes called the _effective_ reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual and can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+
+In most mechanistic models of infectious diseases (starting with the simplest SIR model), $R$ arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
 By fitting such models to data it is then possible to calculate the value of $R$ at any point in time.
+
 The _renewal equation_ represents a more general model which includes the SIR model as a special case.
 In its basic form it makes no assumption about the specific processes that cause $R$ to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time.
 Mathematically, it can be written as
@@ -153,7 +161,7 @@ r_mod
 Familiarise yourself with the model above.
 Again there is a `functions` block at the beginning of the model (lines 1-3), where we load a function called `renewal()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/renewal.stan).
 The functions correspond exactly to our earlier **R** function of the same name.
-Later, this functions is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
+Later, this function is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
 Which line defines priors, and which the likelihood?
 :::
 
@@ -349,13 +357,18 @@ data <- list(
   h = 0 # this is a small easter egg for the attentive reader
 )
 r_rw_inf_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, max_treedepth = 12
+  data = data, parallel_chains = 4, max_treedepth = 12, 
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
 
 ```{r r_inf_rw_fit_summary}
 r_rw_inf_fit
 ```
+
+::: {.callout-tip}
+As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
+:::
 
 We can again extract and visualise the posteriors in the same way as earlier.
 

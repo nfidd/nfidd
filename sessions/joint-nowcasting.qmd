@@ -258,7 +258,10 @@ joint_rt_data <- c(joint_data,
     h = 0 # this is a small easter egg for the attentive reader
   )
 )
-joint_rt_fit <- joint_rt_mod$sample(data = joint_rt_data, parallel_chains = 4)
+joint_rt_fit <- joint_rt_mod$sample(
+  data = joint_rt_data, parallel_chains = 4,
+  init = \() list(init_R = 0, rw_sd = 0.01)
+)
 ```
 
 ```{r joint-nowcast-rt-fit-summary}
