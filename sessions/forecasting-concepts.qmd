@@ -255,7 +255,7 @@ We can now plot the forecast and estimated reproduction numbers.
 ```{r plot-Rt}
 forecast_r |>
   bind_rows(long_r) |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
@@ -326,7 +326,7 @@ As for a single forecast, our first step is to visualise the forecasts as this c
 
 ```{r plot-all-forecasts}
 rw_forecasts |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = onset_df |>
@@ -342,7 +342,7 @@ As for the single forecast it may be helpful to also plot the forecast on the lo
 
 ```{r plot-all-forecasts-log}
 rw_forecasts |>
-  filter(.draw <= 50) |>
+  filter(.draw %in% sample(.draw, 100)) |> 
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
