@@ -292,10 +292,12 @@ Finally we can extract the forecasts from the models and plot them.
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 stat_forecast <- stat_forecast_fit |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 
 forecast <- bind_rows(
@@ -370,6 +372,7 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
+  ungroup() |> 
   mutate(day = day + cutoff)
 ```
 
@@ -396,7 +399,8 @@ forecasts <- bind_rows(
   rw_forecasts,
   stat_forecasts,
   mech_forecasts
-)
+) |> 
+  ungroup()
 ```
 
 ::: {.callout-tip}

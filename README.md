@@ -36,12 +36,13 @@ Contributions of any kind are welcome!
 <a href="https://github.com/nfidd/nfidd/commits?author=sbfnk">sbfnk</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=kathsherratt">kathsherratt</a>,
+<a href="https://github.com/nfidd/nfidd/commits?author=jamesmbaazam">jamesmbaazam</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=ManuelStapper">ManuelStapper</a>
 
 ### Issues
 
 <a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>,
-<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Azsusswein">zsusswein</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
