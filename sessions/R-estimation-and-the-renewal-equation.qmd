@@ -19,6 +19,10 @@ The aim of this session is to introduce the renewal equation as an infection gen
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/R-estimation-and-the-renewal-equation.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.

@@ -23,6 +23,10 @@ Then, we'll use those simulated symptom onsets to try and reconstruct a time ser
 
 # Setup
 
+## Source file
+
+The source file of this session is located at `sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd`.
+
 ## Libraries used
 
 In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
