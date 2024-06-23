@@ -5,7 +5,7 @@ order: 13
 
 [End of course summary](slides/closing)
 
-For any questions or comments about please feel free to use the [course discussion board]().
+For any questions or comments about please feel free to use the [course discussion board](https://github.com/nfidd/nfidd/discussions).
 
 ## Further reading
 
