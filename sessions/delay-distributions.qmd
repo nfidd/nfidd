@@ -9,7 +9,7 @@ Every outbreak starts with an infection, but we rarely observe these directly. I
 
 ## Slides
 
-[Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays.qmd)
+- [Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays)
 
 ## Objectives
 
@@ -57,8 +57,8 @@ options(cmdstanr_print_line_numbers = TRUE)
 # Simulating delayed epidemiological data
 
 We will start this session by working with a simulated data set of infections from a disease that has caused an outbreak which subsequently ended.
-In our example outbreak, there were 649 infections.
-The outbreak lasted around 90 days after the first infection, with new infections peaking roughly around day 40.
+In our example outbreak, there were 6383 infections.
+The outbreak lasted 140 days after the first infection, with new infections peaking roughly around day 80.
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.

@@ -74,8 +74,9 @@ In order to make things simpler we will remove the nowcasting part of the model,
 
 # Extending a model into the future
 
-In the model we introduced in the [renewal session](R-estimation-and-the-renewal-equation.qmd) we estimated the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
-Based on what we found in the [nowcasting session](nowcasting.qmd) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
+The model we introduced in the [renewal session](R-estimation-and-the-renewal-equation) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
+Based on what we found in the [nowcasting session](nowcasting) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
+
 We can do this by simulating the generative model forward in time. 
 We actually already introduced a model that could do this in the renewal session (remember `h` from the data list in the renewal session?).
 So what does this look like in code? Lets load in the model again and take a look.
@@ -107,11 +108,11 @@ Do you see any limitations of this approach?
 Before we can forecast we need some data to fit the model to.
 In order to assess the quality of the forecasts we will also need some future (or hold-out) data that we can compare the forecasts to.
 We will use the same simulated data as in the renewal and nowcasting sessions.
-We will try to make a forecast on day 41 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
+We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
 source(here::here("snippets", "simulate-onsets.r"))
-cutoff <- 41
+cutoff <- 71
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
 tail(onset_df)
@@ -135,7 +136,10 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-rw_forecast <- mod$sample(data = data, parallel_chains = 4, adapt_delta = 0.95)
+rw_forecast <- mod$sample(
+  data = data, parallel_chains = 4, adapt_delta = 0.95,
+  init = \() list(init_R = 0, rw_sd = 0.01)
+)
 ```
 
 ```{r rw_forecast_summary}
@@ -219,7 +223,11 @@ long_data <- list(
   h = 0
 )
 
-rw_long <- mod$sample(data = long_data, parallel_chains = 4, adapt_delta = 0.95)
+
+rw_long <- mod$sample(
+  data = long_data, parallel_chains = 4, adapt_delta = 0.95,
+  init = \() list(init_R = 0, rw_sd = 0.01)
+)
 ```
 
 We first need to extract the forecast and estimated reproduction numbers.
@@ -245,7 +253,7 @@ forecast_r |>
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)+
   labs(title = "Estimated R", 
-       subtitle = "Estimated over whole time series (red), and forecast at day 41 (blue)")
+       subtitle = "Estimated over whole time series (red), and forecast (blue)")
 ```
 
 ::: {.callout-note}
@@ -292,10 +300,10 @@ Some important things to note about these forecasts:
 - Each forecast used all the data up to the forecast date.
 - We generated 1000 posterior samples for each forecast.
 - We started forecasting 3 weeks into the outbreak, and then forecast once a week (every 7 days), i.e., we created forecasts on day 22, day 29, ... to day 71. We excluded the last 14 days to allow a full forecast.
-- We used pregenerated simulated data, which is the same as the outbreak we've been using through the course:
+- We used the outbreak data simulated in the same way as the one we've been using through the course:
 
 ```{r}
-example_onset_df
+head(onset_df)
 ```
 
 :::
@@ -309,7 +317,7 @@ rw_forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = example_onset_df |>
+  geom_point(data = onset_df |>
     filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
   scale_color_binned(type = "viridis") +
@@ -325,7 +333,7 @@ rw_forecasts |>
   filter(.draw <= 50) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
+  geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
   scale_color_binned(type = "viridis") +
   labs(title = "Weekly symptom onset forecasts: log scale",
@@ -373,7 +381,7 @@ We will use `as_forecast` to do this:
 
 ```{r convert-forecasts}
 sc_forecasts <- rw_forecasts |>
-  left_join(example_onset_df, by = "day") |>
+  left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
   as_forecast(
     forecast_unit = c("target_day", "horizon", "model"),

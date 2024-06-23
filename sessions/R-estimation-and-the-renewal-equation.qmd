@@ -152,8 +152,8 @@ gen_time_pmf <- gen_time_pmf / sum(gen_time_pmf) ## renormalise
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
-mod <- cmdstan_model(here("stan", "estimate-r.stan"))
-mod
+r_mod <- cmdstan_model(here("stan", "estimate-r.stan"))
+r_mod
 ```
 
 ::: {.callout-tip}
@@ -180,26 +180,29 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
-r_fit <- mod$sample(data = data, parallel_chains = 4)
+r_fit <- r_mod$sample(data = data, parallel_chains = 4)
 ```
 
 ```{r r_fit_summary}
 r_fit
 ```
 
-Once stan has run its chains, we can visualise the estimates:
+Once stan has run its chains, we can visualise the posterior estimates.
 
 ```{r r_plot}
 # Extract posterior draws
 r_posterior <- r_fit |>
-  gather_draws(infections[infection_day], R[infection_day]) |>
+  gather_draws(R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |> 
+  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
 
 ggplot(
   data = r_posterior,
-  aes(x = infection_day, y = .value)) +
-  geom_line(alpha =  0.1)
+  aes(x = infection_day, y = .value, group = .draw))  +
+  geom_line(alpha =  0.1) +
+  labs(title = "Estimated R", 
+       subtitle = "Model 1: renewal equation from infections")
 ```
 
 ::: {.callout-tip}
@@ -223,11 +226,11 @@ onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
 ```
 
-We now add this to our renewal equation model:
+We now add this to our renewal equation model and use this to estimate infections as well as the reproduction number:
 
 ```{r stan_estimate_inf_and_r}
-mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
-mod
+r_inf_mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
+r_inf_mod
 ```
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -249,44 +252,41 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- mod$sample(data = data, parallel_chains = 4)
+r_inf_fit <- r_inf_mod$sample(data = data, parallel_chains = 4)
 ```
 
 ```{r r_inf_fit_summary}
 r_inf_fit
 ```
 
-We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). For example one could do 
+This time we can extract both the `infections` and `R` variables by infection day.
 
 ```{r r_inf_posterior}
-# To avoid repeating overselves we have put the code to extract the posteriors in a function
-source(here::here("functions", "extract-R-posteriors.r"))
-posteriors <- r_inf_fit |>
+r_inf_posteriors <- r_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |> 
+  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
 ```
 
-This time we extracted both the `infections` and `R` variables by infection day.
-We again use this to visualise infections compared to the data used to generate the time series of onsets
+We can visualise infections compared to the data used to generate the time series of onsets
 
 ```{r plot_infections}
-## Extract 100 samples
-posteriors <- posteriors |>
-  filter(.draw %in% sample(.draw, 100))
-inf_posterior <- posteriors |>
+inf_posterior <- r_inf_posteriors |>
   filter(.variable == "infections")
 ggplot(inf_posterior, mapping = aes(x = infection_day)) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
   geom_line(
     data = inf_ts, mapping = aes(y = infections), colour = "red"
-  )
+  ) +
+  labs(title = "Infections, estimated (grey) and observed (red)", 
+       subtitle = "Model 2: renewal equation from symptom onsets")
 ```
 
 and reproduction numbers
 
 ```{r plot_rt}
-r_inf_posterior <- posteriors |>
+r_inf_posterior <- r_inf_posteriors |>
   filter(.variable == "R")
 ggplot(
   r_inf_posterior, mapping = aes(x = infection_day, y = .value, group = .draw)
@@ -316,7 +316,7 @@ Here we have placed a prior on the standard deviation of the random walk, which 
 
 ## What does a geometric random walk model look like?
 
-```{r}
+```{r rw-plot}
 n <- 100
 R <- rep(NA, n)
 R[1] <- rnorm(1, 1, 0.1)
@@ -357,7 +357,8 @@ data <- list(
   h = 0 # this is a small easter egg for the attentive reader
 )
 r_rw_inf_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, max_treedepth = 12
+  data = data, parallel_chains = 4, max_treedepth = 12, 
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
 
@@ -365,23 +366,30 @@ r_rw_inf_fit <- rw_mod$sample(
 r_rw_inf_fit
 ```
 
+::: {.callout-tip}
+As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
+:::
+
 We can again extract and visualise the posteriors in the same way as earlier.
 
 ```{r r_rw_posterior}
 rw_posteriors <- r_rw_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |>
+  filter(.draw %in% sample(.draw, 100)) # sample 100 trajectories for plotting
 ```
 
 ```{r plot_infections_rw}
 rw_inf_posterior <- rw_posteriors |>
   filter(.variable == "infections")
 ggplot(mapping = aes(x = infection_day)) +
-  geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
   geom_line(
-    data = rw_inf_posterior, mapping = aes(y = .value), alpha = 0.1
-  )
+    data = rw_inf_posterior, mapping = aes(y = .value, group = .draw), alpha = 0.1
+  ) +
+  geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
+  labs(title = "Infections, estimated (grey) and observed (red)", 
+       subtitle = "Model 3: renewal equation with random walk")
 ```
 
 and reproduction numbers
@@ -394,7 +402,9 @@ ggplot(
   data = rw_r_inf_posterior,
   mapping = aes(x = infection_day, y = .value, group = .draw)
 ) +
-  geom_line(alpha = 0.1)
+  geom_line(alpha = 0.1) +
+  labs(title = "Estimated R", 
+       subtitle = "Model 3: renewal equation with random walk")
 ```
 
 ::: {.callout-tip}
@@ -410,17 +420,17 @@ If you have time you could try re-running the experiment with different R trajec
 We can see that using the renewal model as generative model we recover the time series of infections more accurately compared to previously when we assumed independent numbers of infections each day and that using a more believable model (i.e the geometric random walk) for the reproduction number improves things even more.
 Of course, this is helped by the fact that the data was generated by a model similar to the renewal model used for inference.
 
-Comparing the R trajectories
+# Comparing the R trajectories
 
 ```{r plot_r_posteriors}
+## earlier posteriors
+r_posterior <- r_posterior |>
+  mutate(data = "infections")
 r_inf_posterior <- r_inf_posterior |>
   mutate(data = "onsets (normal)")
 rw_r_inf_posterior <- rw_r_inf_posterior |>
   mutate(data = "onsets (random walk)")
 
-## earlier posterior (see previous section)
-r_posterior <- r_posterior |>
-  mutate(data = "infections")
 all_posteriors <- rbind(
   r_inf_posterior,
   rw_r_inf_posterior,
@@ -429,10 +439,13 @@ all_posteriors <- rbind(
 
 ggplot(
   all_posteriors,
-  mapping = aes(x = infection_day, y = .value, colour = data)
+  mapping = aes(x = infection_day, y = .value, group = .draw,
+                colour = data)
 ) +
   geom_line(alpha = 0.1) +
-  scale_fill_brewer(palette = "Set1")
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "R estimates from renewal equation models",
+       subtitle = "Estimates from infections, from symptom onsets, and from onsets with a random walk")
 ```
 
 We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
