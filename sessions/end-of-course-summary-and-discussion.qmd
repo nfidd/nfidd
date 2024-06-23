@@ -3,11 +3,7 @@ title: "End of course summary and discussion"
 order: 13
 ---
 
-# Objective
+[End of course summary](slides/closing)
 
-The aim of this session is to summarise the course and discuss future directions.
-
-# Summary of the course
-
-# Future directions and how to continue learning
+For any questions or comments about please feel free to use the [course discussion board].
 
