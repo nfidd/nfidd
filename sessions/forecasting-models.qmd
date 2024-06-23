@@ -386,10 +386,10 @@ Some important things to note about these forecasts:
   - Each forecast used all the data up to the forecast date.
   - We generated 1000 posterior samples for each forecast.
   - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
-  - We used pregenerated simulated data:
+  - We use the same simulated outbreak data:
 
 ```{r}
-example_onset_df
+head(onset_df)
 ```
 
 :::
@@ -402,7 +402,7 @@ forecasts |>
   filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = example_onset_df |>
+  geom_point(data = onset_df |>
     filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
   scale_color_binned(type = "viridis") +
@@ -418,7 +418,7 @@ forecasts |>
   filter(.draw %in% sample(.draw, 50)) |>
   ggplot(aes(x = day)) +
   geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = example_onset_df, aes(x = day, y = onsets), color = "black") +
+  geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_continuous(trans = "log", limits = c(NA, 500)) +
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
@@ -446,7 +446,7 @@ Which do you prefer?
 
 ```{r convert-forecasts}
 sc_forecasts <- forecasts |>
-  left_join(example_onset_df, by = "day") |>
+  left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
   as_forecast(
     forecast_unit = c("target_day", "horizon", "model"),

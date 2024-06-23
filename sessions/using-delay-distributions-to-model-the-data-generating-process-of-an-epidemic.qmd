@@ -67,7 +67,7 @@ Then we'll use the same model to conduct inference.
 
 In the last session we simulated *individual outcomes* from a delay distribution, and then re-estimated the corresponding parameters.
 However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
-At the population level, individual level delays translate into *convolutions*.
+At the population level, individual-level delays translate into *convolutions*.
 
 If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
 
@@ -75,7 +75,7 @@ $$
 C_t = \sum_{i=0}^{i=p_\mathrm{max}} I_{t-i} p_i
 $$
 
-In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
+In other words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
 We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
@@ -95,11 +95,35 @@ Now we can convolve the time series with a delay distribution to get a time seri
 In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
-Before we can simulate a time series of symptom onsets, we will first need to generate a discrete probability mass function of the incubation period (in days).
+We will assume that both events that make up the delay (here infection and symptom onset) are observed as daily counts (e.g. as number of infections/symptom onsets by calendar date).
+Therefore, both observations are **censored** (as events are rounded to the nearest date).
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd), so we need to use the same ideas introduced in that session. 
 
+::: .callout-note collapse=true
+#### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
+
+The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+
+$$
+F^*(t) = \int_0^1 F(t - u) du
+$$
+
+In effect, this is saying that the daily censored CDF is the average of the continuous distributions CDF over all possible event times (here between 0 and 1).
+
+The probability mass function (PMF) of this distribution when observed as a daily process (i.e. the secondary event is also daily censored) is then
+
+$$
+f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
+$$
+
+The important point is that the ultimately observed PMF is a combination of a primary event daily censoring process and a secondary event daily censoring process.
+:::
+
+We can think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions.qmd).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
-We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset.
+We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
 
 ```{r discretise_2_day_window, file = here::here("functions", "censored-delay-pmf.r")}
@@ -114,7 +138,7 @@ Try it with a few different probability distributions and parameters, e.g. for t
 ```{r discretised_gamma}
 gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 gamma_pmf
-# plot the probabilities corresponding to each discretised days' delay
+
 plot(gamma_pmf)
 ```
 :::
