@@ -64,7 +64,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note collapse = "true"}
 ## What did a geometric random walk model look like again?
 
 ```{r}
@@ -107,7 +107,7 @@ $$
 
 This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
 
-::: {.callout-note, collapse = "true"}
+::: {.callout-note collapse = "true"}
 
 ## What behaviour would we expect from this model?
 
@@ -170,7 +170,7 @@ $$
 
 where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
 
-::: {.callout-note, collapse = "true"}
+::: {.callout-note collapse = "true"}
 ## What behaviour would we expect from this model?
 
 ```{r}
@@ -201,7 +201,7 @@ log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
 $$
 
 
-::: {.callout-note, collapse = TRUE}
+::: {.callout-note collapse = "true"}
 ## What behaviour would we expect from this model?
 
 Again we look at an R function that implements this model:
@@ -332,13 +332,13 @@ forecast |>
 What do you notice about the forecasts from the mechanistic and statistical models?
 :::
 
-::: {.callout-note, collapse = "true"}
+::: {.callout-note collapse = "true"}
 ## Solution
 - The mechanistic model captures the downturn in the data very well.
 - The statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
 :::
 
-::: {.callout-note, collapse = "true"}
+::: {.callout-note collapse = "true"}
 As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
 
 ```{r plot-stat-rt}
@@ -357,7 +357,7 @@ stat_forecast_fit |>
 
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the mechanistic model with different priors for the population size and see how the forecasts change.
 
-::: {.callout-note, collapse = "true"}
+::: {.callout-note collapse = "true"}
 ## Solution
 
 ```{r very-wrong, results = 'hide', message = FALSE}
