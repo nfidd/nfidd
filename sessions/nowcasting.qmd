@@ -163,7 +163,7 @@ The apparent decline towards the present (indicated by a dashed vertical line) w
 ## Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
 
 This can sometimes be a sensible way to visualise the data.
-However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc or reporting delays may vary over timel
+However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc or reporting delays may vary over time.
 At the same time, when it comes to capacity or intervention planning we may need to know how many people e.g. become sick on any given day and will thus present to the healthcare system rather than how many will be reported.
 :::
 
