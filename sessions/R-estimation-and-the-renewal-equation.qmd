@@ -95,7 +95,7 @@ Note that in the discrete version we have started the sum at 1 and thus set $g_0
 ::: {.callout-tip}
 ## Instantaneous vs. case reproduction number
 There are different definitions of the reproduction number that can be applied to the situation where it changes in time.
-As it is defined above it is also called the _instantaneous_ reproduction number because any change affects all currently infectious individual instantaneously.
+As it is defined above it is also called the _instantaneous_ reproduction number because any change affects all currently infectious individuals instantaneously.
 Another example of a definition is the _case_ reproduction number, where changes affect individuals at the time that they are infected but then they have a constant reproduction number throughout their infectious period.
 :::
 
