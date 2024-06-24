@@ -23,6 +23,8 @@ website:
         href: getting-set-up.qmd
       - text: "Getting help"
         href: help.qmd
+      - text: "Timetable"
+        href: sessions.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
