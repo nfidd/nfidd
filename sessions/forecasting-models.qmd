@@ -135,6 +135,7 @@ ggplot(data, aes(x = t, y = Rt)) +
        x = "Time",
        y = "Rt")
 ```
+:::
 
 The key assumptions we are making here are: 
 
@@ -728,8 +729,6 @@ What do you think of the PIT histograms?
 ## Solution
 What do you think of the PIT histograms?
   - The PIT histograms are similar to the original scale PIT histograms.
-:::
-
 :::
 
 # Going further
