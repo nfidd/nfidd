@@ -14,7 +14,7 @@ format:
 How can we use data typically collected in an outbreak to answer questions like
 
 - what **is** the number of cases now? (*nowcasting*)
-- is it rising/falling and by how much? (*R estimation*)
+- is it rising/falling and by how much? (*$R_t$ estimation*)
 - what does this mean for the near future (*forecasting*)
 
 in real time.
