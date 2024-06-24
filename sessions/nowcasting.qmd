@@ -94,13 +94,13 @@ We can now convert this to a time series of symptom onsets and reports:
 ## create time series of onsets and reports
 df_co <- df_co |>
   transmute(
-    infecton_day = floor(infection_time),
+    infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
   )
 
 infection_ts <- df_co |>
-  count(day = infecton_day, name = "infections")
+  count(day = infection_day, name = "infections")
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
 reports_ts <- df_co |>
