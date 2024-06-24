@@ -49,16 +49,19 @@ Throughout the course we will
 
 Each session in the course:
 
-- builds on the last so that participants will have an overview of the real-time analysis workflow by the end of the course;
+- builds on the previous one so that participants will have an overview of the real-time analysis workflow by the end of the course;
 - starts with a short introductory talk;
 - mainly consists of interactive content that participants will work through;
-- has multiple instructors ready to answer questions about this content. If several people have a similar question we may pause the session and discuss it with the group;
 - has optional/additional material that can be skipped or completed after the course ends;
+
+For those attending the in-person version the course also:
+
+- has multiple instructors ready to answer questions about this content; if several people have a similar question we may pause the session and discuss it with the group;
 - ends with a wrap-up and discussion where we review the sessions material.
 
 ### Timeline for the course
 
-The course was created to be taught in-person for 2.5 days but of course you can go through the material at your own pace and in your own time.
+The course was created to be taught in-person for 2.5 days but of course if you are studying this on your own using the web site you can go through the material at your own pace and in your own time.
 Broadly, the intended timeline is:
 
 -   delay distributions and how to estimate them (day 1)
