@@ -429,6 +429,12 @@ sc_scores <- sc_forecasts |>
 sc_scores
 ```
 
+::: {.callout-note collapse="true"}
+## Learning more about the output of `score()`
+
+See the documentation for `?metrics_sample` for information on the default sample metrics.
+:::
+
 ### At a glance
 
 Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
