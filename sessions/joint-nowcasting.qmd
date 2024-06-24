@@ -11,7 +11,7 @@ A better approach is to jointly estimate the delay distribution together with th
 
 ## Slides
 
-- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
+- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays)
 
 ## Objectives
 
