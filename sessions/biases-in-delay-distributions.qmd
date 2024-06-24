@@ -69,7 +69,6 @@ We will use the same simulated data set as in the [session on delay distribution
 Remember, in this outbreak we are assuming:
 
 -   the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days
-
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
