@@ -200,7 +200,7 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 ::: {.callout-note collapse="true"}
 ## Solution
 - The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past we assume all reports have been made.
-- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
+- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. As we've done before when simulating observed data, this has Poisson noise added to it to simulate the stochasticity in the reporting process.
 :::
 
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
