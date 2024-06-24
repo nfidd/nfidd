@@ -108,7 +108,6 @@ We will start with our data on infection times, and work forwards to symptom ons
 -   Infection to symptoms:
     -   We'll assume all infections cause symptoms.
     -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
-
 -   Symptoms to hospital admission:
     -   We'll assume that 30% of symptomatic cases become hospitalised.
     -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
