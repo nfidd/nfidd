@@ -300,7 +300,7 @@ stat_forecast_fit <- stat_mod$sample(
 )
 ```
 
-Finally we can extract the forecasts from the models and plot them.
+Finally, we can extract the forecasts from the models and plot them.
 
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
@@ -336,7 +336,7 @@ forecast |>
 
 and on the log scale
 
-```{r plot_forecast}
+```{r plot_log_forecast}
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
