@@ -121,7 +121,7 @@ Plotting these, we get
 ```{r ts_plot, fig.height = 10}
 combined <- all_days |>
   pivot_longer(c(onsets, reports, infections), names_to = "variable")
-ggplot(combined, aes(x = day, y = value)) +
+  ggplot(combined, aes(x = day, y = value)) +
   facet_grid(variable ~ .) +
   geom_col()
 ```
@@ -129,7 +129,7 @@ ggplot(combined, aes(x = day, y = value)) +
 Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
-By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
+By cutting off at a certain _reporting_ date, we do not observe many of the recent symptom onsets that are yet to be be reported.
 We can see that if we plot the final data set alongside the cut-off one:
 
 ```{r plot_cut_final}
