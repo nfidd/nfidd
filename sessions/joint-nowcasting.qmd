@@ -11,7 +11,7 @@ A better approach is to jointly estimate the delay distribution together with th
 
 ## Slides
 
-- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
+- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays)
 
 ## Objectives
 
@@ -191,8 +191,11 @@ joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
 joint_nowcast_fit
 ```
 
+::: {.callout-important}
 One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model.
 This should give us far more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved).
+:::
+
 We now extract this nowcast:
 
 ```{r joint-nowcast}
