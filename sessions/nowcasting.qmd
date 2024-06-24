@@ -91,7 +91,7 @@ df_co <- df |>
 We can now convert this to a time series of symptom onsets and reports:
 
 ```{r aggregate}
-## create time series of onsets and reports
+## create time series of infections, onsets, and reports
 df_co <- df_co |>
   transmute(
     infection_day = floor(infection_time),
@@ -123,13 +123,14 @@ ggplot(combined, aes(x = day, y = value)) +
   geom_col()
 ```
 
-Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
+Looking at the three plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
 By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
 We can see that if we plot the final data set alongside the cut-off one:
 
 ```{r plot_cut_final}
+# Use full outbreak dataset
 final <- df |>
   transmute(onset_day = floor(onset_time))
 final_onset_ts <- final |>
