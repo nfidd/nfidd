@@ -128,7 +128,7 @@ mod
 ::: {.callout-tip}
 ### Arrays in stan
 On line 4 there is a data declaration starting with `array[n]`.
-This declares an array of size `n` of the type given aftewards (here: `real`).
+This declares an array of size `n` of the type given afterwards (here: `real`).
 Arrays work in a similar way as arrays or vectors in R and its elements be accessed with the bracket operator `[`.
 For example, to get the third element of the array `y` you would write `y[3]`.
 :::
