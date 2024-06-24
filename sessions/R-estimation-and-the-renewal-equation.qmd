@@ -111,7 +111,9 @@ In this course we will only deal with the deterministic renewal equation.
 With the theory out of the way we now turn to simulating an epidemic using the renewal equation.
 We first write a function to simulate the epidemic using the discrete renewal equation.
 
-```{r renewal_equation, file = here::here("functions", "renewal.r")}
+```{r renewal_equation}
+source(here("functions", "renewal.r"))
+renewal
 ```
 
 ::: {.callout-note}
