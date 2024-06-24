@@ -16,6 +16,10 @@ In this session, we'll start with the renewal model that we've been using and ex
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
+::: {.callout-caution}
+None of the models introduced in this section are designed for real world outbreak use!
+:::
+
 ::: {.callout-note collapse="true"}
 
 # Setup
@@ -86,12 +90,16 @@ ggplot(data, aes(x = t, y = R)) +
 A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
 However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
 The worst case is that we have mistaken beliefs about the underlying mechanisms and use these to make predictions which are systematically wrong and misleading.
-In these cases, forecasters of often use _statistical models_ to make predictions which have little or no mechanistic basis.
+In these cases, forecasters often use _statistical models_ to make predictions which have little or no mechanistic basis.
 In our work, we have found that a combination of mechanistic and statistical models can be very powerful but that identifying the best model for a given forecasting task can be challenging.
 
 ## Adding more mechanistic structure to the renewal model
 
 One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecasting concepts session](forecasting-concepts), we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+
+::: {.callout-warning}
+This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
+:::
 
 This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
 
@@ -99,7 +107,9 @@ $$
 R_t = \frac{S_{t-1}}{N} R_0
 $$
 
+::: {.callout-note}
 This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
+:::
 
 ::: {.callout-note collapse="true"}
 
@@ -151,13 +161,15 @@ Rather than adding more mechanistic structure to the renewal model, we could add
 Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
 We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
-A statistical term that can be used to describe capturing a trend is saying that the time series is _non-stationary_.
-More specifically, a _stationary_ time series is defined as one that does not have a trend over time.
+A statistical term that can be used to describe a timeseries with a trend is saying that the time series is _non-stationary_.
+More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean, variance do not change over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
-The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. For the log-transformed reproduction number ($log(R_t)$), the model is:
+The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
+
+ For the log-transformed reproduction number ($log(R_t)$), the model is:
 
 $$
 log(R_t) = \phi log(R_{t-1}) + \epsilon_t
@@ -189,7 +201,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
 
-Returning to the idea that the reproduction number is a _non-stationary_ time series, as we have a trend in the reproduction number we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
+Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
 
 $$
 log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
@@ -206,7 +218,7 @@ source(here("functions", "geometric-diff-ar.r"))
 geometric_diff_ar
 ```
 
-We can use this function to simulate a differenced random walk:
+We can use this function to simulate a differenced AR process:
 
 ```{r}
 log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
@@ -222,7 +234,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-We've coded up a model that uses this random walk as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
 stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
@@ -312,6 +324,18 @@ target_onsets <- onset_df |>
   filter(day <= cutoff + horizon)
 ```
 
+
+```{r plot_forecast}
+forecast |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(x = day)) +
+  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
+```
+
+and on the log scale
+
 ```{r plot_forecast}
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
@@ -330,7 +354,9 @@ What do you notice about the forecasts from the more mechanistic and more statis
 ::: {.callout-note collapse="true"}
 ## Solution
 - The more mechanistic model captures the downturn in the data very well.
-- The more statistical model is not as good at capturing the downturn in the data but is substantially better than the random walk model was in the [forecasting concepts session](forecasting-concepts).
+- However it appears to be somewhat biased as it consistently overpredicts.
+- The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
+- Neither model simply extend the trend in the way the random walk model did in the [forecasting concepts session](forecasting-concepts).
 :::
 
 ::: {.callout-note collapse="true"}
@@ -399,13 +425,14 @@ As in the [forecasting concepts session](forecasting-concepts), we have fit thes
 data(rw_forecasts, stat_forecasts, mech_forecasts)
 forecasts <- bind_rows(
   rw_forecasts,
-  stat_forecasts,
-  mech_forecasts
+  mutate(stat_forecasts, model = "More statistical"),
+  mutate(mech_forecasts, model = "More mechanistic")
 ) |> 
   ungroup()
 ```
 
-::: {.callout-tip}
+::: {.callout-tip, collapse="true"}
+## How did we estimate these forecasts?
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
 
 Some important things to note about these forecasts:
@@ -464,12 +491,14 @@ How do these forecasts compare?
 
 - The more mechanistic model captures the downturn in the data very well.
 - Past the peak all models were comparable.
-- The more statistical model does a very poor job of capturing the downturn in the data extending the current trend.
+- The more statistical model captures the downturn faster than the random walk but less fast than the more mechanistic mode.
+- The more statistical model sporadically predicts a more rapidly growing outbreak than occurred early on.
 - The more statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
 
 Which do you prefer?
 
 - The more mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
+- If we weren't confident in the effective susceptible population the AR model might be preferable.
 :::
 
 ## Scoring your forecast
@@ -499,6 +528,12 @@ sc_scores <- sc_forecasts |>
 
 sc_scores
 ```
+
+::: {.callout-note collapse="true"}
+## Learning more about the output of `score()`
+
+See the documentation for `?metrics_sample` for information on the default sample metrics.
+:::
 
 ### At a glance
 
@@ -554,12 +589,13 @@ How do the CRPS scores change based on forecast horizon?
 
 - All models have increasing CRPS with forecast horizon.
 - The more mechanistic model has the lowest CRPS at all forecast horizon.
-- The more stastical model forms notably worse at all forecast horizons.
+- The more stastical model starts to outperform the random walk model at longer time horizons.
 
 How do the CRPS scores change with forecast date?
 
-- The more statistical model does particularly poorly around the peak of the outbreak.
+- The more statistical model does particularly poorly around the peak of the outbreak but outperforms the random walk model.
 - The more mechanistic model does particularly well around the peak of the outbreak versus all other models
+- The more statistical model starts to outperfrom the other models towards the end of the outbreak.
 
 :::
 
@@ -614,11 +650,12 @@ What do you think of the PIT histograms?
 ## Solution
 What do you think of the PIT histograms?
 
-- The more mechanistic model is reasonably well calibrated but has a tendency to underpredict.
-- Both the random walk and more statistical model are biased towards overpredicting with the more statistical model also being poorly calibrated (liable to both under and overpredict).
+- The more mechanistic model is reasonably well calibrated but has a slight tendency to be overconfident.
+- The random walk is biased towards overpredicting.
+- The more statistical model is underconfident.
 - Across horizons the more mechanistic model is only liable to underpredict at the longest horizons.
-- Similarly, the statistical and random walk models are more biased at longer horizons.
-- The forecast date stratified PIT histograms are hard to interpret but the more mechanistic model seems to be the best calibrated across forecast date.
+- The random walk model is initially relatively unbiased and well calibrated but becomes increasingly likely to overpredict as the horizon increases.
+- The forecast date stratified PIT histograms are hard to interpret. We may need to find other ways to visualise bias and calibration at this level of stratification (see the `{scoringutils}` documentation for some ideas).
 
 :::
 
@@ -678,10 +715,9 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The random walk and more mechanistic models have much similar performance.
-- Even at the peak this is true as the log scale approach more evenly weights the over and underpredictions.
-- The more statistical model is still notably worse than the other models.
-- In particular, it is much worse at the peak of the outbreak and at longer horizons.
+- The performance of the mechanistic model is more variable across forecast horizon than on the natural scale.
+- On the log scale the by horizon performance of the random walk and more statistical mdoel is more comparable than on the log scale.
+- The period of high incidence dominates the target day stratified scores less on the log scale. We see that all models performed less well early and late on.
 :::
 
 ### PIT histograms
@@ -722,7 +758,7 @@ What do you think of the PIT histograms?
 ::: {.callout-note collapse="true"}
 ## Solution
 What do you think of the PIT histograms?
-  - The PIT histograms are similar to the original scale PIT histograms.
+  - The PIT histograms are similar to the original scale PIT histograms but the mechanistic model appears better calibrated.
 :::
 
 # Going further
