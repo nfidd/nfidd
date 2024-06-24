@@ -118,7 +118,7 @@ Plotting these, we get
 ```{r ts_plot, fig.height = 10}
 combined <- all_days |>
   pivot_longer(c(onsets, reports, infections), names_to = "variable")
-ggplot(combined, aes(x = day, y = value)) +
+  ggplot(combined, aes(x = day, y = value)) +
   facet_grid(variable ~ .) +
   geom_col()
 ```
@@ -126,7 +126,7 @@ ggplot(combined, aes(x = day, y = value)) +
 Looking at the three plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
-By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
+By cutting off at a certain _reporting_ date, we do not observe many of the recent symptom onsets that are yet to be be reported.
 We can see that if we plot the final data set alongside the cut-off one:
 
 ```{r plot_cut_final}
@@ -157,11 +157,18 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
 As we can see, even though it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
 The apparent decline towards the present (indicated by a dashed vertical line) was caused by the delay in reporting.
 
-Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
+::: {.callout-note}
+## Plotting and analysing data by report date
+Looking at the plots one might suggest plotting and analysing the data by date of reporting which correctly showed the data to be still increasing and which should, by definition, not be subject to future changes.
+
 This can sometimes be a sensible way to visualise the data.
-However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc.
+However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc or reporting delays may vary over time.
 At the same time, when it comes to capacity or intervention planning we may need to know how many people e.g. become sick on any given day and will thus present to the healthcare system rather than how many will be reported.
+:::
+
+::: {.callout-tip}
 Estimating the "true curve" (i.e. what we expect to see once the data are complete at a future date) of the time series of _epidemiologically relevant events_ from a potentially truncated epidemiological curve and information about the delays is what is usually called "nowcasting".
+:::
 
 # Nowcasting with a known delay
 
@@ -178,7 +185,10 @@ proportion_reported <- plnorm(1:15, 1, 0.5)
 plot(proportion_reported)
 ```
 
+::: {.callout-tip}
+## The `plnorm` function
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
+:::
 
 We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have copied the code into a snippet to make it easier to re-use), and apply the `reporting_delay` to the last 15 days of data.
 
@@ -199,8 +209,14 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past we assume all reports have been made.
-- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. As we've done before when simulating observed data, this has Poisson noise added to it to simulate the stochasticity in the reporting process.
+- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
+- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
+
+```{r plot-proportion-reported}
+reported_onset_df |>
+  ggplot(aes(x = day, y = reported_onsets)) +
+  geom_col()
+```
 :::
 
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
