@@ -42,13 +42,13 @@ Monday June 24: 14.45-15.30
 - Using delay distributions to model the data generating process of an epidemic (15 mins)
 - Practice session: implementing a convolution model and identifying potential problems (30 mins)
 
-## Session 5: R estimation and the renewal equation
+## Session 5: $R_t$ estimation and the renewal equation
 
 Monday June 24: 16.00-17.30
 
 - Introduction to the time-varying reproduction number (10 mins)
 - Practice session: using the renewal equation to estimate R (35 mins)
-- Practice session: combining R estimation with delay distribution convolutions (35 mins)
+- Practice session: combining $R_t$ estimation with delay distribution convolutions (35 mins)
 - Wrap up (10 mins)
 
 ## Session 6: Nowcasting concepts
@@ -73,7 +73,7 @@ Tuesday June 25: 11.00-12.30
 
 Tuesday June 25: 14.00-15.30
 
-- Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation (10 mins)
+- Introduction to forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation (10 mins)
 - Practice session: extending a model into the future (35 minutes)
 - Practice session: evaluate your forecast (35 mins)
 - Wrap up (10 mins)
