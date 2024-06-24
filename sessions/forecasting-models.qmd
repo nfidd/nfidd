@@ -68,6 +68,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## What did a geometric random walk model look like again?
 
 ```{r geometric-random-walk-sim}
+source(here("functions", "geometric-random-walk.r"))
 R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
 data <- tibble(t = seq_along(R), R = exp(R))
 
