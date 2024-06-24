@@ -364,7 +364,6 @@ Would you visualise the forecast in a different way?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-What do you think of these forecasts?
   - We think these forecasts are a reasonable place to start but there is definitely room for improvement.
 Are they any good?
   - They seem to do a reasonable job of capturing the short term dynamics but struggle with the longer term dynamics.
