@@ -64,7 +64,7 @@ The aim of nowcasting is to complete the reporting triangle. This means filling 
 
 (reporting triangle courtesy of Johannes Bracher)
 
-### This session
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Simulate the reporting triangle
 2. Perform a joint estimation of the delay and nowcast

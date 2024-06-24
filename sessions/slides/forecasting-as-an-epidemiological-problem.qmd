@@ -77,7 +77,7 @@ Maximise *sharpness* subject to *calibration*
 - Statements about the future should be **correct** ("calibration")
 - statements about the future should aim to have **narrow uncertainty** ("sharpness")
 
-### Plan for this session
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Start with a simple model and use it to make a forecast (using stan)
 2. Evaluate the forecasts using proper scoring rules
