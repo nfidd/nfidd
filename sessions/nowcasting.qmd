@@ -180,10 +180,10 @@ plot(proportion_reported)
 
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 
-We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
+We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have copied the code into a snippet to make it easier to re-use), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"), echo=TRUE, max.deparse.length = 1000)
 reported_onset_df <- onset_df |>
   filter(day < cutoff) |>
   mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
@@ -199,7 +199,7 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
+- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past we assume all reports have been made.
 - The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
 :::
 
