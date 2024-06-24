@@ -139,9 +139,14 @@ We do so by generating many replicates of the corresponding random delay, taking
 This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
-We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
+We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days.
 
-```{r discretise_2_day_window, file = here::here("functions", "censored-delay-pmf.r")}
+You can find the function in the `functions/` directory.
+You can load and then view it using:
+
+```{r discretise_2_day_window}
+source(here("functions", "censored-delay-pmf.r"))
+censored_delay_pmf
 ```
 
 ::: callout-note
@@ -162,7 +167,9 @@ plot(gamma_pmf)
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
 
-```{r convolution, file = here::here("functions", "convolve-with-delay.r")}
+```{r convolution}
+source(here("functions", "convolve-with-delay.r"))
+convolve_with_delay
 ```
 
 ::: callout-tip
