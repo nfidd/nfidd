@@ -156,7 +156,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+## Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Review the performance of the random walk model from the last session
 2. Motivate a mechanism to include in order to address some of the issues we identified

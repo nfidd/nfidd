@@ -161,7 +161,7 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 
 ::::
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+## Your Turn {background-color="#447099" transition="fade-in"}
 
 - Simulate epidemiological delays
 - Estimate parameters of a delay distribution

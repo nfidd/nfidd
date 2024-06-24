@@ -90,7 +90,7 @@ On the day of analysis we have not observed some delays yet, and these tended to
 - When analysing data from an outbreak in real time, we are likely to have double censoring **and** right truncation, making things worse
 - In the practical we will only look at the two separately to keep things simple
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+## Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Simulate epidemiological delays with biases
 2. Estimate parameters of a delay distribution, correcting for biases

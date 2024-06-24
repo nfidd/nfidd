@@ -64,7 +64,7 @@ Instead, we *discretise* the distribution (remembering that it is **double censo
 
 This can be solved mathematically but in the session we will use simulation.
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+## Your Turn {background-color="#447099" transition="fade-in"}
 
 - Simulate convolutions with infection counts
 - Discretise continuous distributions
