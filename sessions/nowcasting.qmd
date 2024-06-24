@@ -84,11 +84,9 @@ We then assume that we're 70 days into the outbreak, i.e. we only consider obser
 
 ```{r truncate_reports}
 cutoff <- 71
+## cutoff by reporting time
 df_co <- df |>
   filter(report_time < cutoff)
-
-df_on <- df |>
-  filter(onset_time < cutoff)
 ```
 
 We can now convert this to a time series of symptom onsets and reports:
