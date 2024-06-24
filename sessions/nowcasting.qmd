@@ -86,24 +86,21 @@ We then assume that we're 70 days into the outbreak, i.e. we only consider obser
 cutoff <- 71
 df_co <- df |>
   filter(report_time < cutoff)
-
-df_on <- df |>
-  filter(onset_time < cutoff)
 ```
 
 We can now convert this to a time series of symptom onsets and reports:
 
 ```{r aggregate}
-## create time series of onsets and reports
+## create time series of infections, onsets, and reports
 df_co <- df_co |>
   transmute(
-    infecton_day = floor(infection_time),
+    infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
   )
 
 infection_ts <- df_co |>
-  count(day = infecton_day, name = "infections")
+  count(day = infection_day, name = "infections")
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
 reports_ts <- df_co |>
@@ -126,13 +123,14 @@ ggplot(combined, aes(x = day, y = value)) +
   geom_col()
 ```
 
-Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
+Looking at the three plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
 By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
 We can see that if we plot the final data set alongside the cut-off one:
 
 ```{r plot_cut_final}
+# Use full outbreak dataset
 final <- df |>
   transmute(onset_day = floor(onset_time))
 final_onset_ts <- final |>
@@ -171,7 +169,9 @@ Estimating the "true curve" (i.e. what we expect to see once the data are comple
 
 Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
 
-In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
+In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 
+
+We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution up to 15 days, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
 
 ```{r}
 proportion_reported <- plnorm(1:15, 1, 0.5)
@@ -180,10 +180,10 @@ plot(proportion_reported)
 
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 
-We can now construct some simulated data and use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
+We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have copied the code into a snippet to make it easier to re-use), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"))
+source(here("snippets", "simulate-onsets.r"), echo=TRUE, max.deparse.length = 1000)
 reported_onset_df <- onset_df |>
   filter(day < cutoff) |>
   mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
@@ -199,8 +199,8 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
-- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
+- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past we assume all reports have been made.
+- The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. As we've done before when simulating observed data, this has Poisson noise added to it to simulate the stochasticity in the reporting process.
 :::
 
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
