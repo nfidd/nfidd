@@ -237,7 +237,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using a data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
 source(here("snippets", "simulate-onsets.r"))
