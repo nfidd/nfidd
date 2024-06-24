@@ -185,7 +185,7 @@ res$summary() ## could also simply type `res`
 These estimates should look similar to what we used in the simulations.
 We can plot the resulting probability density functions.
 
-:::{.callout note}
+::: .callout note
 Every time we sample from the model posterior, we create 4000 iterations. That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations. You'll see this throughout the course.
 :::
 
