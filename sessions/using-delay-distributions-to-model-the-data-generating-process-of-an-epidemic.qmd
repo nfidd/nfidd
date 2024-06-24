@@ -114,7 +114,7 @@ We will assume that both events that make up the delay (here infection and sympt
 Therefore, both observations are **censored** (as events are rounded to the nearest date).
 This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions), so we need to use the same ideas introduced in that session. 
 
-::: .callout-note collapse=true
+::: {.callout-note collapse=true}
 #### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
 
 The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
@@ -128,7 +128,7 @@ In effect, this is saying that the daily censored CDF is the average of the cont
 The probability mass function (PMF) of this distribution when observed as a daily process (i.e. the secondary event is also daily censored) is then
 
 $$
-f_t \propto \frac{F^*(t + 1) - F^*(t - 1)}{}
+f_t \propto F^*(t + 1) - F^*(t - 1)
 $$
 
 The important point is that the ultimately observed PMF is a combination of a primary event daily censoring process and a secondary event daily censoring process.
