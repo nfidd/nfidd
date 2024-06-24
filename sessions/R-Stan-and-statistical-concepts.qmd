@@ -178,11 +178,6 @@ In order to view a summary of the posterior samples generated, use
 gamma_fit
 ```
 
-::: {.callout-caution}
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
-:::
-
 You can see that the estimates are broadly consistent with the parameters we specified.
 To investigate this further, we will conduct a so-called *posterior predictive check* by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
 
