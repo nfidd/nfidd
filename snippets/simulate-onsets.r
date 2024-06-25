@@ -13,4 +13,5 @@ onset_df <- tibble(day = seq_along(onsets), onsets = onsets) |>
   left_join(
     inf_ts |> select(day = infection_day, infections),
     by = "day"
-  )
+  ) |>
+  replace_na(list(infections = 0))
