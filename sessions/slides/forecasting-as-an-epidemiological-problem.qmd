@@ -50,9 +50,10 @@ However:
 
 ### Relationship with $R_t$ estimation {.smaller}
 
-- In infectious disease epidemiology, "no change" means no change in $R_t$
-- In that sense, predicting infections comes down to predicting $R_t$
-- Commonly, forecast models assume no change in $R_t$. Is this a good assumption?
+- In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
+- Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
+- In that sense, predicting infections comes down to **predicting $R_t$**
+- Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
 
 ### Relationship with nowcasting {.smaller}
 
@@ -67,20 +68,24 @@ However:
 
 ### Importance of evaluation {.smaller}
 
-- Because forecasts are *unconditional* (what will happen) we can compare them to data and see how well they did
+- Because forecasts are unconditional (what will happen) we can compare them to data and see how well they did
+- Doing this allows us to answer question like
+  - Are our forecasts any good?
+  - How far ahead can we trust forecasts?
+  - Which model works best for making forecasts?
 - So-called **proper scoring rules** incentivise forecasters to express an honest belief about the future
 - Many proper scoring rules (and other metrics) are available to assess probabilistic forecasts
 
-### Forecasting paradigm {.smaller}
+### The forecasting paradigm {.smaller}
 
-Maximise *sharpness* subject to *calibration*
+#### Maximise *sharpness* subject to *calibration*
 
 - Statements about the future should be **correct** ("calibration")
-- statements about the future should aim to have **narrow uncertainty** ("sharpness")
+- Statements about the future should aim to have **narrow uncertainty** ("sharpness")
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1. Start with a simple model and use it to make a forecast (using stan)
+1. Start with a model we used before and use it to make a forecast (using stan)
 2. Evaluate the forecasts using proper scoring rules
 
 #
