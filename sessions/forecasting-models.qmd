@@ -331,7 +331,8 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  guides(colour = guide_legend(override.aes = list(alpha = 1)))
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  lims(y = c(0, 500))
 ```
 
 and on the log scale
