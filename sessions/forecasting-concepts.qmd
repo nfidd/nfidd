@@ -153,7 +153,7 @@ rw_forecast
 
 ::: callout-note
 Because this model can struggle to fit to the data, we have increased the value of  `adapt_delta` from its default value of 0.8.
-This is, a tuning parameter that affects the step size of the sampler in exploring the posterior (higher `adapt_delta` leading to smaller step sizes meaning posterior exploration is slower but more careful).
+This is a tuning parameter that affects the step size of the sampler in exploring the posterior (higher `adapt_delta` leading to smaller step sizes meaning posterior exploration is slower but more careful).
 :::
 
 ## Visualising the forecast
