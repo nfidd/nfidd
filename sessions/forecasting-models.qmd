@@ -17,7 +17,7 @@ In this session, we'll start with the renewal model that we've been using and ex
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
 ::: {.callout-caution}
-None of the models introduced in this section are designed for real world outbreak use!
+None of the models introduced in this section are designed for real-world outbreak use!
 :::
 
 ::: {.callout-note collapse="true"}
@@ -161,8 +161,8 @@ Rather than adding more mechanistic structure to the renewal model, we could add
 Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
 We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
-A statistical term that can be used to describe a timeseries with a trend is saying that the time series is _non-stationary_.
-More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean, variance do not change over time.
+A statistical term that can be used to describe a time series with a trend is saying that the time series is _non-stationary_.
+More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean and variance, do not change over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
 The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
