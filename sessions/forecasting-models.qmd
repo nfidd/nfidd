@@ -759,8 +759,7 @@ What do you think of the PIT histograms?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-What do you think of the PIT histograms?
-  - The PIT histograms are similar to the original scale PIT histograms but the mechanistic model appears better calibrated.
+The PIT histograms are similar to the original scale PIT histograms but the mechanistic model appears better calibrated.
 :::
 
 # Going further
