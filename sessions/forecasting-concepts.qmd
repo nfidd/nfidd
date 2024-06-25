@@ -628,7 +628,7 @@ This can be useful if we are interested in the relative performance of the model
 In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates.
 Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
 
-We again use `scoringutils` but first transform both the forecasts and observations to the log scale. Note that we cannot log scale after scoring as this will give incorrect results.
+We again use `scoringutils` but first transform both the forecasts and observations to the log scale. 
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
