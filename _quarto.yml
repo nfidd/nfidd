@@ -42,3 +42,4 @@ format:
     css: styles.css
     link-external-icon: true
     link-external-newwindow: true
+    toc: true
