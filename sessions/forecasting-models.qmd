@@ -352,6 +352,8 @@ stat_forecast_fit |>
 
 In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
 
+:::
+
 ::: {.callout-note collapse="true"}
 ## Solution
 
@@ -388,7 +390,6 @@ mech_forecast_diff |>
     color = "black"
   )
 ```
-:::
 :::
 
 # Evaluating forecasts from our models

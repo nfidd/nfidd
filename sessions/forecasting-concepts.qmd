@@ -642,7 +642,7 @@ log_scores <- log_sc_forecasts |>
   score()
 ```
 
-For more on scoring on the log scale see [Scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
+For more on scoring on the log scale see [this paper on scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
 
 ### At a glance
 
