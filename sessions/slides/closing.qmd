@@ -35,7 +35,7 @@ in real time.
 - we characterise them with probability distributions
 - estimating delays requires correction for biases due to
   - **double interval censoring** (daily data)
-  - ***right truncation** (real-time analysis)
+  - **right truncation** (real-time analysis)
 
 ### Day 1 (cont.): Convolutions {.smaller}
 
@@ -77,6 +77,6 @@ in real time.
 - please tell us if you enjoyed the course, what worked / didn't work etc.
 - we will send out a survey for feedback
 
-# Thank you for coming!
+# Thank you for attending!
 
 [Return to the session](../end-of-course-summary-and-discussion)
