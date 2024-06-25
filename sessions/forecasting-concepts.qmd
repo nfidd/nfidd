@@ -200,7 +200,7 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  scale_y_continuous(trans = "log") +
+  scale_y_log10() +
   labs(title = "Symptom onsets, log scale", subtitle = "Forecast and observed")
 ```
 
