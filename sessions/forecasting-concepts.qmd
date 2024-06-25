@@ -261,7 +261,8 @@ forecast_r |>
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)+
   labs(title = "Estimated R", 
-       subtitle = "Estimated over whole time series (red), and forecast (blue)")
+       subtitle = "Estimated over whole time series (red), and forecast (blue)") +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
 ::: {.callout-note}
