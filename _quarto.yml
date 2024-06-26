@@ -8,12 +8,6 @@ website:
   site-url: https://nfidd.github.io/nfidd/
   description: "Nowcasting and forecasting infectious disease dynamics"
   open-graph: true
-  comments:
-    giscus:
-      repo: nfidd/nfidd
-      category: 'Website discussions'
-      mapping: title
-      reactions-enabled: true
   navbar:
     left:
       - sidebar:sessions
