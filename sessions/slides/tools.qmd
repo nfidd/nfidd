@@ -47,4 +47,4 @@ How does each tool relate to key concepts in the course?
 
 #
 
-[Return to the session](../overview-of-available-tools)
+[Return to the session](../examples-of-available-tools)
