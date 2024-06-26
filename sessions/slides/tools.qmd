@@ -1,11 +1,11 @@
 ---
-title: "Overview of tools"
+title: "Examples of tools"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 engine: knitr
 format:
   revealjs:
-    output: slides/closing.html
-    footer: "Overview of tools"
+    output: slides/tools.html
+    footer: "Examples of tools"
     slide-level: 3
 ---
 
