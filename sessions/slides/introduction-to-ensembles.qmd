@@ -42,7 +42,7 @@ Many uncertainties, many approaches: many models
 
 ::: {.fragment .fade-in}
 
-- Summarising across models
+- Summarising across models to create single (probabilistic) prediction
 
   - e.g. average at each models' probabilistic quantiles
 
@@ -63,16 +63,27 @@ Many uncertainties, many approaches: many models
 
 ## Collaborative modelling
 
-- "Forecast hubs": crowdsourcing forecasts
+### "Forecast hubs"
+
+- Crowdsourcing forecasts
 
    - Open source collaborative projects 
 
    - Anyone able to contribute a forecast
-      - Used for e.g. flu, dengue, COVID-19 
    
-   - Forecasts ensembled into a single projection
+- Forecasts ensembled into a single projection
    
-   - Enables consistent evaluation
+- Also enables consistent evaluation
+
+## Collaborative modelling
+
+### "Forecast hubs"
+
+- Outbreak modelling
+
+  - Since 2013 for US influenza
+
+   - Ebola, dengue, chikungunya, COVID-19, WNV
 
 ##
 
@@ -83,12 +94,32 @@ Many uncertainties, many approaches: many models
 ## Single model {.smaller}
 ![](figures/respicast-single.png)
 
-## Multiple models {.smaller}
+## ... Multiple models {.smaller}
 ![](figures/respicast-multi.png)
 
-## Multi-model ensemble {.smaller}
+## ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
-## When are ensembles useful?
+
+## Evaluation: European COVID-19 Hub 
+
+- March 2021 - now
+
+- ~40 teams, ~50 models
+
+- Weekly ensemble & evaluation
+![](figures/hub-metadata)
+
+## Evaluation: European COVID-19 Hub {.smaller}
+  
+![](figures/hub-ensemble-good)
+
+
+## Evaluation: European COVID-19 Hub {.smaller}
+
+![](figures/hub-ensemble-less-good)
+
+
+## Evaluating ensembles
 
 ::: {.fragment .fade-in}
 
@@ -110,9 +141,14 @@ Many uncertainties, many approaches: many models
 
 ## Ensembles: reflections
 
-   - Comparing uncertainties
-      - Which aspects of uncertainty do we want to keep (compare), or combine?
+- Comparing uncertainties
    
-   - Collaborative modelling
-      - Opportunity for exchange & evaluation
-      - Consensus - at the cost of context?
+   - Which aspects of uncertainty do we want to keep (compare), or combine?
+   
+   
+   
+- Collaborative modelling
+   
+  - Opportunity for exchange & evaluation
+      
+   - Consensus - at the cost of context?
