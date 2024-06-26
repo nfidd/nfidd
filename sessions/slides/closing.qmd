@@ -36,6 +36,8 @@ in real time.
 - estimating delays requires correction for biases due to
   - **double interval censoring** (daily data)
   - **right truncation** (real-time analysis)
+  
+![](figures/truncation_final.png)
 
 ### Day 1 (cont.): Convolutions {.smaller}
 
@@ -44,11 +46,15 @@ in real time.
 - **$R_t$ estimation** using the renewal equation is a convolution problem
 - improving the generative model leads to improvements in estimation (**geometric random walk** vs. independent priors)
 
+![](figures/r_convolution_sketch.png)
+
 ### Day 2: Nowcasting {.smaller}
 
 - **nowcasting** is the task of predicting what data will look once delays have resolved
 - it is a **right truncation problem** (same as discussed before)
 - a **joint generative model** can combine delay estimation, nowcasting and $R_t$ estimation
+
+![](figures/complete_reporting_triangle.png)
 
 ### Day 2 (cont.): Forecasting {.smaller}
 
@@ -57,6 +63,8 @@ in real time.
 - we can assess forecasts using **proper scoring rules**
 - a wide range of methods are available for making forecasts
 - we can use visualisation and scoring to understand the predictive performance of different models
+
+![](figures/pit-log-scale.png)
 
 ### Day 3: Applications {.smaller}
 
