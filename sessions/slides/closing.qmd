@@ -46,7 +46,7 @@ in real time.
 - **$R_t$ estimation** using the renewal equation is a convolution problem
 - improving the generative model leads to improvements in estimation (**geometric random walk** vs. independent priors)
 
-![](figures/infections_onset_sketch.png)
+![](figures/r_convolution_sketch.png)
 
 ### Day 2: Nowcasting {.smaller}
 
