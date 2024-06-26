@@ -1,0 +1,118 @@
+---
+title: "Multi-model ensembles"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/forecasting-as-an-epidemiological-problem.html
+    footer: "Multi-model ensembles"
+---
+
+## Ensembles
+
+- Combine many different models' forecasts into a single prediction
+
+## Why ensemble?
+
+::: {.fragment .fade-in}
+Many uncertainties, many approaches: many models
+
+   - Layers of uncertainty
+  
+      - Model parameters
+        - e.g. parameterising delay distributions
+        
+      - Model structure
+        - e.g. more mechanistic or more statistical approaches
+   - Want to use all available information
+:::
+
+## Why ensemble?
+
+"Whole is greater than sum of parts"
+
+   - Average of multiple predictions is often more performant than any individual model
+   
+      - History in weather & economic forecasting
+      
+      - Seen this in infectious disease forecasting
+
+        - "Forecast challenges": Ebola, dengue, flu, COVID-19...
+
+## Ensemble methods
+
+::: {.fragment .fade-in}
+
+- Summarising across models
+
+  - e.g. average at each models' probabilistic quantiles
+
+     - Mean
+
+     - Median - trims the outliers, so narrows the uncertainty
+:::
+
+## Ensemble methods
+
+- Equal or weighted combination
+
+   - Weight models by past forecast performance
+   
+      - e.g. using forecast scores
+      
+   - Rarely better than equal average
+
+## Collaborative modelling
+
+- "Forecast hubs": crowdsourcing forecasts
+
+   - Open source collaborative projects 
+
+   - Anyone able to contribute a forecast
+      - Used for e.g. flu, dengue, COVID-19 
+   
+   - Forecasts ensembled into a single projection
+   
+   - Enables consistent evaluation
+
+##
+
+... European [Respicast](https://respicast.ecdc.europa.eu/)
+
+![](figures/respicast-forecasts.png)
+
+## Single model {.smaller}
+![](figures/respicast-single.png)
+
+## Multiple models {.smaller}
+![](figures/respicast-multi.png)
+
+## Multi-model ensemble {.smaller}
+![](figures/respicast-comparison.png)
+## When are ensembles useful?
+
+::: {.fragment .fade-in}
+
+  - Ensemble reduces variance
+
+    - (+) Stable
+
+    - (-) Can't explore extremes
+:::
+
+::: {.fragment .fade-in}
+
+  - Dependent on components
+
+    - (+) Ensemble typically more accurate than any individual component
+
+    - (-) Obscures mechanisms
+:::
+
+## Ensembles: reflections
+
+   - Comparing uncertainties
+      - Which aspects of uncertainty do we want to keep (compare), or combine?
+   
+   - Collaborative modelling
+      - Opportunity for exchange & evaluation
+      - Consensus - at the cost of context?
