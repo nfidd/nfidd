@@ -13,11 +13,25 @@ Whilst they will never have the flexibility of completely custom approaches, usi
 
 ## Slides
 
-- [ fs ](slides/forecasting-as-an-epidemiological-problem)
+- [Examples of tools](slides/tools)
 
 ## Objective
 
 The aim of this session is to try out some of the tools that are available that use some of the ideas we have discussed in this course.
+
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/examples-of-available-tools.qmd`.
+
+## Installing tools
+
+In order to install the tools mentioned below, refer to the installation instructions supplied with each of the packages.
+
+:::
 
 # Trying out available tools
 
