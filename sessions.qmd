@@ -86,13 +86,15 @@ Tuesday June 25: 16.00-17.30
 - Practice session: Evaluating forecasts from a range of models (60 mins)
 - Wrap up and discussion (20 mins)
 
-## Session 10: Overview of available tools
+## Session 10: Examples of available tools
 
 Tuesday June 25: 9.00-10.30
 
-- EpiEstim (30 mins)
-- EpiNow2 (30 mins)
-- epinowcast(30 mins)
+- Introduction to tools for $R_t$ estimation, nowcasting and forecasting (5 mins)
+- Group work: explore a tool and relate it to key concepts in the course (30 mins)
+- Discussion (15 mins)
+- Individual exploration of all packages (35 mins)
+- Wrap up (5 mins)
 
 ## Session 11: Methods in the real world
 
