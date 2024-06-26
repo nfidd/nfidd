@@ -86,7 +86,7 @@ Tuesday June 25: 16.00-17.30
 - Practice session: Evaluating forecasts from a range of models (60 mins)
 - Wrap up and discussion (20 mins)
 
-## Session 10: Overview of available tools
+## Session 10: Examples of available tools
 
 Tuesday June 25: 9.00-10.30
 
