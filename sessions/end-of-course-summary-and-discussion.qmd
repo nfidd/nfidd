@@ -36,4 +36,5 @@ The following is a highly subjective list of papers we would recommend to read f
 - Lopez et al., [Challenges of COVID-19 Case Forecasting in the US, 2020-2021](https://doi.org/10.1101/2023.05.30.23290732) describes the difficulty encountered in  making accurate forecasts in COVID-19 cases in the US COVID-19 Forecast Hub.
 - Sherratt et al., [Predictive performance of multi-model ensemble forecasts of COVID-19 across European nations](https://doi.org/10.7554/eLife.81916) investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
 - Asher, [Forecasting Ebola with a regression transmission model](10.1016/j.epidem.2017.02.009) describes model that implements an extension to the random walk with a drift term.
+- CDC, code repo for [Wastewater-informed COVID-19 forecasting](https://github.com/CDCgov/wastewater-informed-covid-forecasting).
 - Hyndman and Athanasopoulos, [Forecasting: Principles and Practice (free online text book)](https://otexts.com/fpp3/) is a textbook on forecasting with a range of time series models and a great resource for finding out more about them.
