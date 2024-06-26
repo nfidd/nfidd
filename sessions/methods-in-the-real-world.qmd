@@ -1,20 +1,13 @@
 ---
 title: "Methods in the real world"
-order: 10
+order: 12
 ---
-
-```{r echo = FALSE}
-set.seed(123)
-```
 
 # Objectives
 
-The aim of this session is to provide an overview of the different methods that are used in the real world from the perspective of the course instructors.
+The aim of this session is to provide an overview of the different methods that are used in the real world from the perspective of the particpants and course instructors.
 
-## Real world 1
+## Slides
 
-## Real world 2
+- [Multi-model ensembles](slides/introduction-to-ensembles)
 
-## Real world 3
-
-# Wrap up

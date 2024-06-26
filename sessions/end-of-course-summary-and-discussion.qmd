@@ -3,28 +3,34 @@ title: "End of course summary and discussion"
 order: 13
 ---
 
+# Introduction
+
+We hope that you've enjoyed taking this course on nowcasting and forecasting infectious disease dynamics.
+We will be very happy to have your feedback, comments or any questions on the [course discussion page](https://github.com/nfidd/nfidd/discussions).
+
+
+## Slides
+
 [End of course summary](slides/closing)
 
-For any questions or comments about please feel free to use the [course discussion board](https://github.com/nfidd/nfidd/discussions).
-
-## Further reading
+# Further reading
 
 The following is a highly subjective list of papers we would recommend to read for those interested in engaging further with the topics discussed here.
 
-### Delay estimation
+## Delay estimation
 - Park et al., [Estimating epidemiological delay distributions for infectious diseases](https://doi.org/10.1101/2024.01.12.24301247).
 - Charniga et al., [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://doi.org/10.48550/arXiv.2405.08841).
 
-### $R_t$ estimation
+## $R_t$ estimation
 - Gostic et al., [Practical considerations for measuring the effective reproductive number, $R_t$](https://doi.org/10.1371/journal.pcbi.1008409).
 - Brockhaus et al., [Why are different estimates of the effective reproductive number so different? A case study on COVID-19 in Germany](https://doi.org/10.1371/journal.pcbi.1011653).
 
-### Nowcasting
+## Nowcasting
 - Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394).
 - Lison et al., [Generative Bayesian modeling to nowcast the effective reproduction number from line list data with missing symptom onset dates](https://doi.org/10.1371/journal.pcbi.1012021).
 - Stoner et al., [A Powerful Modelling Framework for Nowcasting and Forecasting COVID-19 and Other Diseases](https://doi.org/10.48550/arXiv.1912.05965).
 
-### Forecasting
+## Forecasting
 - Funk et al., [Assessing the performance of real-time epidemic forecasts: A case study of Ebola in the Western Area region of Sierra Leone, 2014-15](https://doi.org/10.1371/journal.pcbi.1006785).
 - Held et al, [Probabilistic forecasting in infectious disease epidemiology: the 13th Armitage lecture](https://doi.org/10.1002/sim.7363).
 - Lopez et al., [Challenges of COVID-19 Case Forecasting in the US, 2020-2021](https://doi.org/10.1101/2023.05.30.23290732).
