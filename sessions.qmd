@@ -86,24 +86,23 @@ Tuesday June 25: 16.00-17.30
 - Practice session: Evaluating forecasts from a range of models (60 mins)
 - Wrap up and discussion (20 mins)
 
-## Session 10: Methods in the real world
+## Session 10: Overview of available tools
 
 Tuesday June 25: 9.00-10.30
 
-- Presentations on uses of forecasts in the real world (45 mins)
-- Q & A about course contents and their relationship to outbreak response work (45 mins)
+- EpiEstim (30 mins)
+- EpiNow2 (30 mins)
+- epinowcast(30 mins)
 
-## Session 11: Overview of available tools
+## Session 11: Methods in the real world
 
-Wednesday June 26: 11.00-12.15
+Wednesday June 26: 11.00-12.00
 
-- Practice session: Choose from one an open source example, run through it,
-and relate it to the material in this course.  (60 mins)
-- Wrap up and discussion (15 mins)
+- Presentations and Q&A on uses of nowcasts & forecasts in the real world (60 mins)
 
 ## Session 12: End of course summary
 
-Wednesday June 26: 12.15-12.30
+Wednesday June 26: 12.00-12.30
 
-- Summary of the course (5 mins)
-- Discussion of future directions and how to continue learning (10 mins)
+- Summary of the course (10 mins)
+- Final discussion and closing (20 mins)
