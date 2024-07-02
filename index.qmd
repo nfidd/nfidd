@@ -19,6 +19,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 A course and living resource for learning about nowcasting and forecasting infectious disease dynamics.
 
-All the materials here are provided under [MIT License](https://github.com/nfidd/nfidd/blob/main/LICENSE).
-We invite people to use the materials here in their own teaching.
-We welcome all forms of contributions, additions and suggestions people might have for improving the materials.
+We invite anyone to use the materials here in their own teaching and learning. For questions and discussion of the course or its content, we welcome all users to the [Discussion board](https://github.com/nfidd/nfidd/discussions).
+
+All materials here are provided under the permissive [MIT License](https://github.com/nfidd/nfidd/blob/main/LICENSE). We welcome all forms of [contributions, additions and suggestions](https://github.com/nfidd/nfidd/issues) for improving the materials.
