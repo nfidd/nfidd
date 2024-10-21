@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 
 name: deploy
 
@@ -51,7 +52,7 @@ jobs:
           path: _site
 
       - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
+        if: github.ref_name == 'main'
         uses: JamesIves/github-pages-deploy-action@v4.6.8
         with:
           branch: gh-pages
