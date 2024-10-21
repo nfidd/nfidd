@@ -14,7 +14,7 @@ Description: Resources to support a short course on nowcasting and forecasting
     of infectious disease dynamics.
 License: MIT + file LICENSE
 URL: https://github.com/nfidd/nfidd
-BugReports: https://github.com/nfidd/nfiidd/issues
+BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
 Imports:

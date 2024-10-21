@@ -37,9 +37,9 @@ Then you can choose to:
 
 Before you get started with the course, you will first need to install the following software.
 
-## Installation of the `nfiidd` package
+## Installation of the `nfidd` package
 
-To install the packages needed in the course, including the `nfiidd` package that contains data files used, you can use the `pak` package:
+To install the packages needed in the course, including the `nfidd` package that contains data files used, you can use the `pak` package:
 
 ```{r install, eval=FALSE}
 install.packages("pak")
