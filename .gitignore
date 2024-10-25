@@ -6,8 +6,8 @@ _site
 .DS_Store
 *_files/
 /.quarto/
-stan/*
-!stan/functions
-!stan/*.stan
+inst/stan/*
+!inst/stan/functions
+!inst/stan/*.stan
 *.html
 *.rmarkdown

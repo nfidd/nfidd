@@ -24,7 +24,6 @@ Suggests:
     bayesplot,
     cmdstanr,
     ggplot2,
-    here,
     lubridate,
     posterior,
     purrr,

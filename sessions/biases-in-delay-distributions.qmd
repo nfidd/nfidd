@@ -30,7 +30,7 @@ The source file of this session is located at `sessions/biases-in-delay-distribu
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, and the `cmdstanr` package for using stan.
+In this session we will use the `nfidd` package to load a data set of infection times and built-in stan models, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, and the `cmdstanr` package for using stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -38,13 +38,11 @@ library("ggplot2")
 library("dplyr")
 library("tidyr")
 library("lubridate")
-library("here")
 library("cmdstanr")
 ```
 
 ::: callout-tip
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -72,10 +70,10 @@ Remember, in this outbreak we are assuming:
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
-We saved the code we used in that session to simulate symptom onset and hospitalisation data in a snippet that can be loaded using.
+We saved the code we used in that session to simulate symptom onset and hospitalisation data.
 
 ```{r inf_hosp_solution}
-source(here("snippets", "onset-hosp.r"))
+df <- add_delays(infection_times)
 ```
 
 This creates the `df` data frame that we can inspect e.g. using
@@ -138,7 +136,7 @@ Do you still recover the parameters that we put in?
 ## Solution
 
 ```{r df_dates_solution, results = 'hide', message = FALSE}
-mod <- cmdstan_model(here("stan", "lognormal.stan"))
+mod <- nfidd_cmdstan_model("lognormal")
 res <- mod$sample(
   data = list(
     n = nrow(na.omit(df_dates)),
@@ -160,7 +158,7 @@ For example, if we know that symptom onset of an individual occurred on 20 June,
 We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
 
 ```{r censoring_adjusted_delay_model}
-cmod <- cmdstan_model(here("stan", "censored-delay-model.stan"))
+cmod <- nfidd_cmdstan_model("censored-delay")
 cmod
 ```
 
@@ -259,7 +257,7 @@ res
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
 
 ```{r truncation_adjusted_delay_model}
-tmod <- cmdstan_model(here("stan", "truncated-delay-model.stan"))
+tmod <- nfidd_cmdstan_model("truncated-delay-model")
 tmod
 ```
 
