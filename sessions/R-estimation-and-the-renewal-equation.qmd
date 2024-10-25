@@ -110,7 +110,6 @@ With the theory out of the way we now turn to simulating an epidemic using the r
 We first write a function to simulate the epidemic using the discrete renewal equation.
 
 ```{r renewal_equation}
-source(here("functions", "renewal.r"))
 renewal
 ```
 

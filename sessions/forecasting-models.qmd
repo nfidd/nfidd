@@ -70,7 +70,6 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## What did a geometric random walk model look like again?
 
 ```{r geometric-random-walk-sim}
-source(here("functions", "geometric-random-walk.r"))
 R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
 data <- tibble(t = seq_along(R), R = exp(R))
 
@@ -212,7 +211,6 @@ $$
 Again we look at an R function that implements this model:
 
 ```{r geometric-diff-ar}
-source(here("functions", "geometric-diff-ar.r"))
 geometric_diff_ar
 ```
 
@@ -245,7 +243,7 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"))
+onset_df <- simulate_onsets(make_daily_infections(infection_times))
 onset_df
 
 # we'll make a forecast on day non day 41, pretending we haven't seen the later data
