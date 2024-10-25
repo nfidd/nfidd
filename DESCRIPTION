@@ -1,7 +1,7 @@
 Package: nfidd
 Title: Material to support course on nowcasting and forecasting of infectious
     disease dynamics
-Version: 0.0.0.9999
+Version: 0.1.0.9999
 Authors@R: c(
     person(
       given = "NFIDD course contributors",
@@ -17,7 +17,7 @@ URL: https://github.com/nfidd/nfidd
 BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
-Imports:
+Suggests:
     bayesplot,
     cmdstanr,
     dplyr,
@@ -31,7 +31,9 @@ Imports:
     tidybayes,
     tidyr
 Remotes:
-    stan-dev/cmdstanr,
     epiforecasts/scoringutils@d3cf08d
+Additional_repositories:
+    https://stan-dev.r-universe.dev
 Encoding: UTF-8
 Language: en-GB
+RoxygenNote: 7.3.2
