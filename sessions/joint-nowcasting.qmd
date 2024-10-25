@@ -100,7 +100,11 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-onset_df <- simulate_onsets(make_daily_infections(infection_times))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 head(onset_df)
 cutoff <- 71
 ```
