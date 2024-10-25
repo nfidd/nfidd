@@ -74,8 +74,7 @@ Parameters
 ::: {.column width="60%"}
 <br>
 
-```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = here::here("stan", "coin.stan")}
-
+```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = nfidd_cmdstan_model("coin")
 ```
 :::
 ::::
@@ -86,7 +85,7 @@ There are two packages for using stan from R. We will use the `cmdstanr` package
 
 ```{r load_coin_model, echo = TRUE}
 library("cmdstanr")
-mod <- cmdstan_model(here::here("stan", "coin.stan"))
+mod <- nfidd_cmdstan_model("coin")
 mod
 ```
 

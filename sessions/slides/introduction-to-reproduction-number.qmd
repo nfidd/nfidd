@@ -16,7 +16,7 @@ set.seed(123)
 
 ## Convolution session {.smaller}
 
-```{stan, file = here::here("stan", "estimate-infections.stan"), eval = FALSE, output.var = "mod"}
+```{stan, file = system.file("stan", "estimate-infections.stan", package = "nfidd"), eval = FALSE, output.var = "mod"}
 #| code-line-numbers: "|23"
 ```
 

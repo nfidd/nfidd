@@ -31,7 +31,7 @@ Suggests:
     scoringutils,
     tidybayes
 Remotes:
-    epiforecasts/scoringutils@d3cf08d
+    epiforecasts/scoringutils@b370557
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Encoding: UTF-8
