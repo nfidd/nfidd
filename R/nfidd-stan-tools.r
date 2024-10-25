@@ -271,6 +271,7 @@ nfidd_stan_models <- function(
 #' @return A CmdStanModel object.
 #'
 #' @export
+#'
 #' @family modelhelpers
 #'
 #' @examplesIf requireNamespace("cmdstanr", quietly = TRUE)
