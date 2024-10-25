@@ -50,7 +50,7 @@ We also set an option that makes `cmstanr` show line numbers when printing model
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
-set.seed(123)
+set.seed(1234)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
 
