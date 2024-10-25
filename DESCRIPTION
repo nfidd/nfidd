@@ -17,10 +17,12 @@ URL: https://github.com/nfidd/nfidd
 BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
+Imports:
+    dplyr,
+    tidyr
 Suggests:
     bayesplot,
     cmdstanr,
-    dplyr,
     ggplot2,
     here,
     lubridate,
@@ -28,8 +30,7 @@ Suggests:
     purrr,
     rmarkdown,
     scoringutils,
-    tidybayes,
-    tidyr
+    tidybayes
 Remotes:
     epiforecasts/scoringutils@d3cf08d
 Additional_repositories:
@@ -37,3 +38,4 @@ Additional_repositories:
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
+LazyData: true
