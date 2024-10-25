@@ -115,7 +115,11 @@ We will use the same simulated data as in the renewal and nowcasting sessions.
 We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
-onset_df <- simulate_onsets(make_daily_infections(infection_times))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 cutoff <- 71
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
@@ -592,7 +596,7 @@ This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
- sc_forecasts |>
+sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
   labs(title = "PIT histogram")
@@ -601,7 +605,7 @@ Let's first look at the overall PIT histogram.
 As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
 
 ```{r pit-histogram-horizon}
-sc_forecasts |> 
+sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
@@ -616,7 +620,7 @@ sc_forecasts |>
 and then for different forecast dates.
 
 ```{r pit-histogram-date}
- sc_forecasts |>
+sc_forecasts |>
   get_pit(by = "target_day") |>
   plot_pit() +
   facet_wrap(~target_day) +

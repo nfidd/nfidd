@@ -243,10 +243,15 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-onset_df <- simulate_onsets(make_daily_infections(infection_times))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 onset_df
 
-# we'll make a forecast on day non day 41, pretending we haven't seen the later data
+# we'll make a forecast on day non day 41, pretending we haven't seen the later
+# data
 cutoff <- 41
 
 filtered_onset_df <- onset_df |>
@@ -258,7 +263,7 @@ We will now fit the more mechanistic model to the data.
 horizon <- 28
 
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -281,7 +286,7 @@ We will now fit the more statistical model to the data.
 
 ```{r fit_stat_model, results = 'hide', message = FALSE}
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -292,7 +297,8 @@ data <- list(
 )
 stat_forecast_fit <- stat_mod$sample(
   data = data, parallel_chains = 4,
-  init = \() list(init_R = 0, rw_sd = 0.01) # again set the initial values to make fitting more numerically stable
+  # again set the initial values to make fitting more numerically stable
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
 
@@ -301,7 +307,7 @@ Finally, we can extract the forecasts from the models and plot them.
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 
 stat_forecast <- stat_forecast_fit |>
@@ -325,7 +331,9 @@ target_onsets <- onset_df |>
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
+  geom_line(
+    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   guides(colour = guide_legend(override.aes = list(alpha = 1))) +
   lims(y = c(0, 500))
@@ -337,7 +345,9 @@ and on the log scale
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
+  geom_line(
+    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
@@ -425,7 +435,7 @@ forecasts <- bind_rows(
   rw_forecasts,
   mutate(stat_forecasts, model = "More statistical"),
   mutate(mech_forecasts, model = "More mechanistic")
-) |> 
+) |>
   ungroup()
 ```
 
@@ -470,7 +480,10 @@ As for the single forecast it is helpful to also plot the forecast on the log sc
 forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_log10(limits = c(NA, 500)) +
   scale_color_binned(type = "viridis") +
@@ -610,7 +623,7 @@ How do the CRPS scores change with forecast date?
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
- sc_forecasts |>
+sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
   facet_wrap(~model)
@@ -619,7 +632,7 @@ Let's first look at the overall PIT histogram.
 As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
 ```{r pit-histogram-horizon}
-sc_forecasts |> 
+sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
@@ -633,7 +646,7 @@ sc_forecasts |>
 and then for different forecast dates.
 
 ```{r pit-histogram-date, fig.width = 10}
- sc_forecasts |>
+sc_forecasts |>
   get_pit(by = c("model", "target_day")) |>
   plot_pit() +
   facet_grid(vars(model), vars(target_day))
@@ -721,7 +734,7 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 ### PIT histograms
 
 ```{r pit-histogram-log}
- log_sc_forecasts |>
+log_sc_forecasts |>
   get_pit(by = "model") |>
   plot_pit() +
   facet_wrap(~model)
@@ -729,7 +742,7 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 
 
 ```{r pit-histogram-horizon-log}
-log_sc_forecasts |> 
+log_sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
@@ -742,7 +755,7 @@ log_sc_forecasts |>
 
 
 ```{r pit-histogram-date-log, fig.width = 10}
- log_sc_forecasts |>
+log_sc_forecasts |>
   get_pit(by = c("model", "target_day")) |>
   plot_pit() +
   facet_grid(vars(model), vars(target_day))
