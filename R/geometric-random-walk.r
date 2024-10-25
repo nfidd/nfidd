@@ -8,6 +8,8 @@
 #'
 #' @return A vector of the generated geometric random walk.
 #'
+#' @export
+#'
 #' @examples
 #' geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
 geometric_random_walk <- function(init, noise, std) {

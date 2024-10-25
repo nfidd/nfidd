@@ -12,6 +12,8 @@
 #' @return A vector of probabilities corresponding to discrete indices from
 #'   `0` to `max`, representing the discretised delay distribution.
 #'
+#' @export
+#'
 #' @examples
 #' censored_delay_pmf(rgen = rgamma, max = 14, shape = 5, rate = 1)
 censored_delay_pmf <- function(rgen, max, n = 1e+6, ...) {

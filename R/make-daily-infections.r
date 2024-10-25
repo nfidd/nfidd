@@ -8,6 +8,8 @@
 #' @importFrom dplyr transmute count full_join join_by
 #' @importFrom tidyr expand replace_na
 #'
+#' @export
+#'
 #' @examples
 #' make_daily_infections(infection_times)
 make_daily_infections <- function(infection_times) {

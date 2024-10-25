@@ -177,7 +177,10 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  labs(title = "Symptom onsets", subtitle = "Forecast (trajectories) and observed (points)")
+  labs(
+    title = "Symptom onsets",
+    subtitle = "Forecast (trajectories) and observed (points)"
+  )
 ```
 
 ::: {.callout-tip}
@@ -218,7 +221,7 @@ long_onset_df <- onset_df |>
   filter(day <= cutoff + horizon)
 
 long_data <- list(
-  n =nrow(long_onset_df),
+  n = nrow(long_onset_df),
   I0 = 1,
   obs = long_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -245,7 +248,7 @@ forecast_r <- rw_forecast |>
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(type = "estimate")
 ```
 
@@ -258,9 +261,14 @@ forecast_r |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)+
-  labs(title = "Estimated R", 
-       subtitle = "Estimated over whole time series (red), and forecast (blue)") +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, type), color = type),
+    alpha = 0.1
+  ) +
+  labs(
+    title = "Estimated R",
+    subtitle = "Estimated over whole time series (red), and forecast (blue)"
+  ) +
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
@@ -298,7 +306,7 @@ In order to properly evaluate forecasts from this model we really need to foreca
 
 ```{r load_forecasts}
 data(rw_forecasts)
-rw_forecasts |> 
+rw_forecasts |>
   ungroup()
 ```
 
@@ -328,9 +336,13 @@ As for a single forecast, our first step is to visualise the forecasts as this c
 rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = onset_df |>
-    filter(day >= 21),
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
+  geom_point(
+    data = onset_df |>
+      filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
   scale_color_binned(type = "viridis") +
   labs(title = "Weekly forecasts of symptom onsets over an outbreak",
@@ -344,7 +356,10 @@ As for the single forecast it may be helpful to also plot the forecast on the lo
 rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |> 
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
   scale_color_binned(type = "viridis") +

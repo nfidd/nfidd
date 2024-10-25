@@ -10,6 +10,8 @@
 #' @return A vector of the generated geometric differenced autoregressive
 #' process.
 #'
+#' @export
+#'
 #' @examples
 #' geometric_diff_ar(init = 1, noise = rnorm(100), phi = 0.1, std = 0.1)
 geometric_diff_ar <- function(init, noise, std, damp) {

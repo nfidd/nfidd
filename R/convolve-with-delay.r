@@ -10,6 +10,8 @@
 #'
 #' @return A vector of the convolved time series.
 #'
+#' @export
+#'
 #' @examples
 #' convolve_with_delay(ts = c(10, 14, 10, 10), delay_pmf = c(0.1, 0.6, 0.3))
 convolve_with_delay <- function(ts, delay_pmf) {

@@ -4,11 +4,14 @@
 \alias{simulate_onsets}
 \title{Simulate symptom onsets from daily infection counts}
 \usage{
-simulate_onsets(inf_ts)
+simulate_onsets(inf_ts, gen_time_pmf = make_gen_time_pmf())
 }
 \arguments{
 \item{inf_ts}{A data frame containing columns infection_day and infections,
 as returned by make_daily_infections()}
+
+\item{gen_time_pmf}{A vector of probabilities representing the generation
+time PMF, as returned by `make_gen_time_pmf()`.}
 }
 \value{
 A data frame with columns day, onsets, and infections containing
@@ -18,5 +21,6 @@ A data frame with columns day, onsets, and infections containing
 Simulate symptom onsets from daily infection counts
 }
 \examples{
-simulate_onsets(make_daily_infections(infection_times))
+gt_pmf <- make_gen_time_pmf()
+simulate_onsets(make_daily_infections(infection_times), gt_pmf)
 }

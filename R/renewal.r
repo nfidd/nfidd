@@ -11,6 +11,8 @@
 #'
 #' @return A vector of simulated infections over time.
 #'
+#' @export
+#'
 #' @examples
 #' renewal(
 #'   I0 = 5,

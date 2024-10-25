@@ -1,7 +1,27 @@
+#' Generate a probability mass function for the generation time
+#'
+#' @param max Maximum delay to consider
+#' @param shape Shape parameter for the gamma distribution
+#' @param rate Rate parameter for the gamma distribution
+#'
+#' @return A vector of probabilities representing the generation time PMF
+#'
+#' @export
+#'
+#' @importFrom stats rgamma
+make_gen_time_pmf <- function(max = 14, shape = 4, rate = 1) {
+  pmf <- censored_delay_pmf(rgamma, max = max, shape = shape, rate = rate)
+  pmf <- pmf[-1] # remove first element
+  pmf <- pmf / sum(pmf) # renormalise
+  return(pmf)
+}
+
 #' Simulate symptom onsets from daily infection counts
 #'
 #' @param inf_ts A data frame containing columns infection_day and infections,
 #'   as returned by make_daily_infections()
+#' @param gen_time_pmf A vector of probabilities representing the generation
+#'   time PMF, as returned by `make_gen_time_pmf()`.
 #'
 #' @return A data frame with columns day, onsets, and infections containing
 #'   the daily count of symptom onsets and infections
@@ -10,12 +30,12 @@
 #' @importFrom dplyr tibble left_join select
 #' @importFrom tidyr replace_na
 #'
+#' @export
+#'
 #' @examples
-#' simulate_onsets(make_daily_infections(infection_times))
-simulate_onsets <- function(inf_ts) {
-  gen_time_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 4, rate = 1)
-  gen_time_pmf <- gen_time_pmf[-1] ## remove first element
-  gen_time_pmf <- gen_time_pmf / sum(gen_time_pmf) ## renormalise
+#' gt_pmf <- make_gen_time_pmf()
+#' simulate_onsets(make_daily_infections(infection_times), gt_pmf)
+simulate_onsets <- function(inf_ts, gen_time_pmf = make_gen_time_pmf()) {
 
   ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
   onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)

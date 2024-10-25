@@ -8,6 +8,8 @@
 #' @importFrom dplyr mutate n if_else
 #' @importFrom stats rgamma rlnorm rbinom
 #'
+#' @export
+#'
 #' @examples
 #' add_delays(infection_times)
 add_delays <- function(infection_times) {
