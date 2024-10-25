@@ -28,12 +28,12 @@ The source file of this session is located at `sessions/R-Stan-and-statistical-c
 
 ## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `here` library to reference files, for example, the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `ggplot2` library for plotting, the `nfidd` package to load the stan models, and the `cmdstanr` library for using stan.
 We will also use the `bayesplot` and `posterior` packages to investigate the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("bayesplot")
 library("posterior")
@@ -120,7 +120,7 @@ To do so, we first load in the model.
 
 ```{r load_gamma_model}
 ### load gamma model from the session directory
-mod <- cmdstan_model(here("stan", "gamma.stan"))
+mod <- nfidd_cmdstan_model("gamma")
 ### show model code
 mod
 ```

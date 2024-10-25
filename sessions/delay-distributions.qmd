@@ -34,7 +34,6 @@ library("ggplot2")
 library("dplyr")
 library("tidyr")
 library("lubridate")
-library("here")
 library("cmdstanr")
 library("posterior")
 ```
@@ -151,7 +150,7 @@ This might be an important delay to know about, for example when modelling and f
 To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
 
 ```{r naive_delay_model}
-mod <- cmdstan_model(here("stan", "lognormal.stan"))
+mod <- nfidd_cmdstan_model("lognormal")
 mod
 ```
 
