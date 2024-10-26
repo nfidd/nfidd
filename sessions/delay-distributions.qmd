@@ -174,7 +174,7 @@ res <- mod$sample(
 
 To see the estimates, we can use:
 
-```{r summarise_naive_delay_model}
+```{r summarise_naive_delay_model, eval = FALSE}
 res$summary() ## could also simply type `res`
 ```
 
@@ -185,7 +185,7 @@ We can plot the resulting probability density functions.
 Every time we sample from the model posterior, we create 4000 iterations. That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations. You'll see this throughout the course.
 :::
 
-```{r plot_onset_hospitalisation}
+```{r plot_onset_hospitalisation, eval = FALSE}
 ## get shape and rate samples from the posterior
 res_df <- res |>
   as_draws_df() |>
