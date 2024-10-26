@@ -485,7 +485,7 @@ forecasts |>
     alpha = 0.1
   ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10(limits = c(NA, 500)) +
+
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
@@ -539,7 +539,7 @@ sc_scores <- sc_forecasts |>
 
 sc_scores
 ```
-
+  scale_y_log10(limits = c(NA, 500)) +
 ::: {.callout-note collapse="true"}
 ## Learning more about the output of `score()`
 

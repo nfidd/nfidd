@@ -6,7 +6,17 @@ order: 8
 # Introduction
 
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
-In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. We will then compare the performance of these ensembles to the individual models and to each other.
+In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
+We will then compare the performance of these ensembles to the individual models and to each other.
+Rather than using the forecast samples we have been using we will instead use quantile based forecasts. 
+This better matches the format you may see in real forecasting challenges where quantiles are used to summarise the uncertainty of the forecasts.
+
+::: {.callout-note collapse="true"}
+## What is a quantile?
+
+A quantile is the value that corresponds to a given quantile level. For example, the median is the 50th quantile of a distribution, meaning that 50% of the values in the distribution are less than the median and 50% are greater.
+Similarly, the 90th quantile is the value that corresponds to 90% of the distribution being less than this value.
+:::
 
 ## Slides
 
@@ -56,8 +66,8 @@ set.seed(123)
 In this session we will use the forecasts from the models we explored in the [forecasting models](forecasting-models) session. There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time. These were:
 
 - A random walk model
-- A differenced autoregressive model
-- A simple model of susceptible depeltion.
+- A differenced autoregressive model referred to as "More statistical"
+- A simple model of susceptible depeltion referred to as "More mechanistic"
 
 ::: {.callout-tip}
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
@@ -89,6 +99,11 @@ Some important things to note about these forecasts:
   - We use the same simulated outbreak data:
 
 ```{r}
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 head(onset_df)
 ```
 
@@ -96,13 +111,219 @@ head(onset_df)
 
 # Converting sample based forcasts to quantile based forecasts
 
+As in this session we will be thinking about forecasts in terms of their quantiles, we will need to convert our sample based forecasts to quantile based forecasts. An easy way to do this is to use the `{scoringutils}` package. The steps to do this are to first declare the rw_forecasts as `sample` forecasts
+
+```{r convert-for-scoringutils}
+sample_forecasts <- forecasts |>
+  left_join(onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast_sample(
+    forecast_unit = c("target_day", "horizon", "model", "day"),
+    observed = "onsets",
+    predicted = ".value",
+    sample_id = ".draw"
+  )
+sample_forecasts
+```
+
+and then convert to `quantile` forecasts.
+
+```{r convert-to-quantile}
+quantile_forecasts <- sample_forecasts |>
+  as_forecast_quantile()
+quantile_forecasts
+```
+
 # Simple unweighted ensembles
+
+A good place to start when building ensembles is to take the mean or median of the unweighted forecast at each quantile level. 
+Typically, the median is preferred when outlier forecasts are likely to be present as it is less sensitive to these.
+However, the mean is preferred when forecasters have more faith in models that diverge from the median performance.
 
 ## Construction
 
+We can calculate the mean ensemble by taking the mean of the forecasts at each quantile level.
+
+```{r mean-ensemble}
+mean_ensemble <- quantile_forecasts |>
+  as_tibble() |>
+  summarise(
+    predicted = mean(predicted),
+    observed = unique(observed),
+    model = "Mean ensemble",
+    .by = c(target_day, horizon, quantile_level, day)
+  )
+```
+
+Similarly, we can calculate the median ensemble by taking the median of the forecasts at each quantile level.
+
+```{r median-ensemble}
+median_ensemble <- quantile_forecasts |>
+  as_tibble() |>
+  summarise(
+    predicted = median(predicted),
+    observed = unique(observed),
+    model = "Median ensemble",
+    .by = c(target_day, horizon, quantile_level, day)
+  )
+```
+
+We combine the ensembles into a single data frame along with the individual forecasts in order to make visualisation easier.
+
+```{r combine-ensembles}
+simple_ensembles <- bind_rows(
+  mean_ensemble,
+  median_ensemble,
+  quantile_forecasts
+)
+```
+
 ## Visualisation
 
+How do these ensembles visually differ from the individual models? Lets start by plotting a single forecast from each model and comparing them.
+
+```{r plot-single-forecasts}
+plot_single_forecasts <- simple_ensembles |>
+  filter(target_day == 57) |>
+  pivot_wider(names_from = quantile_level, values_from = predicted) |>
+  ggplot(aes(x = day)) +
+  geom_ribbon(
+    aes(
+      ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
+      group = target_day
+    ),
+    alpha = 0.2
+  ) +
+  geom_ribbon(
+    aes(
+      ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
+      group = target_day
+    ),
+    alpha = 0.5
+  ) +
+  geom_point(
+    data = onset_df |>
+      filter(day >= 57, day <= 57 + 14),
+    aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
+  facet_wrap(~model) +
+  lims(y = c(0, 500)) +
+  theme(legend.position = "none")
+
+plot_single_forecasts
+```
+
+Again we can get a different perspective by plotting the forecasts on the log scale.
+
+```{r plot-single-forecasts-log}
+plot_single_forecasts +
+  scale_y_log10()
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do these ensembles compare to the individual models?
+How do they differ from each other?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do these ensembles compare to the individual models?
+
+- Both of the simple ensembles appear to be less variable than the statistical models models but have more variable than the mechanistic model.
+- Both ensembles are more like the statistical models than the mechanistic model.
+
+How do they differ from each other?
+
+- The mean ensemble has marginally tighter uncertainty bounds than the median ensemble.
+:::
+
+Now lets plot a range of forecasts from each model and ensemble.
+
+```{r plot-multiple-forecasts}
+plot_multiple_forecasts <- simple_ensembles |>
+  pivot_wider(names_from = quantile_level, values_from = predicted) |>
+  ggplot(aes(x = day)) +
+  geom_ribbon(
+    aes(
+      ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
+      group = target_day
+    ),
+    alpha = 0.2
+  ) +
+  geom_ribbon(
+    aes(
+      ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
+      group = target_day
+    ),
+    alpha = 0.5
+  ) +
+  geom_point(
+    data = onset_df |>
+      filter(day >= 21),
+    aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
+  facet_wrap(~model) +
+  lims(y = c(0, 500)) +
+  theme(legend.position = "none")
+
+plot_multiple_forecasts
+```
+
+Again we can get a different perspective by plotting the forecasts on the log scale.
+
+```{r plot-multiple-forecasts-log}
+plot_multiple_forecasts +
+  scale_y_log10()
+```
+
+
+::: {.callout-tip}
+## Take 2 minutes
+How do these ensembles compare to the individual models?
+
+How do they differ from each other?
+
+Are there any differences across forecast dates?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do these ensembles compare to the individual models?
+
+- As before, the ensembles appear to be less variable than the statistical models but more variable than the mechanistic model.
+
+How do they differ from each other?
+
+- The mean ensemble has marginally tighter uncertainty bounds than the median ensemble as for the single forecast.
+
+Are there any differences across forecast dates?
+
+- The mean ensemble appears to be more variable across forecast dates than the median ensemble with this being more pronounced after the peak of the outbreak.
+:::
+
 ## Evaluation 
+
+As in the [forecasting concepts session](forecasting-concepts), we can evaluate the accuracy of the ensembles using the `{scoringutils}` package and in particular the `score()` function.
+
+```{r score-ensembles}
+ensemble_scores <- simple_ensembles |>
+  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+  score()
+```
+
+Again we start with a high level overview of the scores by model.
+
+```{r score-overview}
+ensemble_scores |>
+  summarise_scores(by = c("model"))
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you think the scores are telling you? Which model do you think is best?
+:::
+
 
 # Unweighted ensembles of filtered models
 
