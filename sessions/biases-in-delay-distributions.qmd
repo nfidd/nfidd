@@ -158,7 +158,7 @@ For example, if we know that symptom onset of an individual occurred on 20 June,
 We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
 
 ```{r censoring_adjusted_delay_model}
-cmod <- nfidd_cmdstan_model("censored-delay")
+cmod <- nfidd_cmdstan_model("censored-delay-model")
 cmod
 ```
 
