@@ -407,18 +407,18 @@ Of course we usually don't know this (as we don't know the "true model" for real
 
 We will use the [`{scoringutils}`](https://epiforecasts.io/scoringutils/dev/) package to calculate these metrics.
 Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
-We will use `as_forecast` to do this:
+We will use `as_forecast_sample()` to do this:
 
 ```{r convert-forecasts}
 sc_forecasts <- rw_forecasts |>
   left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
-  as_forecast(
-    forecast_unit = c("target_day", "horizon", "model"),
-    forecast_type = "sample",
+  as_forecast_sample(
+    forecast_unit = c(
+      "target_day", "horizon", "model"
+    ),
     observed = "onsets",
     predicted = ".value",
-    model = "model",
     sample_id = ".draw"
   )
 sc_forecasts
