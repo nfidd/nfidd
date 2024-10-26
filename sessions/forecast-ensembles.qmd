@@ -1,0 +1,124 @@
+---
+title: "Forecast ensembles"
+order: 8
+---
+
+# Introduction
+
+We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
+In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. We will then compare the performance of these ensembles to the individual models and to each other.
+
+## Slides
+
+- [Introduction to ensembles](slides/introduction-to-ensembles)
+
+## Objectives
+
+The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the [forecasting models](forecasting-models) session.
+
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/forecast-ensembles.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load the data set of forecasts, the `dplyr` and `tidyr` packages for data wrangling, and `ggplot2` library for plotting.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("scoringutils")
+```
+
+::: {.callout-tip}
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+
+```{r}
+set.seed(123)
+```
+
+:::
+
+# The forecast models 
+
+In this session we will use the forecasts from the models we explored in the [forecasting models](forecasting-models) session. There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time. These were:
+
+- A random walk model
+- A differenced autoregressive model
+- A simple model of susceptible depeltion.
+
+::: {.callout-tip}
+For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
+
+As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
+
+```{r load_forecasts}
+data(rw_forecasts, stat_forecasts, mech_forecasts)
+forecasts <- bind_rows(
+  rw_forecasts,
+  mutate(stat_forecasts, model = "More statistical"),
+  mutate(mech_forecasts, model = "More mechanistic")
+) |>
+  ungroup()
+
+forecasts
+```
+
+::: {.callout-tip, collapse="true"}
+## How did we estimate these forecasts?
+We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
+
+Some important things to note about these forecasts:
+
+  - We used a 14 day forecast horizon.
+  - Each forecast used all the data up to the forecast date.
+  - We generated 1000 posterior samples for each forecast.
+  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
+  - We use the same simulated outbreak data:
+
+```{r}
+head(onset_df)
+```
+
+:::
+
+# Converting sample based forcasts to quantile based forecasts
+
+# Simple unweighted ensembles
+
+## Construction
+
+## Visualisation
+
+## Evaluation 
+
+# Unweighted ensembles of filtered models
+
+## Construction
+
+## Visualisation
+
+## Evaluation
+
+# Weighted quantile ensembles
+
+## Visualisation
+
+## Evaluation
+
+# Going further
+
+
+# Wrap up
