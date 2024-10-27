@@ -134,11 +134,20 @@ quantile_forecasts <- sample_forecasts |>
 quantile_forecasts
 ```
 
+::: {.callout-tip, collapse="true"}
+What is happening here?
+
+- Internally `scoringutils` is calculating the quantiles of the sample based forecasts.
+- It does this by using a set of default quantiles but these can be overridden.
+- It then calls the `quantile()` function from base R to calculate the quantiles.
+- This is estimating the value that corresponds to each given quantile level by ordering the samples and then taking the value at the appropriate position.
+:::
+
 # Simple unweighted ensembles
 
 A good place to start when building ensembles is to take the mean or median of the unweighted forecast at each quantile level. 
 Typically, the median is preferred when outlier forecasts are likely to be present as it is less sensitive to these.
-However, the mean is preferred when forecasters have more faith in models that diverge from the median performance.
+However, the mean is preferred when forecasters have more faith in models that diverge from the median performance and want to represent this in the ensemble.
 
 ## Construction
 
@@ -183,32 +192,36 @@ simple_ensembles <- bind_rows(
 How do these ensembles visually differ from the individual models? Lets start by plotting a single forecast from each model and comparing them.
 
 ```{r plot-single-forecasts}
-plot_single_forecasts <- simple_ensembles |>
-  filter(target_day == 57) |>
-  pivot_wider(names_from = quantile_level, values_from = predicted) |>
-  ggplot(aes(x = day)) +
-  geom_ribbon(
+plot_ensembles <- function(data, obs_data) {
+  data |>
+    pivot_wider(names_from = quantile_level, values_from = predicted) |>
+    ggplot(aes(x = day)) +
+    geom_ribbon(
     aes(
       ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
-      group = target_day
-    ),
-    alpha = 0.2
-  ) +
-  geom_ribbon(
-    aes(
-      ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
-      group = target_day
-    ),
-    alpha = 0.5
-  ) +
-  geom_point(
-    data = onset_df |>
-      filter(day >= 57, day <= 57 + 14),
-    aes(x = day, y = onsets), color = "black") +
-  scale_color_binned(type = "viridis") +
-  facet_wrap(~model) +
-  lims(y = c(0, 500)) +
-  theme(legend.position = "none")
+        group = target_day
+      ),
+      alpha = 0.2
+    ) +
+    geom_ribbon(
+      aes(
+        ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
+        group = target_day
+      ),
+      alpha = 0.5
+    ) +
+    geom_point(
+      data = obs_data,
+      aes(x = day, y = onsets), color = "black"
+    ) +
+    scale_color_binned(type = "viridis") +
+    facet_wrap(~model) +
+    theme(legend.position = "none")
+}
+
+plot_single_forecasts <- simple_ensembles |>
+  filter(target_day == 57) |>
+  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
 
 plot_single_forecasts
 ```
@@ -242,30 +255,8 @@ Now lets plot a range of forecasts from each model and ensemble.
 
 ```{r plot-multiple-forecasts}
 plot_multiple_forecasts <- simple_ensembles |>
-  pivot_wider(names_from = quantile_level, values_from = predicted) |>
-  ggplot(aes(x = day)) +
-  geom_ribbon(
-    aes(
-      ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
-      group = target_day
-    ),
-    alpha = 0.2
-  ) +
-  geom_ribbon(
-    aes(
-      ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
-      group = target_day
-    ),
-    alpha = 0.5
-  ) +
-  geom_point(
-    data = onset_df |>
-      filter(day >= 21),
-    aes(x = day, y = onsets), color = "black") +
-  scale_color_binned(type = "viridis") +
-  facet_wrap(~model) +
-  lims(y = c(0, 500)) +
-  theme(legend.position = "none")
+  plot_ensembles(onset_df |> filter(day >= 21)) +
+  lims(y = c(0, 400))
 
 plot_multiple_forecasts
 ```
@@ -320,20 +311,207 @@ ensemble_scores |>
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 5 minutes
 What do you think the scores are telling you? Which model do you think is best?
+What other scoring breakdowns might you want to look at?
 :::
 
+::: {.callout-note collapse="true"}
+## Solution
+What do you think the scores are telling you? Which model do you think is best?
+
+- The mean ensemble appears to be the best performing ensemble model overall.
+- However, the more mechanistic model appears to be the best performing model overall.
+
+What other scoring breakdowns might you want to look at?
+
+- There might be variation over forecast dates or horizons between the different ensemble methods
+:::
 
 # Unweighted ensembles of filtered models
 
+A simple method that is often used to improve ensemble performance is to prune out models that perform very poorly. 
+Balancing this can be tricky however as it can be hard to know how much to prune.
+The key tradeoff to consider is how much to optimise for which models have performed well in the past (and what your definition of the past is, is it all time, or only the last few weeks) versus how much you want to allow for the possibility that these models may not perform well in the future.
+
 ## Construction
+
+As we just saw, the random walk model (our original baseline model) is performing poorly in comparison to the other models.
+We can remove this model from the ensemble and see if this improves the performance of the ensemble.
+
+::: {.callout-warning}
+## Warning
+
+Here we are technically cheating a little as we are using the test data to help select the models to include in the ensemble.
+In the real world you would not do this as you would not have access to the test data and so this is a "best case" scenario.
+:::
+
+```{r remove-rw}
+filtered_models <- quantile_forecasts |>
+  filter(model != "Random walk")
+```
+
+We then need to recalculate the ensembles. First the mean ensemble,
+
+```{r recalculate-ensembles}
+filtered_mean_ensembles <- filtered_models |>
+  as_tibble() |>
+  summarise(
+    predicted = mean(predicted),
+    observed = unique(observed),
+    model = "Mean filtered ensemble",
+    .by = c(target_day, horizon, quantile_level, day)
+  )
+```
+
+and then the median ensemble.
+
+```{r recalculate-median-ensemble}
+filtered_median_ensembles <- filtered_models |>
+  as_tibble() |>
+  summarise(
+    predicted = median(predicted),
+    observed = unique(observed),
+    model = "Median filtered ensemble",
+    .by = c(target_day, horizon, quantile_level, day)
+  )
+```
+
+We combine these new ensembles with our previous ensembles in order to make visualisation easier.
+
+```{r combine-filtered-ensembles}
+filtered_ensembles <- bind_rows(
+  filtered_mean_ensembles,
+  filtered_median_ensembles,
+  simple_ensembles
+)
+```
 
 ## Visualisation
 
+As for the simple ensembles, we can plot a single forecast from each model and ensemble.
+
+```{r plot-single-filtered-forecasts}
+filtered_ensembles |>
+  filter(target_day == 57) |>
+  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
+```
+
+and on the log scale.
+
+```{r plot-single-filtered-forecasts-log}
+filtered_ensembles |>
+  filter(target_day == 57) |>
+  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
+  scale_y_log10()
+```
+
+To get an overview we also plot a range of forecasts from each model and ensemble.
+
+```{r plot-multiple-filtered-forecasts}
+plot_multiple_filtered_forecasts <- filtered_ensembles |>
+  plot_ensembles(onset_df |> filter(day >= 21)) +
+  lims(y = c(0, 400))
+plot_multiple_filtered_forecasts
+``` 
+
+and on the log scale.
+
+```{r plot-multiple-filtered-forecasts-log}
+plot_multiple_filtered_forecasts +
+  scale_y_log10()
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do the filtered ensembles compare to the simple ensembles?
+Which do you think is best?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do the filtered ensembles compare to the simple ensembles?
+
+- The filtered ensembles appear to be less variable than the simple ensembles.
+- The filtered ensembles appear to be more like the mechanistic model than the simple ensembles.
+
+Which do you think is best?
+
+- Visually, the filtered ensembles appear very similar. This makes sense given we know there are only two models left in the ensemble.
+
 ## Evaluation
 
+Lets score the filtered ensembles.
+
+```{r score-filtered-ensembles}
+filtered_ensemble_scores <- filtered_ensembles |>
+  as_forecast_quantile(
+    forecast_unit = c(
+      "target_day", "horizon", "model"
+    )
+  ) |>
+  score()
+```
+
+Again we can get a high level overview of the scores by model.
+
+```{r score-overview}
+filtered_ensemble_scores |>
+  summarise_scores(by = c("model"))
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do the filtered ensembles compare to the simple ensembles?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do the filtered ensembles compare to the simple ensembles?
+
+- The filtered ensembles appear to be more accurate than the simple ensembles.
+- As you would expect they are an average of the more mechanistic model and the more statistical model.
+- As there are only two models in the ensemble, the median and mean ensembles are identical.
+- For the first time there are features of the ensemble that outperform the more mechanistic model though it remains the best performing model overall.
+:::
+
 # Weighted quantile ensembles
+
+There are many ways to weight the forecasts in a quantile ensemble. Here we will explore two common methods: 
+
+- Inverse WIS weighting
+- Quantile regression averaging
+
+Inverse WIS weighting is a simple method that weights the forecasts by the inverse of their WIS over some period (note that identifying this period is not straightforward).
+It's main benefit is that it is simple to understand and implement.
+However, it does not optimise the weights directly.
+
+Quantile regression averaging on the other hand does optimise the weights directly and so can be expected to perform better.
+
+## Construction
+
+### Inverse WIS weighting
+
+In order to perform inverse WIS weighting we first need to calculate the WIS for each model. We already have this from the previous evaluation so we can reuse this.
+
+```{r calc-wis}
+wis_per_model <- ensemble_scores |>
+  dplyr::filter(
+    model %in% c("More mechanistic", "More statistical", "Random walk")
+  ) |>
+  summarise_scores(by = c("model", "target_day")) |>
+  select(model, target_day, wis) |>
+  mutate(inv_wis = 1 / wis) |>
+  add_column(
+    inv_wis_total_by_date = sum(inv_wis),
+    .by = target_day
+  ) |>
+  mutate(weights = inv_wis / inv_wis_total_by_date)
+```
+
+### Quantile regression averaging
+
+*TBD - need to update `{qra}` package to work with the new version of `{scoringutils}`*
 
 ## Visualisation
 
