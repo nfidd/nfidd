@@ -495,27 +495,152 @@ Quantile regression averaging on the other hand does optimise the weights direct
 In order to perform inverse WIS weighting we first need to calculate the WIS for each model. We already have this from the previous evaluation so we can reuse this.
 
 ```{r calc-wis}
-wis_per_model <- ensemble_scores |>
+weights_per_model <- ensemble_scores |>
   dplyr::filter(
     model %in% c("More mechanistic", "More statistical", "Random walk")
   ) |>
   summarise_scores(by = c("model", "target_day")) |>
   select(model, target_day, wis) |>
   mutate(inv_wis = 1 / wis) |>
-  add_column(
-    inv_wis_total_by_date = sum(inv_wis),
-    .by = target_day
+  mutate(
+    inv_wis_total_by_date = sum(inv_wis), .by = target_day
   ) |>
   mutate(weights = inv_wis / inv_wis_total_by_date)
+
+weights_per_model |>
+  select(model, target_day, weights) |>
+  pivot_wider(names_from = model, values_from = weights)
+```
+
+Now lets apply the weights to the forecast models. As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
+
+```{r apply-weights}
+inverse_wis_ensemble <- quantile_forecasts |>
+  as_tibble() |>
+  left_join(
+    weights_per_model |>
+      mutate(target_day = target_day + 14),
+    by = c("model", "target_day")
+  ) |>
+  # assign equal weights if no weights are available
+  mutate(weights = ifelse(is.na(weights), 1/3, weights)) |>
+  summarise(
+    predicted = sum(predicted * weights),
+    observed = unique(observed),
+    model = "Inverse WIS ensemble",
+    .by = c(target_day, horizon, quantile_level, day)
+  )
 ```
 
 ### Quantile regression averaging
 
 *TBD - need to update `{qra}` package to work with the new version of `{scoringutils}`*
 
+
+### Combine ensembles
+
+```{r combine-inverse-wis-ensemble}
+weighted_ensembles <- bind_rows(
+  inverse_wis_ensemble,
+  filtered_ensembles
+)
+```
+
 ## Visualisation
 
+### Single forecasts
+
+Again lets start by plotting a single forecast from each model and ensemble.
+
+```{r plot-single-weighted-forecasts}
+weighted_ensembles |>
+  filter(target_day == 57) |>
+  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
+```
+
+and on the log scale.
+
+```{r plot-single-weighted-forecasts-log}
+weighted_ensembles |>
+  filter(target_day == 57) |>
+  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
+  scale_y_log10()
+```
+
+### Multiple forecasts
+
+As before we can plot a range of forecasts from each model and ensemble.
+
+```{r plot-multiple-weighted-forecasts}
+plot_multiple_weighted_forecasts <- weighted_ensembles |>
+  plot_ensembles(onset_df |> filter(day >= 21)) +
+  lims(y = c(0, 400))
+plot_multiple_weighted_forecasts
+```
+
+and on the log scale.
+
+```{r plot-multiple-weighted-forecasts-log}
+plot_multiple_weighted_forecasts +
+  scale_y_log10()
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do the weighted ensembles compare to the simple ensembles?
+Which do you think is best?
+Are you surprised by the results? Can you think of any reasons why this might be the case?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do the weighted ensembles compare to the simple ensembles?
+
+
+:::
+
 ## Evaluation
+
+For a final evaluation we can look at the scores for each model and ensemble again.
+
+```{r score-weighted-ensembles}
+weighted_ensemble_scores <- weighted_ensembles |>
+  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+  score()
+```
+
+Again we can get a high level overview of the scores by model.
+
+```{r score-overview}
+weighted_ensemble_scores |>
+  summarise_scores(by = c("model"))
+```
+
+Remembering back to the [forecasting concepts session](forecasting-concepts), we should also check performance on the log scale. 
+
+```{r score-overview-log}
+log_ensemble_scores <- weighted_ensembles |>
+  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+    transform_forecasts(
+    fun = log_shift,
+    offset = 1,
+    append = FALSE
+  ) |>
+  score()
+
+log_ensemble_scores |>
+  summarise_scores(by = c("model"))
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do the weighted ensembles compare to the simple ensembles on the natural and log scale?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do the weighted ensembles compare to the simple ensembles on the natural and log scale?
+:::
 
 # Going further
 
