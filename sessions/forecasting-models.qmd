@@ -624,8 +624,9 @@ Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
 sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~model)
 ```
 
@@ -638,8 +639,9 @@ sc_forecasts |>
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = c("model", "group_horizon")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(group_horizon))
 ```
 
@@ -647,8 +649,9 @@ and then for different forecast dates.
 
 ```{r pit-histogram-date, fig.width = 10}
 sc_forecasts |>
-  get_pit(by = c("model", "target_day")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(target_day))
 ```
 
@@ -735,8 +738,9 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 
 ```{r pit-histogram-log}
 log_sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~model)
 ```
 
@@ -748,16 +752,18 @@ log_sc_forecasts |>
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = c("model", "group_horizon")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(group_horizon))
 ```
 
 
 ```{r pit-histogram-date-log, fig.width = 10}
 log_sc_forecasts |>
-  get_pit(by = c("model", "target_day")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(target_day))
 ```
 
