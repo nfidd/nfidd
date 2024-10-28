@@ -596,9 +596,10 @@ Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
 sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
-  labs(title = "PIT histogram")
+  get_pit_histogram() |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  labs(title = "PIT histogram", x = "Quantile", y = "Density")
 ```
 
 As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
@@ -610,8 +611,9 @@ sc_forecasts |>
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = "group_horizon") |>
-  plot_pit() +
+  get_pit_histogram(by = "group_horizon") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() + 
   facet_wrap(~group_horizon) +
   labs(title = "PIT by forecast horizon (days)")
 ```
@@ -620,8 +622,9 @@ and then for different forecast dates.
 
 ```{r pit-histogram-date}
 sc_forecasts |>
-  get_pit(by = "target_day") |>
-  plot_pit() +
+  get_pit_histogram(by = "target_day") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() + 
   facet_wrap(~target_day) +
   labs(title = "PIT by forecast date")
 ```
@@ -713,8 +716,9 @@ Let's first look at the overall PIT histogram.
 
 ```{r log-pit-histogram}
 log_sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   labs(title = "PIT histogram, scored on the log scale")
 ```
 
@@ -727,8 +731,9 @@ log_sc_forecasts |>
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = "group_horizon") |>
-  plot_pit() +
+  get_pit_histogram(by = "group_horizon") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~group_horizon) +
   labs(title = "PIT by forecast horizon, scored on the log scale")
 ```
@@ -737,8 +742,9 @@ and then for different forecast dates.
 
 ```{r log-pit-histogram-date}
 log_sc_forecasts |>
-  get_pit(by = "target_day") |>
-  plot_pit() +
+  get_pit_histogram(by = "target_day") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~target_day) +
   labs(title = "PIT by forecast date, scored on the log scale")
 ```
