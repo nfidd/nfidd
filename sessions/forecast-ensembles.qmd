@@ -535,9 +535,7 @@ inverse_wis_ensemble <- quantile_forecasts |>
 
 ### Quantile regression averaging
 
-*TBD - need to update `{qra}` package to work with the new version of `{scoringutils}`*
-
-We need to perform quantile regression averaging (QRA) for each forecast date. We also need to consider how many previous forecasts we wish to use to inform each ensemble forecast. Here we decide to use 3 weeks of previous forecasts to inform each QRA ensemble.
+We need to perform quantile regression averaging (QRA) for each forecast date. We also need to consider how many previous forecasts we wish to use to inform each ensemble forecast. Here we decide to use up to 4 weeks of previous forecasts to inform each QRA ensemble.
 
 ```{r qra}
 forecast_dates <- quantile_forecasts |>
@@ -549,7 +547,7 @@ qra_ensembles_obj <- forecast_dates[-1] |>
   lapply(\(x) quantile_forecasts |>
     mutate(target_end_date = x) |>
     dplyr::filter(target_day <= x) |>
-    dplyr::filter(target_day >= x - 22) |>
+    dplyr::filter(target_day >= x - (4 * 7 + 1)) |>
     dplyr::filter(target_day == x | day <= x) |>
     qra(
         group = c("target_end_date"),
@@ -629,10 +627,11 @@ How do the weighted ensembles compare to the simple ensembles?
 
 ## Evaluation
 
-For a final evaluation we can look at the scores for each model and ensemble again.
+For a final evaluation we can look at the scores for each model and ensemble again. We remove the first week of forecasts as these do not have a quantile regression average forecasts as these require training data to estimate.
 
 ```{r score-weighted-ensembles}
 weighted_ensemble_scores <- weighted_ensembles |>
+  filter(target_day > 22) |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
   score()
 ```
@@ -648,6 +647,7 @@ Remembering back to the [forecasting concepts session](forecasting-concepts), we
 
 ```{r score-overview-log}
 log_ensemble_scores <- weighted_ensembles |>
+  filter(target_day > 22) |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
     transform_forecasts(
     fun = log_shift,
