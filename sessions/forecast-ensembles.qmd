@@ -36,7 +36,7 @@ The source file of this session is located at `sessions/forecast-ensembles.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of forecasts, the `dplyr` and `tidyr` packages for data wrangling, and `ggplot2` library for plotting.
+In this session we will use the `nfidd` package to load the data set of forecasts, the `dplyr` and `tidyr` packages for data wrangling, and `ggplot2` library for plotting. We also use `qra` for quantile regression averaging in the weighted ensemble section.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -44,6 +44,7 @@ library("dplyr")
 library("tidyr")
 library("ggplot2")
 library("scoringutils")
+library("qra")
 ```
 
 ::: {.callout-tip}
@@ -536,6 +537,21 @@ inverse_wis_ensemble <- quantile_forecasts |>
 
 *TBD - need to update `{qra}` package to work with the new version of `{scoringutils}`*
 
+We need to perform quantile regression averaging (QRA) for each forecast date. We also need to consider how many previous forecasts we wish to use to inform each ensemble forecast. Here we decide to use 3 weeks of previous forecasts to inform each QRA ensemble.
+
+```{r qra}
+forecast_dates <- quantile_forecasts |>
+  as_tibble() |>
+  pull(target_day) |>
+  unique()
+
+qra_ensembles <- forecast_dates[-(1:2)] |>
+  lapply(\(x) quantile_forecasts |>
+    qra(
+      target = c(target_day = x)
+    )
+  )
+```
 
 ### Combine ensembles
 

@@ -32,7 +32,7 @@ Suggests:
     tidybayes,
     qra
 Remotes:
-    epiforecasts/scoringutils@b370557
+    epiforecasts/scoringutils@b370557,
     epiforecasts/qra@e86d7e0
 Additional_repositories:
     https://stan-dev.r-universe.dev
