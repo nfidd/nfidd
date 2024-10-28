@@ -545,12 +545,23 @@ forecast_dates <- quantile_forecasts |>
   pull(target_day) |>
   unique()
 
-qra_ensembles <- forecast_dates[-(1:2)] |>
+qra_ensembles_obj <- forecast_dates[-1] |>
   lapply(\(x) quantile_forecasts |>
+    mutate(target_end_date = x) |>
+    dplyr::filter(target_day <= x) |>
+    dplyr::filter(target_day >= x - 22) |>
+    dplyr::filter(target_day == x | day <= x) |>
     qra(
+        group = c("target_end_date"),
       target = c(target_day = x)
     )
   )
+
+qra_weights <- qra_ensembles_obj |>
+  lapply(\(x) attr(x, "weights"))
+
+qra_ensembles <- qra_ensembles_obj |>
+  bind_rows()
 ```
 
 ### Combine ensembles
@@ -558,6 +569,7 @@ qra_ensembles <- forecast_dates[-(1:2)] |>
 ```{r combine-inverse-wis-ensemble}
 weighted_ensembles <- bind_rows(
   inverse_wis_ensemble,
+  qra_ensembles,
   filtered_ensembles
 )
 ```
