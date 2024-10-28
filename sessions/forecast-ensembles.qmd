@@ -535,7 +535,7 @@ inverse_wis_ensemble <- quantile_forecasts |>
 
 ### Quantile regression averaging
 
-We need to perform quantile regression averaging (QRA) for each forecast date. We also need to consider how many previous forecasts we wish to use to inform each ensemble forecast. Here we decide to use up to 4 weeks of previous forecasts to inform each QRA ensemble.
+We need to perform quantile regression averaging (QRA) for each forecast date. We also need to consider how many previous forecasts we wish to use to inform each ensemble forecast. Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble.
 
 ```{r qra}
 forecast_dates <- quantile_forecasts |>
@@ -543,22 +543,57 @@ forecast_dates <- quantile_forecasts |>
   pull(target_day) |>
   unique()
 
-qra_ensembles_obj <- forecast_dates[-1] |>
-  lapply(\(x) quantile_forecasts |>
-    mutate(target_end_date = x) |>
-    dplyr::filter(target_day <= x) |>
-    dplyr::filter(target_day >= x - (4 * 7 + 1)) |>
-    dplyr::filter(target_day == x | day <= x) |>
-    qra(
-        group = c("target_end_date"),
-      target = c(target_day = x)
-    )
-  )
+qra_by_forecast <- function(
+  quantile_forecasts,
+  forecast_dates,
+  group = c("target_end_date"), 
+  ...
+) {
+  lapply(forecast_dates, \(x) {
+    quantile_forecasts |>
+      mutate(target_end_date = x) |>
+      dplyr::filter(target_day <= x) |>
+      dplyr::filter(target_day >= x - (3 * 7 + 1)) |>
+      dplyr::filter(target_day == x | day <= x) |>
+      qra(
+        group = group,
+        target = c(target_day = x),
+        ...
+      )
+  })
+}
 
-qra_weights <- qra_ensembles_obj |>
-  lapply(\(x) attr(x, "weights"))
+qra_ensembles_obj <- qra_by_forecast(
+  quantile_forecasts,
+  forecast_dates[-1],
+  group = c("target_end_date")
+)
+
+qra_weights <- seq_along(qra_ensembles_obj) |>
+  lapply(\(i) attr(qra_ensembles_obj[[i]], "weights") |>
+    mutate(target_day = forecast_dates[i + 1])
+  ) |>
+  bind_rows() |>
+  dplyr::filter(quantile == 0.5)
 
 qra_ensembles <- qra_ensembles_obj |>
+  bind_rows()
+```
+
+We might also want to create a QRA ensemble separately for each forecast horizon. We can do this using `qra()` with the `group` argument.
+
+```{r qra-by-horizon}
+qra_ensembles_by_horizon <- qra_by_forecast(
+  quantile_forecasts,
+  forecast_dates[-c(1:2)],
+  group = c("horizon", "target_end_date"),
+  model = "QRA by horizon"
+)
+
+qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |>
+  lapply(\(i) attr(qra_ensembles_by_horizon[[i]], "weights") |>
+    mutate(target_day = forecast_dates[i + 2])
+  ) |>
   bind_rows()
 ```
 
@@ -568,8 +603,11 @@ qra_ensembles <- qra_ensembles_obj |>
 weighted_ensembles <- bind_rows(
   inverse_wis_ensemble,
   qra_ensembles,
+  qra_ensembles_by_horizon,
   filtered_ensembles
-)
+) |>
+  # remove the repeated filtered ensemble
+  filter(model != "Mean filtered ensemble")
 ```
 
 ## Visualisation
@@ -625,13 +663,46 @@ How do the weighted ensembles compare to the simple ensembles?
 
 :::
 
+### Models weights
+
+Now that we have a weighted ensemble, we can also look at the weights of the individual models. Here we do this for the quantile regression averaging ensemble but we could also do this for the inverse WIS ensemble or any other weighted ensemble (for an unweighted ensemble the weights are all equal).
+
+```{r plot-model-weights}
+qra_weights |>
+  ggplot(aes(x = target_day, y = weight, fill = model)) +
+  geom_col(position = "stack") +
+  theme(legend.position = "bottom")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+How do the weights change over time?
+Are you surprised by the results given what you know about the models performance?
+:::
+
+::: {.callout-note collapse="true"} 
+## Solution
+How do the weights change over time?
+
+- Early on the more statistical models have higher weights
+- Gradually the random walk model gains weight and by the end of the forecast horizon it represents the entire ensemble.
+- Near the peak the mechanistic model also gains weight.
+
+Are you surprised by the results given what you know about the models performance?
+
+- As the random walk model is performing poorly, you would expect it to have low weights but actually it often doesn't.
+This implies that its poor performance is restricted to certain parts of the outbreak.
+- Even though the mechanistic model performs really well overall it is only included in the ensemble around the peak. 
+This could be because the training data doesn't include changes in the epidemic dynamics and so the mechanistic model is not given sufficient weight.
+:::
+
 ## Evaluation
 
-For a final evaluation we can look at the scores for each model and ensemble again. We remove the first week of forecasts as these do not have a quantile regression average forecasts as these require training data to estimate.
+For a final evaluation we can look at the scores for each model and ensemble again. We remove the two weeks of forecasts as these do not have a quantile regression average forecasts as these require training data to estimate.
 
 ```{r score-weighted-ensembles}
 weighted_ensemble_scores <- weighted_ensembles |>
-  filter(target_day > 22) |>
+  filter(target_day >= 29) |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
   score()
 ```
@@ -647,7 +718,7 @@ Remembering back to the [forecasting concepts session](forecasting-concepts), we
 
 ```{r score-overview-log}
 log_ensemble_scores <- weighted_ensembles |>
-  filter(target_day > 22) |>
+  filter(target_day >= 29) |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
     transform_forecasts(
     fun = log_shift,
