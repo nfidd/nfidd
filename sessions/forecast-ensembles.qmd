@@ -456,7 +456,7 @@ filtered_ensemble_scores <- filtered_ensembles |>
 
 Again we can get a high level overview of the scores by model.
 
-```{r score-overview}
+```{r score-overview-filtered}
 filtered_ensemble_scores |>
   summarise_scores(by = c("model"))
 ```
@@ -709,14 +709,14 @@ weighted_ensemble_scores <- weighted_ensembles |>
 
 Again we can get a high level overview of the scores by model.
 
-```{r score-overview}
+```{r score-overview-weighted}
 weighted_ensemble_scores |>
   summarise_scores(by = c("model"))
 ```
 
 Remembering back to the [forecasting concepts session](forecasting-concepts), we should also check performance on the log scale. 
 
-```{r score-overview-log}
+```{r score-overview-weighted-log}
 log_ensemble_scores <- weighted_ensembles |>
   filter(target_day >= 29) |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
