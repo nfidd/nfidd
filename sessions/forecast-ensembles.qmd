@@ -70,7 +70,6 @@ In this session we will use the forecasts from the models we explored in the [fo
 - A differenced autoregressive model referred to as "More statistical"
 - A simple model of susceptible depeltion referred to as "More mechanistic"
 
-::: {.callout-tip}
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
 
 As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
@@ -87,7 +86,7 @@ forecasts <- bind_rows(
 forecasts
 ```
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip collapse="true"}
 ## How did we estimate these forecasts?
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
 
@@ -135,8 +134,8 @@ quantile_forecasts <- sample_forecasts |>
 quantile_forecasts
 ```
 
-::: {.callout-tip, collapse="true"}
-What is happening here?
+::: {.callout-tip collapse="true"}
+## What is happening here?
 
 - Internally `scoringutils` is calculating the quantiles of the sample based forecasts.
 - It does this by using a set of default quantiles but these can be overridden.
@@ -439,6 +438,8 @@ How do the filtered ensembles compare to the simple ensembles?
 Which do you think is best?
 
 - Visually, the filtered ensembles appear very similar. This makes sense given we know there are only two models left in the ensemble.
+
+:::
 
 ## Evaluation
 
