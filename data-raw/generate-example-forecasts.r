@@ -1,16 +1,19 @@
 library("dplyr")
 library("tidyr")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 library("purrr")
 library("usethis")
+library("nfidd")
 
 set.seed(12345)
 
 # simulate data
-source(here::here("snippets", "simulate-onsets.r"))
-
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 
 # define a function to fit and forecast for a single date
 forecast_target_day <- function(
@@ -55,7 +58,7 @@ target_days <- onset_df |>
 target_days <- target_days[seq(1, length(target_days), 7)]
 
 # load the model
-rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw-forecast.stan"))
+rw_mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 
 data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   data <- list(
@@ -83,7 +86,7 @@ rw_forecasts <- target_days |>
 usethis::use_data(rw_forecasts, overwrite = TRUE)
 
 # AR model forecass
-stat_mod <- cmdstan_model(here("stan", "statistical-r.stan"))
+stat_mod <- nfidd_cmdstan_model("statistical-r")
 
 stat_forecasts <- target_days |>
   map_dfr(
@@ -98,7 +101,7 @@ usethis::use_data(stat_forecasts, overwrite = TRUE)
 
 # Mechanistic model forecasts
 
-mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
+mech_mod <- nfidd_cmdstan_model("mechanistic-r")
 
 data_to_list_mech <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   data <- data_to_list_rw(train_df, horizon, gen_time_pmf, ip_pmf)

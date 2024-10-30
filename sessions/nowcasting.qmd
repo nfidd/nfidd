@@ -27,7 +27,7 @@ The source file of this session is located at `sessions/nowcasting.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -35,14 +35,12 @@ library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -193,7 +191,11 @@ The `plnorm()` function is related to the `rlnorm()` function we used earlier to
 We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have copied the code into a snippet to make it easier to re-use), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"), echo=TRUE, max.deparse.length = 1000)
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 reported_onset_df <- onset_df |>
   filter(day < cutoff) |>
   mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
@@ -222,7 +224,7 @@ reported_onset_df |>
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
 ```{r stan-simple-nowcast}
-mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
+mod <- nfidd_cmdstan_model("simple-nowcast")
 mod
 ```
 
@@ -286,7 +288,7 @@ As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-
 We first load the model
 
 ```{r stan-nowcast-with-rw}
-rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
+rw_mod <- nfidd_cmdstan_model("simple-nowcast-rw")
 rw_mod
 ```
 

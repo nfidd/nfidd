@@ -1,13 +1,24 @@
-## function that takes three inputs to simulate using the renewal equation
-##
-## function arguments:
-## I0: the initial number of infections
-## R: the reproduction number, given as a vector with one entry per time point
-## gen_time: the generation time distribution, given as a vector with one entry
-## per day after infection (the first element corresponding to one day after
-## infection)
-##
-## example: renewal(I0 = 5, R = c(rep(3, 4), rep(0.5, 5)), gen_time = c(0.1, 0.2, 0.3, 0.2, 0.1))
+#' Simulate Infections using the Renewal Equation
+#'
+#' This function simulates infections using the renewal equation.
+#'
+#' @param I0 The initial number of infections.
+#' @param R The reproduction number, given as a vector with one entry per time
+#'   point.
+#' @param gen_time The generation time distribution, given as a vector with one
+#'   entry per day after infection (the first element corresponding to one day
+#'   after infection).
+#'
+#' @return A vector of simulated infections over time.
+#'
+#' @export
+#'
+#' @examples
+#' renewal(
+#'   I0 = 5,
+#'   R = c(rep(3, 4), rep(0.5, 5)),
+#'   gen_time = c(0.1, 0.2, 0.3, 0.2, 0.1)
+#' )
 renewal <- function(I0, R, gen_time) {
   ## set the maximum generation time
   max_gen_time <- length(gen_time)

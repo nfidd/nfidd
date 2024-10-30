@@ -29,7 +29,7 @@ The source file of this session is located at `sessions/using-delay-distribution
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -37,14 +37,12 @@ library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: callout-tip
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -83,13 +81,10 @@ In other words, the number of observable outcomes on day $t$ is given by the sum
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
 We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections.
-You can do this by sourcing the following code snippet:
+You can do this using:
 
 ```{r aggregate}
-source(
-  here::here("snippets", "load-ts.r"),
-  echo = TRUE, max.deparse.length = 1000
-)
+inf_ts <- make_daily_infections(infection_times)
 ```
 
 ::: callout-note
@@ -141,11 +136,9 @@ In the absence of any other information or model, we assume for our simulation t
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days.
 
-You can find the function in the `functions/` directory.
 You can load and then view it using:
 
 ```{r discretise_2_day_window}
-source(here("functions", "censored-delay-pmf.r"))
 censored_delay_pmf
 ```
 
@@ -168,7 +161,6 @@ plot(gamma_pmf)
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
 
 ```{r convolution}
-source(here("functions", "convolve-with-delay.r"))
 convolve_with_delay
 ```
 
@@ -234,7 +226,7 @@ ggplot(combined, aes(x = time, y = observed)) +
 As in previous sessions, we don't usually have data on infections. We now create a model that uses symptom onsets to estimate the number of infections over time. We'll base the model on an uninformed prior and work forward from what we know about the observation process.
 
 ```{r stan_estimate_infections}
-mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
+mod <- nfidd_cmdstan_model("estimate-infections")
 mod
 ```
 

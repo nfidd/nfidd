@@ -30,7 +30,7 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -38,7 +38,6 @@ library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 library("scoringutils")
@@ -46,7 +45,6 @@ library("scoringutils")
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -72,7 +70,6 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## What did a geometric random walk model look like again?
 
 ```{r geometric-random-walk-sim}
-source(here("functions", "geometric-random-walk.r"))
 R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
 data <- tibble(t = seq_along(R), R = exp(R))
 
@@ -150,7 +147,7 @@ The key assumptions we are making here are:
 We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Let's load the model:
 
 ```{r}
-mech_mod <- cmdstan_model(here("stan", "mechanistic-r.stan"))
+mech_mod <- nfidd_cmdstan_model("mechanistic-r")
 mech_mod
 ```
 
@@ -214,7 +211,6 @@ $$
 Again we look at an R function that implements this model:
 
 ```{r geometric-diff-ar}
-source(here("functions", "geometric-diff-ar.r"))
 geometric_diff_ar
 ```
 
@@ -237,7 +233,7 @@ ggplot(data, aes(x = t, y = R)) +
 We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
 
 ```{r}
-stat_mod <- cmdstan_model(here("stan/statistical-r.stan"))
+stat_mod <- nfidd_cmdstan_model("statistical-r")
 stat_mod
 ```
 
@@ -247,10 +243,15 @@ stat_mod
 We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 onset_df
 
-# we'll make a forecast on day non day 41, pretending we haven't seen the later data
+# we'll make a forecast on day non day 41, pretending we haven't seen the later
+# data
 cutoff <- 41
 
 filtered_onset_df <- onset_df |>
@@ -262,7 +263,7 @@ We will now fit the more mechanistic model to the data.
 horizon <- 28
 
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -285,7 +286,7 @@ We will now fit the more statistical model to the data.
 
 ```{r fit_stat_model, results = 'hide', message = FALSE}
 data <- list(
-  n =nrow(filtered_onset_df),
+  n = nrow(filtered_onset_df),
   I0 = 1,
   obs = filtered_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -296,7 +297,8 @@ data <- list(
 )
 stat_forecast_fit <- stat_mod$sample(
   data = data, parallel_chains = 4,
-  init = \() list(init_R = 0, rw_sd = 0.01) # again set the initial values to make fitting more numerically stable
+  # again set the initial values to make fitting more numerically stable
+  init = \() list(init_R = 0, rw_sd = 0.01)
 )
 ```
 
@@ -305,7 +307,7 @@ Finally, we can extract the forecasts from the models and plot them.
 ```{r extract-forecast}
 mech_forecast <- mech_forecast_fit |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 
 stat_forecast <- stat_forecast_fit |>
@@ -329,7 +331,9 @@ target_onsets <- onset_df |>
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
+  geom_line(
+    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   guides(colour = guide_legend(override.aes = list(alpha = 1))) +
   lims(y = c(0, 500))
@@ -341,7 +345,9 @@ and on the log scale
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)) +
+  geom_line(
+    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
@@ -429,7 +435,7 @@ forecasts <- bind_rows(
   rw_forecasts,
   mutate(stat_forecasts, model = "More statistical"),
   mutate(mech_forecasts, model = "More mechanistic")
-) |> 
+) |>
   ungroup()
 ```
 
@@ -474,9 +480,12 @@ As for the single forecast it is helpful to also plot the forecast on the log sc
 forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10(limits = c(NA, 500)) +
+
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
@@ -510,12 +519,12 @@ Which do you prefer?
 sc_forecasts <- forecasts |>
   left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
-  as_forecast(
-    forecast_unit = c("target_day", "horizon", "model"),
-    forecast_type = "sample",
+  as_forecast_sample(
+    forecast_unit = c(
+      "target_day", "horizon", "model"
+    ),
     observed = "onsets",
     predicted = ".value",
-    model = "model",
     sample_id = ".draw"
   )
 sc_forecasts
@@ -530,7 +539,7 @@ sc_scores <- sc_forecasts |>
 
 sc_scores
 ```
-
+  scale_y_log10(limits = c(NA, 500)) +
 ::: {.callout-note collapse="true"}
 ## Learning more about the output of `score()`
 
@@ -614,32 +623,35 @@ How do the CRPS scores change with forecast date?
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
- sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+sc_forecasts |>
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~model)
 ```
 
 As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
 ```{r pit-histogram-horizon}
-sc_forecasts |> 
+sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = c("model", "group_horizon")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(group_horizon))
 ```
 
 and then for different forecast dates.
 
 ```{r pit-histogram-date, fig.width = 10}
- sc_forecasts |>
-  get_pit(by = c("model", "target_day")) |>
-  plot_pit() +
+sc_forecasts |>
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(target_day))
 ```
 
@@ -725,30 +737,33 @@ How do the CRPS scores on the log scale compare to the scores on the original sc
 ### PIT histograms
 
 ```{r pit-histogram-log}
- log_sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+log_sc_forecasts |>
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~model)
 ```
 
 
 ```{r pit-histogram-horizon-log}
-log_sc_forecasts |> 
+log_sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = c("model", "group_horizon")) |>
-  plot_pit() +
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(group_horizon))
 ```
 
 
 ```{r pit-histogram-date-log, fig.width = 10}
- log_sc_forecasts |>
-  get_pit(by = c("model", "target_day")) |>
-  plot_pit() +
+log_sc_forecasts |>
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_grid(vars(model), vars(target_day))
 ```
 

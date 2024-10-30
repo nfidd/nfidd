@@ -25,7 +25,7 @@ The source file of this session is located at `sessions/forecasting-concepts.qmd
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
+In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -33,7 +33,6 @@ library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 library("scoringutils")
@@ -41,7 +40,6 @@ library("scoringutils")
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -87,7 +85,7 @@ This is used for in a stan model for any calculations that only depend on other 
 So what does this look like in code? Lets load in the model again and take a look.
 
 ```{r load_model}
-mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw-forecast.stan"))
+mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 mod
 ```
 
@@ -116,7 +114,11 @@ We will use the same simulated data as in the renewal and nowcasting sessions.
 We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
-source(here("snippets", "simulate-onsets.r"))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 cutoff <- 71
 filtered_onset_df <- onset_df |>
   filter(day <= cutoff)
@@ -178,7 +180,10 @@ forecast |>
   ggplot(aes(x = day)) +
   geom_line(alpha = 0.1, aes(y = .value, group = .draw)) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  labs(title = "Symptom onsets", subtitle = "Forecast (trajectories) and observed (points)")
+  labs(
+    title = "Symptom onsets",
+    subtitle = "Forecast (trajectories) and observed (points)"
+  )
 ```
 
 ::: {.callout-tip}
@@ -219,7 +224,7 @@ long_onset_df <- onset_df |>
   filter(day <= cutoff + horizon)
 
 long_data <- list(
-  n =nrow(long_onset_df),
+  n = nrow(long_onset_df),
   I0 = 1,
   obs = long_onset_df$onsets,
   gen_time_max = length(gen_time_pmf),
@@ -246,7 +251,7 @@ forecast_r <- rw_forecast |>
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(type = "estimate")
 ```
 
@@ -259,9 +264,14 @@ forecast_r |>
   ggplot(aes(x = day)) +
   geom_vline(xintercept = cutoff, linetype = "dashed") +
   geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(y = .value, group = interaction(.draw, type), color = type), alpha = 0.1)+
-  labs(title = "Estimated R", 
-       subtitle = "Estimated over whole time series (red), and forecast (blue)") +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, type), color = type),
+    alpha = 0.1
+  ) +
+  labs(
+    title = "Estimated R",
+    subtitle = "Estimated over whole time series (red), and forecast (blue)"
+  ) +
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
@@ -299,7 +309,7 @@ In order to properly evaluate forecasts from this model we really need to foreca
 
 ```{r load_forecasts}
 data(rw_forecasts)
-rw_forecasts |> 
+rw_forecasts |>
   ungroup()
 ```
 
@@ -329,9 +339,13 @@ As for a single forecast, our first step is to visualise the forecasts as this c
 rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
-  geom_point(data = onset_df |>
-    filter(day >= 21),
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
+  geom_point(
+    data = onset_df |>
+      filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
   scale_color_binned(type = "viridis") +
   labs(title = "Weekly forecasts of symptom onsets over an outbreak",
@@ -345,7 +359,10 @@ As for the single forecast it may be helpful to also plot the forecast on the lo
 rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |> 
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
   scale_color_binned(type = "viridis") +
@@ -389,18 +406,18 @@ Of course we usually don't know this (as we don't know the "true model" for real
 
 We will use the [`{scoringutils}`](https://epiforecasts.io/scoringutils/dev/) package to calculate these metrics.
 Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
-We will use `as_forecast` to do this:
+We will use `as_forecast_sample()` to do this:
 
 ```{r convert-forecasts}
 sc_forecasts <- rw_forecasts |>
   left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
-  as_forecast(
-    forecast_unit = c("target_day", "horizon", "model"),
-    forecast_type = "sample",
+  as_forecast_sample(
+    forecast_unit = c(
+      "target_day", "horizon", "model"
+    ),
     observed = "onsets",
     predicted = ".value",
-    model = "model",
     sample_id = ".draw"
   )
 sc_forecasts
@@ -578,23 +595,25 @@ This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
- sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
-  labs(title = "PIT histogram")
+sc_forecasts |>
+  get_pit_histogram() |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  labs(title = "PIT histogram", x = "Quantile", y = "Density")
 ```
 
 As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
 
 ```{r pit-histogram-horizon}
-sc_forecasts |> 
+sc_forecasts |>
   mutate(group_horizon = case_when(
     horizon <= 3 ~ "1-3",
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = "group_horizon") |>
-  plot_pit() +
+  get_pit_histogram(by = "group_horizon") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() + 
   facet_wrap(~group_horizon) +
   labs(title = "PIT by forecast horizon (days)")
 ```
@@ -602,9 +621,10 @@ sc_forecasts |>
 and then for different forecast dates.
 
 ```{r pit-histogram-date}
- sc_forecasts |>
-  get_pit(by = "target_day") |>
-  plot_pit() +
+sc_forecasts |>
+  get_pit_histogram(by = "target_day") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() + 
   facet_wrap(~target_day) +
   labs(title = "PIT by forecast date")
 ```
@@ -696,8 +716,9 @@ Let's first look at the overall PIT histogram.
 
 ```{r log-pit-histogram}
 log_sc_forecasts |>
-  get_pit(by = "model") |>
-  plot_pit() +
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   labs(title = "PIT histogram, scored on the log scale")
 ```
 
@@ -710,8 +731,9 @@ log_sc_forecasts |>
     horizon <= 7 ~ "4-7",
     horizon <= 14 ~ "8-14"
   )) |>
-  get_pit(by = "group_horizon") |>
-  plot_pit() +
+  get_pit_histogram(by = "group_horizon") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~group_horizon) +
   labs(title = "PIT by forecast horizon, scored on the log scale")
 ```
@@ -720,8 +742,9 @@ and then for different forecast dates.
 
 ```{r log-pit-histogram-date}
 log_sc_forecasts |>
-  get_pit(by = "target_day") |>
-  plot_pit() +
+  get_pit_histogram(by = "target_day") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
   facet_wrap(~target_day) +
   labs(title = "PIT by forecast date, scored on the log scale")
 ```

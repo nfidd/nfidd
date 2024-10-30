@@ -18,20 +18,25 @@ BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
 Imports:
+    dplyr,
+    tidyr
+Suggests:
     bayesplot,
     cmdstanr,
-    dplyr,
     ggplot2,
-    here,
     lubridate,
     posterior,
     purrr,
     rmarkdown,
     scoringutils,
     tidybayes,
-    tidyr
+    qra
 Remotes:
-    stan-dev/cmdstanr,
-    epiforecasts/scoringutils@d3cf08d
+    epiforecasts/scoringutils@b370557,
+    epiforecasts/qra@e86d7e0
+Additional_repositories:
+    https://stan-dev.r-universe.dev
 Encoding: UTF-8
 Language: en-GB
+RoxygenNote: 7.3.2
+LazyData: true

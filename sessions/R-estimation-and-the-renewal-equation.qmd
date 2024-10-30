@@ -25,7 +25,7 @@ The source file of this session is located at `sessions/R-estimation-and-the-ren
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
+In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan.
 We will also use the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
@@ -33,14 +33,12 @@ library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
 library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
 ## Initialisation
@@ -112,7 +110,6 @@ With the theory out of the way we now turn to simulating an epidemic using the r
 We first write a function to simulate the epidemic using the discrete renewal equation.
 
 ```{r renewal_equation}
-source(here("functions", "renewal.r"))
 renewal
 ```
 
@@ -129,10 +126,9 @@ What kind of behaviours do you see depending on the values you put in?
 # Estimating $R_t$ from a time series of infections
 
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
-This is saved in a snippet called `load-ts.r` which we can run using
 
 ```{r load_ts}
-source(here("snippets", "load-ts.r"))
+inf_ts <- make_daily_infections(infection_times)
 head(inf_ts)
 ```
 
@@ -146,10 +142,6 @@ We use a renewal equation model in _stan_ to estimate the effective reproduction
 We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
 From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
 We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
-You can load it using
-```{r source_censored_delay_pmf}
-source(here("functions", "censored-delay-pmf.r"))
-```
 
 To approximate the generation time PMF using random draws from the underlying continuous distribution use
 ```{r gen_time_pmf}
@@ -166,7 +158,7 @@ gen_time_pmf <- gen_time_pmf / sum(gen_time_pmf) ## renormalise
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
-r_mod <- cmdstan_model(here("stan", "estimate-r.stan"))
+r_mod <- nfidd_cmdstan_model("estimate-r")
 r_mod
 ```
 
@@ -232,11 +224,7 @@ Does the model reproduce the simulated $R_t$ trajectories?
 Epidemiological data is rarely, perhaps never, available as a time series of infection events.
 Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
-For this we used the `convolved_with_delay()` function which you can load using
-
-```{r add_onsets}
-source(here("functions", "convolve-with-delay.r"))
-```
+For this we used the `convolved_with_delay()` function.
 
 We then simulate observations again using:
 
@@ -249,7 +237,7 @@ obs <- rpois(length(onsets), onsets)
 We now add this to our renewal equation model and use this to estimate infections as well as the reproduction number:
 
 ```{r stan_estimate_inf_and_r}
-r_inf_mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
+r_inf_mod <- nfidd_cmdstan_model("estimate-inf-and-r")
 r_inf_mod
 ```
 ::: {.callout-tip}
@@ -347,7 +335,6 @@ The last line is the geometric random walk.
 You can have a look at an R function for performing the geometric random walk:
 
 ```{r geometric-random-walk}
-source(here("functions", "geometric-random-walk.r"))
 geometric_random_walk
 ```
 
@@ -378,7 +365,7 @@ You can repeat this multiple times either with the same parameters or changing s
 We can now include this in a stan model,
 
 ```{r stan_estimate_inf_and_r_rw}
-rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
+rw_mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw")
 rw_mod
 ```
 
