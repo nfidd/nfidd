@@ -276,7 +276,7 @@ nfidd_stan_models <- function(
 #'
 #' @examplesIf requireNamespace("cmdstanr", quietly = TRUE)
 #' if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
-#'   model <- nfidd_cmdstan_model("renewal", compile = FALSE)
+#'   model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
 #'   model
 #' }
 nfidd_cmdstan_model <- function(
