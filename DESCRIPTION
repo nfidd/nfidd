@@ -30,7 +30,8 @@ Suggests:
     rmarkdown,
     scoringutils,
     tidybayes,
-    qra
+    qra,
+    stackr
 Remotes:
     epiforecasts/scoringutils@b370557,
     epiforecasts/qra@e86d7e0,
