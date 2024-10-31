@@ -54,6 +54,7 @@ library("tidyr")
 library("ggplot2")
 library("scoringutils")
 library("qra")
+library("stackr")
 ```
 
 ::: {.callout-tip}
@@ -498,11 +499,11 @@ How do the filtered ensembles compare to the simple ensembles?
 - For the first time there are features of the ensemble that outperform the more mechanistic model though it remains the best performing model overall.
 :::
 
-# Weighted quantile ensembles
+# Weighted ensembles
 
 The simple mean and median we used to average quantiles earlier treats every model as the same.
 We could try to improve performance by replacing this with a weighted mean (or weighted median), for example given greater weight to models that have proven to make better forecasts.
-Here we will explore two common weighting methods:
+Here we will explore two common weighting methods based on quantile averaging:
 
 - Inverse WIS weighting
 - Quantile regression averaging
@@ -513,6 +514,10 @@ However, it does not optimise the weights directly to produce the best forecasts
 It relies on the hope that giving more weight to better performing models yields a better ensemble
 
 Quantile regression averaging on the other hand does optimise the weights directly in order to yield the best scores on past data.
+
+We further investigate a weighting method that uses samples from the predictive distribution to create an ensemble:
+
+- Mixture ensemble using stacking
 
 ## Construction
 
@@ -563,6 +568,7 @@ inverse_wis_ensemble <- quantile_forecasts |>
 We futher to perform quantile regression averaging (QRA) for each forecast date.
 Again we need to consider how many previous forecasts we wish to use to inform each ensemble forecast.
 Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble.
+We use the `qra` package to perform this task.
 
 ```{r qra}
 forecast_dates <- quantile_forecasts |>
@@ -601,7 +607,8 @@ qra_weights <- seq_along(qra_ensembles_obj) |>
     mutate(target_day = forecast_dates[i + 1])
   ) |>
   bind_rows() |>
-  dplyr::filter(quantile == 0.5)
+  dplyr::filter(quantile == 0.5) |>
+  select(-quantile)
 
 qra_ensembles <- qra_ensembles_obj |>
   bind_rows()
@@ -625,6 +632,58 @@ qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |>
   bind_rows()
 ```
 
+### Mixture ensemble using stacking
+
+Quantile averaging can be interpreted as a combination of different uncertain estimates of a true distribution of a given shape.
+Instead, we might want to interpret multiple models as multiple possible versions of this truth, with weights assigned to each of them representing the probability of each one being the true one.
+In that case, we want to create a (weighted) mixture distribution of the constituent models.
+This can be done from samples, with weights tuned to optimise the CRPS.
+We use the `stackr` package to perform this task.
+
+```{r mixture}
+## stackr expects a "date" column indicating the timing of forecasts
+mixture_forecasts <- sample_forecasts |>
+  rename(date = day)
+
+mixture_by_forecast <- function(
+  sample_forecasts,
+  forecast_dates,
+  group = c("target_end_date"),
+  ...
+) {
+  lapply(forecast_dates, \(x) {
+    y <- sample_forecasts |>
+      mutate(target_end_date = x) |>
+      dplyr::filter(target_day <= x) |>
+      dplyr::filter(target_day >= x - (3 * 7 + 1)) |>
+      dplyr::filter(target_day == x | date <= x)
+    mixture <- mixture_from_samples(y) |>
+      filter(date > x) |>
+      mutate(target_day = x)
+    return(mixture)
+  })
+}
+
+mixture_ensembles_obj <- mixture_by_forecast(
+  mixture_forecasts,
+  forecast_dates[-1]
+)
+
+mixture_weights <- seq_along(mixture_ensembles_obj) |>
+  lapply(\(i) attr(mixture_ensembles_obj[[i]], "weights") |>
+    mutate(target_day = forecast_dates[i + 1])
+  ) |>
+  bind_rows()
+
+## combine and generate quantiles from the resulting samples
+mixture_ensembles <- mixture_ensembles_obj |>
+  bind_rows() |>
+  rename(day = date) |> ## rename column back for later plotting
+  as_forecast_sample() |>
+  as_forecast_quantile()
+
+```
+
 ### Combine ensembles
 
 ```{r combine-inverse-wis-ensemble}
@@ -632,7 +691,8 @@ weighted_ensembles <- bind_rows(
   inverse_wis_ensemble,
   qra_ensembles,
   qra_ensembles_by_horizon,
-  filtered_ensembles
+  filtered_ensembles,
+  mixture_ensembles
 ) |>
   # remove the repeated filtered ensemble
   filter(model != "Mean filtered ensemble")
@@ -690,30 +750,40 @@ How do the weighted ensembles compare to the simple ensembles?
 
 :::
 
-### Models weights
+### Model weights
 
 Now that we have a weighted ensemble, we can also look at the weights of the individual models. Here we do this for the quantile regression averaging ensemble but we could also do this for the inverse WIS ensemble or any other weighted ensemble (for an unweighted ensemble the weights are all equal).
 
 ```{r plot-model-weights}
-qra_weights |>
+weights <- rbind(
+  qra_weights |> mutate(method = "QRA"),
+  mixture_weights |> mutate(method = "Mixture")
+)
+weights |>
   ggplot(aes(x = target_day, y = weight, fill = model)) +
   geom_col(position = "stack") +
+  facet_grid(~ method) +
   theme(legend.position = "bottom")
 ```
 
 ::: {.callout-tip}
 ## Take 2 minutes
+Are the weights assigned to models different between the two methods?
 How do the weights change over time?
 Are you surprised by the results given what you know about the models performance?
 :::
 
 ::: {.callout-note collapse="true"} 
 ## Solution
+Are the weights assigned to models different between the two methods?
+
+- There are major differences especially early on, where the mixture prefers the more mechanistic model and QRA the more statistical model
+
 How do the weights change over time?
 
-- Early on the more statistical models have higher weights
-- Gradually the random walk model gains weight and by the end of the forecast horizon it represents the entire ensemble.
-- Near the peak the mechanistic model also gains weight.
+- Early on the more statistical/mechanistic models have higher weights in the respective ensemble methods.
+- Gradually the random walk model gains weight in both models and by the end of the forecast horizon it represents the entire ensemble.
+- Near the peak the mechanistic model also gains weight in both methods.
 
 Are you surprised by the results given what you know about the models performance?
 
@@ -773,3 +843,4 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 
 
 # Wrap up
+

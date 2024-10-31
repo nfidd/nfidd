@@ -33,7 +33,8 @@ Suggests:
     qra
 Remotes:
     epiforecasts/scoringutils@b370557,
-    epiforecasts/qra@e86d7e0
+    epiforecasts/qra@e86d7e0,
+    epiforecasts/stackr
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Encoding: UTF-8
