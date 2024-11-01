@@ -112,7 +112,9 @@ cutoff <- 71
 We also need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
-reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
+reporting_delay_pmf <- censored_delay_pmf(
+  rlnorm, max = 15, meanlog = 1, sdlog = 0.5
+)
 plot(reporting_delay_pmf)
 ```
 
@@ -122,8 +124,10 @@ We can then simulate the reporting triangle:
 reporting_triangle <- onset_df |>
   filter(day < cutoff) |>
   mutate(
-    reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
-  )) |>
+    reporting_delay = list(
+      tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
+    )
+  ) |>
   unnest(reporting_delay) |>
   mutate(
     reported_onsets = rpois(n(), onsets * reporting_delay)
@@ -175,14 +179,14 @@ We then fit it do data:
 
 ```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(
-  n = length(unique(filtered_reporting_triangle$day)),                # number of days
+  n = length(unique(filtered_reporting_triangle$day)), # number of days
   m = nrow(filtered_reporting_triangle),               # number of reports
   p = filtered_reporting_triangle |>
    group_by(day) |>
    filter(d == max(d)) |>
    mutate(d = d + 1) |>
-   pull(d),       # number of observations per day
-  obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
+   pull(d),            # number of observations per day
+  obs = filtered_reporting_triangle$reported_onsets,   # observed symptom onsets
   d = 16               # number of reporting delays
 )
 joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
@@ -210,7 +214,9 @@ Finally, we can plot the nowcast alongside the observed data:
 
 ```{r plot-joint-nowcast}
 ggplot(joint_nowcast_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6) +
+  geom_col(
+    data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6
+  ) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
   geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```
@@ -319,7 +325,9 @@ joint_nowcast_with_r_onsets <- joint_rt_fit |>
 
 ```{r plot-joint-nowcast-with-r}
 ggplot(joint_nowcast_with_r_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6) +
+  geom_col(
+    data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6
+  ) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
   geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```

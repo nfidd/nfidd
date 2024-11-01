@@ -312,7 +312,7 @@ mech_forecast <- mech_forecast_fit |>
 
 stat_forecast <- stat_forecast_fit |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 
 forecast <- bind_rows(
@@ -332,7 +332,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
   ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   guides(colour = guide_legend(override.aes = list(alpha = 1))) +
@@ -346,7 +347,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
   ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +
