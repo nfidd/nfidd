@@ -66,7 +66,12 @@ To be able to use the code in each session, you will need a local copy of the co
 
 -   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
 
-### Interacting with the course
+-   If you prefer, you can also view each session on the website, and copy-paste the code into your own R script. In that case you don't need to download the material.
+    -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
+
+### Interacting with a local copy of the course material
+
+A benefit of downloading or cloning all the material is that you can interact with the session files directly.
 
 In this course, all content is written using [R Notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html).
 This means that we can combine text with code and see the output directly.
