@@ -112,13 +112,21 @@ We will start with our data on infection times, and work forwards to symptom ons
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
-::: {.callout-tip}
-Throughout the course, we repeat some small chunks of code. Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
+::: {.callout-note}
+Throughout the course, we repeatedly use some small chunks of code.
+Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
+To see exactly what the function does, just type the function name, e.g. `add_delays` for the function below.
 :::
 
 ```{r inf_hosp_solution}
 df <- add_delays(infection_times)
 ```
+
+::: {.callout-tip}
+## Take 2 minutes
+Have a look at the `add_delays()`  function and try to understand its inner workings.
+You can also access a help file for this function, just like any other R function, using `?add_delays`.
+:::
 
 Now we can plot infections, hospitalisations and onsets.
 
