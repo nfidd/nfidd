@@ -26,7 +26,7 @@ The source file of this session is located at `sessions/delay-distributions.qmd`
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `here` package to find the stan models, the `cmdstanr` package for using stan, and the `posterior` packages for investigating the results of the inference conducted with stan.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, and the `posterior` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -34,7 +34,6 @@ library("ggplot2")
 library("dplyr")
 library("tidyr")
 library("lubridate")
-library("cmdstanr")
 library("posterior")
 ```
 
@@ -46,7 +45,7 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmstanr` show line numbers when printing model code.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
@@ -112,13 +111,21 @@ We will start with our data on infection times, and work forwards to symptom ons
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
-::: {.callout-tip}
-Throughout the course, we repeat some small chunks of code. Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
+::: {.callout-note}
+Throughout the course, we repeatedly use some small chunks of code.
+Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
+To see exactly what the function does, just type the function name, e.g. `add_delays` for the function below.
 :::
 
 ```{r inf_hosp_solution}
 df <- add_delays(infection_times)
 ```
+
+::: {.callout-tip}
+## Take 2 minutes
+Have a look at the `add_delays()`  function and try to understand its inner workings.
+You can also access a help file for this function, just like any other R function, using `?add_delays`.
+:::
 
 Now we can plot infections, hospitalisations and onsets.
 
@@ -172,6 +179,7 @@ res <- mod$sample(
 )
 ```
 
+To find out more about the `sample` function we used here, you can use `?cmdstanr::sample`.
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}

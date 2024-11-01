@@ -30,7 +30,7 @@ The source file of this session is located at `sessions/biases-in-delay-distribu
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and built-in stan models, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, and the `cmdstanr` package for using stan.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -38,7 +38,6 @@ library("ggplot2")
 library("dplyr")
 library("tidyr")
 library("lubridate")
-library("cmdstanr")
 ```
 
 ::: callout-tip
@@ -49,7 +48,7 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmstanr` show line numbers when printing model code.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
@@ -70,7 +69,7 @@ Remember, in this outbreak we are assuming:
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
-We saved the code we used in that session to simulate symptom onset and hospitalisation data.
+We use the same function we used in that session to simulate symptom onset and hospitalisation data.
 
 ```{r inf_hosp_solution}
 df <- add_delays(infection_times)

@@ -27,15 +27,13 @@ The source file of this session is located at `sessions/nowcasting.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("cmdstanr")
 library("tidybayes")
 ```
 
@@ -188,7 +186,7 @@ plot(proportion_reported)
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 :::
 
-We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have copied the code into a snippet to make it easier to re-use), and apply the `reporting_delay` to the last 15 days of data.
+We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have created helper functions `make_gen_time_pmf()` and `make_ip_pmf()` to make it easier to re-use; we recommend to have a look at what these functions do), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()

@@ -30,15 +30,13 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("cmdstanr")
 library("tidybayes")
 library("scoringutils")
 ```
@@ -51,7 +49,7 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmstanr` show line numbers when printing model code.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
@@ -312,7 +310,7 @@ mech_forecast <- mech_forecast_fit |>
 
 stat_forecast <- stat_forecast_fit |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 
 forecast <- bind_rows(
@@ -332,7 +330,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
   ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   guides(colour = guide_legend(override.aes = list(alpha = 1))) +
@@ -346,7 +345,8 @@ forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    alpha = 0.1, aes(y = .value, group = interaction(.draw, model), colour = model)
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
   ) +
   geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
   scale_y_log10() +

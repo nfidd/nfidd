@@ -25,15 +25,13 @@ The source file of this session is located at `sessions/forecasting-concepts.qmd
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times and find the stan models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `cmdstanr` library for using stan. A new addition is the `scoringutils` package for calculating forecast evaluation metrics.
-We will also use the `tidybayes` package for extracting results of the inference.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("cmdstanr")
 library("tidybayes")
 library("scoringutils")
 ```
