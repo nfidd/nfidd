@@ -70,7 +70,7 @@ Remember, in this outbreak we are assuming:
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
-We saved the code we used in that session to simulate symptom onset and hospitalisation data.
+We use the same function we used in that session to simulate symptom onset and hospitalisation data.
 
 ```{r inf_hosp_solution}
 df <- add_delays(infection_times)
