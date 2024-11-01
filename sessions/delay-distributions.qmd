@@ -46,7 +46,7 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmstanr` show line numbers when printing model code.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
