@@ -6,8 +6,3 @@ order: 12
 # Objectives
 
 The aim of this session is to provide an overview of the different methods that are used in the real world from the perspective of the particpants and course instructors.
-
-## Slides
-
-- [Multi-model ensembles](slides/introduction-to-ensembles)
-
