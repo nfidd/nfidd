@@ -115,10 +115,13 @@ Alternatively we could have used, e.g., `geom_histogram()` to plot the raw data.
 ## Estimating the parameters of probability distributions
 
 We will now use stan to estimate the parameters of the probability distribution.
-To do so, we first load in the model.
+To do so, we first load in the stan model.
+Normally, you would do this by saving the model code in a text file called `gamma_model.stan` and then loading this using `cmdstanr::cmdstan_model()`.
+For this course, we included all the models in the `nfidd` package, and they can be accessed using `nfidd_cmdstan_model()` which uses `cmdstanr::cmdstan_model()` to load the specified model included with the package.
+Afterwards, we can use this model exactly how we would if we had loaded it using `cmdstanr` directly.
 
 ```{r load_gamma_model}
-### load gamma model from the session directory
+### load gamma model from the nfidd package
 mod <- nfidd_cmdstan_model("gamma")
 ### show model code
 mod
