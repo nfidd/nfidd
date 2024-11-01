@@ -28,13 +28,12 @@ The source file of this session is located at `sessions/R-Stan-and-statistical-c
 
 ## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `nfidd` package to load the stan models, and the `cmdstanr` library for using stan.
+In this session we will use the `ggplot2` library for plotting and the `nfidd` package to load the stan models.
 We will also use the `bayesplot` and `posterior` packages to investigate the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("ggplot2")
-library("cmdstanr")
 library("bayesplot")
 library("posterior")
 ```
