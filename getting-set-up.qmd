@@ -2,44 +2,18 @@ Each session in this course uses R code for demonstration.
 All the content is self-contained within a software package designed for the course.
 To get the most out of this course, you will need to use R and the following instructions to interact with the course material.
 
-# Required software
+# Getting R
 
 -   [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
 -   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
 
-# Accessing the course
-
-To be able to use the code in each session, you will need a local copy of the course material.
-
--   Directly download the course material:
-
-    ::: callout-tip
-    [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
-    :::
-
--   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
-
-### Interacting with the course
-
-In this course, all content is written using [R Notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html).
-This means that we can combine text with code and see the output directly.
-The notebooks are then directly reproduced on the course website (for example, this page).
-
-To interact with each session in the course, we recommend opening the RStudio Project file (`nfidd.RProj`) in the `nfidd` folder you have just downloaded.
-Then you can choose to:
-
--   View each session on the website, and copy-paste the code into your own R script.
-    -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
--   Open the R Notebook for each session.
-    -   Each notebook is saved in `nfidd/sessions/` as a `.qmd` file.
-    -   Execute code with the single green "play" button at the top-right corner of each code chunk ("Run current chunk"). You can also execute code line-by-line using `Ctrl/Cmd + Enter`.
-    -   We suggest using "Visual" view for a better experience (top-left of the RStudio pane).
+# Installing additional requirements
 
 Before you get started with the course, you will first need to install the following software.
 
 ## Installation of the `nfidd` package
 
-To install the packages needed in the course, including the `nfidd` package that contains data files used, you can use the `pak` package:
+To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout, you can use the `pak` package:
 
 ```{r install, eval=FALSE}
 install.packages("pak")
@@ -79,3 +53,32 @@ cmdstanr::cmdstan_version()
 ```
 
 For more details, and for links to resources in case something goes wrong, see the [Getting Started with CmdStanr](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette of the package.
+
+# Accessing the course
+
+To be able to use the code in each session, you will need a local copy of the course material.
+
+-   Directly download the course material:
+
+    ::: callout-tip
+    [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    :::
+
+-   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
+
+### Interacting with the course
+
+In this course, all content is written using [R Notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html).
+This means that we can combine text with code and see the output directly.
+The notebooks are then directly reproduced on the course website (for example, this page).
+
+To interact with each session in the course, we recommend opening the RStudio Project file (`nfidd.RProj`) in the `nfidd` folder you have just downloaded.
+Then you can choose to:
+
+-   View each session on the website, and copy-paste the code into your own R script.
+    -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
+-   Open the R Notebook for each session.
+    -   Each notebook is saved in `nfidd/sessions/` as a `.qmd` file.
+    -   Execute code with the single green "play" button at the top-right corner of each code chunk ("Run current chunk"). You can also execute code line-by-line using `Ctrl/Cmd + Enter`.
+    -   We suggest using "Visual" view for a better experience (top-left of the RStudio pane).
+
