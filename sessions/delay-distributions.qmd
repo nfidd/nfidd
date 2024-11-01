@@ -180,6 +180,7 @@ res <- mod$sample(
 )
 ```
 
+To find out more about the `sample` function we used here, you can use `?cmdstanr::sample`.
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
