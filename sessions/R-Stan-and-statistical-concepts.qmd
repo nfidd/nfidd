@@ -28,13 +28,12 @@ The source file of this session is located at `sessions/R-Stan-and-statistical-c
 
 ## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `nfidd` package to load the stan models, and the `cmdstanr` library for using stan.
+In this session we will use the `ggplot2` library for plotting and the `nfidd` package to load the stan models.
 We will also use the `bayesplot` and `posterior` packages to investigate the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("ggplot2")
-library("cmdstanr")
 library("bayesplot")
 library("posterior")
 ```
@@ -47,7 +46,7 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility.
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmstanr` show line numbers when printing model code.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
@@ -115,10 +114,13 @@ Alternatively we could have used, e.g., `geom_histogram()` to plot the raw data.
 ## Estimating the parameters of probability distributions
 
 We will now use stan to estimate the parameters of the probability distribution.
-To do so, we first load in the model.
+To do so, we first load in the stan model.
+Normally, you would do this by saving the model code in a text file called `gamma_model.stan` and then loading this using `cmdstanr::cmdstan_model()`.
+For this course, we included all the models in the `nfidd` package, and they can be accessed using `nfidd_cmdstan_model()` which uses `cmdstanr::cmdstan_model()` to load the specified model included with the package.
+Afterwards, we can use this model exactly how we would if we had loaded it using `cmdstanr` directly.
 
 ```{r load_gamma_model}
-### load gamma model from the session directory
+### load gamma model from the nfidd package
 mod <- nfidd_cmdstan_model("gamma")
 ### show model code
 mod

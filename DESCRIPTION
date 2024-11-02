@@ -34,8 +34,8 @@ Suggests:
     stackr
 Remotes:
     epiforecasts/scoringutils@b370557,
-    epiforecasts/qra@e86d7e0,
-    epiforecasts/stackr
+    epiforecasts/qra@v0.1.0
+    epiforecasts/stackr@v0.1.0
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Encoding: UTF-8

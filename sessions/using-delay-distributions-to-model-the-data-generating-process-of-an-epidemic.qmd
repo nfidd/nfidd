@@ -29,15 +29,13 @@ The source file of this session is located at `sessions/using-delay-distribution
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, the `ggplot2` library for plotting and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("cmdstanr")
 library("tidybayes")
 ```
 
@@ -88,7 +86,8 @@ inf_ts <- make_daily_infections(infection_times)
 ```
 
 ::: callout-note
-The second part of the code snippet above is used to add days without infections with a zero count.
+As before you can look at the code of the function by typing `make_daily_infections`.
+The second part of this function is used to add days without infections with a zero count.
 This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
 :::
 
@@ -136,7 +135,7 @@ In the absence of any other information or model, we assume for our simulation t
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days.
 
-You can load and then view it using:
+You can view the function we have written do this using:
 
 ```{r discretise_2_day_window}
 censored_delay_pmf
@@ -159,6 +158,7 @@ plot(gamma_pmf)
 #### Applying a convolution
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
+The function we have written to do this is called `convolve_with_delay`
 
 ```{r convolution}
 convolve_with_delay
