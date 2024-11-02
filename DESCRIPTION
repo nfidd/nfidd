@@ -33,7 +33,6 @@ Suggests:
     qra,
     stackr
 Remotes:
-    epiforecasts/scoringutils@b370557,
     epiforecasts/qra@v0.1.0,
     epiforecasts/stackr@v0.1.0
 Additional_repositories:
