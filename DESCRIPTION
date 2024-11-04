@@ -30,7 +30,7 @@ Suggests:
     rmarkdown,
     scoringutils,
     tidybayes,
-    qra,
+    qrensemble,
     stackr
 Additional_repositories:
     https://stan-dev.r-universe.dev,
