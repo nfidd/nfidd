@@ -30,13 +30,11 @@ Suggests:
     rmarkdown,
     scoringutils,
     tidybayes,
-    qra,
+    qrensemble,
     stackr
-Remotes:
-    epiforecasts/qra@v0.1.0,
-    epiforecasts/stackr@v0.1.0
 Additional_repositories:
-    https://stan-dev.r-universe.dev
+    https://stan-dev.r-universe.dev,
+    https://epiforecasts.r-universe.dev
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2

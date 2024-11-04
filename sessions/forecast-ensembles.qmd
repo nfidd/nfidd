@@ -46,7 +46,7 @@ The source file of this session is located at `sessions/forecast-ensembles.qmd`.
 ## Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
-We will also use `qra` for quantile regression averaging in the weighted ensemble section.
+We will also use `qrensemble` for quantile regression averaging in the weighted ensemble section.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -54,7 +54,7 @@ library("dplyr")
 library("tidyr")
 library("ggplot2")
 library("scoringutils")
-library("qra")
+library("qrensemble")
 library("stackr")
 ```
 
