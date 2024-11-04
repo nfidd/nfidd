@@ -24,8 +24,8 @@ jobs:
         with:
           use-public-rspm: true
           extra-repositories:
-            'https://stan-dev.r-universe.dev'
-            'https://epiforecasts.r-universe.dev'
+            https://stan-dev.r-universe.dev,
+            https://epiforecasts.r-universe.dev
 
       - name: Setup pandoc
         uses: r-lib/actions/setup-pandoc@v2
