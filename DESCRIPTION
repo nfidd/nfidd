@@ -28,10 +28,10 @@ Suggests:
     posterior,
     purrr,
     rmarkdown,
-    scoringutils,
+    scoringutils (>= 2.0.0),
     tidybayes,
-    qrensemble,
-    stackr,
+    qrensemble (>= 0.1.0),
+    stackr (>= 0.1.0),
     roxyglobals
 Additional_repositories:
     https://stan-dev.r-universe.dev,
