@@ -25,7 +25,7 @@ files.
 \examples{
 \dontshow{if (requireNamespace("cmdstanr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
-  model <- nfidd_cmdstan_model("renewal", compile = FALSE)
+  model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
   model
 }
 \dontshow{\}) # examplesIf}
