@@ -241,7 +241,7 @@ nfidd_load_stan_functions <- function(
 #' @export
 #'
 #' @examples
-#' nfidd_list_stan_models()
+#' nfidd_stan_models()
 nfidd_stan_models <- function(
     stan_path = nfidd::nfidd_stan_path()
   ) {

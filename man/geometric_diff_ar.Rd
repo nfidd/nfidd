@@ -23,5 +23,5 @@ process.
 This function generates a geometric differenced autoregressive process.
 }
 \examples{
-geometric_diff_ar(init = 1, noise = rnorm(100), phi = 0.1, std = 0.1)
+geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
 }

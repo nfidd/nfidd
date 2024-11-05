@@ -17,5 +17,6 @@ A data frame with columns for infection time, onset time, and
 Simulate symptom onset and hospitalization times from infection times
 }
 \examples{
-add_delays(infection_times)
+delayed_infections <- add_delays(infection_times)
+head(delayed_infections)
 }

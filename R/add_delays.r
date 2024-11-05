@@ -11,7 +11,8 @@
 #' @export
 #'
 #' @examples
-#' add_delays(infection_times)
+#' delayed_infections <- add_delays(infection_times)
+#' head(delayed_infections)
 add_delays <- function(infection_times) {
   # Add random delays from appropriate probability distributions
   df <- infection_times |>

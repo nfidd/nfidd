@@ -18,5 +18,5 @@ This function finds all available Stan models in the NFIDD package and
 returns their names without the .stan extension.
 }
 \examples{
-nfidd_list_stan_models()
+nfidd_stan_models()
 }
