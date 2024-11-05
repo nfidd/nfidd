@@ -31,7 +31,8 @@ Suggests:
     scoringutils,
     tidybayes,
     qrensemble,
-    stackr
+    stackr,
+    roxyglobals
 Additional_repositories:
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev
@@ -39,3 +40,7 @@ Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
 LazyData: true
+Roxygen: list(roclets = c("collate", "namespace", "rd",
+    "roxyglobals::global_roclet"))
+Config/roxyglobals/filename: globals.R
+Config/roxyglobals/unique: FALSE

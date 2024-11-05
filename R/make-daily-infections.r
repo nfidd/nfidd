@@ -8,6 +8,7 @@
 #' @importFrom dplyr transmute count full_join join_by
 #' @importFrom tidyr expand replace_na
 #'
+#' @autoglobal
 #' @export
 #'
 #' @examples
