@@ -569,7 +569,7 @@ inverse_wis_ensemble <- quantile_forecasts |>
 We futher to perform quantile regression averaging (QRA) for each forecast date.
 Again we need to consider how many previous forecasts we wish to use to inform each ensemble forecast.
 Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble.
-We use the `qra` package to perform this task.
+We use the `qrensemble` package to perform this task.
 
 ```{r qra}
 forecast_dates <- quantile_forecasts |>
