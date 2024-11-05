@@ -49,6 +49,7 @@ make_ip_pmf <- function(max = 14, shape = 5, rate = 1) {
 #' @importFrom dplyr tibble left_join select
 #' @importFrom tidyr replace_na
 #'
+#' @autoglobal
 #' @export
 #'
 #' @examples

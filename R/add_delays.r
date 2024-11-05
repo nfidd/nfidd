@@ -8,6 +8,7 @@
 #' @importFrom dplyr mutate n if_else
 #' @importFrom stats rgamma rlnorm rbinom
 #'
+#' @autoglobal
 #' @export
 #'
 #' @examples

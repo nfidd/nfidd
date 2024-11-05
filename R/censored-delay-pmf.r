@@ -11,7 +11,8 @@
 #'
 #' @return A vector of probabilities corresponding to discrete indices from
 #'   `0` to `max`, representing the discretised delay distribution.
-#'
+#' @importFrom stats runif
+#' @autoglobal
 #' @export
 #'
 #' @examples
