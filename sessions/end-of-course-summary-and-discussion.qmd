@@ -34,7 +34,10 @@ The following is a highly subjective list of papers we would recommend to read f
 - Funk et al., [Assessing the performance of real-time epidemic forecasts: A case study of Ebola in the Western Area region of Sierra Leone, 2014-15](https://doi.org/10.1371/journal.pcbi.1006785) evaluates the performance of a forecasting method that combines a mechanistic SEIR model with a random walk prior for the reproduction number.
 - Held et al, [Probabilistic forecasting in infectious disease epidemiology: the 13th Armitage lecture](https://doi.org/10.1002/sim.7363) makes a compelling argument for the use of probabilistic forecasts and evaluates spatial forecasts based on routine surveillance data.
 - Lopez et al., [Challenges of COVID-19 Case Forecasting in the US, 2020-2021](https://doi.org/10.1101/2023.05.30.23290732) describes the difficulty encountered in  making accurate forecasts in COVID-19 cases in the US COVID-19 Forecast Hub.
-- Sherratt et al., [Predictive performance of multi-model ensemble forecasts of COVID-19 across European nations](https://doi.org/10.7554/eLife.81916) investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
 - Asher, [Forecasting Ebola with a regression transmission model](10.1016/j.epidem.2017.02.009) describes model that implements an extension to the random walk with a drift term.
 - CDC, code repo for [Wastewater-informed COVID-19 forecasting](https://github.com/CDCgov/wastewater-informed-covid-forecasting).
 - Hyndman and Athanasopoulos, [Forecasting: Principles and Practice (free online text book)](https://otexts.com/fpp3/) is a textbook on forecasting with a range of time series models and a great resource for finding out more about them.
+
+## Ensembles
+- Sherratt et al., [Predictive performance of multi-model ensemble forecasts of COVID-19 across European nations](https://doi.org/10.7554/eLife.81916) investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
+- Ribeiro et al., [Post-processing and weighted combination of infectious disease nowcasts]( https://doi.org/10.1101/2024.08.28.24312701) discusses the challenges in improving on the predictive performance of simpler approaches using weighted ensembles.
