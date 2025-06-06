@@ -5,6 +5,7 @@ order: 8
 
 # Introduction
 
+As we saw in the [session on different forecasting models](forecast-models), different modelling approaches have different strength and weaknesses, and it is not clear a priori which one produces the best forecast in any given situation.
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach.
 These different approaches all have different strength and weaknesses, and it is not clear a prior which one produces the best forecast in any given situation.
 One way to attempt to draw strength from a diversity of approaches is the creation of so-called *forecast ensembles* from the forecasts produced by different models.
@@ -25,6 +26,9 @@ A quantile is the value that corresponds to a given quantile level of a distribu
 For example, the median is the 50th quantile of a distribution, meaning that 50% of the values in the distribution are less than the median and 50% are greater.
 Similarly, the 90th quantile is the value that corresponds to 90% of the distribution being less than this value.
 If we characterise a predictive distribution by its quantiles, we specify these values at a range of specific quantile levels, e.g. from 5% to 95% in 5% steps.
+
+Deciding how to represent forecasts depends on many things, for example the method used (and whether it produces samples by default) but also logistic considerations.
+Many collaborative forecasting projects and so-called forecasting hubs use quantile-based representations of forecasts in the hope to be able to characterise both the centre and tails of the distributions more reliably and with less demand on storage space than a sample-based representation.
 :::
 
 ## Slides
@@ -46,7 +50,7 @@ The source file of this session is located at `sessions/forecast-ensembles.qmd`.
 ## Libraries used
 
 In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
-We will also use `qrensemble` for quantile regression averaging in the weighted ensemble section.
+We will also use `qrensemble` for quantile regression averaging and `stackr` for mixture ensembles using stacking in the weighted ensemble section.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -79,11 +83,11 @@ In this session we will use the forecasts from the models we explored in the ses
 
 - A random walk model
 - A differenced autoregressive model referred to as "More statistical"
-- A simple model of susceptible depeltion referred to as "More mechanistic"
+- A simple model of susceptible depletion referred to as "More mechanistic"
 
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
 
-As in the session on [forecasting concepts](forecasting-concepts), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
+As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
 We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
@@ -266,7 +270,7 @@ How do they differ from each other?
 ## Solution
 How do these ensembles compare to the individual models?
 
-- Both of the simple ensembles appear to be less variable than the statistical models but have more variable than the mechanistic model.
+- Both of the simple ensembles appear to be less variable than the statistical models but are more variable than the mechanistic model.
 - Both ensembles are more like the statistical models than the mechanistic model.
 
 How do they differ from each other?
@@ -318,13 +322,19 @@ Are there any differences across forecast dates?
 
 ## Evaluation 
 
-As in the [forecasting concepts session](forecasting-concepts), we can evaluate the accuracy of the ensembles using the `{scoringutils}` package and in particular the `score()` function.
+As in the [forecast evaluation session](forecast-evaluation), we can evaluate the accuracy of the ensembles using the `{scoringutils}` package and in particular the `score()` function.
 
 ```{r score-ensembles}
 ensemble_scores <- simple_ensembles |>
   as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
   score()
 ```
+
+::: {.callout-note}
+The **weighted interval score (WIS)** is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
+
+We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
+:::
 
 Again we start with a high level overview of the scores by model.
 
@@ -500,7 +510,7 @@ How do the filtered ensembles compare to the simple ensembles?
 - For the first time there are features of the ensemble that outperform the more mechanistic model though it remains the best performing model overall.
 :::
 
-# Weighted ensembles
+# Weighted quantile ensembles
 
 The simple mean and median we used to average quantiles earlier treats every model as the same.
 We could try to improve performance by replacing this with a weighted mean (or weighted median), for example given greater weight to models that have proven to make better forecasts.
@@ -515,10 +525,6 @@ However, it does not optimise the weights directly to produce the best forecasts
 It relies on the hope that giving more weight to better performing models yields a better ensemble
 
 Quantile regression averaging on the other hand does optimise the weights directly in order to yield the best scores on past data.
-
-We further investigate a weighting method that uses samples from the predictive distribution to create an ensemble:
-
-- Mixture ensemble using stacking
 
 ## Construction
 
@@ -813,7 +819,7 @@ weighted_ensemble_scores |>
   summarise_scores(by = c("model"))
 ```
 
-Remembering the session on [forecasting concepts](forecasting-concepts), we should also check performance on the log scale. 
+Remembering the session on [forecast evaluation](forecast-evaluation), we should also check performance on the log scale. 
 
 ```{r score-overview-weighted-log}
 log_ensemble_scores <- weighted_ensembles |>
@@ -837,7 +843,7 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 
 ::: {.callout-note collapse="true"}
 ## Solution
-How do the weighted ensembles compare to the simple ensembles on the natural and log scale?
+The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles. Why might this be the case?
 :::
 
 # Going further

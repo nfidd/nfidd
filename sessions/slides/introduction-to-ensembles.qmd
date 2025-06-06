@@ -75,16 +75,6 @@ Many uncertainties, many approaches: many models
    
 - Also enables consistent evaluation
 
-## Collaborative modelling
-
-### "Forecast hubs"
-
-- Outbreak modelling
-
-  - Since 2013 for US influenza
-
-   - Ebola, dengue, chikungunya, COVID-19, WNV
-
 ##
 
 ... European [Respicast](https://respicast.ecdc.europa.eu/)
@@ -100,55 +90,13 @@ Many uncertainties, many approaches: many models
 ## ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
 
-## Evaluation: European COVID-19 Hub 
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-- March 2021 - now
+1. Create unweighted and weighted ensembles using forecasts from multiple models.
+2. Evaluate the forecasts from ensembles compared to their constituent models.
 
-- ~40 teams, ~50 models
+#
 
-- Weekly ensemble & evaluation
-![](figures/hub-metadata)
-
-## Evaluation: European COVID-19 Hub {.smaller}
-  
-![](figures/hub-ensemble-good)
+[Return to the session](../forecast-ensembles)
 
 
-## Evaluation: European COVID-19 Hub {.smaller}
-
-![](figures/hub-ensemble-less-good)
-
-
-## Evaluating ensembles
-
-::: {.fragment .fade-in}
-
-  - Ensemble reduces variance
-
-    - (+) Stable
-
-    - (-) Can't explore extremes
-:::
-
-::: {.fragment .fade-in}
-
-  - Dependent on components
-
-    - (+) Ensemble typically more accurate than any individual component
-
-    - (-) Obscures mechanisms
-:::
-
-## Ensembles: reflections
-
-- Comparing uncertainties
-   
-   - Which aspects of uncertainty do we want to keep (compare), or combine?
-   
-   
-   
-- Collaborative modelling
-   
-  - Opportunity for exchange & evaluation
-      
-   - Consensus - at the cost of context?
