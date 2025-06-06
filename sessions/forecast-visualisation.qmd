@@ -194,7 +194,7 @@ If we do this, we get the following plot.
 
 ```{r plot_future_forecast}
 future_onsets <- onset_df |>
-  filter(day <= forecast_day + horizon)
+  filter(day <= cutoff + horizon)
 
 forecast |>
   filter(.draw %in% sample(.draw, 100)) |>
