@@ -19,7 +19,7 @@ format:
 
 Modelling the future can help decision making:
 
-- how many beds to we need?
+- how many beds do we need?
 - where should we allocate vaccines?
 - where should we trial vaccines?
 
@@ -48,46 +48,17 @@ However:
 
 [CDC: About Flu Forecasting](https://www.cdc.gov/flu/weekly/flusight/how-flu-forecasting.htm)
 
-### Relationship with $R_t$ estimation {.smaller}
-
-- In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
-- Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
-- In that sense, predicting infections comes down to **predicting $R_t$**
-- Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
-
-### Relationship with nowcasting {.smaller}
-
-- Nowcast: we have **some** data from the dates we're predicting
-- Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
-
 ### Forecasts are usually *probabilistic* {.smaller}
 
 - Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
 
 ![](figures/weather_forecast.png)
 
-### Importance of evaluation {.smaller}
-
-- Because forecasts are unconditional (what will happen) we can compare them to data and see how well they did
-- Doing this allows us to answer question like
-  - Are our forecasts any good?
-  - How far ahead can we trust forecasts?
-  - Which model works best for making forecasts?
-- So-called **proper scoring rules** incentivise forecasters to express an honest belief about the future
-- Many proper scoring rules (and other metrics) are available to assess probabilistic forecasts
-
-### The forecasting paradigm {.smaller}
-
-#### Maximise *sharpness* subject to *calibration*
-
-- Statements about the future should be **correct** ("calibration")
-- Statements about the future should aim to have **narrow uncertainty** ("sharpness")
-
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1. Start with a model we used before and use it to make a forecast (using stan)
-2. Evaluate the forecasts using proper scoring rules
+1. Load some forecasts we have generated and visualise them alongside the data.
+2. Explore different ways of visualising forecasts to assess how good the model performs at forecasting.
 
 #
 
-[Return to the session](../forecasting-concepts)
+[Return to the session](../forecasting-visualisation)

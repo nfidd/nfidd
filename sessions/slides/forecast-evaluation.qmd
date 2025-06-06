@@ -1,0 +1,36 @@
+---
+title: "Forecast evaluation"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/forecast-evaluation.html
+    footer: "Forecast evaluation"
+    slide-level: 3
+---
+
+### Importance of evaluation {.smaller}
+
+- Because forecasts are unconditional (what will happen) we can compare them to data and see how well they did
+- Doing this allows us to answer question like
+  - Are our forecasts any good?
+  - How far ahead can we trust forecasts?
+  - Which model works best for making forecasts?
+- So-called **proper scoring rules** incentivise forecasters to express an honest belief about the future
+- Many proper scoring rules (and other metrics) are available to assess probabilistic forecasts
+
+### The forecasting paradigm {.smaller}
+
+#### Maximise *sharpness* subject to *calibration*
+
+- Statements about the future should be **correct** ("calibration")
+- Statements about the future should aim to have **narrow uncertainty** ("sharpness")
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+1. Load forecasts from the model we have visualised previously.
+2. Evaluate the forecasts using proper scoring rules
+
+#
+
+[Return to the session](../forecast-evaluation)
