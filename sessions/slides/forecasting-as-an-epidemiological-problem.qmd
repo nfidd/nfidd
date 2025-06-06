@@ -48,6 +48,18 @@ However:
 
 [CDC: About Flu Forecasting](https://www.cdc.gov/flu/weekly/flusight/how-flu-forecasting.htm)
 
+### Relationship with $R_t$ estimation {.smaller}
+
+- In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
+- Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
+- In that sense, predicting infections comes down to **predicting $R_t$**
+- Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
+
+### Relationship with nowcasting {.smaller}
+
+- Nowcast: we have **some** data from the dates we're predicting
+- Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
+
 ### Forecasts are usually *probabilistic* {.smaller}
 
 - Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
