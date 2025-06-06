@@ -28,12 +28,13 @@ The source file of this session is located at `sessions/forecasting-visualisatio
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and corresponding forecasts, the `dplyr` package for data wrangling, and the `ggplot2` library for plotting.
+In this session we will use the `nfidd` package to load a data set of infection times and corresponding forecasts, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("ggplot2")
+library("tidybayes")
 ```
 
 ::: {.callout-tip}
