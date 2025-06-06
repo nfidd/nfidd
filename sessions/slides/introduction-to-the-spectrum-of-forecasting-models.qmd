@@ -1,15 +1,15 @@
 ---
-title: "Forecasting models"
+title: "Introduction to the spectrum of forecasting models"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 engine: knitr
 format:
   revealjs:
-    output: slides/forecasting-as-an-epidemiological-problem.html
-    footer: "Forecasting as an epidemiological problem"
+    output: slides/introduction-to-the-spectrum-of-forecasting-models.html
+    footer: "Introduction to the spectrum of forecasting models"
     slide-level: 3
 ---
 
-###  {.smaller}
+## Different types of models {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -44,7 +44,7 @@ format:
 
 **Complex agent-based models**
 
-Conceptually probably the closest to metereological forecasting, if with much less real-time data.
+Conceptually probably the closest to meteorological forecasting, if with much less real-time data.
 
 :::
 
@@ -100,9 +100,9 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::: {.column}
 
-![](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/biostatistics/14/3/10.1093_biostatistics_kxs052/1/kxs05202.gif?Expires=1722167238&Signature=jV-HNL5VRrTpanqfOydjV~RcZSNMvaS6ENMD6vGNuJUBR-aar7NImeJ44fkzLBm6HEJPVtH6N6VORbIDZk8au5dzM5~XEjrGSxkdMxYxLW2L4S8PGaNHhFEf0lEJH6WrvlsJat9eN8716ULDcNgbrNr7N4Kjah1erborOZODCbNyaL8e-2SChcSxMTU1Lf2s~OADpKzmADukH4PFv--rF4iShx4ppQwm~9~s-E3YAPBYaHpTISjl3oj7s97Z~ROFYLqBJ2PRQsyJXrDomXEtl5mwWPGzEt32kPRwNumZUJD0wN1M3GwadWZL1FB6CqBPu8qA5Vo365tiox58lr1Esg__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA)
+![](https://ars.els-cdn.com/content/image/1-s2.0-S1755436516300445-gr2.jpg)
 
-[Dureau *et al.*, *Biostatistics*, 2013](https://doi.org/10.1093/biostatistics/kxs052)
+[Funk *et al.*, *Epidemics*, 2018](http://dx.doi.org/10.1016/j.epidem.2016.11.003)
 
 :::
 
