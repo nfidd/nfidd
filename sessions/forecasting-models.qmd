@@ -10,7 +10,7 @@ In this session, we'll start with the renewal model that we've been using and ex
 
 ## Slides
 
-- [Forecasting models](slides/forecasting-models)
+- [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
 
 ## Objectives
 
@@ -59,7 +59,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 :::
 
-# What did we learn about the random walk model from the [forecasting concepts session](forecasting-concepts)?
+# What did we learn about the random walk model from the [forecast evaluation session](forecast-valuation)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
@@ -485,7 +485,7 @@ forecasts |>
     alpha = 0.1
   ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
-
+  scale_y_log10(limits = c(NA, 500)) +
   scale_color_binned(type = "viridis") +
   facet_wrap(~model)
 ```
@@ -539,7 +539,7 @@ sc_scores <- sc_forecasts |>
 
 sc_scores
 ```
-  scale_y_log10(limits = c(NA, 500)) +
+
 ::: {.callout-note collapse="true"}
 ## Learning more about the output of `score()`
 
@@ -562,12 +562,12 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 ### Continuous ranked probability score
 
-As in the [forecasting concepts session](forecasting-concepts), we will start by looking at the CRPS by horizon and forecast date.
+As in the [forecast evaluation session](forecast-evaluation), we will start by looking at the CRPS by horizon and forecast date.
 
 ::: {.callout-tip}
 ## Reminder: Key things to note about the CRPS
   - Small values are better
-  - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+  - When scoring absolute values (e.g. number of cases) it can be difficult to compare forecasts across scales (i.e., when case numbers are different, for example between locations or at different times).
 :::
 
 First by forecast horizon.
@@ -590,23 +590,23 @@ sc_scores |>
 
 ::: {.callout-tip}
 ## Take 5 minutes 
-How do the CRPS scores change based on forecast date?
-How do the CRPS scores change with forecast horizon?
+How do the CRPS values change based on forecast date?
+How do the CRPS values change with forecast horizon?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-How do the CRPS scores change based on forecast horizon?
+How do the CRPS values change based on forecast horizon?
 
 - All models have increasing CRPS with forecast horizon.
 - The more mechanistic model has the lowest CRPS at all forecast horizon.
 - The more stastical model starts to outperform the random walk model at longer time horizons.
 
-How do the CRPS scores change with forecast date?
+How do the CRPS values change with forecast date?
 
 - The more statistical model does particularly poorly around the peak of the outbreak but outperforms the random walk model.
 - The more mechanistic model does particularly well around the peak of the outbreak versus all other models
-- The more statistical model starts to outperfrom the other models towards the end of the outbreak.
+- The more statistical model starts to outperform the other models towards the end of the outbreak.
 
 :::
 
@@ -675,7 +675,7 @@ What do you think of the PIT histograms?
 
 ## Scoring on the log scale
 
-Again as in the [forecasting concepts session](forecasting-concepts), we will also score the forecasts on the log scale.
+Again as in the [forecast evaluation session](forecast-evaluation), we will also score the forecasts on the log scale.
 
 ```{r log-convert-forecasts}
 log_sc_forecasts <- sc_forecasts |>
@@ -724,7 +724,7 @@ log_sc_scores |>
 
 ::: {.callout-tip}
 ## Take 5 minutes 
-How do the CRPS scores on the log scale compare to the scores on the original scale?
+How do the CRPS values on the log scale compare to the scores on the original scale?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -784,3 +784,8 @@ The PIT histograms are similar to the original scale PIT histograms but the mech
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
 
 # Wrap up
+
+# References
+
+::: {#refs}
+:::
