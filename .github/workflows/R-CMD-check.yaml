@@ -38,14 +38,14 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
+          extra-repositories:
+            https://stan-dev.r-universe.dev,
+            https://epiforecasts.r-universe.dev
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          extra-repositories:
-            https://stan-dev.r-universe.dev,
-            https://epiforecasts.r-universe.dev
 
       - name: Install CmdStan
         uses: epinowcast/actions/install-cmdstan@v1
