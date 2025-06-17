@@ -43,6 +43,10 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          repositories: |
+            CRAN=https://cran.rstudio.com/
+            stan-dev=https://stan-dev.r-universe.dev
+            epiforecasts=https://epiforecasts.r-universe.dev
 
       - name: Install CmdStan
         uses: epinowcast/actions/install-cmdstan@v1
