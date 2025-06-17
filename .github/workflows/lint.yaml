@@ -26,6 +26,7 @@ jobs:
       with:
         extra-packages: any::lintr, local::.
         needs: lint
+        extra-repositories: c('https://stan-dev.r-universe.dev', 'https://epiforecasts.r-universe.dev')
 
     - name: Lint package
       run: lintr::lint_package()
