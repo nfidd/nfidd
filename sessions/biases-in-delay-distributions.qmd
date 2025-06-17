@@ -152,14 +152,7 @@ res
 We can calculate the mean and standard deviation to see the bias more clearly:
 
 ```{r df_dates_mean_sd_summary}
-res |>
-  spread_draws(meanlog, sdlog) |>
-  mutate(
-    mean = exp(meanlog + 0.5 * sdlog^2),
-    sd = exp(meanlog + 0.5 * sdlog^2) * sqrt(exp(sdlog^2) - 1)
-  ) |>
-  select(mean, sd) |>
-  summary()
+res |> summarise_lognormal()
 ```
 
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
@@ -209,14 +202,7 @@ cres
 We can also examine the mean and standard deviation of the estimated delay distribution:
 
 ```{r censored_mean_sd_summary}
-cres |>
-  spread_draws(meanlog, sdlog) |>
-  mutate(
-    mean = exp(meanlog + 0.5 * sdlog^2),
-    sd = exp(meanlog + 0.5 * sdlog^2) * sqrt(exp(sdlog^2) - 1)
-  ) |>
-  select(mean, sd) |>
-  summary()
+cres |> summarise_lognormal()
 ```
 
 ::: callout-tip
@@ -282,14 +268,7 @@ res
 The mean and standard deviation show the underestimation due to truncation:
 
 ```{r df_realtime_mean_sd_summary}
-res |>
-  spread_draws(meanlog, sdlog) |>
-  mutate(
-    mean = exp(meanlog + 0.5 * sdlog^2),
-    sd = exp(meanlog + 0.5 * sdlog^2) * sqrt(exp(sdlog^2) - 1)
-  ) |>
-  select(mean, sd) |>
-  summary()
+res |> summarise_lognormal()
 ```
 :::
 
@@ -332,14 +311,7 @@ tres
 Let's also check the mean and standard deviation of the truncation-adjusted delay distribution:
 
 ```{r truncated_mean_sd_summary}
-tres |>
-  spread_draws(meanlog, sdlog) |>
-  mutate(
-    mean = exp(meanlog + 0.5 * sdlog^2),
-    sd = exp(meanlog + 0.5 * sdlog^2) * sqrt(exp(sdlog^2) - 1)
-  ) |>
-  select(mean, sd) |>
-  summary()
+tres |> summarise_lognormal()
 ```
 
 ::: callout-tip
