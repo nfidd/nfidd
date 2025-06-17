@@ -43,7 +43,9 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          extra-repositories: c('https://stan-dev.r-universe.dev', 'https://epiforecasts.r-universe.dev')
+          extra-repositories:
+            https://stan-dev.r-universe.dev,
+            https://epiforecasts.r-universe.dev
 
       - name: Install CmdStan
         uses: epinowcast/actions/install-cmdstan@v1
