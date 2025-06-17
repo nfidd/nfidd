@@ -3,6 +3,6 @@
 # https://r-pkgs.org/testing-design.html#sec-tests-files-overview
 # for more information.
 library(testthat)
-library(nfidd)
 
+# Package will be loaded by devtools/R CMD check
 test_check("nfidd")
