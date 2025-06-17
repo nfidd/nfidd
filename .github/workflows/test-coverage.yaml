@@ -25,8 +25,7 @@ jobs:
         with:
           extra-packages: any::covr, local::.
           needs: coverage
-          extra-repositories: |
-            c('https://stan-dev.r-universe.dev', 'https://epiforecasts.r-universe.dev')
+          extra-repositories: c('https://stan-dev.r-universe.dev', 'https://epiforecasts.r-universe.dev')
 
       - name: Install CmdStan
         uses: epinowcast/actions/install-cmdstan@v1
