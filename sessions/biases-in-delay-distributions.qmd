@@ -314,7 +314,8 @@ tres
 Let's also check the mean and standard deviation of the truncation-adjusted delay distribution:
 
 ```{r truncated_mean_sd_summary}
-tres |> summarise_lognormal()
+tres |>
+  summarise_lognormal()
 ```
 
 ::: callout-tip
