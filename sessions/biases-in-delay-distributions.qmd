@@ -30,7 +30,7 @@ The source file of this session is located at `sessions/biases-in-delay-distribu
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, and the `tidybayes` package for extracting results from model fits.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -38,6 +38,7 @@ library("ggplot2")
 library("dplyr")
 library("tidyr")
 library("lubridate")
+library("tidybayes")
 ```
 
 ::: callout-tip
@@ -148,6 +149,13 @@ res <- mod$sample(
 res
 ```
 
+We can calculate the mean and standard deviation to see the bias more clearly:
+
+```{r df_dates_mean_sd_summary}
+res |>
+  summarise_lognormal()
+```
+
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
 :::
 
@@ -190,6 +198,13 @@ cres <- cmod$sample(
 
 ```{r censored_estimate_summary}
 cres
+```
+
+We can also examine the mean and standard deviation of the estimated delay distribution:
+
+```{r censored_mean_sd_summary}
+cres |>
+  summarise_lognormal()
 ```
 
 ::: callout-tip
@@ -251,6 +266,13 @@ res <- mod$sample(
 ```{r df_realtime_solution_summary}
 res
 ```
+
+The mean and standard deviation show the underestimation due to truncation:
+
+```{r df_realtime_mean_sd_summary}
+res |>
+  summarise_lognormal()
+```
 :::
 
 Once again, we can write a model that adjusts for truncation, by re-creating the simulated truncation effect in the stan model:
@@ -287,6 +309,13 @@ tres <- tmod$sample(
 
 ```{r truncated_estimate_summary}
 tres
+```
+
+Let's also check the mean and standard deviation of the truncation-adjusted delay distribution:
+
+```{r truncated_mean_sd_summary}
+tres |>
+  summarise_lognormal()
 ```
 
 ::: callout-tip
