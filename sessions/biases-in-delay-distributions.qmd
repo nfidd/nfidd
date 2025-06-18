@@ -203,7 +203,8 @@ cres
 We can also examine the mean and standard deviation of the estimated delay distribution:
 
 ```{r censored_mean_sd_summary}
-cres |> summarise_lognormal()
+cres |>
+  summarise_lognormal()
 ```
 
 ::: callout-tip
