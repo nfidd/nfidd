@@ -270,7 +270,8 @@ res
 The mean and standard deviation show the underestimation due to truncation:
 
 ```{r df_realtime_mean_sd_summary}
-res |> summarise_lognormal()
+res |>
+  summarise_lognormal()
 ```
 :::
 
