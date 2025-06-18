@@ -41,7 +41,7 @@ transformed parameters {
 model {
   // Prior
   init_I ~ lognormal(-1, 1);
-  init_R ~ normal(-.1, 0.5); // Approximately Normal(1, 0.5)
+  init_R ~ normal(-0.1, 0.5); // Approximately Normal(1, 0.5)
   rw_noise ~ std_normal();
   rw_sd ~ normal(0, 0.05) T[0,];
   reporting_delay ~ dirichlet(rep_vector(1, d));
