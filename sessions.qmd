@@ -63,7 +63,7 @@ Monday June 23: 16.00-17.30
 
 Tuesday June 24: 09.00-09.15
 
--   Day 1 review
+-   Day 1 review (15 mins)
 
 ## Session 6: Nowcasting concepts
 
@@ -71,8 +71,8 @@ Tuesday June 24: 09.15-10.30
 
 -   [Introduction](sessions/slides/introduction-to-nowcasting.qmd): nowcasting as a right-truncation problem (10 mins)
 -   [Practice](sessions/nowcasting.qmd): 
-    - simulating the delay distribution (35 mins)
-    - nowcasting using pre-estimated delay distributions (35 mins)
+    - simulating the delay distribution (25 mins)
+    - nowcasting using pre-estimated delay distributions (30 mins)
 -   Wrap up (10 mins)
 
 ## Session 7: Nowcasting with an unknown reporting delay
@@ -109,14 +109,15 @@ Tuesday June 24: 16.00-17.30
 
 Wednesday June 25: 09.00-09.15
 
--   Day 2 review
+-   Day 2 review (15 mins)
 
 ## Session 10: Forecasting with ensembles
 
 Wednesday June 25: 09.15-10.30
 
--   [Introduction](sessions/slides/introduction-to-ensembles.qmd): strategies for collating and combining models
--   [Practice](sessions/forecast-ensembles): evaluating methods for ensemble forecasts
+-   [Introduction](sessions/slides/introduction-to-ensembles.qmd): strategies for collating and combining models (10 mins)
+-   [Practice](sessions/forecast-ensembles): evaluating methods for ensemble forecasts (55 mins)
+-   Wrap up (10 mins)
 
 ## Session 11: Methods in the real world
 
