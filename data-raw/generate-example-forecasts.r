@@ -25,25 +25,22 @@ forecast_target_day <- function(
   train_df <- onset_df |>
     filter(day <= target_day)
 
-  test_df <- onset_df |>
-    filter(day > target_day, day <= target_day + horizon)
-
   data <- data_to_list(train_df, horizon, gen_time_pmf, ip_pmf)
 
   fit <- mod$sample(
     data = data, chains = 4, parallel_chains = 4, adapt_delta = 0.95,
-    max_treedepth = 15, iter_warmup = 1000, iter_sampling = 500, ...)
+    max_treedepth = 15, iter_warmup = 1000, iter_sampling = 500, ...
+  )
 
-  forecast <- fit |>
+  fit |>
     gather_draws(forecast[day]) |>
     filter(!is.na(.value)) |>
     slice_head(n = 1000) |>
     mutate(horizon = day) |>
     mutate(day = day + target_day) |>
     mutate(target_day = target_day) |>
-    mutate(.draw = 1:n()) |>
+    mutate(.draw = seq_leon(n())) |>
     select(-.chain, -.iteration)
-  return(forecast)
 }
 
 # define a forecast horizon
@@ -61,7 +58,7 @@ target_days <- target_days[seq(1, length(target_days), 7)]
 rw_mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 
 data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
-  data <- list(
+  list(
     n = nrow(train_df),
     I0 = 1,
     obs = train_df$onsets,
@@ -71,15 +68,16 @@ data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
     ip_pmf = ip_pmf,
     h = horizon
   )
-  return(data)
 }
 
 rw_forecasts <- target_days |>
   map_dfr(
-    \(x) forecast_target_day(
-      rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf,
-      data_to_list_rw, init = \() list(init_R = 0, rw_sd = 0.01)
-    )
+    \(x) {
+      forecast_target_day(
+        rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf,
+        data_to_list_rw, init = \() list(init_R = 0, rw_sd = 0.01)
+      )
+    }
   ) |>
   mutate(model = "Random walk") |>
   ungroup()
@@ -91,10 +89,12 @@ stat_mod <- nfidd_cmdstan_model("statistical-r")
 
 stat_forecasts <- target_days |>
   map_dfr(
-    \(x) forecast_target_day(
-      stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw,
-      init = \() list(init_R = 0, rw_sd = 0.01)
-    )
+    \(x) {
+      forecast_target_day(
+        stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw,
+        init = \() list(init_R = 0, rw_sd = 0.01)
+      )
+    }
   ) |>
   mutate(model = "Statistical") |>
   ungroup()
@@ -108,14 +108,16 @@ mech_mod <- nfidd_cmdstan_model("mechanistic-r")
 data_to_list_mech <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   data <- data_to_list_rw(train_df, horizon, gen_time_pmf, ip_pmf)
   data$N_prior <- c(10000, 2000)
-  return(data)
+  data
 }
 
 mech_forecasts <- target_days |>
   map_dfr(
-    \(x) forecast_target_day(
-      mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech
-    )
+    \(x) {
+      forecast_target_day(
+        mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech
+      )
+    }
   ) |>
   mutate(model = "Mechanistic") |>
   ungroup()
