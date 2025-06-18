@@ -103,7 +103,7 @@ Tuesday June 24: 16.00-17.30
 -   [Practice](sessions/forecasting-models.qmd): evaluating forecasts from a range of models (60 mins)
 -   Wrap up & discussion (20 mins)
 
-# Day 3: Reconstructing - ensembles and applications
+# Day 3: Consolidation: ensembles and applications
 
 **Wednesday June 25**
 
