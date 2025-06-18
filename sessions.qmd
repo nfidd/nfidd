@@ -5,18 +5,18 @@ comments: false
 
 # Day 1: Deconstructing epidemiological timelines
 
-**Monday June 24**
+**Monday June 23**
 
 ## Session 0: Introduction and course overview
 
-09.00-09.30
+Monday June 23: 09.00-09.30
 
 -   [Introduction](introduction-to-the-course-and-the-instructors.qmd): the course and the instructors (10 mins)
 -   [Motivating the course](from-line-list-to-decisions.qmd): From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
-09.30-10.30
+Monday June 23: 09.30-10.30
 
 -   [Introduction](sessions/slides/introduction-to-statistical-concepts): statistical concepts used in the course (15 mins)
 -   [Introduction](sessions/slides/introduction-to-stan): stan concepts used in the course (15 mins)
@@ -24,7 +24,7 @@ comments: false
 
 ## Session 2: Delay distributions
 
-11.00-11.45
+Monday June 23: 11.00-11.45
 
 -   [Introduction](sessions/slides/introduction-to-epidemiological-delays.qmd): epidemiological delays and how to represent them with probability distributions (10 mins)
 -   [Practice](delay-distributions.qmd): simulate and estimate epidemiological delays (30 mins)
@@ -32,7 +32,7 @@ comments: false
 
 ## Session 3: Biases in delay distributions
 
-11.45-12.30 and 14.00-14.45
+Monday June 23: 11.45-12.30 and 14.00-14.45
 
 -   [Introduction](sessions/slides/introduction-to-biases-in-epidemiological-delays.qmd): biases in delay distributions (10 mins)
 -   [Practice](sessions/biases-in-delay-distributions.qmd): 
@@ -42,14 +42,14 @@ comments: false
 
 ## Session 4: Using delay distributions to model the data generating process of an epidemic
 
-14.45-15.30
+Monday June 23: 14.45-15.30
 
 -   [Introduction](convolutions.qmd): Using delay distributions to model the data generating process of an epidemic (15 mins)
 -   [Practice](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd): implementing a convolution model and identifying potential problems (30 mins)
 
 ## Session 5: $R_t$ estimation and the renewal equation
 
-16.00-17.30
+Monday June 23: 16.00-17.30
 
 -   [Introduction](sessions/slides/introduction-to-reproduction-number.qmd): the time-varying reproduction number (10 mins)
 -   [Practice](sessions/R-estimation-and-the-renewal-equation.qmd): 
@@ -59,15 +59,15 @@ comments: false
 
 # Day 2: Constructing nowcasts and forecasts
 
-**Tuesday June 25**
+**Tuesday June 24**
 
-09.00-09.15
+Tuesday June 24: 09.00-09.15
 
 -   Day 1 review
 
 ## Session 6: Nowcasting concepts
 
-09.15-10.30
+Tuesday June 24: 09.15-10.30
 
 -   [Introduction](sessions/slides/introduction-to-nowcasting.qmd): nowcasting as a right-truncation problem (10 mins)
 -   [Practice](sessions/nowcasting.qmd): 
@@ -77,7 +77,7 @@ comments: false
 
 ## Session 7: Nowcasting with an unknown reporting delay
 
-11.00-12.30
+Tuesday June 24: 11.00-12.30
 
 -   [Introduction](sessions/slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays.qmd): joint estimation of delays and nowcasts (10 mins)
 -   [Practice](sessions/joint-nowcasting.qmd):
@@ -87,7 +87,7 @@ comments: false
 
 ## Session 8: Forecasting concepts
 
-14.00-15.30
+Tuesday June 24: 14.00-15.30
 
 -   [Introduction](sessions/slides/forecasting-as-an-epidemiological-problem.qmd): forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation (10 mins)
 -   [Practice](sessions/forecast-visualisation.qmd): 
@@ -97,7 +97,7 @@ comments: false
 
 ## Session 9: Forecasting models
 
-16.00-17.30
+Tuesday June 24: 16.00-17.30
 
 -   [Introduction](sessions/slides/forecast-evaluation.qmd): quantitatively evaluating forecasts (10 mins)
 -   [Practice](sessions/forecast-evaluation.qmd): evaluating forecasts with a range of metrics (60 mins)
@@ -108,28 +108,28 @@ comments: false
 
 # Day 3: Reconstructing - ensembles and applications
 
-**Wednesday June 26**
+**Wednesday June 25**
 
-09.00-09.15
+Wednesday June 25: 09.00-09.15
 
 -   Day 2 review
 
 ## Session 10: Forecasting with ensembles
 
-09.15-10.30
+Wednesday June 25: 09.15-10.30
 
 -   [Introduction](sessions/slides/introduction-to-ensembles.qmd): strategies for collating and combining models
 -   [Practice](sessions/forecast-ensembles): evaluating methods for ensemble forecasts
 
 ## Session 11: Methods in the real world
 
-11.00-12.00
+Wednesday June 25: 11.00-12.00
 
 -   Presentations and Q&A on uses of nowcasts & forecasts in the real world (60 mins)
 
 ## Session 12: End of course summary
 
-12.00-12.30
+Wednesday June 25: 12.00-12.30
 
 -   [Summary](sessions/slides/closing.qmd) of the course (10 mins)
 -   Final discussion and closing (20 mins)
