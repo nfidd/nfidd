@@ -90,7 +90,7 @@ In our work, we have found that a combination of mechanistic and statistical mod
 
 ## Adding more mechanistic structure to the renewal model
 
-One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast visualisation session](forecast-visualisation), we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast evaluation](forecast-evaluation) session, we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
 
 ::: {.callout-warning}
 This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
@@ -238,7 +238,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation session](forecast-visualisation). We will first load in the data and filter for a target forecast date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation](forecast-visualisation) session. We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
