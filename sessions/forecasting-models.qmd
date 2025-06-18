@@ -59,7 +59,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 :::
 
-# What did we learn about the random walk model from the [forecast evaluation session](forecast-valuation)?
+# What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
@@ -90,7 +90,7 @@ In our work, we have found that a combination of mechanistic and statistical mod
 
 ## Adding more mechanistic structure to the renewal model
 
-One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecasting concepts session](forecasting-concepts), we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast visualisation session](forecast-visualisation), we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
 
 ::: {.callout-warning}
 This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
@@ -160,7 +160,7 @@ A statistical term that can be used to describe a time series with a trend is sa
 More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean and variance, do not change over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
-The random walk model we used in the [forecasting concept](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
+The random walk model we used in the [forecast visualisation](forecast-visualisation) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
 The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
 
@@ -238,7 +238,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts session](forecasting-concepts). We will first load in the data and filter for a target forecast date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation session](forecast-visualisation). We will first load in the data and filter for a target forecast date.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -363,7 +363,7 @@ What do you notice about the forecasts from the more mechanistic and more statis
 - The more mechanistic model captures the downturn in the data very well.
 - However it appears to be somewhat biased as it consistently overpredicts.
 - The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
-- Neither model simply extend the trend in the way the random walk model did in the [forecasting concepts session](forecasting-concepts).
+- Neither model simply extend the trend in the way the random walk model did in the [forecast visualisation session](forecast-visualisation).
 :::
 
 ::: {.callout-note collapse="true"}
@@ -427,7 +427,7 @@ mech_forecast_diff |>
 
 # Evaluating forecasts from our models
 
-As in the [forecasting concepts session](forecasting-concepts), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
+As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
 data(rw_forecasts, stat_forecasts, mech_forecasts)
@@ -531,7 +531,7 @@ sc_forecasts
 ```
 
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting concepts session](forecasting-concepts).
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics.
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
