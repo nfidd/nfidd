@@ -75,8 +75,7 @@ This will also give us more to work with when using scoring metrics. We will now
 
 ```{r load_forecasts}
 data(rw_forecasts)
-rw_forecasts |>
-  ungroup()
+rw_forecasts
 ```
 
 ::: {.callout-tip}
