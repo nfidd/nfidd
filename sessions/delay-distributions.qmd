@@ -192,7 +192,8 @@ These estimates should look similar to what we used in the simulations.
 We can also calculate the mean and standard deviation of the lognormal distribution from the estimated parameters:
 
 ```{r mean_sd_summary}
-res |> summarise_lognormal()
+res |>
+  summarise_lognormal()
 ```
 
 This shows us the mean and standard deviation of the onset-to-hospitalisation delay in days, which is often more interpretable than the lognormal parameters.
