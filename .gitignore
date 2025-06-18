@@ -14,3 +14,4 @@ inst/stan/*
 *.rmarkdown
 .vscode/
 *pdf
+CLAUDE.md

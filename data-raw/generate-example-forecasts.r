@@ -81,7 +81,8 @@ rw_forecasts <- target_days |>
       data_to_list_rw, init = \() list(init_R = 0, rw_sd = 0.01)
     )
   ) |>
-  mutate(model = "Random walk")
+  mutate(model = "Random walk") |>
+  ungroup()
 
 usethis::use_data(rw_forecasts, overwrite = TRUE)
 
@@ -95,7 +96,8 @@ stat_forecasts <- target_days |>
       init = \() list(init_R = 0, rw_sd = 0.01)
     )
   ) |>
-  mutate(model = "Statistical")
+  mutate(model = "Statistical") |>
+  ungroup()
 
 usethis::use_data(stat_forecasts, overwrite = TRUE)
 
@@ -115,6 +117,7 @@ mech_forecasts <- target_days |>
       mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech
     )
   ) |>
-  mutate(model = "Mechanistic")
+  mutate(model = "Mechanistic") |>
+  ungroup()
 
 usethis::use_data(mech_forecasts, overwrite = TRUE)
