@@ -152,7 +152,8 @@ res
 We can calculate the mean and standard deviation to see the bias more clearly:
 
 ```{r df_dates_mean_sd_summary}
-res |> summarise_lognormal()
+res |>
+  summarise_lognormal()
 ```
 
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
