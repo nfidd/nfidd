@@ -29,6 +29,7 @@ Suggests:
     lubridate,
     posterior,
     purrr,
+    rlang,
     rmarkdown,
     scoringutils (>= 2.0.0),
     testthat (>= 3.0.0),

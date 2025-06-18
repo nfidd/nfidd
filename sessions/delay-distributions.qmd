@@ -26,7 +26,7 @@ The source file of this session is located at `sessions/delay-distributions.qmd`
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, and the `posterior` packages for investigating the results of the inference conducted with stan.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `ggplot2` package for plotting, the `dplyr` and `tidyr` packages to wrangle data, the `lubridate` package to deal with dates, the `posterior` and `tidybayes` packages for investigating the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -35,6 +35,7 @@ library("dplyr")
 library("tidyr")
 library("lubridate")
 library("posterior")
+library("tidybayes")
 ```
 
 ::: {.callout-tip}
@@ -187,6 +188,15 @@ res$summary() ## could also simply type `res`
 ```
 
 These estimates should look similar to what we used in the simulations.
+
+We can also calculate the mean and standard deviation of the lognormal distribution from the estimated parameters:
+
+```{r mean_sd_summary}
+res |>
+  summarise_lognormal()
+```
+
+This shows us the mean and standard deviation of the onset-to-hospitalisation delay in days, which is often more interpretable than the lognormal parameters.
 We can plot the resulting probability density functions.
 
 ::: {.callout-note}
