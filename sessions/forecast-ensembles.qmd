@@ -96,8 +96,7 @@ forecasts <- bind_rows(
   rw_forecasts,
   mutate(stat_forecasts, model = "More statistical"),
   mutate(mech_forecasts, model = "More mechanistic")
-) |>
-  ungroup()
+)
 
 forecasts
 ```

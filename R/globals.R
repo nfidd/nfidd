@@ -8,5 +8,6 @@ utils::globalVariables(c(
   "infection_day", # <make_daily_infections>
   "infection_day", # <simulate_onsets>
   "infections", # <simulate_onsets>
+  "sd", # <summarise_lognormal>
   NULL
 ))
