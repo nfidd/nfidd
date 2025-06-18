@@ -90,21 +90,18 @@ Tuesday June 24: 11.00-12.30
 Tuesday June 24: 14.00-15.30
 
 -   [Introduction](sessions/slides/forecasting-as-an-epidemiological-problem.qmd): forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation (10 mins)
--   [Practice](sessions/forecast-visualisation.qmd): 
-    - extending a model into the future (35 minutes)
-    - visualising and evaluating your forecast (35 mins)
+-   [Practice](sessions/forecast-visualisation.qmd): extending a model into the future, visualising and evaluating your forecast (30 minutes)
+-   [Introduction](sessions/slides/forecast-evaluation.qmd): quantitatively evaluating forecasts (10 mins)
+-   [Practice](sessions/forecast-evaluation.qmd): evaluating forecasts with a range of metrics (30 mins)
 -   Wrap up (10 mins)
 
 ## Session 9: Forecasting models
 
 Tuesday June 24: 16.00-17.30
 
--   [Introduction](sessions/slides/forecast-evaluation.qmd): quantitatively evaluating forecasts (10 mins)
--   [Practice](sessions/forecast-evaluation.qmd): evaluating forecasts with a range of metrics (60 mins)
--   Wrap up and discussion (20 mins)
-
--   [Introduction](sessions/slides/introduction-to-the-spectrum-of-forecasting-models.qmd): a spectrum of forecasting models
--   [Practice](sessions/forecasting-models.qmd): evaluating forecasts from a range of models
+-   [Introduction](sessions/slides/introduction-to-the-spectrum-of-forecasting-models.qmd): a spectrum of forecasting models (10 mins)
+-   [Practice](sessions/forecasting-models.qmd): evaluating forecasts from a range of models (60 mins)
+-   Wrap up & discussion (20 mins)
 
 # Day 3: Reconstructing - ensembles and applications
 
