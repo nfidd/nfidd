@@ -1,6 +1,6 @@
 ---
 title: "Learning outcomes"
-order: 1
+order: 2
 comments: false
 ---
 

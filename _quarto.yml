@@ -15,16 +15,16 @@ website:
     left:
       - getting-started.qmd
       - sidebar:sessions
-      - sidebar:course-info
+      - sidebar:reference
       - authors.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
   sidebar:
-    - id: course-info
+    - id: reference
       title: "Reference"
       style: "docked"
-      contents: "course-info/*.qmd"
+      contents: "reference/*.qmd"
     - id: sessions
       title: "Sessions"
       style: "docked"
