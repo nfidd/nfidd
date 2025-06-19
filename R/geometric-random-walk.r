@@ -23,5 +23,5 @@ geometric_random_walk <- function(init, noise, std) {
   for (i in 2:n) {
     x[i] <- x[i - 1] + noise[i - 1] * std
   }
-  return(exp(x))
+  exp(x)
 }

@@ -27,5 +27,5 @@ geometric_diff_ar <- function(init, noise, std, damp) {
   for (i in 3:n) {
     x[i] <- x[i - 1] + damp * (x[i - 1] - x[i - 2]) + noise[i - 1] * std
   }
-  return(exp(x))
+  exp(x)
 }
