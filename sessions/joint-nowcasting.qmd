@@ -301,7 +301,7 @@ joint_rt_data <- c(joint_data,
 joint_rt_fit <- joint_rt_mod$sample(
   data = joint_rt_data, parallel_chains = 4,
   adapt_delta = 0.95,
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 
