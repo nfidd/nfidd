@@ -24,7 +24,7 @@ The aim of this session is to introduce the concept of forecasting and forecast 
 
 ## Source file
 
-The source file of this session is located at `sessions/forecasting-visualisation.qmd`.
+The source file of this session is located at `sessions/forecast-visualisation.qmd`.
 
 ## Libraries used
 
