@@ -19,14 +19,14 @@ website:
       - icon: github
         href: https://github.com/nfidd/nfidd
   sidebar:
-    - id: sessions
-      title: "Sessions"
-      style: "docked"
-      contents: "sessions/*.qmd"
     - id: about
       title: "About"
       style: "docked"
       contents: "about/*.qmd"
+    - id: sessions
+      title: "Sessions"
+      style: "docked"
+      contents: "sessions/*.qmd"
 
 format:
   html:
