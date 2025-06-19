@@ -20,6 +20,8 @@ website:
         href: help.qmd
       - text: "Timetable"
         href: sessions.qmd
+      - text: "About"
+        href: about.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
