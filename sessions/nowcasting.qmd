@@ -5,7 +5,7 @@ order: 6
 
 # Introduction
 
-So far we've explored the delays and biases of real-time outbreak data, started to correct for these, and considered the underlying process that drives the evolution of an outbreak (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how an outbreak is evolving in the present and future. 
+So far we've explored the delays and biases of real-time infectious disease surveillance data, started to correct for these, and considered the underlying process that drives the evolution of epidemics (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how infectious disease transmission is evolving in the present and future. 
 
 We know that we have incomplete information in the present because of delays in the observation process (reporting delays). The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
 

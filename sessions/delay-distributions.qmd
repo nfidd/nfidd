@@ -5,7 +5,12 @@ order: 2
 
 # Introduction
 
-Every outbreak starts with an infection, but we rarely observe these directly. Instead,  there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc. The length of time between any of these events might be highly variable and uncertain. However, we often need to have some estimate for these delays in order to understand what's happening now and predict what might happen in the future. We capture this variability using probability distributions, which is the focus of this session.
+Every outbreak starts with an infection, but we rarely observe these directly.
+The same principles apply to endemic infectious diseases and routine surveillance.
+Instead, there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
+The length of time between any of these events might be highly variable and uncertain.
+However, we often need to have some estimate for these delays in order to understand what's happening now and predict what might happen in the future.
+We capture this variability using probability distributions, which is the focus of this session.
 
 ## Slides
 
@@ -94,8 +99,8 @@ ggplot(infection_times, aes(x = infection_time)) +
 ```
 
 ::: callout-note
-In reality, data from an outbreak will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
-For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic outbreak data later.
+In reality, data from infectious disease surveillance will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
+For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
 :::
 
 ## Working forwards: simulating a sequence of delays after infection
@@ -147,7 +152,7 @@ ggplot(dfl, aes(x = time)) +
 
 ## Estimating delay distributions from outcome data
 
-As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in outbreaks.
+As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in infectious disease surveillance.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
 
