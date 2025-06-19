@@ -332,5 +332,7 @@ Can you establish under which conditions the bias in estimation gets worse?
 -   The [`primarycensored`](https://github.com/epinowcast/primarycensored) R package provides a comprehensive framework for dealing with censored and truncated delay distributions.
     It implements many of the advanced techniques for handling primary event censoring, secondary event censoring, and right truncation in a unified and efficient manner.
     This package can be particularly useful for production-level implementations where performance and accuracy are critical.
+-   The [`epidist`](https://github.com/epinowcast/epidist) package extends `primarycensored` to work with `brms` for estimating epidemiological delay distributions.
+    It enables flexible modelling including time-varying components, spatial effects, and partially pooled estimates of demographic characteristics.
 
 # Wrap up
