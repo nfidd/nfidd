@@ -177,7 +177,7 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 #### What is the Continuous Ranked Probability Score (CRPS)?
 
-The Continuous Ranked Probability Score (CRPS) is a proper scoring rule used to evaluate the accuracy of probabilistic forecasts. It is a generalization of the Mean Absolute Error (MAE) to probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours).
+For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours), we can use the Continuous Ranked Probability Score (CRPS). The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts. Note that for deterministic forecasts, CRPS reduces to MAE.
 
 The CRPS can be thought about as the combination of two key aspects of forecasting:
 1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
@@ -226,7 +226,7 @@ sc_scores |>
   summarise_scores(by = "horizon") |>
   ggplot(aes(x = horizon, y = crps)) +
   geom_point() +
-  labs(title = "CRPS by daily forecast horizon", 
+  labs(title = "CRPS by daily forecast horizon",
        subtitle = "Summarised across all forecasts")
 ```
 
@@ -237,7 +237,7 @@ sc_scores |>
   summarise_scores(by = "target_day") |>
   ggplot(aes(x = target_day, y = crps)) +
   geom_point() +
-  labs(title = "CRPS by forecast start date", 
+  labs(title = "CRPS by forecast start date",
        subtitle = "Summarised across all forecasts", x = "forecast date")
 ```
 
@@ -306,7 +306,7 @@ sc_forecasts |>
   get_pit_histogram() |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  labs(title = "PIT histogram", x = "Quantile", y = "Density")
+  labs(title = "PIT histogram", x = "Predicted quantiles", y = "Density")
 ```
 
 As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
@@ -320,9 +320,9 @@ sc_forecasts |>
   )) |>
   get_pit_histogram(by = "group_horizon") |>
   ggplot(aes(x = mid, y = density)) +
-  geom_col() + 
+  geom_col() +
   facet_wrap(~group_horizon) +
-  labs(title = "PIT by forecast horizon (days)")
+  labs(title = "PIT by forecast horizon (days)", x = "Predicted quantiles")
 ```
 
 and then for different forecast dates.
@@ -331,9 +331,9 @@ and then for different forecast dates.
 sc_forecasts |>
   get_pit_histogram(by = "target_day") |>
   ggplot(aes(x = mid, y = density)) +
-  geom_col() + 
+  geom_col() +
   facet_wrap(~target_day) +
-  labs(title = "PIT by forecast date")
+  labs(title = "PIT by forecast date", x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
@@ -426,7 +426,8 @@ log_sc_forecasts |>
   get_pit_histogram(by = "model") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  labs(title = "PIT histogram, scored on the log scale")
+  labs(title = "PIT histogram, scored on the log scale",
+       x = "Predicted quantiles")
 ```
 
 As before lets look at the PIT histogram by forecast horizon
@@ -442,7 +443,8 @@ log_sc_forecasts |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
   facet_wrap(~group_horizon) +
-  labs(title = "PIT by forecast horizon, scored on the log scale")
+  labs(title = "PIT by forecast horizon, scored on the log scale",
+       x = "Predicted quantiles")
 ```
 
 and then for different forecast dates.
@@ -453,7 +455,8 @@ log_sc_forecasts |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
   facet_wrap(~target_day) +
-  labs(title = "PIT by forecast date, scored on the log scale")
+  labs(title = "PIT by forecast date, scored on the log scale",
+       x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
