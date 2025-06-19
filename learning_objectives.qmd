@@ -3,6 +3,8 @@ title: "Independent learning outcomes"
 comments: false
 ---
 
+The skills and methods taught in this course apply broadly across infectious disease epidemiology, from outbreak response to routine surveillance of endemic diseases, seasonal patterns, and long-term trends. While examples often use outbreak scenarios for clarity, participants should consider how these approaches apply to their own epidemiological contexts.
+
 ## R and statistical concepts used
 
 - familiarity with R concepts used in the course
