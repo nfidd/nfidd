@@ -1,0 +1,65 @@
+---
+title: "Glossary of key concepts"
+---
+
+## Session 1: Statistical concepts
+
+**Probability density function**
+
+**Probability mass function**
+
+**Sampling the posterior**
+
+
+
+### Session 2
+
+**Primary and secondary events**: when one epidemiological event (the primary event) directly causes another epidemiological event (the secondary event).
+For example, infection and symptom onset; infection in one person causing infection in another.
+A focus of this course is on understanding the time between these pairs of events.
+Key pairs of events include: 
+- The incubation period: infection to symptom onset 
+- Symptom onset to hospitalisation 
+- The generation time: infection in one person causing infection in another
+
+### Session 3
+
+**Censoring**: knowing that an event occurred at some time, but not specifically when.
+In this course, we mostly consider double (or interval) censored events: we know the event occurred at some time within a time interval, such as at any time on a certain date.
+Events might also be right censored (we only know the earliest time it could have happened) or left censored (we only know the latest time it could have occurred).
+
+**Right truncation**: when we only have incomplete information about events because not enough time has passed to observe all of them.
+This is a problem if we try to use incomplete secondary event data (such as recent symptom onsets) to infer the pattern of primary events - our estimates will be biased because we are missing some of the data.
+
+### Session 4
+
+**Convolution**
+
+**Discretisation**: when we want to use a continuous probability distribution to model a discrete (count) variable, we need to transform the probability distribution from continuous to discrete.
+
+Moving back and forth between continuous and discrete / simulation and estimation
+
+### Session 5
+
+**Reproduction number**: the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+
+**Renewal equation**: relates the number of infected people in the population; the current value of the reproduction number; and a delay distribution of the so-called generation time
+
+**Random walk**: random noise along a given trajectory. In this course, we use a **geometric random walk**, where we add this random noise the logarithm of the reproduction number.
+
+## Nowcasting
+
+**Cumulative distribution function** (CDF): we use cumulative probabilities to account for the fact that events are reported over a delayed period. The CDF gives the increasing probability that a report is made over this reporting period (e.g. increasingly probable that a report is made on day 2 or earlier than day 1 or earlier), until we know that all reports have been made (probability of 1).
+
+**Reporting triangle**: This is a matrix used for nowcasting delayed reports, e.g. of symptom onset. The rows are the days of onset and the columns are the days of report. The entries are the number of onsets on day $i$ that are reported on day $j$. We can then use this matrix to estimate the delay distribution and nowcast the data. It is referred to as a triangle because the data for the more recent data entries are incomplete which gives the matrix a triangular shape.
+
+## Session 9
+
+
+
+## Functions
+
+censored-delay-pmf
+
+
+
