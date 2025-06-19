@@ -19,6 +19,8 @@
 #'   R = c(rep(3, 4), rep(0.5, 5)),
 #'   gen_time = c(0.1, 0.2, 0.3, 0.2, 0.1)
 #' )
+# #' @references
+# nolint start: object_name_linter
 renewal <- function(I0, R, gen_time) {
   ## set the maximum generation time
   max_gen_time <- length(gen_time)
@@ -36,5 +38,6 @@ renewal <- function(I0, R, gen_time) {
     ## convolve infections with generation time
     I[t + 1] <- sum(I_segment * gen_pmf) * R[t]
   }
-  return(I[-1]) ## remove I0 from time series
+  I[-1] ## remove I0 from time series
 }
+# nolint end

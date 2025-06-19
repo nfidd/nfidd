@@ -12,3 +12,5 @@ sessions/
 ^styles.css$
 \.github/
 \.nojekyll
+\.lintr
+LICENSE.md

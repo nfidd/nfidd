@@ -18,24 +18,23 @@ BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
 Imports:
+    cmdstanr,
     dplyr,
-    tidyr
+    tidyr,
+    tidybayes
 Suggests:
     bayesplot,
-    cmdstanr,
     covr,
     ggplot2,
     lintr,
     lubridate,
     posterior,
     purrr,
-    rlang,
     rmarkdown,
     scoringutils (>= 2.0.0),
     testthat (>= 3.0.0),
-    tidybayes,
     qrensemble (>= 0.1.0),
-    stackr (>= 0.1.0),
+    lopensemble (>= 0.1.0),
     roxyglobals
 Additional_repositories:
     https://stan-dev.r-universe.dev,
