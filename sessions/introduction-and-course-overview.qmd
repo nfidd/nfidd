@@ -57,7 +57,7 @@ Each session in the course:
 For those attending the in-person version the course also:
 
 - has multiple instructors ready to answer questions about this content; if several people have a similar question we may pause the session and discuss it with the group;
-- follows a stop-and-review approach where we pause after each section of self-guided material to discuss and review together, and addressing any questions that arise;
+- follows a stop-and-review approach where we pause after each section of self-guided material to discuss and review together and address any questions;
 - ends with a wrap-up and discussion where we review the sessions material.
 
 ### Timeline for the course
