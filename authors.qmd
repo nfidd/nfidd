@@ -1,11 +1,6 @@
 ---
-title: "About NFIDD"
+title: "Authors"
 ---
-
-## What is NFIDD?
-
-NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of sessions for learning about nowcasting and forecasting of infectious disease surveillance data.
-This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
 
 ## Course Authors
 
