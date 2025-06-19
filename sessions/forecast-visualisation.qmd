@@ -24,7 +24,7 @@ The aim of this session is to introduce the concept of forecasting and forecast 
 
 ## Source file
 
-The source file of this session is located at `sessions/forecasting-visualisation.qmd`.
+The source file of this session is located at `sessions/forecast-visualisation.qmd`.
 
 ## Libraries used
 
@@ -135,7 +135,7 @@ data <- list(
 )
 rw_forecast <- mod$sample(
   data = data, parallel_chains = 4, adapt_delta = 0.95,
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 
@@ -260,7 +260,7 @@ long_data <- list(
 
 rw_long <- mod$sample(
   data = long_data, parallel_chains = 4, adapt_delta = 0.95,
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 

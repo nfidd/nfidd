@@ -20,12 +20,12 @@ geometric_diff_ar <- function(init, noise, std, damp) {
   ## declare vector
   x <- numeric(n)
   ## initial value
-  x[1] <- init
+  x[1] <- log(init)
   ## second value (no difference yet available for use)
   x[2] <- x[1] + noise[1] * std
   ## random walk
   for (i in 3:n) {
     x[i] <- x[i - 1] + damp * (x[i - 1] - x[i - 2]) + noise[i - 1] * std
   }
-  return(exp(x))
+  exp(x)
 }
