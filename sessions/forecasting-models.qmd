@@ -409,7 +409,7 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 ```
 
