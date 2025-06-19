@@ -10,7 +10,7 @@ order: 0
 In this course we will address how can we use data typically collected in an outbreak, or in routine surveillance, to answer questions like
 
 -   What is the number of cases now (*nowcasting*)
--   Is the outbreak rising/falling and by how much (*$R_t$ estimation*)
+-   Are infections rising/falling and by how much (*$R_t$ estimation*)
 -   What does this mean for the near future (*forecasting*)
 
 To answer these questions, we need to understand the epidemiological processes that create the kinds of data that we typically have available for outbreak analysis and infectious disease surveillance.
