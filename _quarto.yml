@@ -13,16 +13,18 @@ website:
   open-graph: true
   navbar:
     left:
+      - getting-started.qmd
       - sidebar:sessions
-      - sidebar:about
+      - sidebar:course-info
+      - authors.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
   sidebar:
-    - id: about
-      title: "About"
+    - id: course-info
+      title: "Reference"
       style: "docked"
-      contents: "about/*.qmd"
+      contents: "course-info/*.qmd"
     - id: sessions
       title: "Sessions"
       style: "docked"
