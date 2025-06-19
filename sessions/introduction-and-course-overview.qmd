@@ -34,7 +34,7 @@ With that, we can start to interpret the present (nowcasting) and predict the fu
 
 ### Why this course?
 
--   These are common questions in modelling infectious disease surveillance data
+-   These are common questions in outbreak response and disease surveillance
 -   Accounting for underlying processes can get surprisingly complicated quickly[^1], and it's easy to make mistakes
 -   There's currently (at the time of devising this course) no comprehensive training resource that links these common questions and challenges
 
