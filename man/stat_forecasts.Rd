@@ -13,7 +13,8 @@ A [tibble::tibble()] with a 7 columns
   \item{.variable}{name of the variable}
   \item{.value}{predicted value}
   \item{.horizon}{the forecast horizon in days}
-  \item{target_day}{the day on which the forecast was made (using data up to this day)}
+  \item{target_day}{the day on which the forecast was made (using data up to
+  this day)}
   \item{model}{the name of the model}
 }
 }

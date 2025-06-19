@@ -242,9 +242,7 @@ nfidd_load_stan_functions <- function(
 #'
 #' @examples
 #' nfidd_stan_models()
-nfidd_stan_models <- function(
-    stan_path = nfidd::nfidd_stan_path()
-  ) {
+nfidd_stan_models <- function(stan_path = nfidd::nfidd_stan_path()) {
   stan_files <- list.files(
     stan_path,
     pattern = "\\.stan$", full.names = FALSE,
@@ -274,6 +272,8 @@ nfidd_stan_models <- function(
 #'
 #' @family modelhelpers
 #'
+#' @importFrom cmdstanr cmdstan_model
+#'
 #' @examplesIf requireNamespace("cmdstanr", quietly = TRUE)
 #' if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
 #'   model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
@@ -283,10 +283,6 @@ nfidd_cmdstan_model <- function(
     model_name,
     include_paths = nfidd::nfidd_stan_path(),
     ...) {
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-    stop("Package 'cmdstanr' is required but not installed for this function.")
-  }
-
   stan_model <- system.file(
     "stan", paste0(model_name, ".stan"),
     package = "nfidd"
@@ -296,7 +292,7 @@ nfidd_cmdstan_model <- function(
     stop(sprintf("Model '%s.stan' not found in NFIDD package", model_name))
   }
 
-  cmdstanr::cmdstan_model(
+  cmdstan_model(
     stan_model,
     include_paths = include_paths,
     ...
