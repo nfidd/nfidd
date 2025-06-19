@@ -409,7 +409,7 @@ mech_forecast_fit_diff <- mech_mod$sample(
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 ```
 
@@ -626,7 +626,8 @@ sc_forecasts |>
   get_pit_histogram(by = "model") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~model)
+  facet_wrap(~model) +
+  labs(x = "Predicted quantiles")
 ```
 
 As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
@@ -641,7 +642,8 @@ sc_forecasts |>
   get_pit_histogram(by = c("model", "group_horizon")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(group_horizon)) +
+  labs(x = "Predicted quantiles")
 ```
 
 and then for different forecast dates.
@@ -651,7 +653,8 @@ sc_forecasts |>
   get_pit_histogram(by = c("model", "target_day")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(target_day))
+  facet_grid(vars(model), vars(target_day)) +
+  labs(x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
@@ -740,7 +743,8 @@ log_sc_forecasts |>
   get_pit_histogram(by = "model") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~model)
+  facet_wrap(~model) +
+  labs(x = "Predicted quantiles")
 ```
 
 
@@ -754,7 +758,8 @@ log_sc_forecasts |>
   get_pit_histogram(by = c("model", "group_horizon")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(group_horizon)) +
+  labs(x = "Predicted quantiles")
 ```
 
 
@@ -763,7 +768,8 @@ log_sc_forecasts |>
   get_pit_histogram(by = c("model", "target_day")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(target_day))
+  facet_grid(vars(model), vars(target_day)) +
+  labs(x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
