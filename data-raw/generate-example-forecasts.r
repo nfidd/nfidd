@@ -39,7 +39,7 @@ forecast_target_day <- function(
     mutate(horizon = day) |>
     mutate(day = day + target_day) |>
     mutate(target_day = target_day) |>
-    mutate(.draw = seq_leon(n())) |>
+    mutate(.draw = seq_len(n())) |>
     select(-.chain, -.iteration)
 }
 
@@ -75,7 +75,7 @@ rw_forecasts <- target_days |>
     \(x) {
       forecast_target_day(
         rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf,
-        data_to_list_rw, init = \() list(init_R = 0, rw_sd = 0.01)
+        data_to_list_rw, init = \() list(init_R = 1, rw_sd = 0.01)
       )
     }
   ) |>
@@ -92,7 +92,7 @@ stat_forecasts <- target_days |>
     \(x) {
       forecast_target_day(
         stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw,
-        init = \() list(init_R = 0, rw_sd = 0.01)
+        init = \() list(init_R = 1, rw_sd = 0.01)
       )
     }
   ) |>

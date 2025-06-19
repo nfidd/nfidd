@@ -259,14 +259,14 @@ data <- list(
   ip_pmf = ip_pmf
 )
 r_inf_fit <- r_inf_mod$sample(
-  data = data, parallel_chains = 4, init = \() list(init_R = 0)
+  data = data, parallel_chains = 4, init = \() list(init_R = 1)
 )
 ```
 
 ::: {.callout-note}
 Generally one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
 When testing this model we noticed that sometimes the model failed to fit the data at all.
-Because of this we added an argument to start sampling with `init_R` set to 0.
+Because of this we added an argument to start sampling with `init_R` set to 1.
 This makes sure the sampler starts fitting the model from a sensible value and avoids fitting failiures.
 :::
 
@@ -383,7 +383,7 @@ data <- list(
 )
 r_rw_inf_fit <- rw_mod$sample(
   data = data, parallel_chains = 4, max_treedepth = 12, 
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 

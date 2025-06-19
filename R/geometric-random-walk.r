@@ -18,7 +18,7 @@ geometric_random_walk <- function(init, noise, std) {
   ## declare vector
   x <- numeric(n)
   ## initial value
-  x[1] <- init
+  x[1] <- log(init)
   ## random walk
   for (i in 2:n) {
     x[i] <- x[i - 1] + noise[i - 1] * std
