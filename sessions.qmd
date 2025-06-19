@@ -11,8 +11,8 @@ comments: false
 
 Monday June 23: 09.00-09.30
 
--   [Introduction](sessions/introduction-to-the-course-and-the-instructors.qmd): the course and the instructors (10 mins)
--   [Motivating the course](sessions/from-line-list-to-decisions.qmd): From an epidemiological line list to informing decisions in real-time (20 mins)
+-   [Introduction](sessions/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
+-   [Motivating the course](sessions/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
@@ -27,7 +27,7 @@ Monday June 23: 09.30-10.30
 Monday June 23: 11.00-11.45
 
 -   [Introduction](sessions/slides/introduction-to-epidemiological-delays): epidemiological delays and how to represent them with probability distributions (10 mins)
--   [Practice](sessions/delay-distributions.qmd): simulate and estimate epidemiological delays (30 mins)
+-   [Practice](sessions/delay-distributions): simulate and estimate epidemiological delays (30 mins)
 -   Wrap up (5 mins)
 
 ## Session 3: Biases in delay distributions
