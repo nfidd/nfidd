@@ -5,7 +5,7 @@ order: 2
 
 # Introduction
 
-Every outbreak starts with an infection, but we rarely observe these directly.
+Every outbreak starts with an infection, but we rarely observe transmission events directly.
 The same principles apply to endemic infectious diseases and routine surveillance.
 Instead, there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
 The length of time between any of these events might be highly variable and uncertain.
