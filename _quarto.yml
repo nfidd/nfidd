@@ -6,7 +6,7 @@ project:
 website:
   title: "NFIDD"
   site-url: https://nfidd.github.io/nfidd/
-  repo-url: https://nfidd.github.io/nfidd/
+  repo-url: https://github.com/nfidd/nfidd
   repo-actions: [source, issue]
   description: "Nowcasting and forecasting infectious disease dynamics"
   body-footer: '<script data-goatcounter="https://nfidd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
