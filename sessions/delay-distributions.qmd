@@ -9,7 +9,7 @@ Every outbreak starts with an infection, but we rarely observe transmission even
 The same principles apply to endemic infectious diseases and routine surveillance.
 Instead, there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
 The length of time between any of these events might be highly variable and uncertain.
-However, we often need to have some estimate for these delays in order to understand what's happening now and predict what might happen in the future.
+However, we often need to have some estimate for these delays when interpreting data in order to understand what is happening now and predict what might happen in the future.
 We capture this variability using probability distributions, which is the focus of this session.
 
 ## Slides
