@@ -2,8 +2,6 @@
 title: "Authors"
 ---
 
-## Course Authors
-
 The NFIDD course was developed by the **NFIDD course contributors**:
 
 - [Sam Abbott](https://github.com/seabbs)
