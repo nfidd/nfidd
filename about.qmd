@@ -12,7 +12,7 @@ This course is a living resource designed to help epidemiologists, public health
 The NFIDD course was developed by the **NFIDD course contributors**:
 
 - [Sam Abbott](https://github.com/seabbs)
-- [Katherine Sherratt](https://github.com/kathsherratt)
+- [Kath Sherratt](https://github.com/kathsherratt)
 - [Sebastian Funk](https://github.com/sbfnk)
 
 ## How to Cite
