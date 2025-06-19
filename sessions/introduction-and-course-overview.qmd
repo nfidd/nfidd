@@ -57,6 +57,7 @@ Each session in the course:
 For those attending the in-person version the course also:
 
 - has multiple instructors ready to answer questions about this content; if several people have a similar question we may pause the session and discuss it with the group;
+- follows a stop-and-review approach where we pause after each section of self-guided material to discuss and review together, and addressing any questions that arise;
 - ends with a wrap-up and discussion where we review the sessions material.
 
 ### Timeline for the course
@@ -67,8 +68,8 @@ Broadly, the intended timeline is:
 -   delay distributions and how to estimate them (day 1)
 -   $R_t$ estimation and the generation interval (day 1)
 -   nowcasting (day 2)
--   forecasting and evaluation, ensemble methods (day 2)
--   applications (day 3)
+-   forecasting and evaluation (day 2)
+-   ensemble methods and applications (day 3)
 
 Let's get started!
 
