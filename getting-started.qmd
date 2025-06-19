@@ -1,22 +1,28 @@
 ---
-title: "Getting set up"
-order: 3
+title: "Getting started"
 ---
+
+## What is NFIDD?
+
+NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data.
+This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
+
+## Set up
 
 Each session in this course uses R code for demonstration.
 All the content is self-contained within a software package designed for the course.
 To get the most out of this course, you will need to use R and the following instructions to interact with the course material.
 
-# Getting R
+### Installing R
 
 -   [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
 -   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
 
-# Installing additional requirements
+### Installing additional requirements
 
 Before you get started with the course, you will first need to install the following software.
 
-## Installation of the `nfidd` package
+#### Installation of the `nfidd` package
 
 To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout, you can use the `pak` package:
 
@@ -31,7 +37,7 @@ Then you can check that the installation completed successfully by loading the p
 library("nfidd")
 ```
 
-## Installing `cmdstan`
+### Installing `cmdstan`
 
 The course relies on running stan through the `cmdstanr` **R** package, which itself uses the `cmdstan` software.
 This requires a separate installation step:
@@ -59,7 +65,7 @@ cmdstanr::cmdstan_version()
 
 For more details, and for links to resources in case something goes wrong, see the [Getting Started with CmdStanr](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette of the package.
 
-# Accessing the course
+## Accessing the course
 
 To be able to use the code in each session, you will need a local copy of the course material.
 
