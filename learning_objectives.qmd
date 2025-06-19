@@ -8,10 +8,8 @@ While examples often use outbreak scenarios for clarity, participants should con
 
 ## R and statistical concepts used
 
-- familiarity with R concepts used in the course
-  - to be completed once the course has been fully written but likely includes functions, accessing documentation, etc.
-- understanding of statistical concepts used in the course
-  - to be completed once the course has been fully written but likely includes discrete and continuous probability distributions
+- understanding of common probability distributions used for epidemiological delays
+- familiarity with using stan to estimate parameters of a probability distribution
 
 ## Delay distributions
 
