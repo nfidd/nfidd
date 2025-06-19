@@ -17,7 +17,7 @@ In this session, we'll start with the renewal model that we've been using and ex
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
 ::: {.callout-caution}
-None of the models introduced in this section are designed for real-world outbreak use!
+None of the models introduced in this section are designed for real-world use!
 :::
 
 ::: {.callout-note collapse="true"}
@@ -787,6 +787,7 @@ The PIT histograms are similar to the original scale PIT histograms but the mech
 - We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
 - We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
+- Consider how forecasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? Think about seasonal patterns, long-term trends, holiday effects, or other cyclical behaviours that might influence transmission dynamics and reporting patterns.
 
 # Wrap up
 
