@@ -1,5 +1,5 @@
 ---
-title: "Timetable"
+title: "Sessions"
 order: 2
 comments: false
 ---
