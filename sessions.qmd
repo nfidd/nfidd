@@ -90,7 +90,7 @@ Tuesday June 24: 11.00-12.30
 Tuesday June 24: 14.00-15.30
 
 -   [Introduction](sessions/slides/forecasting-as-an-epidemiological-problem.qmd): forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation (10 mins)
--   [Practice](sessions/forecast-visualisation.qmd): extending a model into the future, visualising and evaluating your forecast (30 minutes)
+-   [Practice](sessions/forecast-visualisation.qmd): extending a model into the future and visualising your forecast (30 minutes)
 -   [Introduction](sessions/slides/forecast-evaluation.qmd): quantitatively evaluating forecasts (10 mins)
 -   [Practice](sessions/forecast-evaluation.qmd): evaluating forecasts with a range of metrics (30 mins)
 -   Wrap up (10 mins)
