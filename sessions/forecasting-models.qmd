@@ -68,8 +68,8 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## What did a geometric random walk model look like again?
 
 ```{r geometric-random-walk-sim}
-R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
-data <- tibble(t = seq_along(R), R = exp(R))
+R <- geometric_random_walk(init = 0, noise = rnorm(100), std = 0.1)
+data <- tibble(t = seq_along(R), R = R)
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
@@ -215,9 +215,9 @@ geometric_diff_ar
 We can use this function to simulate a differenced AR process:
 
 ```{r}
-log_R <- geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
+R <- geometric_diff_ar(init = 0, noise = rnorm(100), std = 0.1, damp = 0.1)
 
-data <- tibble(t = seq_along(log_R), R = exp(log_R))
+data <- tibble(t = seq_along(R), R = R)
 
 ggplot(data, aes(x = t, y = R)) +
   geom_line() +
@@ -296,7 +296,7 @@ data <- list(
 stat_forecast_fit <- stat_mod$sample(
   data = data, parallel_chains = 4,
   # again set the initial values to make fitting more numerically stable
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 
