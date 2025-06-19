@@ -1,2 +1,16 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^README.Rmd
+_data/
+data-raw/
+^_quarto.yml$
+_site/
+.quarto/
+^.*\.html
+^.*\.qmd
+sessions/
+^styles.css$
+\.github/
+\.nojekyll
+\.lintr
+LICENSE.md

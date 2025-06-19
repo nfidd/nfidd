@@ -3,19 +3,19 @@ title: "Introduction and course overview"
 order: 0
 ---
 
-[From an epidemiological line list to informing decisions in real-time](slides/from-line-list-to-decisions.qmd)
+[From an epidemiological line list to informing decisions in real-time](slides/from-line-list-to-decisions)
 
 ### Aim of the course
 
-How can we use data typically collected in an outbreak to answer questions like
+In this course we will address how can we use data typically collected in an outbreak to answer questions like
 
--   what is the number of cases now (*nowcasting*)
--   is the outbreak rising/falling and by how much (*R estimation*)
--   what does this mean for the near future (*forecasting*)
-
-in real time?
+-   What is the number of cases now (*nowcasting*)
+-   Is the outbreak rising/falling and by how much (*$R_t$ estimation*)
+-   What does this mean for the near future (*forecasting*)
 
 To answer these questions, we need to understand the epidemiological processes that create the kinds of data that we typically have available for outbreak analysis.
+
+There are particular challenges when trying to do these analyses *in real time* (i.e. whilst transmission and data collection is ongoing) rather than retrospectively, which we will address in turn.
 
 ::: callout
 Let's look at outbreak data from the perspective of an individual infection.
@@ -25,43 +25,60 @@ There are two types of processes happening:
 
 -   outwards, from each infection spreading to cause new infections in the outbreak.
 
-Both of these processes involve time delays and potential biases, which makes analysing data in real time during an outbreak especially tricky.
+Both of these processes involve time delays which makes analysing data in real time especially tricky.
 :::
 
 In this course, we first focus on making sense of the delays and biases in the data we are able to access in real time during an outbreak.
-We'll combine this with the process of infectious disease transmission, with the reproduction number as the key.
+We'll combine this with the process of infectious disease transmission, with the reproduction number as a key component.
 With that, we can start to interpret the present (nowcasting) and predict the future (forecasting).
 
 ### Why this course?
 
 -   These are common questions in outbreak response
--   Accounting for underlying processes can get surprisingly complicated surprisingly quickly[^1], and it's easy to make mistakes
--   There's currently no comprehensive training resource that links these common questions and challenges together
+-   Accounting for underlying processes can get surprisingly complicated quickly[^1], and it's easy to make mistakes
+-   There's currently (at the time of devising this course) no comprehensive training resource that links these common questions and challenges
 
 ### Approach
 
 Throughout the course we will
 
-1.  simulate typical infectious disease data in **R** (the *generative model*)
+1.  simulate typical infectious disease data in **R** (thus introducing the *generative model*)
 2.  apply the generative model to data in the probabilistic programming language **stan**, to
     -   learn about the system (conduct inference)
     -   make predictions (nowcasting/forecasting)
 
+Each session in the course:
+
+- builds on the previous one so that participants will have an overview of the real-time analysis workflow by the end of the course;
+- starts with a short introductory talk;
+- mainly consists of interactive content that participants will work through;
+- has optional/additional material that can be skipped or completed after the course ends;
+
+For those attending the in-person version the course also:
+
+- has multiple instructors ready to answer questions about this content; if several people have a similar question we may pause the session and discuss it with the group;
+- ends with a wrap-up and discussion where we review the sessions material.
+
 ### Timeline for the course
 
--   delay distributions and how to estimate them (Day 1)
--   R estimation and the generation interval (Day 1)
+The course was created to be taught in-person for 2.5 days but of course if you are studying this on your own using the web site you can go through the material at your own pace and in your own time.
+Broadly, the intended timeline is:
+
+-   delay distributions and how to estimate them (day 1)
+-   $R_t$ estimation and the generation interval (day 1)
 -   nowcasting (day 2)
 -   forecasting and evaluation, ensemble methods (day 2)
 -   applications (day 3)
 
 Let's get started!
 
--   Have a more detailed look at the [learning objectives](/learning_objectives.qmd)
+-   Have a more detailed look at the [learning objectives](/learning_objectives)
 
--   [Introduction to the course and the instructors](slides/introduction-to-the-course-and-instructors.qmd)
+-   [Introduction to the course and the instructors](slides/introduction-to-the-course-and-the-instructors)
 
--   If you haven't already, start with [getting set up for the course](/getting-set-up.qmd)
+-   If you haven't already, start with [getting set up for the course](/getting-set-up)
+
+-   Once you're all set up, let's introduce some concepts and methods we'll rely heavily in this course in the session on [probability distributions and parameter estimation](R-Stan-and-statistical-concepts.qmd).
 
 
 [^1]: Time travel is [messy stuff](https://youtu.be/q2nNzNo_Xps)

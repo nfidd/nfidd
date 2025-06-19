@@ -60,7 +60,7 @@ set.seed(123)
 
 - The *conditional probability* of getting outcome $a$ from random variable $A$, given that the outcome of random variable $B$ was $b$, is written as
   $$ p(A = a | B = b) = p(a| b) $$
-- Example: the probability that it rains tomorrow given that it is sunny today
+- Example: the probability that it rains tomorrow given that it rains today
   $$ p(\mathrm{tomorrow} = \mathrm{rain} | \mathrm{today} = \mathrm{rain}) = p(\mathrm{rain} | \mathrm{rain})$$
 - Conditional probabilities are related to joint probabilities as
   $$ p(a | b) = \frac{p(a, b)}{p(b)}$$

@@ -16,7 +16,7 @@ set.seed(12345)
 - a *Probabilistic Programming Language* for Bayesian inference
   (i.e., a way to write down models)
   
-- models are written in a text file (ending `.stan`) and then loaded into an R/python/etc interface
+- models are written in a text file (often ending `.stan`) and then loaded into an R/python/etc interface
 
 - once a model is written down, stan can be used to **generate samples** from the **posterior distribution** (using a variety of methods)
 
@@ -74,8 +74,7 @@ Parameters
 ::: {.column width="60%"}
 <br>
 
-```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = here::here("stan", "coin.stan")}
-
+```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = nfidd::nfidd_cmdstan_model("coin")
 ```
 :::
 ::::
@@ -86,8 +85,8 @@ There are two packages for using stan from R. We will use the `cmdstanr` package
 
 ```{r load_coin_model, echo = TRUE}
 library("cmdstanr")
-mod <- cmdstan_model(here::here("stan", "coin.stan"))
-mod$print(line_numbers = TRUE)
+mod <- nfidd::nfidd_cmdstan_model("coin")
+mod
 ```
 
 ## Sampling from the posterior {.xmaller}

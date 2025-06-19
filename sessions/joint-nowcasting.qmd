@@ -3,34 +3,56 @@ title: "Nowcasting with an unknown reporting delay"
 order: 6.5
 ---
 
-[Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-nowcasting)
+# Introduction
 
-```{r echo = FALSE}
-set.seed(123)
-```
+In the last session we introduced the idea of nowcasting using a simple model. However, this approach had problems: we didn't fully account for uncertainty, or for example observation error in the primary events, and it's not a fully generative model of the data reporting process. And as we saw, if we get the delay distribution wrong, we can get the nowcast very wrong. 
 
-# Objectives
+A better approach is to jointly estimate the delay distribution together with the nowcast. We can do this by using information from multiple snapshots of the data as it changes over time (using a data structure called the "reporting triangle"). In this session, we'll introduce this approach to joint estimation in nowcasting. At the end we'll then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
+
+## Slides
+
+- [Introduction to joint estimation of delays and nowcasts](slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays)
+
+## Objectives
 
 This session aims to introduce how to do nowcasting if the reporting delay distribution is unknown.
 
-# Libraries used
+::: {.callout-note collapse="true"}
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/joint-nowcasting.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Joint estimation of delay distributions and nowcasting
@@ -38,7 +60,7 @@ If not using the Visual Editor please remember that the code in the session need
 ## Motivation
 
 So far we have assumed that the delay distribution is known. In practice, this is often not the case and we need to estimate it from the data.
-As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above.
+As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above.
 However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution or observation error of the primary events.
 We can instead estimate the delay distribution and nowcast the data jointly.
 
@@ -76,7 +98,11 @@ We can simulate this data by using the same generative process as above but now 
 Once again we generate our simulated onset dataset:
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r")) ## generates `onset_df`
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 head(onset_df)
 cutoff <- 71
 ```
@@ -84,8 +110,9 @@ cutoff <- 71
 We also need to simulate the reporting delays:
 
 ```{r simulate-reporting-delays}
-source(here::here("functions", "censored-delay-pmf.r"))
-reporting_delay_pmf <- censored_delay_pmf(rlnorm, max = 15, meanlog = 1, sdlog = 0.5)
+reporting_delay_pmf <- censored_delay_pmf(
+  rlnorm, max = 15, meanlog = 1, sdlog = 0.5
+)
 plot(reporting_delay_pmf)
 ```
 
@@ -95,8 +122,10 @@ We can then simulate the reporting triangle:
 reporting_triangle <- onset_df |>
   filter(day < cutoff) |>
   mutate(
-    reporting_delay = list(tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
-  )) |>
+    reporting_delay = list(
+      tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
+    )
+  ) |>
   unnest(reporting_delay) |>
   mutate(
     reported_onsets = rpois(n(), onsets * reporting_delay)
@@ -108,9 +137,7 @@ We also need to update our simulated truth data to include the Poisson observati
 
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
-  group_by(day) |>
-  summarise(noisy_onsets = sum(reported_onsets)) |>
-  ungroup()
+  summarise(noisy_onsets = sum(reported_onsets), .by = day)
 ```
 
 As we only partially observe the reporting triangle we need to filter it to only include the data we have observed:
@@ -120,53 +147,81 @@ filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
 ```
 
+Finally, we sum the filtered reporting triangle to get the counts we actually observe.
+
+```{r counts-observed}
+available_onsets <- filtered_reporting_triangle |>
+  summarise(available_onsets = sum(reported_onsets), .by = day)
+```
+
 ## Fitting the joint model
 
 As usual we start by loading the model:
 
 ```{r stan-joint-nowcast}
-joint_mod <- cmdstan_model(here("stan", "joint-nowcast.stan"))
-joint_mod$print(line_numbers = TRUE)
+joint_mod <- nfidd_cmdstan_model("joint-nowcast")
+joint_mod
 ```
 
-and then fit it:
+::: {.callout-tip collapse="true"}
+## Model details
+This time we won't go into details of the model.
+For now, it is important that you understand the concept but as the models get more complex we hope that you trust us that the model does what we describe above.
 
-```{r joint-nowcast-fit}
+Once thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
+This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
+In most situations this number would be unknown so what we do here is closer to what one would do in the real world.
+:::
+
+We then fit it do data:
+
+```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(
-  n = length(unique(filtered_reporting_triangle$day)),                # number of days
+  n = length(unique(filtered_reporting_triangle$day)), # number of days
   m = nrow(filtered_reporting_triangle),               # number of reports
   p = filtered_reporting_triangle |>
    group_by(day) |>
    filter(d == max(d)) |>
    mutate(d = d + 1) |>
-   pull(d),       # number of observations per day
-  obs = filtered_reporting_triangle$reported_onsets,     # observed symptom onsets
+   pull(d),            # number of observations per day
+  obs = filtered_reporting_triangle$reported_onsets,   # observed symptom onsets
   d = 16               # number of reporting delays
 )
-joint_nowcast_fit <- joint_mod$sample(
-  data = joint_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
+```
+
+```{r joint-nowcast-fit-summary}
 joint_nowcast_fit
 ```
 
+::: {.callout-important}
 One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model.
 This should give us far more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved).
+:::
+
 We now extract this nowcast:
 
 ```{r joint-nowcast}
 joint_nowcast_onsets <- joint_nowcast_fit |>
   gather_draws(nowcast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 Finally, we can plot the nowcast alongside the observed data:
 
 ```{r plot-joint-nowcast}
 ggplot(joint_nowcast_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(
+    data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6
+  ) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```
+
+:::{.callout-tip}
+Reminder: The points in this plot represent the data available when the nowcast was made (and so are truncated) whilst the bars represent the finally reported data (a perfect nowcast would exactly reproduce these).
+:::
 
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -213,8 +268,8 @@ plot(ip_pmf)
 We now load in the model:
 
 ```{r stan-joint-nowcast-rt}
-joint_rt_mod <- cmdstan_model(here("stan", "joint-nowcast-with-r.stan"))
-joint_rt_mod$print(line_numbers = TRUE)
+joint_rt_mod <- nfidd_cmdstan_model("joint-nowcast-with-r")
+joint_rt_mod
 ```
 
 ::: {.callout-tip}
@@ -233,7 +288,7 @@ We would also remove the `generated quantities` block as we are not nowcasting t
 
 Now let's fit the final model for this session!
 
-```{r joint-nowcast-rt-fit}
+```{r joint-nowcast-rt-fit, results = 'hide', message = FALSE}
 joint_rt_data <- c(joint_data,
   list(
     gen_time_max = length(gen_time_pmf),
@@ -244,8 +299,17 @@ joint_rt_data <- c(joint_data,
   )
 )
 joint_rt_fit <- joint_rt_mod$sample(
-  data = joint_rt_data, parallel_chains = 4, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
+  data = joint_rt_data, parallel_chains = 4,
+  adapt_delta = 0.95,
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
+```
+
+::: {.callout-tip}
+We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult to explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
+:::
+
+```{r joint-nowcast-rt-fit-summary}
 joint_rt_fit
 ```
 
@@ -254,13 +318,16 @@ First we can extract the nowcast and plot the nowcast alongside the observed dat
 joint_nowcast_with_r_onsets <- joint_rt_fit |>
   gather_draws(nowcast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 ```{r plot-joint-nowcast-with-r}
 ggplot(joint_nowcast_with_r_onsets, aes(x = day)) +
-  geom_col(data = noisy_onsets_df, mapping = aes(y = noisy_onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(
+    data = noisy_onsets_df, mapping = aes(y = noisy_onsets), alpha = 0.6
+  ) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = available_onsets, mapping = aes(y = available_onsets))
 ```
 
 We can also extract the reproduction number and plot it:
@@ -269,7 +336,7 @@ We can also extract the reproduction number and plot it:
 joint_rt <- joint_rt_fit |>
   gather_draws(R[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100))
 
 ggplot(joint_rt, aes(x = day, y = .value, group = .draw)) +
   geom_line(alpha = 0.1)
@@ -291,9 +358,8 @@ This is because we have accounted for the truncation (otherwise it would be spur
 
 # Going further
 
-- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd) and see how it affects the simple nowcast models.
+- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions) and see how it affects the simple nowcast models.
 - Despite being fairly involved the joint nowcast model we used here is still quite simple and may struggle to capture more complex patterns in the data.
 In practice more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases).
-- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets.\
-Compare what we did in this session to this [package vignette](https://package.epinowcast.org/articles/single-timeseries-rt-estimation.html).
+- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets. You will have the opportunity to try it in a later session.
 - This session focussed on the role of the generative process in nowcasting. This is an area of active research but [this paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012021) gives a good overview of the current state of the art.

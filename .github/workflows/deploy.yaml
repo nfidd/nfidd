@@ -2,9 +2,12 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'  # Run at 00:00 on the 1st of every month
   push:
     branches: [main]
   pull_request:
+  merge_group:
 
 name: deploy
 
@@ -23,6 +26,9 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          extra-repositories:
+            https://stan-dev.r-universe.dev,
+            https://epiforecasts.r-universe.dev
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
@@ -51,8 +57,8 @@ jobs:
           path: _site
 
       - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4.6.1
+        if: github.ref_name == 'main'
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: _site

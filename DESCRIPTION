@@ -1,7 +1,7 @@
 Package: nfidd
 Title: Material to support course on nowcasting and forecasting of infectious
     disease dynamics
-Version: 0.0.0.9999
+Version: 1.0.0
 Authors@R: c(
     person(
       given = "NFIDD course contributors",
@@ -14,25 +14,36 @@ Description: Resources to support a short course on nowcasting and forecasting
     of infectious disease dynamics.
 License: MIT + file LICENSE
 URL: https://github.com/nfidd/nfidd
-BugReports: https://github.com/nfidd/nfiidd/issues
+BugReports: https://github.com/nfidd/nfidd/issues
 Depends:
     R (>= 4.2.0)
 Imports:
-    bayesplot,
     cmdstanr,
     dplyr,
+    tidyr,
+    tidybayes
+Suggests:
+    bayesplot,
+    covr,
     ggplot2,
-    here,
+    lintr,
     lubridate,
     posterior,
     purrr,
     rmarkdown,
-    scoringutils,
-    tidybayes,
-    tidyr
-Remotes:
-    stan-dev/cmdstanr,
-    epiforecasts/scoringutils@d3cf08d
+    scoringutils (>= 2.0.0),
+    testthat (>= 3.0.0),
+    qrensemble (>= 0.1.0),
+    lopensemble (>= 0.1.0),
+    roxyglobals
+Additional_repositories:
+    https://stan-dev.r-universe.dev,
+    https://epiforecasts.r-universe.dev
 Encoding: UTF-8
 Language: en-GB
+RoxygenNote: 7.3.2
 LazyData: true
+Roxygen: list(roclets = c("collate", "namespace", "rd",
+    "roxyglobals::global_roclet"))
+Config/roxyglobals/filename: globals.R
+Config/roxyglobals/unique: FALSE

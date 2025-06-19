@@ -3,38 +3,58 @@ title: "Using delay distributions to model the data generating process"
 order: 4
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
+# Introduction
 
-[Delay distributions at the population level](slides/convolutions)
+We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak. So far, we've been working with individual line-list data. However, we usually want to model how an outbreak evolves through a whole population. The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
 
-# Objectives
+This means working with aggregated count data. This creates some new issues in correctly accounting for uncertainty. We handle population-level data using *convolutions* as a way of combining count data with a distribution of individual probabilities. We will have to adjust our continuous probability distributions to work with this using *discretisation*. We'll then need to re-introduce additional uncertainty to account for the observation process at a population level.
 
-The aim of this session is to introduce how delay distributions can be used to model the population-level data generating process of an epidemic.
+## Slides
 
-In this session, we'll focus on the delay from infection to symptom onset.
-First, we will use a time series of infections to simulate observed symptom onsets.
+- [Delay distributions at the population level](slides/convolutions)
+
+## Objectives
+
+In this session, we'll focus on the delay from infection to symptom onset at a population level.
+First, we will introduce the techniques of convolution and discretisation. We'll apply these to an aggregated time series of infections in order to simulate observed symptom onsets.
 Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
 
-# Libraries used
+::: {.callout-note collapse="true"}
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, the `ggplot2` library for plotting and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: callout-tip
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating observations from a time series of infections
@@ -47,7 +67,7 @@ Then we'll use the same model to conduct inference.
 
 In the last session we simulated *individual outcomes* from a delay distribution, and then re-estimated the corresponding parameters.
 However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
-At the population level, individual level delays translate into *convolutions*.
+At the population level, individual-level delays translate into *convolutions*.
 
 If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
 
@@ -55,18 +75,27 @@ $$
 C_t = \sum_{i=0}^{i=p_\mathrm{max}} I_{t-i} p_i
 $$
 
-In words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
+In other words, the number of observable outcomes on day $t$ is given by the sum of infections on all previous days multiplied by the probability that those infections are observed on day $t$.
 For example, the observable outcomes $C_t$ could be the number of symptom onsets on day $t$ and $p_i$ is the incubation period.
 
-We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections:
+We can use the same data as in the [session on biases in delay distributions](biases-in-delay-distributions#create-data-set), but this time we first aggregate this into a daily time series of infections.
+You can do this using:
 
-```{r aggregate, file = here::here("snippets", "load-ts.r")}
+```{r aggregate}
+inf_ts <- make_daily_infections(infection_times)
 ```
 
 ::: callout-note
-The second part of the code snippet above is used to add days without infections with a zero count.
+As before you can look at the code of the function by typing `make_daily_infections`.
+The second part of this function is used to add days without infections with a zero count.
 This will make our calculations easier later (as otherwise we would have to try and detect these in any models that used this data which could be complicated).
 :::
+
+And look at the first few rows of the daily aggregated data:
+
+```{r display-aggregate}
+head(inf_ts)
+```
 
 Now we can convolve the time series with a delay distribution to get a time series of outcomes as suggested above.
 
@@ -75,14 +104,41 @@ Now we can convolve the time series with a delay distribution to get a time seri
 In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
 The gamma distribution is a *continuous* distribution, but now our delay data are in days which are *discrete* entities.
-Before we can simulate a time series of symptom onsets, we will first need to generate a discrete probability mass function of the incubation period (in days).
+We will assume that both events that make up the delay (here infection and symptom onset) are observed as daily counts (e.g. as number of infections/symptom onsets by calendar date).
+Therefore, both observations are **censored** (as events are rounded to the nearest date).
+This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions), so we need to use the same ideas introduced in that session. 
 
+::: {.callout-note collapse=true}
+#### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
+
+The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
+
+$$
+F^*(t) = \int_0^1 F(t - u) du
+$$
+
+In effect, this is saying that the daily censored CDF is the average of the continuous distributions CDF over all possible event times (here between 0 and 1).
+
+The probability mass function (PMF) of this distribution when observed as a daily process (i.e. the secondary event is also daily censored) is then
+
+$$
+f_t \propto F^*(t + 1) - F^*(t - 1)
+$$
+
+The important point is that the ultimately observed PMF is a combination of a primary event daily censoring process and a secondary event daily censoring process.
+:::
+
+We can think about this via simulation.
 We do so by generating many replicates of the corresponding random delay, taking into account that we have already rounded down our infection times to infection days.
+This means that discretising a delay in this context is **double censoring** as we discussed in the [the biases in delay distribution session](sessions/biases-in-delay-distributions).
 In the absence of any other information or model, we assume for our simulation that infection occurred at some random time during the day, with each time equally likely.
-We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset.
-We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days:
+We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
+We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days.
 
-```{r discretise_2_day_window, file = here::here("functions", "censored-delay-pmf.r")}
+You can view the function we have written do this using:
+
+```{r discretise_2_day_window}
+censored_delay_pmf
 ```
 
 ::: callout-note
@@ -94,7 +150,7 @@ Try it with a few different probability distributions and parameters, e.g. for t
 ```{r discretised_gamma}
 gamma_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 gamma_pmf
-# plot the probabilities corresponding to each discretised days' delay
+
 plot(gamma_pmf)
 ```
 :::
@@ -102,8 +158,10 @@ plot(gamma_pmf)
 #### Applying a convolution
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
+The function we have written to do this is called `convolve_with_delay`
 
-```{r convolution, file = here::here("functions", "convolve-with-delay.r")}
+```{r convolution}
+convolve_with_delay
 ```
 
 ::: callout-tip
@@ -165,11 +223,11 @@ ggplot(combined, aes(x = time, y = observed)) +
 
 # Estimating a time series of infections
 
-We now estimate the number of infections over time based on an uninformed prior and working forward based on what we know about the observation process.
+As in previous sessions, we don't usually have data on infections. We now create a model that uses symptom onsets to estimate the number of infections over time. We'll base the model on an uninformed prior and work forward from what we know about the observation process.
 
 ```{r stan_estimate_infections}
-mod <- cmdstan_model(here("stan", "estimate-infections.stan"))
-mod$print(line_numbers = TRUE)
+mod <- nfidd_cmdstan_model("estimate-infections")
+mod
 ```
 
 ::: callout-tip
@@ -193,24 +251,20 @@ Line 24 defines the likelihood, and it does so using the Poisson observation unc
 
 We can now use this model to conduct inference, i.e. to try to reconstruct the time series of infections from the time series of onsets that we generated earlier.
 
-```{r inf_fit}
+```{r inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(combined),
   obs = combined$observed,
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(
-  data = data,
-  refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+inf_fit <- mod$sample(data = data, parallel_chains = 4)
 ```
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
-
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
+We have added the `parallel_chains` option to make use of any paralle hardware you may ave.
+If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 500, iter_sampling = 500`).
 :::
 
 ::: callout-tip
@@ -225,17 +279,15 @@ We can see the first few estimates of the number of infections using:
 inf_fit
 ```
 
-Again, we can do a posterior predictive check by plotting the modelled estimates of the time series of infections (with uncertainy) against our original data.
+Again, we can do a posterior predictive check by plotting the modelled estimates of the time series of infections (with uncertainty) against our original data.
 Does it look like a good fit?
 
 ```{r inf_ppc}
 # Extract posterior draws
 inf_posterior <- inf_fit |>
   gather_draws(infections[infection_day]) |>
-  mutate(infection_day = infection_day - 1)
-
-# sample 100 trajectories for plotting
-inf_posterior <- inf_posterior |>
+  ungroup() |> 
+  mutate(infection_day = infection_day - 1) |>
   filter(.draw %in% sample(.draw, 100))
 
 ggplot(mapping = aes(x = infection_day)) +
@@ -243,8 +295,8 @@ ggplot(mapping = aes(x = infection_day)) +
     data = inf_posterior, mapping = aes(y = .value, group = .draw), alpha = 0.1
   ) +
   geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
-  labs(subtitle = "Infections per day (red),
-       and sampled infection trajectories (lback)")
+  labs(title = "Infections per day",
+       subtitle = "True data (red), and sample of estimated trajectories (black)")
 ```
 
 ::: callout-tip
@@ -262,5 +314,9 @@ This is particularly useful when dealing with arrays such as `inference` because
 -   We could have used the individual-level model of the previous section to try to estimate the number of infections with a known delay distribution by estimating each individual infection time.
     How would this look in stan code?
     Would you expect it to yield a different result?
+
+-   The [`primarycensored`](https://github.com/epinowcast/primarycensored) package provides tools for efficiently working with censored and truncated delay distributions.
+    It offers both theoretical background on primary and secondary interval censoring and right truncation, as well as practical functions for estimating and using these distributions.
+    The package implements deterministic methods that are significantly faster than the Monte Carlo approach used in `censored_delay_pmf()` while providing exact results.
 
 # Wrap up

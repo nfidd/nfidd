@@ -6,8 +6,12 @@ _site
 .DS_Store
 *_files/
 /.quarto/
-stan/*
-!stan/functions
-!stan/*.stan
+inst/stan/simple-nowcast
+inst/stan/*
+!inst/stan/functions
+!inst/stan/*.stan
 *.html
 *.rmarkdown
+.vscode/
+*pdf
+CLAUDE.md

@@ -1,0 +1,102 @@
+---
+title: "Multi-model ensembles"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+format:
+  revealjs:
+    output: slides/forecasting-as-an-epidemiological-problem.html
+    footer: "Multi-model ensembles"
+---
+
+## Ensembles
+
+- Combine many different models' forecasts into a single prediction
+
+## Why ensemble?
+
+::: {.fragment .fade-in}
+Many uncertainties, many approaches: many models
+
+   - Layers of uncertainty
+  
+      - Model parameters
+        - e.g. parameterising delay distributions
+        
+      - Model structure
+        - e.g. more mechanistic or more statistical approaches
+   - Want to use all available information
+:::
+
+## Why ensemble?
+
+"Whole is greater than sum of parts"
+
+   - Average of multiple predictions is often more performant than any individual model
+   
+      - History in weather & economic forecasting
+      
+      - Seen this in infectious disease forecasting
+
+        - "Forecast challenges": Ebola, dengue, flu, COVID-19...
+
+## Ensemble methods
+
+::: {.fragment .fade-in}
+
+- Summarising across models to create single (probabilistic) prediction
+
+  - e.g. average at each models' probabilistic quantiles
+
+     - Mean
+
+     - Median - trims the outliers, so narrows the uncertainty
+:::
+
+## Ensemble methods
+
+- Equal or weighted combination
+
+   - Weight models by past forecast performance
+   
+      - e.g. using forecast scores
+      
+   - Rarely better than equal average
+
+## Collaborative modelling
+
+### "Forecast hubs"
+
+- Crowdsourcing forecasts
+
+   - Open source collaborative projects 
+
+   - Anyone able to contribute a forecast
+   
+- Forecasts ensembled into a single projection
+   
+- Also enables consistent evaluation
+
+##
+
+... European [Respicast](https://respicast.ecdc.europa.eu/)
+
+![](figures/respicast-forecasts.png)
+
+## Single model {.smaller}
+![](figures/respicast-single.png)
+
+## ... Multiple models {.smaller}
+![](figures/respicast-multi.png)
+
+## ... ... Multi-model ensemble {.smaller}
+![](figures/respicast-comparison.png)
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+1. Create unweighted and weighted ensembles using forecasts from multiple models.
+2. Evaluate the forecasts from ensembles compared to their constituent models.
+
+#
+
+[Return to the session](../forecast-ensembles)
+
+

@@ -7,13 +7,8 @@ website:
   title: "NFIDD"
   site-url: https://nfidd.github.io/nfidd/
   description: "Nowcasting and forecasting infectious disease dynamics"
+  body-footer: '<script data-goatcounter="https://nfidd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
   open-graph: true
-  comments:
-    giscus:
-      repo: nfidd/nfidd
-      category: 'Website discussions'
-      mapping: title
-      reactions-enabled: true
   navbar:
     left:
       - sidebar:sessions
@@ -23,6 +18,8 @@ website:
         href: getting-set-up.qmd
       - text: "Getting help"
         href: help.qmd
+      - text: "Timetable"
+        href: sessions.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
@@ -40,3 +37,4 @@ format:
     css: styles.css
     link-external-icon: true
     link-external-newwindow: true
+    toc: true

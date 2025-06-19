@@ -23,7 +23,7 @@ comments: false
 - understanding of right truncation in epidemiolgical data
 - ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
   
-## R estimation and the renewal equation
+## $R_t$ estimation and the renewal equation
 
 - understanding of the reproduction number and challenges in its estimation
 - awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
@@ -37,11 +37,11 @@ comments: false
 - understanding of nowcasting as a particular right truncation problem
 - Ability to perform a simple nowcast in R
 - awareness of the breadth of methods to perform nowcasting
-- R estimation as a nowcasting problem
+- $R_t$ estimation as a nowcasting problem
 
 ## Forecasting
 
-- understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and R estimation
+- understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation
 - understanding of the difference between forecasts, projections and scenarios
 - familiarity with common forecasting models and their properties, and applicability in epidemiology
 - ability to use a common forecasting model on an epidemiological time series in R
@@ -54,7 +54,5 @@ comments: false
 
 ## Evaluating forecasts (and nowcasts)
 
-- familiarity with metrics for evaluating deterministic forecasts (e.g. MAE)
-- ability to score deterministic forecasts in R
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
 - ability to score probabilistic forecasts in R

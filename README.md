@@ -1,7 +1,7 @@
 
 # Nowcasting and forecasting infectious disease dynamics
 
-This repository contains the material to create the nfiidd course page.
+This repository contains the material to create the nfidd course page.
 
 All the raw material is in the folder `sessions/` and is written in
 `quarto`. Any changes to the quarto files are automatically updated on
@@ -26,22 +26,26 @@ quarto::quarto_render()
 <!-- markdownlint-disable -->
 
 All contributions to this project are gratefully acknowledged using the
-[`allcontributors`
-package](https://github.com/ropenscilabs/allcontributors) following the
-[all-contributors](https://allcontributors.org) specification.
-Contributions of any kind are welcome!
+[`allcontributors` package](https://github.com/ropensci/allcontributors)
+following the [all-contributors](https://allcontributors.org)
+specification. Contributions of any kind are welcome!
 
 ### Code
 
 <a href="https://github.com/nfidd/nfidd/commits?author=sbfnk">sbfnk</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/nfidd/nfidd/commits?author=kathsherratt">kathsherratt</a>,
-<a href="https://github.com/nfidd/nfidd/commits?author=ManuelStapper">ManuelStapper</a>
+<a href="https://github.com/nfidd/nfidd/commits?author=github-actions[bot]">github-actions\[bot\]</a>,
+<a href="https://github.com/nfidd/nfidd/commits?author=dependabot[bot]">dependabot\[bot\]</a>,
+<a href="https://github.com/nfidd/nfidd/commits?author=jamesmbaazam">jamesmbaazam</a>,
+<a href="https://github.com/nfidd/nfidd/commits?author=ManuelStapper">ManuelStapper</a>,
+<a href="https://github.com/nfidd/nfidd/commits?author=zsusswein">zsusswein</a>
 
 ### Issues
 
 <a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Atoshiakiasakura">toshiakiasakura</a>,
-<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Ajcken95">jcken95</a>,
+<a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3ADegoot-AM">Degoot-AM</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->

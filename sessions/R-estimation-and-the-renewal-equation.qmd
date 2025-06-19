@@ -1,36 +1,56 @@
 ---
-title: "R estimation and the renewal equation"
+title: "$R_t$ estimation and the renewal equation"
 order: 5
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
+# Introduction
 
-[Introduction to the reproduction number](slides/introduction-to-reproduction-number)
+In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.
 
-# Objectives
+## Slides 
+
+- [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
+
+## Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.
 
-# Libraries used
+::: {.callout-note collapse="true"}
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/R-estimation-and-the-renewal-equation.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # The renewal equation as a process model for infectious diseases
@@ -41,15 +61,17 @@ Recall that in the [session on convolutions](using-delay-distributions-to-model-
 In doing so we assumed that infections every day were independently identically distributed and determined only by the number of symptom onsets that they caused.
 In reality, however, we know that infections are not independent.
 Because infection is dependent on a pathogen being transmitted from one individual to another, we expect infections on any day to depend on existing infections, that is the number of individuals that became infectious in the recent past.
-We know express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R$.
+We now express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number $R_t$.
 
 Remember that this is a more general concept than the _basic_ reproduction number $R_0$ which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
-The reproduction number $R$ (sometimes called the _effective_ reproduction number) *more generally describes the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
-In most mechanistic models of infectious diseases (starting with the simplest SIR model), *$* arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
-By fitting such models to data it is then possible to calculate the value of $R$ at any point in time.
+The reproduction number $R_t$ (sometimes called the _effective_ reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual and can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+
+In most mechanistic models of infectious diseases (starting with the simplest SIR model), $R_t$ arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
+By fitting such models to data it is then possible to calculate the value of $R_t$ at any point in time.
+
 The _renewal equation_ represents a more general model which includes the SIR model as a special case.
-In its basic form it makes no assumption about the specific processes that cause $R$ to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time.
+In its basic form it makes no assumption about the specific processes that cause $R_t$ to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time.
 Mathematically, it can be written as
 
 $$
@@ -69,7 +91,7 @@ Note that in the discrete version we have started the sum at 1 and thus set $g_0
 ::: {.callout-tip}
 ## Instantaneous vs. case reproduction number
 There are different definitions of the reproduction number that can be applied to the situation where it changes in time.
-As it is defined above it is also called the _instantaneous_ reproduction number because any change affects all currently infectious individual instantaneously.
+As it is defined above it is also called the _instantaneous_ reproduction number because any change affects all currently infectious individuals instantaneously.
 Another example of a definition is the _case_ reproduction number, where changes affect individuals at the time that they are infected but then they have a constant reproduction number throughout their infectious period.
 :::
 
@@ -83,9 +105,10 @@ In this course we will only deal with the deterministic renewal equation.
 # Simulating an epidemic using the renewal equation
 
 With the theory out of the way we now turn to simulating an epidemic using the renewal equation.
-We first write a function to simulate the epidemic using the discrete renewal equation.
+We can use function included in the `nfidd` package to simulate the epidemic using the discrete renewal equation.
 
-```{r renewal_equation, file = here::here("functions", "renewal.r")}
+```{r renewal_equation}
+renewal
 ```
 
 ::: {.callout-note}
@@ -98,22 +121,25 @@ Try calling the function with a few different probability distributions and para
 What kind of behaviours do you see depending on the values you put in?
 :::
 
-# Estimating R from a time series of infections
+# Estimating $R_t$ from a time series of infections
 
 We now return to the time series of infections we used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions).
 
 ```{r load_ts}
-source(here::here("snippets", "load-ts.r"))
+inf_ts <- make_daily_infections(infection_times)
+head(inf_ts)
+```
+
+This creates the `inf_ts` data set which we can look at e.g. using
+
+```{r load_ts_inspect}
+head(inf_ts)
 ```
 
 We use a renewal equation model in _stan_ to estimate the effective reproduction number throughout the outbreak.
 We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days).
 From this we can calculate that the parameters of the distribution are shape 4 and rate 1.
 We can use the `censored_delay_pmf()` function defined in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) to use this continuous distribution with the discrete renewal equation.
-If you don't have this available any more, you can load it using
-```{r source_censored_delay_pmf}
-source(here("functions", "censored-delay-pmf.r"))
-```
 
 To approximate the generation time PMF using random draws from the underlying continuous distribution use
 ```{r gen_time_pmf}
@@ -130,8 +156,8 @@ gen_time_pmf <- gen_time_pmf / sum(gen_time_pmf) ## renormalise
 As always we first load the stan model and spend some time trying to understand it.
 
 ```{r stan_estimate_r}
-mod <- cmdstan_model(here("stan", "estimate-r.stan"))
-mod$print(line_numbers = TRUE)
+r_mod <- nfidd_cmdstan_model("estimate-r")
+r_mod
 ```
 
 ::: {.callout-tip}
@@ -139,18 +165,18 @@ mod$print(line_numbers = TRUE)
 Familiarise yourself with the model above.
 Again there is a `functions` block at the beginning of the model (lines 1-3), where we load a function called `renewal()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/renewal.stan).
 The functions correspond exactly to our earlier **R** function of the same name.
-Later, this functions is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
+Later, this function is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
 Which line defines priors, and which the likelihood?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Line 24 defines the prior distribution of R at each time point, and Line 25 defines the likelihood using Poisson observation uncertainty.
+Line 24 defines the prior distribution of $R_t$ at each time point, and Line 25 defines the likelihood using Poisson observation uncertainty.
 :::
 
 Once again we can generate estimates from this model:
 
-```{r r_fit}
+```{r r_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(inf_ts) - 1,
   obs = inf_ts$infections[-1],
@@ -158,54 +184,59 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
-r_fit <- mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+r_fit <- r_mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r r_fit_summary}
 r_fit
 ```
 
-Once stan has run its chains, we can visualise the estimates:
+Once stan has run its chains, we can visualise the posterior estimates.
 
 ```{r r_plot}
 # Extract posterior draws
 r_posterior <- r_fit |>
-  gather_draws(infections[infection_day], R[infection_day]) |>
+  gather_draws(R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |> 
+  filter(.draw %in% sample(.draw, 100))
 
 ggplot(
   data = r_posterior,
-  aes(x = infection_day, y = .value)
-) +
-  geom_line(alpha =  0.1)
+  aes(x = infection_day, y = .value, group = .draw))  +
+  geom_line(alpha =  0.1) +
+  labs(title = "Estimated Rt", 
+       subtitle = "Model 1: renewal equation from infections")
 ```
 
 ::: {.callout-tip}
 ## Take 10 minutes
-Simulate from the renewal equation using the `renewal()` R function we defined above with a given **R** trajectory.
-For example, you could look at R increasing steadily, or suddenly, or having any other trajectory you might imagine.
+Simulate from the renewal equation using the `renewal()` R function we defined above with a given $R_t$ trajectory.
+For example, you could look at $R_t$ increasing steadily, or suddenly, or having any other trajectory you might imagine.
 Use the stan model to infer the trajectory of the reproduction number from the resulting time series of infection.
-Does the model reproduce the simulated R trajectories?
+Does the model reproduce the simulated $R_t$ trajectories?
 :::
 
-# Estimating R from a time series of symptom onsets
+# Estimating $R_t$ from a time series of symptom onsets
 
 Epidemiological data is rarely, perhaps never, available as a time series of infection events.
 Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g. by presenting to a hospital. 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution:
+For this we used the `convolved_with_delay()` function.
 
-```{r add_onsets}
-source(here::here("functions", "convolve-with-delay.r"))
+We then simulate observations again using:
+
+```{r generate_obs}
 ip_pmf <- censored_delay_pmf(rgamma, max = 14, shape = 5, rate = 1)
 onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
 obs <- rpois(length(onsets), onsets)
 ```
 
-We now add this to our renewal equation model:
+We now add this to our renewal equation model and use this to estimate infections as well as the reproduction number:
 
 ```{r stan_estimate_inf_and_r}
-mod <- cmdstan_model(here("stan", "estimate-inf-and-r.stan"))
-mod$print(line_numbers = TRUE)
+r_inf_mod <- nfidd_cmdstan_model("estimate-inf-and-r")
+r_inf_mod
 ```
 ::: {.callout-tip}
 ## Take 5 minutes
@@ -217,7 +248,7 @@ How do the assumptions about the infections time series differ between the model
 
 We then generate estimates from this model:
 
-```{r r_inf_fit}
+```{r r_inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = length(obs) - 1,
   obs = obs[-1],
@@ -227,43 +258,50 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE, parallel_chains = 4
+r_inf_fit <- r_inf_mod$sample(
+  data = data, parallel_chains = 4, init = \() list(init_R = 1)
 )
+```
+
+::: {.callout-note}
+Generally one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
+When testing this model we noticed that sometimes the model failed to fit the data at all.
+Because of this we added an argument to start sampling with `init_R` set to 1.
+This makes sure the sampler starts fitting the model from a sensible value and avoids fitting failiures.
+:::
+
+```{r r_inf_fit_summary}
 r_inf_fit
 ```
 
-We can visualise the posteriors in the same way as earlier here and in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections). For example one could do 
+This time we can extract both the `infections` and `R` variables by infection day.
 
 ```{r r_inf_posterior}
-# To avoid repeating overselves we have put the code to extract the posteriors in a function
-source(here::here("functions", "extract-R-posteriors.r"))
-posteriors <- r_inf_fit |>
+r_inf_posteriors <- r_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |> 
+  filter(.draw %in% sample(.draw, 100))
 ```
 
-This time we extracted both the `infections` and `R` variables by infection day.
-We again use this to visualise infections compared to the data used to generate the time series of onsets
+We can visualise infections compared to the data used to generate the time series of onsets
 
 ```{r plot_infections}
-## Extract 100 samples
-posteriors <- posteriors |>
-  filter(.draw %in% sample(.draw, 100))
-inf_posterior <- posteriors |>
+inf_posterior <- r_inf_posteriors |>
   filter(.variable == "infections")
 ggplot(inf_posterior, mapping = aes(x = infection_day)) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
   geom_line(
     data = inf_ts, mapping = aes(y = infections), colour = "red"
-  )
+  ) +
+  labs(title = "Infections, estimated (grey) and observed (red)", 
+       subtitle = "Model 2: renewal equation from symptom onsets")
 ```
 
 and reproduction numbers
 
 ```{r plot_rt}
-r_inf_posterior <- posteriors |>
+r_inf_posterior <- r_inf_posteriors |>
   filter(.variable == "R")
 ggplot(
   r_inf_posterior, mapping = aes(x = infection_day, y = .value, group = .draw)
@@ -275,7 +313,7 @@ ggplot(
 
 In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
 
-In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
+In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
 
 $$
 \sigma \sim HalfNormal(0, 0.05) \\
@@ -288,19 +326,52 @@ $$
 $$
 
 Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
+The last line is the geometric random walk.
+
+## Simulating a geometric random walk
+
+You can have a look at an R function for performing the geometric random walk:
+
+```{r geometric-random-walk}
+geometric_random_walk
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+Look at this function and try to understand what it does.
+Note that we use the fact that we can generate a random normally distributed variable $X$ with mean 0 and standard deviation $\sigma$ by mutiplying a standard normally distributed variable (i.e., mean 0 and standard deviation 1) $Y$ with $\sigma$.
+Using this [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency) will improve our computational efficency later when using an equivalent function in stan 
+:::
+
+We can use this function to simulate a random walk:
+
+```{r simulate-geometric-walk}
+R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
+data <- tibble(t = seq_along(R), R = exp(R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from a random walk model",
+       x = "Time",
+       y = "R")
+```
+
+You can repeat this multiple times either with the same parameters or changing some to get a feeling for what this does.
+
+## Estimating $R_t$ with a geometric random walk prior
 
 We can now include this in a stan model,
 
 ```{r stan_estimate_inf_and_r_rw}
-rw_mod <- cmdstan_model(here("stan", "estimate-inf-and-r-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw")
+rw_mod
 ```
 
-Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number. See [`stan/functions/geometric_random_walk.stan`]() for the geometric random walk function (note that here we use the [non-centred parameterisation](https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html) for efficiency).
+Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number using a function in stan that does the same as our R function of the same name we defined.
 
 We can now generate estimates from this model:
 
-```{r r_inf_rw_fit}
+```{r r_inf_rw_fit, results = 'hide', message = FALSE}
 data <- list(
   n = length(obs) - 1,
   obs = obs[-1],
@@ -308,15 +379,21 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf,
   ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = 0 # this is a small easter egg for the attentive reader
+  ip_pmf = ip_pmf
 )
 r_rw_inf_fit <- rw_mod$sample(
-  data = data, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE,
-  parallel_chains = 4, max_treedepth = 12
+  data = data, parallel_chains = 4, max_treedepth = 12, 
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
+```
+
+```{r r_inf_rw_fit_summary}
 r_rw_inf_fit
 ```
+
+::: {.callout-note}
+As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
+:::
 
 We can again extract and visualise the posteriors in the same way as earlier.
 
@@ -324,17 +401,20 @@ We can again extract and visualise the posteriors in the same way as earlier.
 rw_posteriors <- r_rw_inf_fit |>
   gather_draws(infections[infection_day], R[infection_day]) |>
   ungroup() |>
-  mutate(infection_day = infection_day - 1)
+  mutate(infection_day = infection_day - 1) |>
+  filter(.draw %in% sample(.draw, 100))
 ```
 
 ```{r plot_infections_rw}
 rw_inf_posterior <- rw_posteriors |>
   filter(.variable == "infections")
 ggplot(mapping = aes(x = infection_day)) +
-  geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
   geom_line(
-    data = rw_inf_posterior, mapping = aes(y = .value), alpha = 0.1
-  )
+    data = rw_inf_posterior, mapping = aes(y = .value, group = .draw), alpha = 0.1
+  ) +
+  geom_line(data = inf_ts, mapping = aes(y = infections), colour = "red") +
+  labs(title = "Infections, estimated (grey) and observed (red)", 
+       subtitle = "Model 3: renewal equation with random walk")
 ```
 
 and reproduction numbers
@@ -342,12 +422,14 @@ and reproduction numbers
 ```{r plot_rt_rw}
 rw_r_inf_posterior <- rw_posteriors |>
   filter(.variable == "R") |>
-  filter(.draw %in% sample(.draw, 100)) ## extract 100 draws
+  filter(.draw %in% sample(.draw, 100))
 ggplot(
   data = rw_r_inf_posterior,
   mapping = aes(x = infection_day, y = .value, group = .draw)
 ) +
-  geom_line(alpha = 0.1)
+  geom_line(alpha = 0.1) +
+  labs(title = "Estimated R", 
+       subtitle = "Model 3: renewal equation with random walk")
 ```
 
 ::: {.callout-tip}
@@ -355,25 +437,25 @@ ggplot(
 Compare the results across the models used in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
 How do the models vary in the number of parameters that need to be estimated?
 How do the assumptions about the infections time series differ between the models?
-What do you notice about the level uncertainty in the estimates of infections and R over the course of the time series?
-If you have time you could try re-running the experiment with different R trajectories and delay distributions to see whether results change.
+What do you notice about the level of uncertainty in the estimates of infections and $R_t$ over the course of the time series?
+If you have time you could try re-running the experiment with different $R_t$ trajectories and delay distributions to see whether results change.
 
 ::: {.callout-note collapse="true"}
 ## Solution
 We can see that using the renewal model as generative model we recover the time series of infections more accurately compared to previously when we assumed independent numbers of infections each day and that using a more believable model (i.e the geometric random walk) for the reproduction number improves things even more.
 Of course, this is helped by the fact that the data was generated by a model similar to the renewal model used for inference.
 
-Comparing the R trajectories
+# Comparing the $R_t$ trajectories
 
 ```{r plot_r_posteriors}
+## earlier posteriors
+r_posterior <- r_posterior |>
+  mutate(data = "infections")
 r_inf_posterior <- r_inf_posterior |>
   mutate(data = "onsets (normal)")
 rw_r_inf_posterior <- rw_r_inf_posterior |>
   mutate(data = "onsets (random walk)")
 
-## earlier posterior (see previous section)
-r_posterior <- r_posterior |>
-  mutate(data = "infections")
 all_posteriors <- rbind(
   r_inf_posterior,
   rw_r_inf_posterior,
@@ -382,10 +464,19 @@ all_posteriors <- rbind(
 
 ggplot(
   all_posteriors,
-  mapping = aes(x = infection_day, y = .value, colour = data)
+  mapping = aes(x = infection_day, y = .value, group = .draw,
+                colour = data)
 ) +
   geom_line(alpha = 0.1) +
-  scale_fill_brewer(palette = "Set1")
+  scale_fill_brewer(palette = "Set1") +
+  labs(
+    title = "Rt estimates from renewal equation models",
+    subtitle = paste(
+      "Estimates from infections, from symptom onsets, and from onsets with a",
+      "random walk"
+    )
+  ) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
 We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
@@ -399,6 +490,8 @@ We can see that the estimates are smoother when using the random walk model for 
 Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
 How would you change the model in this case?
 What are the implications for inference?
+- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
+
 
 
 

@@ -3,34 +3,56 @@ title: "Nowcasting concepts"
 order: 6
 ---
 
-[Introduction to nowcasting](slides/introduction-to-nowcasting)
+# Introduction
 
-```{r echo = FALSE}
-set.seed(123)
-```
+So far we've explored the delays and biases of real-time outbreak data, started to correct for these, and considered the underlying process that drives the evolution of an outbreak (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how an outbreak is evolving in the present and future. 
 
-# Objectives
+We know that we have incomplete information in the present because of delays in the observation process (reporting delays). The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
+
+## Slides
+
+- [Introduction to nowcasting](slides/introduction-to-nowcasting)
+
+## Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
 
-# Libraries used
+::: {.callout-note collapse="true"}
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/nowcasting.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `tidybayes` package for extracting results of the inference.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("tidybayes")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
 :::
 
 # Simulating delayed reporting
@@ -45,6 +67,7 @@ Let us assume that the symptom onsets are reported with a delay and that this de
 To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
+data(infection_times)
 df <- infection_times |>
   mutate(
     onset_time = infection_time + rgamma(n(), shape = 5, rate = 1),
@@ -52,31 +75,28 @@ df <- infection_times |>
   )
 ```
 
-We then assume that we're 40 days into the outbreak, i.e. we only consider observations with a reporting time less than 41 - other symptom onset may have already happened, but we have not observed them yet.
+We then assume that we're 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
 
 
 ```{r truncate_reports}
-cutoff <- 41
+cutoff <- 71
 df_co <- df |>
   filter(report_time < cutoff)
-
-df_on <- df |>
-  filter(onset_time < cutoff)
 ```
 
 We can now convert this to a time series of symptom onsets and reports:
 
 ```{r aggregate}
-## create time series of onsets and reports
+## create time series of infections, onsets, and reports
 df_co <- df_co |>
   transmute(
-    infecton_day = floor(infection_time),
+    infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
   )
 
 infection_ts <- df_co |>
-  count(day = infecton_day, name = "infections")
+  count(day = infection_day, name = "infections")
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
 reports_ts <- df_co |>
@@ -94,18 +114,19 @@ Plotting these, we get
 ```{r ts_plot, fig.height = 10}
 combined <- all_days |>
   pivot_longer(c(onsets, reports, infections), names_to = "variable")
-ggplot(combined, aes(x = day, y = value)) +
+  ggplot(combined, aes(x = day, y = value)) +
   facet_grid(variable ~ .) +
   geom_col()
 ```
 
-Looking at the four plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
+Looking at the three plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
-By cutting off at a certain _reporting_ date, we will many of the recent symptom onsets still to be reported.
+By cutting off at a certain _reporting_ date, we do not observe many of the recent symptom onsets that are yet to be be reported.
 We can see that if we plot the final data set alongside the cut-off one:
 
 ```{r plot_cut_final}
+# Use full outbreak dataset
 final <- df |>
   transmute(onset_day = floor(onset_time))
 final_onset_ts <- final |>
@@ -118,7 +139,7 @@ intermediate <- combined |>
   filter(variable == "onsets") |>
   select(-variable) |>
   rename(onsets = value) |>
-  mutate(cutoff = "40 days")
+  mutate(cutoff = "70 days")
 combined_cutoffs <- rbind(
   intermediate,
   final_all_days
@@ -129,34 +150,50 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
   geom_vline(xintercept = cutoff, linetype = "dashed")
 ```
 
-As we can see, even though on day 40 it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
-The apparent decline towards the present on day 40 (indicated by a dashed vertical line) was caused by the delay in reporting.
+As we can see, even though it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
+The apparent decline towards the present (indicated by a dashed vertical line) was caused by the delay in reporting.
 
-Why then, you might ask, not just plot the data by date of reporting which correctly showed the data to be still increasing and should, by definition, not be subject to future changes?
+::: {.callout-note}
+## Plotting and analysing data by report date
+Looking at the plots one might suggest plotting and analysing the data by date of reporting which correctly showed the data to be still increasing and which should, by definition, not be subject to future changes.
+
 This can sometimes be a sensible way to visualise the data.
-However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc.
+However, reporting might itself be subject to biases such as breaks during the weekend, holidays etc or reporting delays may vary over time.
 At the same time, when it comes to capacity or intervention planning we may need to know how many people e.g. become sick on any given day and will thus present to the healthcare system rather than how many will be reported.
+:::
+
+::: {.callout-tip}
 Estimating the "true curve" (i.e. what we expect to see once the data are complete at a future date) of the time series of _epidemiologically relevant events_ from a potentially truncated epidemiological curve and information about the delays is what is usually called "nowcasting".
+:::
 
 # Nowcasting with a known delay
 
 ## The simplest possible nowcasting model
 
-Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions.qmd).
+Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
 
-In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
+In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 
+
+We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution up to 15 days, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
 
 ```{r}
 proportion_reported <- plnorm(1:15, 1, 0.5)
 plot(proportion_reported)
 ```
 
+::: {.callout-tip}
+## The `plnorm` function
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
+:::
 
-We can now construct some simulated data and use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) and apply the `reporting_delay` to the last 15 days of data.
+We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have created helper functions `make_gen_time_pmf()` and `make_ip_pmf()` to make it easier to re-use; we recommend to have a look at what these functions do), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
-source(here::here("snippets", "simulate-onsets.r"))
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
 reported_onset_df <- onset_df |>
   filter(day < cutoff) |>
   mutate(proportion_reported = c(rep(1, n() - 15), rev(proportion_reported)),
@@ -174,13 +211,19 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 ## Solution
 - The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
 - The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
+
+```{r plot-proportion-reported}
+reported_onset_df |>
+  ggplot(aes(x = day, y = reported_onsets)) +
+  geom_col()
+```
 :::
 
 We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
 ```{r stan-simple-nowcast}
-mod <- cmdstan_model(here("stan", "simple-nowcast.stan"))
-mod$print(line_numbers = TRUE)
+mod <- nfidd_cmdstan_model("simple-nowcast")
+mod
 ```
 
 ::: {.callout-tip}
@@ -197,16 +240,17 @@ Familiarise yourself with the model above. What does it do?
 
 Once again we can generate estimates from this model:
 
-```{r nowcast_fit}
+```{r nowcast_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(reported_onset_df) - 1,
   obs = reported_onset_df$reported_onsets[-1],
   report_max = length(proportion_reported) - 1,
   report_cdf = proportion_reported 
 )
-simple_nowcast_fit <- mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+simple_nowcast_fit <- mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r nowcast_fit_summary}
 simple_nowcast_fit
 ```
 
@@ -216,15 +260,20 @@ We can now plot onsets alongside those nowcasted by the model:
 nowcast_onsets <- simple_nowcast_fit |>
   gather_draws(onsets[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |> ## sample 100 iterations randomly
+  filter(.draw %in% sample(.draw, 100)) |>
   mutate(day = day + 1)
 ```
 
 ```{r plot_nowcast}
 ggplot(nowcast_onsets, aes(x = day)) +
   geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
-  geom_col(data = reported_onset_df, mapping = aes(y = onsets))
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
+
+:::{.callout-tip}
+The points in this plot represent the data available when the nowcast was made (and so are truncated) whilst the bars represent the finally reported data (a perfect nowcast would exactly reproduce these).
+:::
 
 ::: {.callout-tip}
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
@@ -237,16 +286,17 @@ As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-
 We first load the model
 
 ```{r stan-nowcast-with-rw}
-rw_mod <- cmdstan_model(here("stan", "simple-nowcast-rw.stan"))
-rw_mod$print(line_numbers = TRUE)
+rw_mod <- nfidd_cmdstan_model("simple-nowcast-rw")
+rw_mod
 ```
 
 and then fit it
 
-```{r rw-nowcast-fit}
-rw_nowcast_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, refresh = ifelse(interactive(), 50, 0), show_exceptions = FALSE, show_messages = FALSE
-)
+```{r rw-nowcast-fit, results = 'hide', message = FALSE}
+rw_nowcast_fit <- rw_mod$sample(data = data, parallel_chains = 4)
+```
+
+```{r rw-nowcast-fit-summary}
 rw_nowcast_fit
 ```
 
@@ -263,8 +313,9 @@ rw_nowcast_onsets <- rw_nowcast_fit |>
 
 ```{r rw-plot_nowcast}
 ggplot(rw_nowcast_onsets, aes(x = day)) +
-  geom_col(data = reported_onset_df, mapping = aes(y = onsets)) +
-  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1)
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
 
 ::: {.callout-tip}
@@ -282,5 +333,65 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
+## What happens if we get the delay distribution wrong?
+
+In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
+In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.
+We will now look at what happens if we get the delay distribution wrong.
+
+We use the same data as before but now assume that the delay distribution is a gamma distribution with shape 2 and rate 3.
+This is a very different distribution to the lognormal distribution we used to simulate the data.
+
+```{r gamma-dist}
+wrong_proportion_reported <- pgamma(1:15, 2, 3)
+plot(wrong_proportion_reported)
+```
+
+We first need to update the data to use this new delay distribution:
+
+```{r wrong-delay-data}
+wrong_delay_data <- data
+wrong_delay_data$report_cdf <- wrong_proportion_reported
+```
+
+We now fit the nowcasting model with the wrong delay distribution:
+
+```{r gamma-nowcast-fit, results = 'hide', message = FALSE}
+gamma_nowcast_fit <- rw_mod$sample(data = wrong_delay_data, parallel_chains = 4)
+```
+
+```{r gamma-nowcast-fit-summary}
+gamma_nowcast_fit
+```
+
+
+Again we can extract the nowcast of symptom onsets and plot it alongside the observed data:
+
+```{r gamma-nowcast-onsets}
+gamma_nowcast_onsets <- gamma_nowcast_fit |>
+  gather_draws(onsets[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  mutate(day = day + 1)
+```
+
+```{r gamma-plot_nowcast}
+ggplot(gamma_nowcast_onsets, aes(x = day)) +
+  geom_col(data = reported_onset_df, mapping = aes(y = onsets), alpha = 0.6) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The nowcast now looks very different to the observed data. This is because the model is using the wrong delay distribution to nowcast the data.
+- If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
+- In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
+:::
 
 # Wrap up

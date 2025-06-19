@@ -1,0 +1,170 @@
+---
+title: "Introduction to the spectrum of forecasting models"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-the-spectrum-of-forecasting-models.html
+    footer: "Introduction to the spectrum of forecasting models"
+    slide-level: 3
+---
+
+## Different types of models {.smaller}
+
+![](figures/mechanism.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+- We can classify models by the level of mechanism they include
+- All of the model types we will introduce in the next few slides have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
+
+**NOTE:**  level of mechanism $\neq$ model complexity
+
+:::
+
+::: {.column}
+
+![](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41597-022-01517-w/MediaObjects/41597_2022_1517_Fig4_HTML.png?as=webp)
+
+[Cramer *et al.*, *Scientific Data*, 2022](https://doi.org/10.1038/s41597-022-01517-w)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism1.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Complex agent-based models**
+
+Conceptually probably the closest to meteorological forecasting, if with much less real-time data.
+
+:::
+
+::: {.column}
+
+![](https://ars.els-cdn.com/content/image/1-s2.0-S1755436517300221-gr1.jpg)
+
+[Venkatramanan *et al.*, *Epidemics*, 2018](https://doi.org/10.1016/j.epidem.2017.02.010)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism2.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Compartmental models**
+
+Aim to capture relevant mechanisms but without going to the individual level.
+
+:::
+
+::: {.column}
+
+![](https://journals.plos.org/ploscompbiol/article/figure/image?size=large&id=10.1371/journal.pcbi.1008619.g001)
+
+[Keeling *et al.*, *PLOS Comp Biol*, 2021](https://doi.org/10.1371/journal.pcbi.1008619)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism3.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Semi-mechanistic models**
+
+- Include some epidemiological mechanism (e.g. SIR or the renewal equation)
+- Add a nonmechanistic time component inspired by statistical models (e.g. random walk)
+- e.g., the model we have worked with so far
+
+:::
+
+::: {.column}
+
+![](https://ars.els-cdn.com/content/image/1-s2.0-S1755436516300445-gr2.jpg)
+
+[Funk *et al.*, *Epidemics*, 2018](http://dx.doi.org/10.1016/j.epidem.2016.11.003)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism4.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Statistical models**
+
+- Models that don't include any epidemiological background e.g. ARIMA; also called *time-series models*
+- The random walk model when used on its own (without going via $R_t$) is called a [stochastic volatility model](https://mc-stan.org/docs/stan-users-guide/time-series.html#stochastic-volatility-models)
+
+:::
+
+::: {.column}
+
+![](figures/muni_model.png)
+
+:::
+
+::::
+
+### {.smaller}
+
+![](figures/mechanism.png){width="70%"}
+
+:::: {.columns}
+
+::: {.column}
+
+**Other models**
+
+- Expert or crowd opinion
+- Machine learning
+- ...
+
+:::
+
+::: {.column}
+
+![](figures/crowdforecastr.png)
+
+[Bosse *et al.*, *Wellcome Open Res*, 2024](https://doi.org/10.12688/wellcomeopenres.19380.2)
+
+:::
+
+::::
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {.smaller background-color="#447099" transition="fade-in"}
+
+1. Review the performance of the random walk model
+2. Motivate a mechanism to order to address some of the issues
+3. Motivate a statistical approach aiming to address the same issues
+4. Compare the performance of these models for a single forecast
+5. Evaluate many forecast from these models and compare their performance
+
+# 
+
+[Return to the session](../forecasting-models)

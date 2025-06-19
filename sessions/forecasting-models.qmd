@@ -3,34 +3,788 @@ title: "Forecasting models"
 order: 8
 ---
 
-```{r echo = FALSE}
-set.seed(123)
-```
+# Introduction
 
-# Objectives
+We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
+In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model. We'll again evaluate these models to see what effect these different approaches might have.
+
+## Slides
+
+- [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
+
+## Objectives
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
-# Libraries used
+::: {.callout-caution}
+None of the models introduced in this section are designed for real-world outbreak use!
+:::
 
-In this session we will use the `nfidd` package to load the data set of infection times, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `tidybayes` package for extracting results of the inference.
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/forecasting-models.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("tidybayes")
+library("scoringutils")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
+:::
+
+# What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
+
+- It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
+- It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
+
+::: {.callout-note collapse="true"}
+## What did a geometric random walk model look like again?
+
+```{r geometric-random-walk-sim}
+R <- geometric_random_walk(init = 0, noise = rnorm(100), std = 0.1)
+data <- tibble(t = seq_along(R), R = R)
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from a random walk model",
+       x = "Time",
+       y = "R")
+```
+
+:::
+
+# Forecasting models as a spectrum
+
+A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
+However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
+The worst case is that we have mistaken beliefs about the underlying mechanisms and use these to make predictions which are systematically wrong and misleading.
+In these cases, forecasters often use _statistical models_ to make predictions which have little or no mechanistic basis.
+In our work, we have found that a combination of mechanistic and statistical models can be very powerful but that identifying the best model for a given forecasting task can be challenging.
+
+## Adding more mechanistic structure to the renewal model
+
+One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast evaluation](forecast-evaluation) session, we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+
+::: {.callout-warning}
+This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
+:::
+
+This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
+
+$$
+R_t = \frac{S_{t-1}}{N} R_0
+$$
+
+::: {.callout-note}
+This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
+:::
+
+::: {.callout-note collapse="true"}
+
+## What behaviour would we expect from this model?
+
+```{r}
+n <- 100
+N <- 1000
+R0 <- 1.5
+S <- rep(NA, n)
+S[1] <- N
+Rt <- rep(NA, n) ## reproduction number
+Rt[1] <- R0
+I <- rep(NA, n)
+I[1] <- 1
+for (i in 2:n) {
+  Rt[i] <- (S[i-1]) / N * R0
+  I[i] <- I[i-1] * Rt[i]
+  S[i] <- S[i-1] - I[i]
+}
+
+data <- tibble(t = 1:n, Rt = Rt)
+
+ggplot(data, aes(x = t, y = Rt)) +
+  geom_line() +
+  labs(title = "Simulated data from an SIR model",
+       x = "Time",
+       y = "Rt")
+```
+:::
+
+The key assumptions we are making here are: 
+
+- The population is constant and we roughly know the size of the population.
+- The reproduction number only changes due to susceptible depletion
+- The number of new cases at each time is proportional to the number of susceptibles in the population.
+
+We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Let's load the model:
+
+```{r}
+mech_mod <- nfidd_cmdstan_model("mechanistic-r")
+mech_mod
+```
+
+## Adding more statistical structure to the renewal model
+
+Adding more mechanistic structure is not always possible and, if we don't specify mechanisms correctly, might make forecasts worse.
+Rather than adding more mechanistic structure to the renewal model, we could add more statistical structure with the aim of improving performance.
+Before we do this, we need to think about what we want from a forecasting model.
+As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
+We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
+A statistical term that can be used to describe a time series with a trend is saying that the time series is _non-stationary_.
+More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean and variance, do not change over time.
+In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
+
+The random walk model we used in the [forecast visualisation](forecast-visualisation) session is a special case of a more general class of models called _autoregressive (AR) models_. 
+AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
+The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
+
+ For the log-transformed reproduction number ($log(R_t)$), the model is:
+
+$$
+log(R_t) = \phi log(R_{t-1}) + \epsilon_t
+$$
+
+where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
+
+::: {.callout-note collapse="true"}
+## What behaviour would we expect from this model?
+
+```{r}
+n <- 100
+phi <- 0.4
+sigma <- 0.1
+log_R <- rep(NA, n)
+log_R[1] <- rnorm(1, 0, sigma)
+for (i in 2:n) {
+  log_R[i] <- phi * log_R[i-1] + rnorm(1, 0, sigma)
+}
+data <- tibble(t = 1:n, R = exp(log_R))
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from an exponentiated AR(1) model",
+       x = "Time",
+       y = "R")
+```
+:::
+
+However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
+
+Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
+
+$$
+log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
+$$
+
+
+::: {.callout-note collapse="true"}
+## What behaviour would we expect from this model?
+
+Again we look at an R function that implements this model:
+
+```{r geometric-diff-ar}
+geometric_diff_ar
+```
+
+We can use this function to simulate a differenced AR process:
+
+```{r}
+R <- geometric_diff_ar(init = 0, noise = rnorm(100), std = 0.1, damp = 0.1)
+
+data <- tibble(t = seq_along(R), R = R)
+
+ggplot(data, aes(x = t, y = R)) +
+  geom_line() +
+  labs(title = "Simulated data from an exponentiated AR(1) model with differencing",
+       x = "Time",
+       y = "R")
+```
+
+:::
+
+We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
+
+```{r}
+stat_mod <- nfidd_cmdstan_model("statistical-r")
+stat_mod
+```
+
+
+# Forecasting with the mechanistic and statistical models
+
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation](forecast-visualisation) session. We will first load in the data and filter for a target forecast date.
+
+```{r, load-simulated-onset}
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
+onset_df
+
+# we'll make a forecast on day non day 41, pretending we haven't seen the later
+# data
+cutoff <- 41
+
+filtered_onset_df <- onset_df |>
+  filter(day <= cutoff)
+```
+
+We will now fit the more mechanistic model to the data.
+```{r fit_mech_model, results = 'hide', message = FALSE}
+horizon <- 28
+
+data <- list(
+  n = nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon, # Here we set the number of days to forecast into the future
+  N_prior = c(10000, 2000) # the prior for the population size
+)
+mech_forecast_fit <- mech_mod$sample(
+  data = data, parallel_chains = 4
+)
+```
+
+```{r mech-forcast-print}
+mech_forecast_fit
+```
+
+We will now fit the more statistical model to the data.
+
+```{r fit_stat_model, results = 'hide', message = FALSE}
+data <- list(
+  n = nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon # Here we set the number of days to forecast into the future
+)
+stat_forecast_fit <- stat_mod$sample(
+  data = data, parallel_chains = 4,
+  # again set the initial values to make fitting more numerically stable
+  init = \() list(init_R = 1, rw_sd = 0.01)
+)
+```
+
+Finally, we can extract the forecasts from the models and plot them.
+
+```{r extract-forecast}
+mech_forecast <- mech_forecast_fit |>
+  gather_draws(forecast[day]) |>
+  ungroup() |>
+  mutate(day = day + cutoff)
+
+stat_forecast <- stat_forecast_fit |>
+  gather_draws(forecast[day]) |>
+  ungroup() |>
+  mutate(day = day + cutoff)
+
+forecast <- bind_rows(
+  mutate(mech_forecast, model = "more mechanistic"),
+  mutate(stat_forecast, model = "more statistical")
+) |>
+  ungroup()
+
+target_onsets <- onset_df |>
+  filter(day > cutoff) |>
+  filter(day <= cutoff + horizon)
+```
+
+
+```{r plot_forecast}
+forecast |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(x = day)) +
+  geom_line(
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  lims(y = c(0, 500))
+```
+
+and on the log scale
+
+```{r plot_log_forecast}
+forecast |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(x = day)) +
+  geom_line(
+    alpha = 0.1,
+    aes(y = .value, group = interaction(.draw, model), colour = model)
+  ) +
+  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
+  scale_y_log10() +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+What do you notice about the forecasts from the more mechanistic and more statistical models?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The more mechanistic model captures the downturn in the data very well.
+- However it appears to be somewhat biased as it consistently overpredicts.
+- The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
+- Neither model simply extend the trend in the way the random walk model did in the [forecast visualisation session](forecast-visualisation).
+:::
+
+::: {.callout-note collapse="true"}
+As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
+
+```{r plot-stat-rt}
+stat_forecast_fit |>
+  gather_draws(R[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_line(aes(group = .draw), alpha = 0.1)
+```
+:::
+
+::: {.callout-tip}
+## What happens when you are very wrong about the population size? (optional)
+
+In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r very-wrong, results = 'hide', message = FALSE}
+data <- list(
+  n = nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon, # Here we set the number of days to forecast into the future
+  N_prior = c(100, 20) # the prior for the population size
+)
+
+mech_forecast_fit_diff <- mech_mod$sample(
+  data = data, parallel_chains = 4
+)
+
+mech_forecast_diff <- mech_forecast_fit_diff |>
+  gather_draws(forecast[day]) |>
+  ungroup() |> 
+  mutate(day = day + cutoff)
+```
+
+```{r very-wrong-plot}
+mech_forecast_diff |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_line(alpha = 0.1, aes(group = .draw)) +
+  geom_point(
+    data = target_onsets, aes(x = day, y = onsets),
+    color = "black"
+  )
+```
+:::
+
+# Evaluating forecasts from our models
+
+As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
+
+```{r load_forecasts}
+data(rw_forecasts, stat_forecasts, mech_forecasts)
+forecasts <- bind_rows(
+  rw_forecasts,
+  mutate(stat_forecasts, model = "More statistical"),
+  mutate(mech_forecasts, model = "More mechanistic")
+)
+```
+
+::: {.callout-tip, collapse="true"}
+## How did we estimate these forecasts?
+We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
+
+Some important things to note about these forecasts:
+
+  - We used a 14 day forecast horizon.
+  - Each forecast used all the data up to the forecast date.
+  - We generated 1000 posterior samples for each forecast.
+  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
+  - We use the same simulated outbreak data:
+
+```{r}
+head(onset_df)
+```
+
+:::
+
+## Visualising your forecast
+
+
+```{r plot-all-forecasts}
+forecasts |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(x = day)) +
+  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_point(data = onset_df |>
+    filter(day >= 21),
+    aes(x = day, y = onsets), color = "black") +
+  scale_color_binned(type = "viridis") +
+  facet_wrap(~model) +
+  lims(y = c(0, 500))
+```
+
+
+As for the single forecast it is helpful to also plot the forecast on the log scale.
+
+```{r plot-all-forecasts-log}
+forecasts |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(x = day)) +
+  geom_line(
+    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    alpha = 0.1
+  ) +
+  geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
+  scale_y_log10(limits = c(NA, 500)) +
+  scale_color_binned(type = "viridis") +
+  facet_wrap(~model)
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+How do these forecasts compare?
+Which do you prefer?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do these forecasts compare?
+
+- The more mechanistic model captures the downturn in the data very well.
+- Past the peak all models were comparable.
+- The more statistical model captures the downturn faster than the random walk but less fast than the more mechanistic mode.
+- The more statistical model sporadically predicts a more rapidly growing outbreak than occurred early on.
+- The more statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
+
+Which do you prefer?
+
+- The more mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
+- If we weren't confident in the effective susceptible population the AR model might be preferable.
+:::
+
+## Scoring your forecast
+
+
+```{r convert-forecasts}
+sc_forecasts <- forecasts |>
+  left_join(onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast_sample(
+    forecast_unit = c(
+      "target_day", "horizon", "model"
+    ),
+    observed = "onsets",
+    predicted = ".value",
+    sample_id = ".draw"
+  )
+sc_forecasts
+```
+
+
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting visualisation session](forecasting-visualisation).
+
+```{r score-forecasts}
+sc_scores <- sc_forecasts |>
+  score()
+
+sc_scores
+```
+
+::: {.callout-note collapse="true"}
+## Learning more about the output of `score()`
+
+See the documentation for `?metrics_sample` for information on the default sample metrics.
+:::
+
+### At a glance
+
+Let's summarise the scores by model first.
+
+```{r}
+sc_scores |>
+  summarise_scores(by = "model")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
+:::
+
+### Continuous ranked probability score
+
+As in the [forecast evaluation session](forecast-evaluation), we will start by looking at the CRPS by horizon and forecast date.
+
+::: {.callout-tip}
+## Reminder: Key things to note about the CRPS
+  - Small values are better
+  - When scoring absolute values (e.g. number of cases) it can be difficult to compare forecasts across scales (i.e., when case numbers are different, for example between locations or at different times).
+:::
+
+First by forecast horizon.
+
+```{r}
+sc_scores |>
+  summarise_scores(by = c("model", "horizon")) |>
+  ggplot(aes(x = horizon, y = crps, col = model)) +
+  geom_point()
+```
+
+and across different forecast dates
+
+```{r}
+sc_scores |>
+  summarise_scores(by = c("target_day", "model")) |>
+  ggplot(aes(x = target_day, y = crps, col = model)) +
+  geom_point()
+```
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS values change based on forecast date?
+How do the CRPS values change with forecast horizon?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+How do the CRPS values change based on forecast horizon?
+
+- All models have increasing CRPS with forecast horizon.
+- The more mechanistic model has the lowest CRPS at all forecast horizon.
+- The more stastical model starts to outperform the random walk model at longer time horizons.
+
+How do the CRPS values change with forecast date?
+
+- The more statistical model does particularly poorly around the peak of the outbreak but outperforms the random walk model.
+- The more mechanistic model does particularly well around the peak of the outbreak versus all other models
+- The more statistical model starts to outperform the other models towards the end of the outbreak.
+
+:::
+
+### PIT histograms
+
+::: {.callout-tip}
+## Reminder: Interpreting the PIT histogram
+- Ideally PIT histograms should be uniform. 
+- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
+- If it is skewed then the model is biased towards the direction of the skew.
+:::
+
+
+Let's first look at the overall PIT histogram.
+
+```{r pit-histogram}
+sc_forecasts |>
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_wrap(~model)
+```
+
+As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
+
+```{r pit-histogram-horizon}
+sc_forecasts |>
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_grid(vars(model), vars(group_horizon))
+```
+
+and then for different forecast dates.
+
+```{r pit-histogram-date, fig.width = 10}
+sc_forecasts |>
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_grid(vars(model), vars(target_day))
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+What do you think of the PIT histograms?
+
+- The more mechanistic model is reasonably well calibrated but has a slight tendency to be overconfident.
+- The random walk is biased towards overpredicting.
+- The more statistical model is underconfident.
+- Across horizons the more mechanistic model is only liable to underpredict at the longest horizons.
+- The random walk model is initially relatively unbiased and well calibrated but becomes increasingly likely to overpredict as the horizon increases.
+- The forecast date stratified PIT histograms are hard to interpret. We may need to find other ways to visualise bias and calibration at this level of stratification (see the `{scoringutils}` documentation for some ideas).
+
+:::
+
+## Scoring on the log scale
+
+Again as in the [forecast evaluation session](forecast-evaluation), we will also score the forecasts on the log scale.
+
+```{r log-convert-forecasts}
+log_sc_forecasts <- sc_forecasts |>
+  transform_forecasts(
+    fun = log_shift,
+    offset = 1,
+    append = FALSE
+  )
+
+log_sc_scores <- log_sc_forecasts |>
+  score()
+```
+
+
+::: {.callout-tip}
+Reminder: For more on scoring on the log scale see [this paper on scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
+:::
+
+### At a glance
+
+```{r}
+log_sc_scores |>
+  summarise_scores(by = "model")
+```
+
+::: {.callout-tip}
+## Take 2 minutes
+Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
+:::
+
+### CRPS
+
+```{r}
+log_sc_scores |>
+  summarise_scores(by = c("model", "horizon")) |>
+  ggplot(aes(x = horizon, y = crps, col = model)) +
+  geom_point()
+```
+
+```{r}
+log_sc_scores |>
+  summarise_scores(by = c("target_day", "model")) |>
+  ggplot(aes(x = target_day, y = crps, col = model)) +
+  geom_point()
+```
+
+::: {.callout-tip}
+## Take 5 minutes 
+How do the CRPS values on the log scale compare to the scores on the original scale?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- The performance of the mechanistic model is more variable across forecast horizon than on the natural scale.
+- On the log scale the by horizon performance of the random walk and more statistical mdoel is more comparable than on the log scale.
+- The period of high incidence dominates the target day stratified scores less on the log scale. We see that all models performed less well early and late on.
+:::
+
+### PIT histograms
+
+```{r pit-histogram-log}
+log_sc_forecasts |>
+  get_pit_histogram(by = "model") |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_wrap(~model)
+```
+
+
+```{r pit-histogram-horizon-log}
+log_sc_forecasts |>
+  mutate(group_horizon = case_when(
+    horizon <= 3 ~ "1-3",
+    horizon <= 7 ~ "4-7",
+    horizon <= 14 ~ "8-14"
+  )) |>
+  get_pit_histogram(by = c("model", "group_horizon")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_grid(vars(model), vars(group_horizon))
+```
+
+
+```{r pit-histogram-date-log, fig.width = 10}
+log_sc_forecasts |>
+  get_pit_histogram(by = c("model", "target_day")) |>
+  ggplot(aes(x = mid, y = density)) +
+  geom_col() +
+  facet_grid(vars(model), vars(target_day))
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+What do you think of the PIT histograms?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+The PIT histograms are similar to the original scale PIT histograms but the mechanistic model appears better calibrated.
 :::
 
 # Going further
 
+- We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
+- We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
+- We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
+
 # Wrap up
+
+# References
+
+::: {#refs}
+:::

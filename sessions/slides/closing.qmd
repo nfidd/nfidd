@@ -1,0 +1,90 @@
+---
+title: "End of course summary"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/closing.html
+    footer: "End of course summary"
+    slide-level: 3
+---
+
+### Aim of this course:
+
+How can we use data typically collected in an outbreak to answer questions like
+
+- what **is** the number of cases now? (*nowcasting*)
+- is it rising/falling and by how much? (*$R_t$ estimation*)
+- what does this mean for the near future (*forecasting*)
+
+in real time.
+
+### Timeline
+
+- delay distributions and how to estimate them (day 1)
+- $R_t$ estimation and the generation interval (day 1)
+- nowcasting (day 2)
+- forecasting and evaluation, ensemble methods (day 2)
+- applications (day 3)
+
+# Key takeaways
+
+### Day 1: Delay distributions {.smaller}
+
+- delays play a fundamental role in nowcasting/forecasting
+- we characterise them with probability distributions
+- estimating delays requires correction for biases due to
+  - **double interval censoring** (daily data)
+  - **right truncation** (real-time analysis)
+  
+![](figures/truncation_final.png)
+
+### Day 1 (cont.): Convolutions {.smaller}
+
+- we can use **convolutions** to model delays at the population scale
+- when doing so we need to make sure to account for **double interval censoring**
+- **$R_t$ estimation** using the renewal equation is a convolution problem
+- improving the generative model leads to improvements in estimation (**geometric random walk** vs. independent priors)
+
+![](figures/r_convolution_sketch.png)
+
+### Day 2: Nowcasting {.smaller}
+
+- **nowcasting** is the task of predicting what data will look once delays have resolved
+- it is a **right truncation problem** (same as discussed before)
+- a **joint generative model** can combine delay estimation, nowcasting and $R_t$ estimation
+
+![](figures/complete_reporting_triangle.png)
+
+### Day 2 (cont.): Forecasting {.smaller}
+
+- **forecasting** is the task of making unconditional statements about the future
+- meaningful forecasts are **probabilistic**
+- we can assess forecasts using **proper scoring rules**
+- a wide range of methods are available for making forecasts
+- we can use visualisation and scoring to understand the predictive performance of different models
+
+![](figures/pit-log-scale.png)
+
+### Day 3: Applications {.smaller}
+
+- the methods introduced here have **wide applications** in infectious disease epidemiology
+- **open-source tools** are available to make this task easier in practice
+
+### Outlook {.smaller}
+
+- it is worth trying some of these methods here in practice to learn more about typical nowcast/forecast performance and intricacies of infectious disease data
+- one way of doing so is by contributing to forecast hubs
+
+![](figures/respicast.png)
+
+[https://respicast.ecdc.europa.eu/](https://respicast.ecdc.europa.eu/)
+
+### Feedback {.smaller}
+
+- please tell us if you enjoyed the course, what worked / didn't work etc.
+- we will send out a survey for feedback
+
+# Thank you for attending!
+
+[Return to the session](../end-of-course-summary-and-discussion)

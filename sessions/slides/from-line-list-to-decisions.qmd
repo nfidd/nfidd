@@ -35,7 +35,7 @@ Hans Rosling, Liberia, 2014
 How can we use data typically collected in an outbreak to answer questions like
 
 - what **is** the number of cases now? (*nowcasting*)
-- is it rising/falling and by how much? (*R estimation*)
+- is it rising/falling and by how much? (*$R_t$ estimation*)
 - what does this mean for the near future (*forecasting*)
 
 in real time.
@@ -53,11 +53,19 @@ Throughout the course we will
 ### Timeline
 
 ::: {.incremental}
-- delay distributions and how to estimate them (Day 1)
-- R estimation and the generation interval (Day 1)
+- delay distributions and how to estimate them (day 1)
+- $R_t$ estimation and the generation interval (day 1)
 - nowcasting (day 2)
 - forecasting and evaluation, ensemble methods (day 2)
 - applications (day 3)
 :::
 
+#
 
+To start the course go to:
+[https://nfidd.github.io/nfidd/](https://nfidd.github.io/nfidd/)
+and get started on the first sesion (*Probability distributions and parameter estimation*)
+
+#
+
+[Return to the session](../introduction-and-course-overview)

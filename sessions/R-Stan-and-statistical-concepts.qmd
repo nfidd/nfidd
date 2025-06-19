@@ -3,46 +3,64 @@ title: "Probability distributions and parameter estimation"
 order: 1
 ---
 
-## Introduction
-
-### Parameters and probabilities
+# Introduction
 
 Many important characteristics, or parameters, of epidemiological processes are not fully observed - and are therefore uncertain. For example, in this course this might include time delays, reproduction numbers, or case numbers now and in the future. We can specify the shape of uncertainty around a specific parameter using a probability distribution. 
 
 We'll want to correctly specify this uncertainty. We can do this best by combining our own prior understanding with the data that we have available. In this course, we'll use this Bayesian approach to modelling. A useful tool for creating these models is the `stan` probabilistic programming language. 
 
-### Slides
+## Slides
 
 -   [Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
 -   [Introduction to stan concepts used in the course](slides/introduction-to-stan)
 
-### Objectives
+## Objectives
 
 The aim of this session is to introduce the concept of probability distributions and how to estimate their parameters using Bayesian inference with `stan`.
 
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/R-Stan-and-statistical-concepts.qmd`.
+
 ## Libraries used
 
-In this session we will use the `ggplot2` library for plotting, the `here` library to find the stan model, and the `cmdstanr` library for using stan.
-We will also use the `bayesplot` and `posterior` packages for investigating the results of the inference conducted with stan.
+In this session we will use the `ggplot2` library for plotting and the `nfidd` package to load the stan models.
+We will also use the `bayesplot` and `posterior` packages to investigate the results of the inference conducted with stan.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("ggplot2")
-library("here")
-library("cmdstanr")
 library("bayesplot")
 library("posterior")
 ```
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
-If not using the Visual Editor please remember that the code in the session needs to be run inside the course repository so that the `here()` commands below find the stan model files.
 :::
 
-## Simulating data from a probability distribution
+## Initialisation
+
+We set a random seed for reproducibility.
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
+:::
+
+# Simulating data from a probability distribution
 
 First let us simulate some data from a probability distribution.
-In R, this can is usually done using a family of functions that start with `r`.
-For example, to simulate from a normal distribution you would use the `rnorm()` function.
+In R, this is usually done using a family of random number generation functions that start with `r`.
+For example, to simulate random numbers from a normal distribution you would use the `rnorm()` function.
 All these functions have a first argument `n`, the number of random replicates to generate, and then some further arguments that parameterise the probability distribution.
 
 ```{r rnorm}
@@ -50,12 +68,13 @@ rnorm(n = 10, mean = 0, sd = 1)
 ```
 
 We will use probability distributions to characterise epidemiological delays.
-These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero (although it is worth noting that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first).
+These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
+Note that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first.
 
 Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
-These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e. gives more probability to occasional very large values, whereas the gamma distribution as more of a tail on the left, i.e. gives more probability to values lower than the mean.
+These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e., gives more probability to occasional very large values, whereas the gamma distribution has more of a tail on the left, i.e., gives more probability to values lower than the mean.
 
-The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$. 
+The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$.
 A gamma distribution with mean 5 and variance 2, for example, has $\alpha = 12.5$ and $\beta = 2.5$.
 To simulate from such a distribution, we can use the following R code.
 
@@ -67,7 +86,7 @@ mean(gammas)
 var(gammas)
 ```
 
-The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$. 
+The lognormal distribution is characterised by the `meanlog` ($\mu$) and `sdlog` ($\sigma$) parameters, with a mean of $e^{\mu + 0.5\sigma^2}$ and variance $(e^{\sigma^2} - 1) e^{2\mu + \sigma^2}$.
 A lognormal distribution with mean 5 and variance 2, for example, has (after a bit of calculation) $\mu = 1.57$ and $\sigma = 0.28$.
 
 ```{r lognormals}
@@ -95,14 +114,25 @@ Alternatively we could have used, e.g., `geom_histogram()` to plot the raw data.
 ## Estimating the parameters of probability distributions
 
 We will now use stan to estimate the parameters of the probability distribution.
-To do so, we first load in the model 
+To do so, we first load in the stan model.
+Normally, you would do this by saving the model code in a text file called `gamma_model.stan` and then loading this using `cmdstanr::cmdstan_model()`.
+For this course, we included all the models in the `nfidd` package, and they can be accessed using `nfidd_cmdstan_model()` which uses `cmdstanr::cmdstan_model()` to load the specified model included with the package.
+Afterwards, we can use this model exactly how we would if we had loaded it using `cmdstanr` directly.
 
 ```{r load_gamma_model}
-### load gamma model from the session directory
-mod <- cmdstan_model(here("stan", "gamma.stan"))
-### show model code with line numbers
-mod$print(line_numbers = TRUE)
+### load gamma model from the nfidd package
+mod <- nfidd_cmdstan_model("gamma")
+### show model code
+mod
 ```
+
+::: {.callout-tip}
+### Arrays in stan
+On line 4 there is a data declaration starting with `array[n]`.
+This declares an array of size `n` of the type given afterwards (here: `real`).
+Arrays work in a similar way as arrays or vectors in R and its elements be accessed with the bracket operator `[`.
+For example, to get the third element of the array `y` you would write `y[3]`.
+:::
 
 ::: {.callout-tip}
 ### Take 5 minutes
@@ -121,24 +151,36 @@ Lines 3 and 4 define the data that has to be supplied to the model.
 We use the model we have defined in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
 Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
 
-```{r gamma_inference}
+```{r gamma_inference, results='hide', message=FALSE}
 stan_data <- list(
   N = length(gammas),
   y = gammas
 )
-gamma_fit <- mod$sample(
-  data = stan_data, refresh = 0, show_exceptions = FALSE, show_messages = FALSE
-)
+gamma_fit <- mod$sample(data = stan_data)
+```
+
+::: {.callout-note}
+### Passing data to the stan model
+The `stan_data` object is a list with elements that will is passed to the stan model as the `data` argument to `sample`.
+The names and types of the elements need to correspond to the data block in the model (see lines 3 and 4 in the model).
+Here, we pass the length of `gammas` as `N` and the vector `gammas` itself as `y`.
+:::
+
+::: {.callout-note}
+### Stan messages
+The`mod$sample` command will produce a lot of messages which we have suppressed above.
+This is fine and intended to keep the user informed about any issues as well as general progress with the inference.
+This will come in handy later in the course when we fit more complicated models that can take a little while to run.
+:::
+
+In order to view a summary of the posterior samples generated, use
+
+```{r gamma_summary}
 gamma_fit
 ```
 
-::: {.callout-caution}
-The arguments to `mod$sample()` after the `data` argument are there to remove the amount printed to the screen (and in this document).
-You can remove them and you'll get more messages from the stan sampler (which can be very useful for diagnosing and debugging).
-:::
-
-You can see that the estimates are broadly consistent with the parameters we put in.
-To investigate this further, we will conduct a so-called _posterior predictive check_ by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
+You can see that the estimates are broadly consistent with the parameters we specified.
+To investigate this further, we will conduct a so-called *posterior predictive check* by comparing random numbers simulated using the estimated parameters to the ones we simulated earlier.
 
 ```{r gamma_ppc}
 ## Extract posterior draws
@@ -156,7 +198,7 @@ gamma_ppc <- sapply(seq_along(gammas), function(i) {
 ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
 ```
 
-We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e. the samples generated earlier that we fitted to.
+We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e., the samples generated earlier that we fitted to.
 
 ## Going further
 
