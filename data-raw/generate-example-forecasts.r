@@ -39,7 +39,7 @@ forecast_target_day <- function(
     mutate(horizon = day) |>
     mutate(day = day + target_day) |>
     mutate(target_day = target_day) |>
-    mutate(.draw = seq_leon(n())) |>
+    mutate(.draw = seq_len(n())) |>
     select(-.chain, -.iteration)
 }
 
