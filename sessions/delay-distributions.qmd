@@ -236,4 +236,4 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 
 # Wrap up
 
-[1] Much like Alice through the Looking Glass [Red Queen](https://en.wikipedia.org/wiki/Red_Queen%27s_race), it can feel like we are running to stay in the same place!
+[1] Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!
