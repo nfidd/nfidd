@@ -57,8 +57,6 @@ set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
 
-:::
-
 # What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
@@ -271,9 +269,7 @@ data <- list(
   h = horizon, # Here we set the number of days to forecast into the future
   N_prior = c(10000, 2000) # the prior for the population size
 )
-mech_forecast_fit <- mech_mod$sample(
-  data = data, parallel_chains = 4
-)
+mech_forecast_fit <- nfidd_sample(mech_mod, data = data)
 ```
 
 ```{r mech-forcast-print}
@@ -293,8 +289,8 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4,
+stat_forecast_fit <- nfidd_sample(
+  stat_mod, data = data,
   # again set the initial values to make fitting more numerically stable
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
@@ -403,8 +399,8 @@ data <- list(
   N_prior = c(100, 20) # the prior for the population size
 )
 
-mech_forecast_fit_diff <- mech_mod$sample(
-  data = data, parallel_chains = 4
+mech_forecast_fit_diff <- nfidd_sample(
+  mech_mod, data = data
 )
 
 mech_forecast_diff <- mech_forecast_fit_diff |>

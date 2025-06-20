@@ -203,7 +203,7 @@ We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
 combined <- combined |>
-  mutate(observed = rpois(n(), onsets))
+  mutate(reported_onsets = rpois(n(), onsets))
 ```
 
 ::: callout-tip
@@ -216,7 +216,7 @@ Does a plot of these observations look more like the plots from the [session on 
 ## Solution
 
 ```{r plot-with-poisson}
-ggplot(combined, aes(x = time, y = observed)) +
+ggplot(combined, aes(x = time, y = reported_onsets)) +
   geom_bar(stat = "identity")
 ```
 :::
@@ -254,17 +254,17 @@ We can now use this model to conduct inference, i.e. to try to reconstruct the t
 ```{r inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(combined),
-  obs = combined$observed,
+  obs = combined$reported_onsets,
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(data = data, parallel_chains = 4)
+inf_fit <- nfidd_sample(mod, data = data)
 ```
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
 We have added the `parallel_chains` option to make use of any paralle hardware you may ave.
-If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 500, iter_sampling = 500`).
+If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 250, iter_sampling = 250`).
 :::
 
 ::: callout-tip
