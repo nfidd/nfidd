@@ -486,12 +486,27 @@ We can see that the estimates are smoother when using the random walk model for 
 
 # Going further
 
+## Challenge
+
 - We have used symptom onsets under the assumption that every infected person develops symptoms. 
 Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
 How would you change the model in this case?
 What are the implications for inference?
-- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
 
+## Methods in practice
 
+- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here.
 
+# Wrap up
 
+The learning objectives for this session were:
+
+- understanding of the reproduction number and challenges in its estimation
+- awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
+- understanding of the renewal equation as an epidemiological model
+- awareness of connections of the renewal equation with other epidemiological models
+- familiarity with the generation time as a particular type of delay distributions
+- ability to estimate static and time-varying reproduction numbers from time-series data in R
+
+::: {#refs}
+:::
