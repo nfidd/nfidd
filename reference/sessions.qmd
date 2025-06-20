@@ -1,5 +1,6 @@
 ---
-title: "Sessions"
+title: "Session timetable"
+order: 1
 comments: false
 ---
 
@@ -11,8 +12,8 @@ comments: false
 
 Monday June 23: 09.00-09.30
 
--   [Introduction](sessions/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
--   [Motivating the course](sessions/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
+-   [Introduction](sessions/slides/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
+-   [Motivating the course](sessions/slides/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
@@ -85,17 +86,23 @@ Tuesday June 24: 11.00-12.30
     - joint estimation of delays, nowcasts and reproduction numbers (35 mins)
 -   Wrap up (10 mins)
 
-## Session 8: Forecasting concepts
+## Session 8: Visualising infectious disease forecasts
 
-Tuesday June 24: 14.00-15.30
+Tuesday June 24: 14.00-14.45
 
 -   [Introduction](sessions/slides/forecasting-as-an-epidemiological-problem): forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation (10 mins)
 -   [Practice](sessions/forecast-visualisation): extending a model into the future and visualising your forecast (30 minutes)
+-   Wrap up (5 minutes)
+
+## Session 9: Forecast evaluation
+
+Tuesday June 24: 14.45-15.30
+
 -   [Introduction](sessions/slides/forecast-evaluation): quantitatively evaluating forecasts (10 mins)
 -   [Practice](sessions/forecast-evaluation): evaluating forecasts with a range of metrics (30 mins)
--   Wrap up (10 mins)
+-   Wrap up (5 mins)
 
-## Session 9: Forecasting models
+## Session 10: Forecasting models
 
 Tuesday June 24: 16.00-17.30
 
@@ -111,7 +118,7 @@ Wednesday June 25: 09.00-09.15
 
 -   Day 2 review (15 mins)
 
-## Session 10: Forecasting with ensembles
+## Session 11: Forecasting with ensembles
 
 Wednesday June 25: 09.15-10.30
 
@@ -119,13 +126,13 @@ Wednesday June 25: 09.15-10.30
 -   [Practice](sessions/forecast-ensembles): evaluating methods for ensemble forecasts (55 mins)
 -   Wrap up (10 mins)
 
-## Session 11: Methods in the real world
+## Session 12: Methods in the real world
 
 Wednesday June 25: 11.00-12.00
 
 -   Presentations and Q&A on uses of nowcasts & forecasts in the real world (60 mins)
 
-## Session 12: End of course summary
+## Session 13: End of course summary
 
 Wednesday June 25: 12.00-12.30
 

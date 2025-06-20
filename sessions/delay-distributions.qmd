@@ -5,12 +5,13 @@ order: 2
 
 # Introduction
 
-Every outbreak starts with an infection, but we rarely observe transmission events directly.
-The same principles apply to endemic infectious diseases and routine surveillance.
-Instead, there are many types of epidemiological events that we might observe that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
-The length of time between any of these events might be highly variable and uncertain.
-However, we often need to have some estimate for these delays when interpreting data in order to understand what is happening now and predict what might happen in the future.
-We capture this variability using probability distributions, which is the focus of this session.
+Every chain of infectious disease transmission starts with one person infecting another.
+But we rarely observe these infection events directly.
+Instead, we typically collect epidemiological data from events that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
+We often then need to understand how much time has passed between these events.
+For example, the incubation period might be used to determine the appropriate length of quarantine. 
+We also need to have some estimate for these delays when interpreting new data, in order to understand what is happening now[^1] and predict what might happen in the future.
+However, the length of time between any of these events might be highly variable (between individuals) and fundamentally uncertain (across the population as a whole). We capture this variability using probability distributions, which is the focus of this session.
 
 ## Slides
 
@@ -76,9 +77,9 @@ We will later deal with modelling the infectious process.
 For now, we will focus on modelling how infections get reported in data - the *observation* process.
 Using infectious disease data for analysis comes with three common challenges:
 
-1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other realisations.
-2.  These observations are *incomplete* (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave infections unobserved).
-3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptoms).
+1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other events.
+2.  These observations are an *incomplete* representation of total infections (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave some infections unaccounted for).
+3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptom).
 
 ## Load the outbreak data
 
@@ -113,7 +114,7 @@ We will start with our data on infection times, and work forwards to symptom ons
     -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
 -   Symptoms to hospital admission:
     -   We'll assume that 30% of symptomatic cases become hospitalised.
-    -   *Time from symptom onset to hospital admission*: We assume that the onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
+    -   *Time from symptom onset to hospital admission*: We assume that this delay is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
@@ -141,7 +142,11 @@ dfl <- df |>
   pivot_longer(
     cols = c(infection_time, onset_time, hosp_time),
     names_to = "type", values_to = "time"
-  )
+  ) |> 
+  mutate(type = ordered(type, 
+    levels = c("infection_time", "onset_time", "hosp_time"), 
+    labels = c("Infections", "Symptom onsets", "Hospitalisations")
+  ))
 # plot
 ggplot(dfl, aes(x = time)) +
   geom_histogram(position = "dodge", binwidth = 1) +
@@ -177,7 +182,8 @@ df_onset_to_hosp <- df |>
   # exclude infections that didn't result in hospitalisation
   drop_na(onset_to_hosp)
 ## Use the data to sample from the model posterior
-res <- mod$sample(
+res <- nfidd_sample(
+  mod,
   data = list(
     n = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
@@ -185,7 +191,7 @@ res <- mod$sample(
 )
 ```
 
-To find out more about the `sample` function we used here, you can use `?cmdstanr::sample`.
+To find out more about the arguments that can be passed to `cmdstanr::sample` via the `nfidd_sample()` function we used here, you can use `?cmdstanr::sample `.
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
@@ -233,3 +239,5 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 -   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
 
 # Wrap up
+
+[1] Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!
