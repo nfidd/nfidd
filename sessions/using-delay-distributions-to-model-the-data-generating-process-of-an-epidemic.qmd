@@ -325,11 +325,8 @@ This is particularly useful when dealing with arrays such as `inference` because
 
 # Wrap up
 
-The learning objectives for this session were:
-
-- Understanding of using delay distributions to model population-level data generating processes
-- Ability to use *convolutions* to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with *discretisation*
-- Understanding of the need to introduce additional uncertainty to account for the observation process at a population level
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
 ::: {#refs}
 :::
