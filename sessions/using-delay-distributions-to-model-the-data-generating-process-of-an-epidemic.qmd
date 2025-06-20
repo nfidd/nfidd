@@ -67,7 +67,7 @@ Then we'll use the same model to conduct inference.
 
 In the last session we simulated *individual outcomes* from a delay distribution, and then re-estimated the corresponding parameters.
 However, sometimes we do not have data on these individual-level outcomes, either because they are not recorded or because they cannot be shared, for example due to privacy concerns.
-At the population level, individual-level delays translate into *convolutions*.
+At the population level, individual-level delays translate into *convolutions*[^1].
 
 If we have a time series of infections $I_t$ ($t=1, 2, 3, \ldots, t_\mathrm{max}$), where $t$ denotes the day on which the infections occur, and observable outcomes occur with a delay given by a delay distribution $p_i$ ($i=0, 1, 2, \dots, p_\mathrm{max}$), where $i$ is the number of days after infection that the observation happens, then the number of observable outcomes $C_t$ on day $t$ is given by
 
@@ -135,7 +135,7 @@ In the absence of any other information or model, we assume for our simulation t
 We can then apply the incubation period using a continuous probability distribution, before once again rounding down to get the day of symptom onset (mimicking daily reporting).
 We repeat this many times to get the probability mass function that allows us to go from infection days to symptom onset days.
 
-You can view the function we have written do this using:
+You can view the function we have written to do this using:
 
 ```{r discretise_2_day_window}
 censored_delay_pmf
@@ -263,7 +263,7 @@ inf_fit <- mod$sample(data = data, parallel_chains = 4)
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
-We have added the `parallel_chains` option to make use of any paralle hardware you may ave.
+We have added the `parallel_chains` option to make use of any parallel hardware you may have.
 If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 500, iter_sampling = 500`).
 :::
 
@@ -320,3 +320,5 @@ This is particularly useful when dealing with arrays such as `inference` because
     The package implements deterministic methods that are significantly faster than the Monte Carlo approach used in `censored_delay_pmf()` while providing exact results.
 
 # Wrap up
+
+[^1] An intuitive introduction (and much more) on convolutions is at [BetterExplained](https://betterexplained.com/articles/intuitive-convolution/).
