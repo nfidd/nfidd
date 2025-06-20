@@ -282,9 +282,15 @@ $$
 
 where $Y$ is uniformly distributed on $[0, 1]$. 
 
-#### Integer Case
+### Integer Case
 
-When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated. To address this, a randomized version of the PIT is used. For an integer-valued random variable $X$ with CDF $F_X$, the randomized PIT is defined as:
+When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated [@czado2009].
+To remedy this, there are different solutions (the `get_pit_histogram()` function used below uses the non-randomised version by default):
+
+#### Randomised PIT
+  
+One way to use integer count is a randomised version of the PIT.
+For an integer-valued random variable $X$ with CDF $F_X$, the randomised PIT is defined as:
 
 $$
 U = F_X(k) + v \cdot (F_X(k) - F_X(k-1))
@@ -292,11 +298,40 @@ $$
 
 where:
 
-- $k$ is the observed integer value.
-- $F_X(k)$ is the CDF evaluated at $k$.
+- $k$ is the observed integer value,
+- $F_X(k)$ is the CDF evaluated at $k$,
 - $v$ is a random variable uniformly distributed on $[0, 1]$.
 
-This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the forecasted distribution $F_X$ is correctly specified.
+This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the predictive distribution $F_X$ is correctly specified.
+
+#### Non-randomised PIT
+
+A second option is to plot a slightly different variable:
+
+$$
+G(u) = \begin{cases}
+0, & u \leq F_X(k-1), \\
+(u - F_X(k-1))/(F_X(k) - F_X(k-1)), & F_X(k-1) < u < F_X(k), \\
+1, & u \geq F_X(k),
+\end{cases}
+$$
+
+if $k \geq 1$ and
+
+$$
+G(u) = \begin{cases}
+u/F_X(0), & u \leq F_X(0), \\
+1, & u \geq F_X(0),
+\end{cases}
+$$
+
+if $k=0$ where as before
+
+- $k$ is the observed integer value,
+- $F_X(k)$ is the CDF evaluated at $k$.
+
+Again, the transformed G(u) is uniformly distributed on $[0, 1]$ if the predictive distribution $F_X$ is correctly specified.
+
 :::
 
 Let's first look at the overall PIT histogram.
