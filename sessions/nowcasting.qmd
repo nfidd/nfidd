@@ -247,7 +247,7 @@ data <- list(
   report_max = length(proportion_reported) - 1,
   report_cdf = proportion_reported 
 )
-simple_nowcast_fit <- mod$sample(data = data, parallel_chains = 4)
+simple_nowcast_fit <- nfidd_sample(mod, data = data)
 ```
 
 ```{r nowcast_fit_summary}
@@ -293,7 +293,7 @@ rw_mod
 and then fit it
 
 ```{r rw-nowcast-fit, results = 'hide', message = FALSE}
-rw_nowcast_fit <- rw_mod$sample(data = data, parallel_chains = 4)
+rw_nowcast_fit <- nfidd_sample(rw_mod, data = data)
 ```
 
 ```{r rw-nowcast-fit-summary}
@@ -357,7 +357,7 @@ wrong_delay_data$report_cdf <- wrong_proportion_reported
 We now fit the nowcasting model with the wrong delay distribution:
 
 ```{r gamma-nowcast-fit, results = 'hide', message = FALSE}
-gamma_nowcast_fit <- rw_mod$sample(data = wrong_delay_data, parallel_chains = 4)
+gamma_nowcast_fit <- nfidd_sample(rw_mod, data = wrong_delay_data)
 ```
 
 ```{r gamma-nowcast-fit-summary}

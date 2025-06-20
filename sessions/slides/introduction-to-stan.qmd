@@ -96,7 +96,7 @@ data <- list(
   N = 10, ## 10 coin flips
   x = 6 ## 6 times heads
 )
-mod$sample(data = data)
+nfidd::nfidd_sample(mod, data = data)
 ```
 
 #
