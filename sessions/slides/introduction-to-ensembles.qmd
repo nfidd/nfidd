@@ -78,7 +78,7 @@ Many uncertainties, many approaches: many models
 
 ## 
 
-Infectious disease forecasting hubs have grown in popularity over the last decade (@Reich2022-jo).
+Infectious disease forecasting hubs have grown in popularity over the last decade
 
 ![](figures/history-of-hubs.png)
 
