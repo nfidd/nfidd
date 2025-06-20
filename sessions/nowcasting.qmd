@@ -399,11 +399,8 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 
 # Wrap up
 
-The learning objectives for this session were:
-
-- Understanding of nowcasting as a particular right truncation problem
-- Ability to perform a simple nowcast in R
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
 ::: {#refs}
 :::
-
