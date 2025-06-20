@@ -233,7 +233,7 @@ The data set we have looked at so far in this session is a "final" data set repr
 However, information on delay distributions is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
 
 Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
-We call this incompleteness *truncation*.
+We call this incompleteness *right truncation*.
 This is a problem if we try to use an incomplete set of data about one type of event to infer the pattern of a previous epidemiological event. 
 For example, our target might be to infer the "primary" event of infections. We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
 However, we are still in the middle of an outbreak.
