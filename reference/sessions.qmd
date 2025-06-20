@@ -12,8 +12,8 @@ comments: false
 
 Monday June 23: 09.00-09.30
 
--   [Introduction](sessions/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
--   [Motivating the course](sessions/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
+-   [Introduction](sessions/slides/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
+-   [Motivating the course](sessions/slides/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
