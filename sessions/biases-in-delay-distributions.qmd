@@ -327,8 +327,15 @@ Can you establish under which conditions the bias in estimation gets worse?
 
 # Going further
 
+## Challenge
+
 -   We have looked at censoring and truncation separately, but in reality often both are present. Can you combine the two in a model?
--   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biases from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
+-   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biases from estimation even further. 
+For a full overview, the review by [@parkEstimatingEpidemiologicalDelay2024] might be worth a read. 
+If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
+
+## Methods in practice
+
 -   The [`primarycensored`](https://github.com/epinowcast/primarycensored) R package provides a comprehensive framework for dealing with censored and truncated delay distributions.
     It implements many techniques for handling primary event censoring, secondary event censoring, and right truncation in a unified and efficient manner.
     This package can be particularly useful for production-level implementations where performance and accuracy are critical.
@@ -336,3 +343,13 @@ Can you establish under which conditions the bias in estimation gets worse?
     It enables flexible modelling including time-varying components, spatial effects, and partially pooled estimates of demographic characteristics.
 
 # Wrap up
+
+The learning objectives for this session were:
+
+- Understanding of how censoring affects the estimation and interpretation of epidemiological delay distributions
+- Ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
+- Understanding of right truncation in epidemiolgical data
+- Ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+
+::: {#refs}
+:::
