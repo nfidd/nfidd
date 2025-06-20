@@ -136,7 +136,7 @@ sample_forecasts <- forecasts |>
   left_join(onset_df, by = "day") |>
   filter(!is.na(.value)) |>
   as_forecast_sample(
-    forecast_unit = c("target_day", "horizon", "model", "day"),
+    forecast_unit = c("origin_day", "horizon", "model", "day"),
     observed = "onsets",
     predicted = ".value",
     sample_id = ".draw"
@@ -186,7 +186,7 @@ mean_ensemble <- quantile_forecasts |>
     predicted = mean(predicted),
     observed = unique(observed),
     model = "Mean ensemble",
-    .by = c(target_day, horizon, quantile_level, day)
+    .by = c(origin_day, horizon, quantile_level, day)
   )
 ```
 
@@ -199,7 +199,7 @@ median_ensemble <- quantile_forecasts |>
     predicted = median(predicted),
     observed = unique(observed),
     model = "Median ensemble",
-    .by = c(target_day, horizon, quantile_level, day)
+    .by = c(origin_day, horizon, quantile_level, day)
   )
 ```
 
@@ -225,14 +225,14 @@ plot_ensembles <- function(data, obs_data) {
     geom_ribbon(
     aes(
       ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
-        group = target_day
+        group = origin_day
       ),
       alpha = 0.2
     ) +
     geom_ribbon(
       aes(
         ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
-        group = target_day
+        group = origin_day
       ),
       alpha = 0.5
     ) +
@@ -246,7 +246,7 @@ plot_ensembles <- function(data, obs_data) {
 }
 
 plot_single_forecasts <- simple_ensembles |>
-  filter(target_day == 57) |>
+  filter(origin_day == 57) |>
   plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
 
 plot_single_forecasts
@@ -325,7 +325,7 @@ As in the [forecast evaluation session](forecast-evaluation), we can evaluate th
 
 ```{r score-ensembles}
 ensemble_scores <- simple_ensembles |>
-  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
   score()
 ```
 
@@ -392,7 +392,7 @@ filtered_mean_ensembles <- filtered_models |>
     predicted = mean(predicted),
     observed = unique(observed),
     model = "Mean filtered ensemble",
-    .by = c(target_day, horizon, quantile_level, day)
+    .by = c(origin_day, horizon, quantile_level, day)
   )
 ```
 
@@ -405,7 +405,7 @@ filtered_median_ensembles <- filtered_models |>
     predicted = median(predicted),
     observed = unique(observed),
     model = "Median filtered ensemble",
-    .by = c(target_day, horizon, quantile_level, day)
+    .by = c(origin_day, horizon, quantile_level, day)
   )
 ```
 
@@ -425,7 +425,7 @@ As for the simple ensembles, we can plot a single forecast from each model and e
 
 ```{r plot-single-filtered-forecasts}
 filtered_ensembles |>
-  filter(target_day == 57) |>
+  filter(origin_day == 57) |>
   plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
 ```
 
@@ -433,7 +433,7 @@ and on the log scale.
 
 ```{r plot-single-filtered-forecasts-log}
 filtered_ensembles |>
-  filter(target_day == 57) |>
+  filter(origin_day == 57) |>
   plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
   scale_y_log10()
 ```
@@ -481,7 +481,7 @@ Let us score the filtered ensembles.
 filtered_ensemble_scores <- filtered_ensembles |>
   as_forecast_quantile(
     forecast_unit = c(
-      "target_day", "horizon", "model"
+      "origin_day", "horizon", "model"
     )
   ) |>
   score()
@@ -536,16 +536,16 @@ weights_per_model <- ensemble_scores |>
   dplyr::filter(
     model %in% c("More mechanistic", "More statistical", "Random walk")
   ) |>
-  summarise_scores(by = c("model", "target_day")) |>
-  select(model, target_day, wis) |>
+  summarise_scores(by = c("model", "origin_day")) |>
+  select(model, origin_day, wis) |>
   mutate(inv_wis = 1 / wis) |>
   mutate(
-    inv_wis_total_by_date = sum(inv_wis), .by = target_day
+    inv_wis_total_by_date = sum(inv_wis), .by = origin_day
   ) |>
   mutate(weights = inv_wis / inv_wis_total_by_date)
 
 weights_per_model |>
-  select(model, target_day, weights) |>
+  select(model, origin_day, weights) |>
   pivot_wider(names_from = model, values_from = weights)
 ```
 
@@ -556,8 +556,8 @@ inverse_wis_ensemble <- quantile_forecasts |>
   as_tibble() |>
   left_join(
     weights_per_model |>
-      mutate(target_day = target_day + 14),
-    by = c("model", "target_day")
+      mutate(origin_day = origin_day + 14),
+    by = c("model", "origin_day")
   ) |>
   # assign equal weights if no weights are available
   mutate(weights = ifelse(is.na(weights), 1/3, weights)) |>
@@ -565,7 +565,7 @@ inverse_wis_ensemble <- quantile_forecasts |>
     predicted = sum(predicted * weights),
     observed = unique(observed),
     model = "Inverse WIS ensemble",
-    .by = c(target_day, horizon, quantile_level, day)
+    .by = c(origin_day, horizon, quantile_level, day)
   )
 ```
 
@@ -579,7 +579,7 @@ We use the `qrensemble` package to perform this task.
 ```{r qra}
 forecast_dates <- quantile_forecasts |>
   as_tibble() |>
-  pull(target_day) |>
+  pull(origin_day) |>
   unique()
 
 qra_by_forecast <- function(
@@ -591,12 +591,12 @@ qra_by_forecast <- function(
   lapply(forecast_dates, \(x) {
     quantile_forecasts |>
       mutate(target_end_date = x) |>
-      dplyr::filter(target_day <= x) |>
-      dplyr::filter(target_day >= x - (3 * 7 + 1)) |>
-      dplyr::filter(target_day == x | day <= x) |>
+      dplyr::filter(origin_day <= x) |>
+      dplyr::filter(origin_day >= x - (3 * 7 + 1)) |>
+      dplyr::filter(origin_day == x | day <= x) |>
       qra(
         group = group,
-        target = c(target_day = x),
+        target = c(origin_day = x),
         ...
       )
   })
@@ -610,7 +610,7 @@ qra_ensembles_obj <- qra_by_forecast(
 
 qra_weights <- seq_along(qra_ensembles_obj) |>
   lapply(\(i) attr(qra_ensembles_obj[[i]], "weights") |>
-    mutate(target_day = forecast_dates[i + 1])
+    mutate(origin_day = forecast_dates[i + 1])
   ) |>
   bind_rows() |>
   dplyr::filter(quantile == 0.5) |>
@@ -633,7 +633,7 @@ qra_ensembles_by_horizon <- qra_by_forecast(
 
 qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |>
   lapply(\(i) attr(qra_ensembles_by_horizon[[i]], "weights") |>
-    mutate(target_day = forecast_dates[i + 2])
+    mutate(origin_day = forecast_dates[i + 2])
   ) |>
   bind_rows()
 ```
@@ -660,12 +660,12 @@ mixture_by_forecast <- function(
   lapply(forecast_dates, \(x) {
     y <- sample_forecasts |>
       mutate(target_end_date = x) |>
-      dplyr::filter(target_day <= x) |>
-      dplyr::filter(target_day >= x - (3 * 7 + 1)) |>
-      dplyr::filter(target_day == x | date <= x)
+      dplyr::filter(origin_day <= x) |>
+      dplyr::filter(origin_day >= x - (3 * 7 + 1)) |>
+      dplyr::filter(origin_day == x | date <= x)
     mixture <- mixture_from_samples(y) |>
       filter(date > x) |>
-      mutate(target_day = x)
+      mutate(origin_day = x)
     return(mixture)
   })
 }
@@ -677,7 +677,7 @@ mixture_ensembles_obj <- mixture_by_forecast(
 
 mixture_weights <- seq_along(mixture_ensembles_obj) |>
   lapply(\(i) attr(mixture_ensembles_obj[[i]], "weights") |>
-    mutate(target_day = forecast_dates[i + 1])
+    mutate(origin_day = forecast_dates[i + 1])
   ) |>
   bind_rows()
 
@@ -712,7 +712,7 @@ Again we start by plotting a single forecast from each model and ensemble.
 
 ```{r plot-single-weighted-forecasts}
 weighted_ensembles |>
-  filter(target_day == 57) |>
+  filter(origin_day == 57) |>
   plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
 ```
 
@@ -720,7 +720,7 @@ and on the log scale.
 
 ```{r plot-single-weighted-forecasts-log}
 weighted_ensembles |>
-  filter(target_day == 57) |>
+  filter(origin_day == 57) |>
   plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
   scale_y_log10()
 ```
@@ -766,7 +766,7 @@ weights <- rbind(
   mixture_weights |> mutate(method = "Mixture")
 )
 weights |>
-  ggplot(aes(x = target_day, y = weight, fill = model)) +
+  ggplot(aes(x = origin_day, y = weight, fill = model)) +
   geom_col(position = "stack") +
   facet_grid(~ method) +
   theme(legend.position = "bottom")
@@ -806,8 +806,8 @@ We remove the two weeks of forecasts as these do not have a quantile regression 
 
 ```{r score-weighted-ensembles}
 weighted_ensemble_scores <- weighted_ensembles |>
-  filter(target_day >= 29) |>
-  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+  filter(origin_day >= 29) |>
+  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
   score()
 ```
 
@@ -822,8 +822,8 @@ Remembering the session on [forecast evaluation](forecast-evaluation), we should
 
 ```{r score-overview-weighted-log}
 log_ensemble_scores <- weighted_ensembles |>
-  filter(target_day >= 29) |>
-  as_forecast_quantile(forecast_unit = c("target_day", "horizon", "model")) |>
+  filter(origin_day >= 29) |>
+  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
     transform_forecasts(
     fun = log_shift,
     offset = 1,

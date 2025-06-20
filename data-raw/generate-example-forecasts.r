@@ -16,20 +16,20 @@ onset_df <- simulate_onsets(
 )
 
 # define a function to fit and forecast for a single date
-forecast_target_day <- function(
-  mod, onset_df, target_day, horizon, gen_time_pmf, ip_pmf, data_to_list, ...
+make_forecast_on_day <- function(
+  mod, onset_df, origin_day, horizon, gen_time_pmf, ip_pmf, data_to_list, ...
 ) {
 
-  message("Fitting and forecasting for target day: ", target_day)
+  message("Fitting and forecasting for origin day: ", origin_day)
 
   train_df <- onset_df |>
-    filter(day <= target_day)
+    filter(day <= origin_day)
 
   data <- data_to_list(train_df, horizon, gen_time_pmf, ip_pmf)
 
   fit <- mod$sample(
     data = data, chains = 4, parallel_chains = 4, adapt_delta = 0.95,
-    max_treedepth = 15, iter_warmup = 1000, iter_sampling = 500, ...
+    max_treedepth = 15, iter_warmup = 500, iter_sampling = 500, ...
   )
 
   fit |>
@@ -37,8 +37,8 @@ forecast_target_day <- function(
     filter(!is.na(.value)) |>
     slice_head(n = 1000) |>
     mutate(horizon = day) |>
-    mutate(day = day + target_day) |>
-    mutate(target_day = target_day) |>
+    mutate(day = day + origin_day) |>
+    mutate(origin_day = origin_day) |>
     mutate(.draw = seq_len(n())) |>
     select(-.chain, -.iteration)
 }
@@ -46,13 +46,13 @@ forecast_target_day <- function(
 # define a forecast horizon
 horizon <- 14
 
-target_days <- onset_df |>
+origin_days <- onset_df |>
   filter(day <= max(day) - horizon) |>
   filter(day > 21) |>
   pull(day)
 
 # create forecasts every 7 days
-target_days <- target_days[seq(1, length(target_days), 7)]
+origin_days <- origin_days[seq(1, length(origin_days), 7)]
 
 # load the model
 rw_mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
@@ -70,10 +70,10 @@ data_to_list_rw <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   )
 }
 
-rw_forecasts <- target_days |>
+rw_forecasts <- origin_days |>
   map_dfr(
     \(x) {
-      forecast_target_day(
+      make_forecast_on_day(
         rw_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf,
         data_to_list_rw, init = \() list(init_R = 1, rw_sd = 0.01)
       )
@@ -87,10 +87,10 @@ usethis::use_data(rw_forecasts, overwrite = TRUE)
 # AR model forecass
 stat_mod <- nfidd_cmdstan_model("statistical-r")
 
-stat_forecasts <- target_days |>
+stat_forecasts <- origin_days |>
   map_dfr(
     \(x) {
-      forecast_target_day(
+      make_forecast_on_day(
         stat_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_rw,
         init = \() list(init_R = 1, rw_sd = 0.01)
       )
@@ -111,10 +111,10 @@ data_to_list_mech <- function(train_df, horizon, gen_time_pmf, ip_pmf) {
   data
 }
 
-mech_forecasts <- target_days |>
+mech_forecasts <- origin_days |>
   map_dfr(
     \(x) {
-      forecast_target_day(
+      make_forecast_on_day(
         mech_mod, onset_df, x, horizon, gen_time_pmf, ip_pmf, data_to_list_mech
       )
     }
