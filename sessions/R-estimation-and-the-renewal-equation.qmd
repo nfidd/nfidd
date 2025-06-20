@@ -184,7 +184,7 @@ data <- list(
   gen_time_max = length(gen_time_pmf),
   gen_time_pmf = gen_time_pmf
 )
-r_fit <- r_mod$sample(data = data, parallel_chains = 4)
+r_fit <- nfidd_sample(r_mod, data = data)
 ```
 
 ```{r r_fit_summary}
@@ -258,8 +258,8 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_inf_fit <- r_inf_mod$sample(
-  data = data, parallel_chains = 4, init = \() list(init_R = 1)
+r_inf_fit <- nfidd_sample(
+  r_inf_mod, data = data, init = \() list(init_R = 1)
 )
 ```
 
@@ -381,8 +381,8 @@ data <- list(
   ip_max = length(ip_pmf) - 1,
   ip_pmf = ip_pmf
 )
-r_rw_inf_fit <- rw_mod$sample(
-  data = data, parallel_chains = 4, max_treedepth = 12, 
+r_rw_inf_fit <- nfidd_sample(
+  rw_mod, data = data, max_treedepth = 12, 
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
