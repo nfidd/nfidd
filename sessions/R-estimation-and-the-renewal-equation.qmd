@@ -1,4 +1,4 @@
-alsn---
+---
 title: "$R_t$ estimation and the renewal equation"
 order: 5
 ---
