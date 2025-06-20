@@ -57,8 +57,6 @@ set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
 
-:::
-
 # What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
