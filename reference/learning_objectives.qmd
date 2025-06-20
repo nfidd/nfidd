@@ -61,5 +61,6 @@ While examples often use outbreak scenarios for clarity, participants should con
 
 ## Evaluating forecasts (and nowcasts)
 
+- ability to visually assess forecasts and nowcasts
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
 - ability to score probabilistic forecasts in R
