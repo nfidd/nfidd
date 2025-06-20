@@ -499,14 +499,11 @@ What are the implications for inference?
 
 # Wrap up
 
-The learning objectives for this session were:
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
-- Understanding of the reproduction number and challenges in its estimation
-- Awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
-- Understanding of the renewal equation as an epidemiological model
-- Awareness of connections of the renewal equation with other epidemiological models
-- Familiarity with the generation time as a particular type of delay distributions
-- Ability to estimate static and time-varying reproduction numbers from time-series data in R
+::: {#refs}
+:::
 
 
 
