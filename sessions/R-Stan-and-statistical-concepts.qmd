@@ -200,9 +200,19 @@ ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
 
 We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e., the samples generated earlier that we fitted to.
 
-## Going further
+# Going further
+
+## Challenge
 
 - For the model above we chose truncated normal priors with a mode at 0 and standard deviation 10. If you change the parameters of the prior distributions, does it affect the results?
 - You could try the model included in `lognormal.stan` to estimate parameters of the lognormal distribution.
 
-## Wrap up
+# Wrap up
+
+Learning objectives for this session were:
+
+- Understanding of common probability distributions used for epidemiological delays
+- Familiarity with using stan to estimate parameters of a probability distribution
+
+::: {#refs}
+:::
