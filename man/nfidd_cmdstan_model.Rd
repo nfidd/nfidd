@@ -30,4 +30,8 @@ if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
 }
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other modelhelpers: 
+\code{\link{nfidd_sample}()}
+}
 \concept{modelhelpers}
