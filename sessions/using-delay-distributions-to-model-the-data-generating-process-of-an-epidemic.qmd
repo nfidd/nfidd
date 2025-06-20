@@ -5,7 +5,7 @@ order: 4
 
 # Introduction
 
-We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak. So far, we've been working with individual line-list data. However, we usually want to model how an outbreak evolves through a whole population. The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
+We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak. So far, we've focused on how typical surveillance data are generated from individuals: considering the process of delays and biases along the way from an individual infection through to what we see in line-list data. However, we usually want to model how an outbreak evolves through a whole population. The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
 
 This means working with aggregated count data. This creates some new issues in correctly accounting for uncertainty. We handle population-level data using *convolutions* as a way of combining count data with a distribution of individual probabilities. We will have to adjust our continuous probability distributions to work with this using *discretisation*. We'll then need to re-introduce additional uncertainty to account for the observation process at a population level.
 
