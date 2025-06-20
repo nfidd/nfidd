@@ -72,4 +72,4 @@ This can be solved mathematically but in the session we will use simulation.
 
 #
 
-[Return to the session](../biases-in-delay-distributions)
+[Return to the session](../using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic)
