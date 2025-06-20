@@ -121,7 +121,7 @@ sc_forecasts <- rw_forecasts |>
   filter(!is.na(.value)) |>
   as_forecast_sample(
     forecast_unit = c(
-      "target_day", "horizon", "model"
+      "origin_day", "horizon", "model"
     ),
     observed = "onsets",
     predicted = ".value",
@@ -140,7 +140,7 @@ What important information is in the `forecast` object?
 
 ::: {.callout-note collapse="true"}
 ## Solution
- - The forecast unit which is the target day, horizon, and model
+ - The forecast unit which is the origin day, horizon, and model
  - The type of forecast which is a sample forecast
 :::
 
@@ -234,8 +234,8 @@ and at different time points.
 
 ```{r}
 sc_scores |>
-  summarise_scores(by = "target_day") |>
-  ggplot(aes(x = target_day, y = crps)) +
+  summarise_scores(by = "origin_day") |>
+  ggplot(aes(x = origin_day, y = crps)) +
   geom_point() +
   labs(title = "CRPS by forecast start date",
        subtitle = "Summarised across all forecasts", x = "forecast date")
@@ -329,10 +329,10 @@ and then for different forecast dates.
 
 ```{r pit-histogram-date}
 sc_forecasts |>
-  get_pit_histogram(by = "target_day") |>
+  get_pit_histogram(by = "origin_day") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~target_day) +
+  facet_wrap(~origin_day) +
   labs(title = "PIT by forecast date", x = "Predicted quantiles")
 ```
 
@@ -398,8 +398,8 @@ and across different forecast dates
 
 ```{r}
 log_scores |>
-  summarise_scores(by = "target_day") |>
-  ggplot(aes(x = target_day, y = crps)) +
+  summarise_scores(by = "origin_day") |>
+  ggplot(aes(x = origin_day, y = crps)) +
   geom_point() +
   labs(title = "CRPS by forecast date, scored on the log scale")
 ```
@@ -451,10 +451,10 @@ and then for different forecast dates.
 
 ```{r log-pit-histogram-date}
 log_sc_forecasts |>
-  get_pit_histogram(by = "target_day") |>
+  get_pit_histogram(by = "origin_day") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~target_day) +
+  facet_wrap(~origin_day) +
   labs(title = "PIT by forecast date, scored on the log scale",
        x = "Predicted quantiles")
 ```
