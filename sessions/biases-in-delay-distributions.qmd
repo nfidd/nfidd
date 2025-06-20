@@ -84,7 +84,10 @@ head(df)
 
 # Dates, not days: censoring
 
-So far, the data we've been using has represented time as a *continuous* variable: a numeric time since a given starting point. Data on health outcomes are usually not recorded in this way. Instead, we usually deal with *dates*: a discrete interval. We refer to this restriction of the data as *censoring*.
+So far, the data we've been using has represented time as a *continuous* variable: a numeric time since a given starting point.
+Data on health outcomes are usually not recorded in this way.
+Instead, we usually deal with *dates*: a discrete interval.
+We refer to this restriction of the data, where we only know that an event has occurred within a given time period (e.g. a day) but not when exactly within that period, as *censoring*.
 
 We can make our simulated dataset a bit more realistic by rounding down the infection times to an integer number.
 
