@@ -182,7 +182,8 @@ df_onset_to_hosp <- df |>
   # exclude infections that didn't result in hospitalisation
   drop_na(onset_to_hosp)
 ## Use the data to sample from the model posterior
-res <- mod$sample(
+res <- nfidd_sample(
+  mod,
   data = list(
     n = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
@@ -190,7 +191,7 @@ res <- mod$sample(
 )
 ```
 
-To find out more about the `sample` function we used here, you can use `?cmdstanr::sample`.
+To find out more about the arguments that can be passed to `cmdstanr::sample` via the `nfidd_sample()` function we used here, you can use `?cmdstanr::sample `.
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
