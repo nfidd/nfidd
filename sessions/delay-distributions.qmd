@@ -5,9 +5,11 @@ order: 2
 
 # Introduction
 
-Every chain of infectious disease transmission starts with one person infecting another. But we rarely observe these infection events directly.
+Every chain of infectious disease transmission starts with one person infecting another.
+But we rarely observe these infection events directly.
 Instead, we typically collect epidemiological data from events that occur after the time of infection: symptom onsets, hospitalisations and discharge, etc.
-We often then need to understand how much time has passed between these events. For example, the incubation period might be used to determine the appropriate length of quarantine. 
+We often then need to understand how much time has passed between these events.
+For example, the incubation period might be used to determine the appropriate length of quarantine. 
 We also need to have some estimate for these delays when interpreting new data, in order to understand what is happening now[^1] and predict what might happen in the future.
 However, the length of time between any of these events might be highly variable (between individuals) and fundamentally uncertain (across the population as a whole). We capture this variability using probability distributions, which is the focus of this session.
 
@@ -112,7 +114,7 @@ We will start with our data on infection times, and work forwards to symptom ons
     -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
 -   Symptoms to hospital admission:
     -   We'll assume that 30% of symptomatic cases become hospitalised.
-    -   *Time from symptom onset to hospital admission*: We assume that the symptom onset-to-hospitalisation period is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
+    -   *Time from symptom onset to hospital admission*: We assume that this delay is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
@@ -142,8 +144,9 @@ dfl <- df |>
     names_to = "type", values_to = "time"
   ) |> 
   mutate(type = ordered(type, 
-                        levels = c("infection_time", "onset_time", "hosp_time"), 
-                        labels = c("Infections", "Symptom onsets", "Hospitalisations")))
+    levels = c("infection_time", "onset_time", "hosp_time"), 
+    labels = c("Infections", "Symptom onsets", "Hospitalisations")
+  ))
 # plot
 ggplot(dfl, aes(x = time)) +
   geom_histogram(position = "dodge", binwidth = 1) +
