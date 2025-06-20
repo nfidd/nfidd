@@ -291,7 +291,7 @@ data <- list(
 )
 stat_forecast_fit <- nfidd_sample(
   stat_mod, data = data,
-  # again set th  e initial values to make fitting more numerically stable
+  # again set the initial values to make fitting more numerically stable
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
