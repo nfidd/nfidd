@@ -46,11 +46,10 @@ Throughout the course we will
 
 1. simulate typical infectious disease data in **R** <br>
 (the *generative model*)
-2. apply the generative model to data in **stan** to 
-   - learn about the system (conduct inference)
-   - make predictions (nowcasting/forecasting)
    
-```{r}
+```{r outbreak-plot, fig.width=5, fig.height=3, fig.align='center'}
+library(ggplot2)
+library(nfidd)
 ### visualise the infection curve
 data(infection_times)
 ggplot(infection_times, aes(x = infection_time)) +
@@ -60,6 +59,14 @@ ggplot(infection_times, aes(x = infection_time)) +
        title = "Infections during an outbreak") +
   theme_minimal()
 ```
+
+### Approach
+
+Throughout the course we will
+
+2. apply the generative model to data in **stan** to 
+   - learn about the system (conduct inference)
+   - make predictions (nowcasting/forecasting)
 
 ### Timeline
 
