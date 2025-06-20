@@ -495,7 +495,7 @@ What are the implications for inference?
 
 ## Methods in practice
 
-- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
+- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here.
 
 # Wrap up
 
