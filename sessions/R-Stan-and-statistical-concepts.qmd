@@ -144,7 +144,7 @@ Which line(s) define the parameter prior distribution(s), which one(s) the likel
 ::: {.callout-note collapse="true"}
 ### Solution
 Lines 13 and 14 define the parametric prior distributions (for parameters alpha and beta).
-The additional qualifier `T[0,]` specifies that the distribution should be _truncated_ with a lower bound of zero.
+The additional qualifier `T[0,]` specifies that the distribution should be _truncated_ with a lower bound of zero (because the alpha and beta parameters of the gamma distribution have to be nonnegative).
 Line 15 defines the likelihood.
 Lines 3 and 4 define the data that has to be supplied to the model.
 :::
