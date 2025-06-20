@@ -1,5 +1,6 @@
 ---
-title: "Independent learning outcomes"
+title: "Learning outcomes"
+order: 2
 comments: false
 ---
 
