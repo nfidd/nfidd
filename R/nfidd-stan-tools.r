@@ -320,12 +320,11 @@ nfidd_cmdstan_model <- function(
 #' @export
 #'
 #' @family modelhelpers
-nfidd_sample <- function(
-    model,
-    iter_warmup = 500,
-    iter_sampling = 500,
-    parallel_chains = 4,
-    ...) {
+nfidd_sample <- function(model,
+                         iter_warmup = 500,
+                         iter_sampling = 500,
+                         parallel_chains = 4,
+                         ...) {
   model$sample(
     iter_warmup = iter_warmup,
     iter_sampling = iter_sampling,
