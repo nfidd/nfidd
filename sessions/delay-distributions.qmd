@@ -236,8 +236,23 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 
 # Going further
 
--   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
+## Challenge
+
+-   In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
+With real data, of course, we don't have this information available. 
+Try using a different distribution for inference (e.g. normal, or gamma). 
+Do you get a good fit?
+
+## Methods in practice
+
+-   Charniga et al., [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://doi.org/10.48550/arXiv.2405.08841) summarises challenges in estimating delay distributions into a set of best practices, with a practical flowchart and reporting checklist.
 
 # Wrap up
+
+The learning objectives for this session were:
+
+- understanding of the ubiquity of delays in epidemiological data
+- understanding of how delays affect population-level epidemiological data via discrete convolutions
+- ability to apply convolutions of discrete probability distributions to epidemiological data in R
 
 [1] Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!
