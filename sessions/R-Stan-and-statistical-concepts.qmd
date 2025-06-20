@@ -157,7 +157,7 @@ The `nfidd_sample()` function is a wrapper around the `cmdstanr` `sample()` meth
 It provides sensible defaults for the course and simplifies the syntax.
 In particular, we are generating 500 samples instead of the default of 1000 to make the models run faster.
 When running your models, you can use the [diagnostic capabilities of stan](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html#diagnose-warnings-and-recommendations) to test for convergence and ensure that you have generated enough samples: `mod$diagnose()`.
-For example, `nfidd_sample(mod, data = stan_data)` is equivalent to `mod$sample(data = stan_data, parallel_chains = 4)`.
+For example, `nfidd_sample(mod, data = stan_data)` is equivalent to `mod$sample(data = stan_data, parallel_chains = 4, iter_wamup = 500, iter_sampling = 500)`.
 You can still pass additional arguments like `init`, `adapt_delta`, or `max_treedepth` when needed.
 :::
 
