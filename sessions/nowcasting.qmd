@@ -95,15 +95,12 @@ df_co <- df_co |>
     report_day = floor(report_time)
   )
 
-infection_ts <- df_co |>
-  count(day = infection_day, name = "infections")
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
 reports_ts <- df_co |>
   count(day = report_day, name = "reports")
 
 all_days <- expand_grid(day = seq(0, cutoff - 1)) |>
-  full_join(infection_ts, by = "day") |>
   full_join(onset_ts, by = "day") |>
   full_join(reports_ts, by = "day") |>
   replace_na(list(onsets = 0, reports = 0))
@@ -113,17 +110,17 @@ Plotting these, we get
 
 ```{r ts_plot, fig.height = 10}
 combined <- all_days |>
-  pivot_longer(c(onsets, reports, infections), names_to = "variable")
+  pivot_longer(c(onsets, reports), names_to = "variable")
   ggplot(combined, aes(x = day, y = value)) +
   facet_grid(variable ~ .) +
   geom_col()
 ```
 
-Looking at the three plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
+Looking at the two plots in isolation we would conclude very different things about the epidemic: symptom onsets seem to have flattened off and perhaps are going down, whereas reports are increasing rapidly.
 
 This apparent contradiction appears because onsets are reported with a delay.
 By cutting off at a certain _reporting_ date, we do not observe many of the recent symptom onsets that are yet to be be reported.
-We can see that if we plot the final data set alongside the cut-off one:
+We can see that if we plot the final data set of symptom onsets alongside the cut-off one:
 
 ```{r plot_cut_final}
 # Use full outbreak dataset
