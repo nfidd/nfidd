@@ -82,6 +82,7 @@ Infectious disease forecasting hubs have grown in popularity over the last decad
 
 ![](figures/history-of-hubs.png)
 
+[@Reich2022-jo]
 ##
 
 ... for example, the European [Respicast](https://respicast.ecdc.europa.eu/)
