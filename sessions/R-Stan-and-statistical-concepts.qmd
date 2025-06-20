@@ -149,14 +149,22 @@ Lines 3 and 4 define the data that has to be supplied to the model.
 :::
 
 We use the model we have defined in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
-Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
+Once you have familiarised yourself with the model, we will use the `nfidd_sample()` function to fit the model.
+
+::: {.callout-tip}
+### `nfidd_sample()`
+The `nfidd_sample()` function is a wrapper around the `cmdstanr` `sample()` method.
+It provides sensible defaults for the course and simplifies the syntax.
+For example, `nfidd_sample(mod, data = stan_data)` is equivalent to `mod$sample(data = stan_data, parallel_chains = 4)`.
+You can still pass additional arguments like `init`, `adapt_delta`, or `max_treedepth` when needed.
+:::
 
 ```{r gamma_inference, results='hide', message=FALSE}
 stan_data <- list(
   N = length(gammas),
   y = gammas
 )
-gamma_fit <- mod$sample(data = stan_data)
+gamma_fit <- nfidd_sample(mod, data = stan_data)
 ```
 
 ::: {.callout-note}
@@ -168,7 +176,7 @@ Here, we pass the length of `gammas` as `N` and the vector `gammas` itself as `y
 
 ::: {.callout-note}
 ### Stan messages
-The`mod$sample` command will produce a lot of messages which we have suppressed above.
+The `nfidd_sample` command will produce a lot of messages which we have suppressed above.
 This is fine and intended to keep the user informed about any issues as well as general progress with the inference.
 This will come in handy later in the course when we fit more complicated models that can take a little while to run.
 :::

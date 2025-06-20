@@ -258,7 +258,7 @@ data <- list(
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(data = data, parallel_chains = 4)
+inf_fit <- nfidd_sample(mod, data = data)
 ```
 
 ::: callout-caution

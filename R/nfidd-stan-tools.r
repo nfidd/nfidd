@@ -298,3 +298,38 @@ nfidd_cmdstan_model <- function(
     ...
   )
 }
+
+#' Sample from a CmdStanModel with NFIDD course defaults
+#'
+#' This function wraps the cmdstanr sample method with optimized defaults
+#' for course use to speed up model fitting. All cmdstanr sample arguments
+#' can still be overridden for experimentation.
+#'
+#' @param model A CmdStanModel object to sample from.
+#' @param iter_warmup Integer, number of warmup iterations per chain.
+#'   Defaults to 500 (reduced from cmdstanr default of 1000) for course speed.
+#' @param iter_sampling Integer, number of sampling iterations per chain.
+#'   Defaults to 500 (reduced from cmdstanr default of 1000) for course speed.
+#' @param parallel_chains Integer, number of chains to run in parallel.
+#'   Defaults to 4 for course speed.
+#' @param ... Additional arguments passed to the model's sample method.
+#'   All cmdstanr sample arguments are supported.
+#'
+#' @return A CmdStanMCMC object containing the posterior samples.
+#'
+#' @export
+#'
+#' @family modelhelpers
+nfidd_sample <- function(
+    model,
+    iter_warmup = 500,
+    iter_sampling = 500,
+    parallel_chains = 4,
+    ...) {
+  model$sample(
+    iter_warmup = iter_warmup,
+    iter_sampling = iter_sampling,
+    parallel_chains = parallel_chains,
+    ...
+  )
+}
