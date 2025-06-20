@@ -229,7 +229,9 @@ Can you establish under which conditions the bias in estimation gets worse?
 The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
 However, information on delay distributions is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
 
-Estimating delays in real time comes with particular challenges, as we know that our data are always incomplete: not enough time has passed to observe all of the relevant events. We call this incompleteness *truncation*. This is a problem if we try to use incomplete secondary event data (such as recent symptom onsets) to infer the pattern of primary events (such as infections) - our estimates will be biased because we are missing some of the data.
+Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
+We call this incompleteness *truncation*.
+This is a problem if we try to use incomplete secondary event data (such as recent symptom onsets) to infer the pattern of primary events (such as infections) - our estimates might be biased because we are missing some of the data to get the full picture.
 
 This bias also changes over the course of an outbreak. If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections that have in fact already occurred.
