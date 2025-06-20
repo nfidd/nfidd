@@ -23,7 +23,12 @@ While examples often use outbreak scenarios for clarity, participants should con
 - ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
 - understanding of right truncation in epidemiolgical data
 - ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
-  
+
+## Using delay distributions to model the data generating process
+- understanding of using delay distributions to model population-level data generating processes
+- ability to use *convolutions* to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with *discretisation*
+- understanding of the need to re-introduce additional uncertainty to account for the observation process at a population level
+
 ## $R_t$ estimation and the renewal equation
 
 - understanding of the reproduction number and challenges in its estimation
