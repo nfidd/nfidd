@@ -15,7 +15,9 @@ To get the most out of this course, you will need to use R and the following ins
 
 ### Installing R
 
--   [R](http://cran.r-project.org) is used as the main programming language. Please install at least version: R-4.2.0.
+-   [R](http://cran.r-project.org) is used as the main programming language.
+    You can check which version you have by typing `R.version` in your R session.
+    We recommend installing the latest `r R.version$version.string`.
 -   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
 
 ### Installing additional requirements
