@@ -23,7 +23,7 @@ convolve_with_delay <- function(ts, delay_pmf) {
     first_index <- max(1, i - max_delay)
     ts_segment <- ts[seq(first_index, i)]
     ## take reverse of pmf and cut if needed
-    pmf <- rev(delay_pmf)[seq_len(i - first_index + 1)]
+    pmf <- rev(delay_pmf[seq_len(i - first_index + 1)])
     ## convolve with delay distribution
     ret <- sum(ts_segment * pmf)
     convolved[i] <- ret
