@@ -234,7 +234,13 @@ However, information on delay distributions is often important during ongoing ou
 
 Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
 We call this incompleteness *truncation*.
-This is a problem if we try to use incomplete secondary event data (such as recent symptom onsets) to infer the pattern of primary events (such as infections) - our estimates might be biased because we are missing some of the data to get the full picture.
+This is a problem if we try to use an incomplete set of data about one type of event to infer the pattern of a previous epidemiological event. 
+For example, our target might be to infer the "primary" event of infections. We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
+However, we are still in the middle of an outbreak.
+Some infected cases haven't yet presented with symptoms. 
+So we only have a partial, incomplete count to work with.
+When we condition on an observed event with a delay in this way, we get **right truncation** of the target event. 
+Our estimates might be biased, because we are missing some of the data to get the full picture.
 
 This bias also changes over the course of an outbreak. If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections that have in fact already occurred.
