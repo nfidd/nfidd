@@ -218,6 +218,10 @@ We can see that the random numbers generated from the posterior samples are dist
 - For the model above we chose truncated normal priors with a mode at 0 and standard deviation 10. If you change the parameters of the prior distributions, does it affect the results?
 - You could try the model included in `lognormal.stan` to estimate parameters of the lognormal distribution.
 
+## Methods in practice
+
+- In this course we are building an intuition for the epidemiological processes and uncertainties that underlie typical surveillance data. We'll continue to work in `stan` to build up from simple to more complex models based on our understanding of these data-generating processes. In practice, you might also want to consider other tools and/or methods to help build a model that's most appropriate for your context. Throughout the course, we'll suggest some examples of available tools, methods, and best practices for you to consider.
+
 # Wrap up
 
 - Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
