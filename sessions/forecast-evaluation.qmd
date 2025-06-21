@@ -65,6 +65,13 @@ An important aspect of making forecasts is that we can later confront the foreca
 2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
 4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
+
+Note that sharpness is a property of the forecasts themselves, whereas calibration, unbiasedness, and accuracy are properties that emerge from comparing forecasts to observed data.
+
+## The forecasting paradigm
+
+The general principle underlying forecast evaluation is to **maximise *sharpness* subject to *calibration***.
+This means that statements about the future should be **correct** (calibration) and should aim to have **narrow uncertainty** (sharpness).
 :::
 
 
