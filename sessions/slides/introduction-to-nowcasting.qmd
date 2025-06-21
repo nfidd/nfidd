@@ -55,16 +55,10 @@ Remember from [biases in delay estimation](../biases-in-delay-distributions):
 
 **Right truncation**
 
-![](figures/truncation_final.png)
-
-### Nowcasting as right truncation
-
-**Right truncation**
-
 - reporting of events can be triggered by the **secondary** event
 - in that case, longer delays might be missing because whilst the *primary events* have occurred the *secondary events* **have not occurred yet**
 
-Nowcasting is exactly this!
+Nowcasting is exactly this!.
 
 ### A simple approach to nowcasting
 
