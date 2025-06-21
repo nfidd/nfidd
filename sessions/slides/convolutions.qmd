@@ -27,18 +27,6 @@ ggplot(data.frame(ip_pmf), aes(x = Var1, y = Freq)) +
   theme_minimal()
 ```
 
-## From individual events to population level counts
-
-If individual $i$ has their *primary event* at time $x_i$ then the expected number of individuals $S_t$ that have their secondary event at time $t$ can be calculated as the sum of these probabilities:
-
-$$
-S_t = \sum_i f_{t - x_i}
-$$
-
-. . .
-
-**Note:** If $S_t$ is in discrete time steps then $f_t$ needs to be a discrete probability distribution.
-
 ## Population level counts
 
 If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
