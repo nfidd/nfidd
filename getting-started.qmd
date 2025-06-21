@@ -73,7 +73,8 @@ cmdstanr::install_cmdstan()
 ```
 
 ::: callout-note
-This may take a few minutes. Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
+This may take a few minutes. 
+Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
 :::
 
 If there are any problems with this, you can try (on Windows) to fix them using
@@ -112,7 +113,7 @@ A benefit of downloading or cloning all the material is that you can interact wi
 
 In this course, all content is written using [Quarto](https://quarto.org) notebooks (`.qmd` files). This means that we can combine text with code and see the output directly. The notebooks are then directly reproduced on the course website (for example, this page).
 
-**Recommended approach**: Open the RStudio Project file (`nfidd.RProj`) in the `nfidd` folder you have downloaded and work directly with the notebook files.
+**Recommended approach**: Work with the notebooks using RStudio's visual editor mode. See guidance on this below.
 
 ::: callout-tip
 ## Using RStudio's Visual Editor (Recommended for Notebooks)
@@ -121,8 +122,6 @@ In this course, all content is written using [Quarto](https://quarto.org) notebo
 2.  **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source")
 3.  **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution
 4.  **Visual mode benefits**: Easier to read formatted text and equations, better experience with code chunks and outputs
-
-**Note**: If you can't find the Visual button, make sure you're using RStudio 2022.07 or later.
 :::
 
 **Alternative approaches that also work**:
@@ -131,6 +130,7 @@ In this course, all content is written using [Quarto](https://quarto.org) notebo
 
 ::: callout-tip
 The Quarto extension for VS Code also supports a visual editor mode.
+You can find it in the command palette.
 :::
 
 ## Day-of-Course Updates
