@@ -245,8 +245,7 @@ Do you get a good fit?
 
 ## Methods in practice
 
--   In this session we used `stan` to model a simple delay distribution. We could also consider a range of tools to achieve this: for example, using a regression approach implemented in e.g. [brms](https://cran.r-project.org/web/packages/brms/index.html), or using an R package designed for fitting simple distributions, such as [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) or the 'naive' model in the [`epidist`](https://github.com/epinowcast/epidist). 
--   In this course, we start with building custom models from scratch to help think through the complex epidemiological processes and uncertainties that underlie typical surveillance data. We'll continue to use `stan` to build our understanding of these data-generating processes and explore how these might fit together in more complex models. In practice, there can be a tension between the type of customised process-driven model building we are doing here, and readily available software aiming to account for such processes more generally. Throughout the course, we'll suggest some examples of these tools and methods for you to consider.
+-   We could consider a range of tools for fitting a probabilistic distribution to a set of observed delays, such as we have been doing here. For example, we could implement a regression approach in e.g. [brms](https://cran.r-project.org/web/packages/brms/index.html), or use a package such as [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) or the 'naive' model in [`epidist`](https://github.com/epinowcast/epidist). 
 
 # Wrap up
 
