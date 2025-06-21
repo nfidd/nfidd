@@ -133,8 +133,8 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-rw_forecast <- mod$sample(
-  data = data, parallel_chains = 4, adapt_delta = 0.95,
+rw_forecast <- nfidd_sample(
+  mod, data = data, adapt_delta = 0.95,
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
@@ -258,8 +258,9 @@ long_data <- list(
 )
 
 
-rw_long <- mod$sample(
-  data = long_data, parallel_chains = 4, adapt_delta = 0.95,
+rw_long <- nfidd_sample(mod,
+  data = long_data,
+  adapt_delta = 0.95,
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
@@ -329,7 +330,7 @@ rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    aes(y = .value, group = interaction(.draw, origin_day), col = origin_day),
     alpha = 0.1
   ) +
   geom_point(
@@ -349,7 +350,7 @@ rw_forecasts |>
   filter(.draw %in% sample(.draw, 100)) |> 
   ggplot(aes(x = day)) +
   geom_line(
-    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    aes(y = .value, group = interaction(.draw, origin_day), col = origin_day),
     alpha = 0.1
   ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +

@@ -18,7 +18,7 @@ We can again handle these by including them as uncertain parameters in the model
 
 ## Objectives
 
-In this session, we'll introduce censoring and right truncation as typical properties of infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
+In this session, we'll introduce censoring and right truncation as typical properties of the process that generates infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
 
 ::: {.callout-note collapse="true"}
 
@@ -70,7 +70,7 @@ Remember, in this outbreak we are assuming:
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.75** and **sdlog 0.5**, i.e. a mean delay of about a week
 :::
 
-We use the same function we used in that session to simulate symptom onset and hospitalisation data.
+We use the same function we used previously to simulate symptom onset and hospitalisation data.
 
 ```{r inf_hosp_solution}
 df <- add_delays(infection_times)
@@ -84,8 +84,10 @@ head(df)
 
 # Dates, not days: censoring
 
-Data on health outcomes are usually not recorded in the way that we have used so far in this session: as a numeric time since a given start date.
-Instead, we usually deal with *dates*.
+So far, the data we've been using has represented time as a *continuous* variable: a numeric time since a given starting point.
+Data on health outcomes are usually not recorded in this way.
+Instead, we usually deal with *dates*: a discrete interval.
+We refer to this restriction of the data, where we only know that an event has occurred within a given time period (e.g. a day) but not when exactly within that period, as *interval censoring*.
 
 We can make our simulated dataset a bit more realistic by rounding down the infection times to an integer number.
 
@@ -108,7 +110,18 @@ This makes handling the data easier - we don't have to make any conversions befo
 Each of the numbers now represent the number of days that have passed since the start of the outbreak.
 That is, each of the numbers correspond to a day.
 In that sense, the data is more like typical data we get from infectious disease outbreaks, where we would usually have a line list with key events such as symptom onset or death reported by a *date*.
-In statistical terms, we call the delay *double interval censored*: "double" because the delays represent the time between two events that are both censored; and "interval" because all we know about the timings of the events is that they happened in a certain time interval (between 0:00 and 23:59 on the recorded day).
+In statistical terms, we call the data *double interval censored*:
+
+- "double" because the delays represent the time between two events that are both censored
+
+- "interval" because all we know about the timings of the events is that they happened in a certain time interval (between 0:00 and 23:59 on the recorded day).
+
+::: {.callout-note collapse="true"}
+# Why are we so worried?
+
+We'll be spending a lot of time thinking about a potentially "short" 24 hour time interval. In this session, we'll start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
+The concepts and techniques that we use here also apply to longer time intervals that we might find in surveillance data, for example, reported case counts aggregated by week.
+:::
 
 ## Estimating delay distributions accounting for censoring
 
@@ -137,7 +150,7 @@ Do you still recover the parameters that we put in?
 
 ```{r df_dates_solution, results = 'hide', message = FALSE}
 mod <- nfidd_cmdstan_model("lognormal")
-res <- mod$sample(
+res <- nfidd_sample(mod,
   data = list(
     n = nrow(na.omit(df_dates)),
     y = na.omit(df_dates)$onset_to_hosp
@@ -188,7 +201,7 @@ Lines 15-17 reflect the integer delays, adjusted by the estimated times of day.
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
 ```{r censored_estimate, results = 'hide', message = FALSE}
-cres <- cmod$sample(
+cres <- nfidd_sample(cmod,
   data = list(
     n = nrow(na.omit(df_dates)),
     onset_to_hosp = na.omit(df_dates)$onset_to_hosp
@@ -217,12 +230,22 @@ Can you establish under which conditions the bias in estimation gets worse?
 # Real-time estimation: truncation
 
 The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
-However, information on delay distribution is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
+However, information on delay distributions is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
 
-Estimating delays in real time comes with particular challenges, as the timing of the cut-off might introduce a bias.
-If, for example, infections are exponentially increasing then there will be disproportionately more people with recent symptom onset.
-Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections.
+Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
+We call this incompleteness *right truncation*.
+This is a problem if we try to use an incomplete set of data about one type of event to infer the pattern of a previous epidemiological event. 
+For example, our target might be to infer the "primary" event of infections. We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
+However, we are still in the middle of an outbreak.
+Some infected cases haven't yet presented with symptoms. 
+So we only have a partial, incomplete count to work with.
+When we condition on an observed event with a delay in this way, we get **right truncation** of the target event. 
+Our estimates might be biased, because we are missing some of the data to get the full picture.
+
+This bias also changes over the course of an outbreak. If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
+Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections that have in fact already occurred.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
+So among a cohort of people with symptom onset at the same time, those with shorter delays to onset would be over-represented.
 
 Once again, we can simulate this effect, for example by imagining we would like to make an estimate on day 70 of our outbreak.
 Let us work with the original, un-censored data for the time from onset to hospitalisation so as to look at the issue of truncation in isolation:
@@ -255,7 +278,7 @@ How far away from the "true" parameters do you end up?
 ## Solution
 
 ```{r df_realtime_solution, results = 'hide', message = FALSE}
-res <- mod$sample(
+res <- nfidd_sample(mod,
   data = list(
     n = nrow(na.omit(df_realtime)),
     y = na.omit(df_realtime)$onset_to_hosp
@@ -298,7 +321,7 @@ Line 17 defines the upper limit of `onset_to_hosp` as `time_since_onset`.
 Now we can use this model to re-estimate the parameters of the delay distribution:
 
 ```{r truncated_estimate, results = 'hide', message = FALSE}
-tres <- tmod$sample(
+tres <- nfidd_sample(tmod,
   data = list(
     n = nrow(df_realtime),
     onset_to_hosp = df_realtime$onset_to_hosp, 
@@ -327,8 +350,15 @@ Can you establish under which conditions the bias in estimation gets worse?
 
 # Going further
 
+## Challenge
+
 -   We have looked at censoring and truncation separately, but in reality often both are present. Can you combine the two in a model?
--   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biases from estimation even further. For a full overview, the [review by Park et al.](https://doi.org/10.1101/2024.01.12.24301247) might be worth a read. If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
+-   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biases from estimation even further. 
+For a full overview, the review by [@parkEstimatingEpidemiologicalDelay2024] might be worth a read. 
+If you are feeling adventurous, try to implement one or more of them in the stan model above - with a warning that this can get quite involved very quickly.
+
+## Methods in practice
+
 -   The [`primarycensored`](https://github.com/epinowcast/primarycensored) R package provides a comprehensive framework for dealing with censored and truncated delay distributions.
     It implements many techniques for handling primary event censoring, secondary event censoring, and right truncation in a unified and efficient manner.
     This package can be particularly useful for production-level implementations where performance and accuracy are critical.
@@ -336,3 +366,13 @@ Can you establish under which conditions the bias in estimation gets worse?
     It enables flexible modelling including time-varying components, spatial effects, and partially pooled estimates of demographic characteristics.
 
 # Wrap up
+
+The learning objectives for this session were:
+
+- Understanding of how censoring affects the estimation and interpretation of epidemiological delay distributions
+- Ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
+- Understanding of right truncation in epidemiolgical data
+- Ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+
+::: {#refs}
+:::

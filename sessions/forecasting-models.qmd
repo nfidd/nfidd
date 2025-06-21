@@ -17,7 +17,7 @@ In this session, we'll start with the renewal model that we've been using and ex
 The aim of this session is to introduce some common forecasting models and to evaluate them.
 
 ::: {.callout-caution}
-None of the models introduced in this section are designed for real-world outbreak use!
+None of the models introduced in this section are designed for real-world use!
 :::
 
 ::: {.callout-note collapse="true"}
@@ -56,8 +56,6 @@ This is not strictly necessary but will help us talk about the models.
 set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
-
-:::
 
 # What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
 
@@ -238,7 +236,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation](forecast-visualisation) session. We will first load in the data and filter for a target forecast date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation](forecast-visualisation) session. We will first load in the data and filter for a forecast origin date.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -271,9 +269,7 @@ data <- list(
   h = horizon, # Here we set the number of days to forecast into the future
   N_prior = c(10000, 2000) # the prior for the population size
 )
-mech_forecast_fit <- mech_mod$sample(
-  data = data, parallel_chains = 4
-)
+mech_forecast_fit <- nfidd_sample(mech_mod, data = data)
 ```
 
 ```{r mech-forcast-print}
@@ -293,8 +289,8 @@ data <- list(
   ip_pmf = ip_pmf,
   h = horizon # Here we set the number of days to forecast into the future
 )
-stat_forecast_fit <- stat_mod$sample(
-  data = data, parallel_chains = 4,
+stat_forecast_fit <- nfidd_sample(
+  stat_mod, data = data,
   # again set the initial values to make fitting more numerically stable
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
@@ -403,13 +399,13 @@ data <- list(
   N_prior = c(100, 20) # the prior for the population size
 )
 
-mech_forecast_fit_diff <- mech_mod$sample(
-  data = data, parallel_chains = 4
+mech_forecast_fit_diff <- nfidd_sample(
+  mech_mod, data = data
 )
 
 mech_forecast_diff <- mech_forecast_fit_diff |>
   gather_draws(forecast[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(day = day + cutoff)
 ```
 
@@ -463,7 +459,7 @@ head(onset_df)
 forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, target_day), col = target_day), alpha = 0.1) +
+  geom_line(aes(y = .value, group = interaction(.draw, origin_day), col = origin_day), alpha = 0.1) +
   geom_point(data = onset_df |>
     filter(day >= 21),
     aes(x = day, y = onsets), color = "black") +
@@ -480,7 +476,7 @@ forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
   ggplot(aes(x = day)) +
   geom_line(
-    aes(y = .value, group = interaction(.draw, target_day), col = target_day),
+    aes(y = .value, group = interaction(.draw, origin_day), col = origin_day),
     alpha = 0.1
   ) +
   geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
@@ -520,7 +516,7 @@ sc_forecasts <- forecasts |>
   filter(!is.na(.value)) |>
   as_forecast_sample(
     forecast_unit = c(
-      "target_day", "horizon", "model"
+      "origin_day", "horizon", "model"
     ),
     observed = "onsets",
     predicted = ".value",
@@ -582,8 +578,8 @@ and across different forecast dates
 
 ```{r}
 sc_scores |>
-  summarise_scores(by = c("target_day", "model")) |>
-  ggplot(aes(x = target_day, y = crps, col = model)) +
+  summarise_scores(by = c("origin_day", "model")) |>
+  ggplot(aes(x = origin_day, y = crps, col = model)) +
   geom_point()
 ```
 
@@ -626,7 +622,8 @@ sc_forecasts |>
   get_pit_histogram(by = "model") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~model)
+  facet_wrap(~model) +
+  labs(x = "Predicted quantiles")
 ```
 
 As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
@@ -641,17 +638,19 @@ sc_forecasts |>
   get_pit_histogram(by = c("model", "group_horizon")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(group_horizon)) +
+  labs(x = "Predicted quantiles")
 ```
 
 and then for different forecast dates.
 
 ```{r pit-histogram-date, fig.width = 10}
 sc_forecasts |>
-  get_pit_histogram(by = c("model", "target_day")) |>
+  get_pit_histogram(by = c("model", "origin_day")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(target_day))
+  facet_grid(vars(model), vars(origin_day)) +
+  labs(x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
@@ -716,8 +715,8 @@ log_sc_scores |>
 
 ```{r}
 log_sc_scores |>
-  summarise_scores(by = c("target_day", "model")) |>
-  ggplot(aes(x = target_day, y = crps, col = model)) +
+  summarise_scores(by = c("origin_day", "model")) |>
+  ggplot(aes(x = origin_day, y = crps, col = model)) +
   geom_point()
 ```
 
@@ -730,7 +729,7 @@ How do the CRPS values on the log scale compare to the scores on the original sc
 ## Solution
 - The performance of the mechanistic model is more variable across forecast horizon than on the natural scale.
 - On the log scale the by horizon performance of the random walk and more statistical mdoel is more comparable than on the log scale.
-- The period of high incidence dominates the target day stratified scores less on the log scale. We see that all models performed less well early and late on.
+- The period of high incidence dominates the origin day stratified scores less on the log scale. We see that all models performed less well early and late on.
 :::
 
 ### PIT histograms
@@ -740,7 +739,8 @@ log_sc_forecasts |>
   get_pit_histogram(by = "model") |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_wrap(~model)
+  facet_wrap(~model) +
+  labs(x = "Predicted quantiles")
 ```
 
 
@@ -754,16 +754,18 @@ log_sc_forecasts |>
   get_pit_histogram(by = c("model", "group_horizon")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(group_horizon))
+  facet_grid(vars(model), vars(group_horizon)) +
+  labs(x = "Predicted quantiles")
 ```
 
 
 ```{r pit-histogram-date-log, fig.width = 10}
 log_sc_forecasts |>
-  get_pit_histogram(by = c("model", "target_day")) |>
+  get_pit_histogram(by = c("model", "origin_day")) |>
   ggplot(aes(x = mid, y = density)) +
   geom_col() +
-  facet_grid(vars(model), vars(target_day))
+  facet_grid(vars(model), vars(origin_day)) +
+  labs(x = "Predicted quantiles")
 ```
 
 ::: {.callout-tip}
@@ -781,6 +783,7 @@ The PIT histograms are similar to the original scale PIT histograms but the mech
 - We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
 - We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
+- Consider how forecasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? Think about seasonal patterns, long-term trends, holiday effects, or other cyclical behaviours that might influence transmission dynamics and reporting patterns.
 
 # Wrap up
 

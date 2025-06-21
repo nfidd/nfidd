@@ -1,14 +1,16 @@
 ---
-title: "Independent learning outcomes"
+title: "Learning outcomes"
+order: 2
 comments: false
 ---
 
+The skills and methods taught in this course apply broadly across infectious disease epidemiology, from outbreak response to routine surveillance of endemic diseases. 
+While examples often use outbreak scenarios for clarity, participants should consider how these approaches apply to their epidemiological contexts.
+
 ## R and statistical concepts used
 
-- familiarity with R concepts used in the course
-  - to be completed once the course has been fully written but likely includes functions, accessing documentation, etc.
-- understanding of statistical concepts used in the course
-  - to be completed once the course has been fully written but likely includes discrete and continuous probability distributions
+- understanding of common probability distributions used for epidemiological delays
+- familiarity with using stan to estimate parameters of a probability distribution
 
 ## Delay distributions
 
@@ -22,7 +24,12 @@ comments: false
 - ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
 - understanding of right truncation in epidemiolgical data
 - ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
-  
+
+## Using delay distributions to model the data generating process
+- understanding of using delay distributions to model population-level data generating processes
+- ability to use *convolutions* to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with *discretisation*
+- understanding of the need to introduce additional uncertainty to account for the observation process at a population level
+
 ## $R_t$ estimation and the renewal equation
 
 - understanding of the reproduction number and challenges in its estimation
@@ -54,5 +61,6 @@ comments: false
 
 ## Evaluating forecasts (and nowcasts)
 
+- ability to visually assess forecasts and nowcasts
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
 - ability to score probabilistic forecasts in R
