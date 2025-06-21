@@ -11,7 +11,27 @@ This course is a living resource designed to help epidemiologists, public health
 
 Each session in this course uses R code for demonstration.
 All the content is self-contained within a software package designed for the course.
-To get the most out of this course, you will need to use R and the following instructions to interact with the course material.
+
+**You have three options for using this course:**
+
+1. **Web-only**: View sessions on the website
+2. **Local setup**: Install R, packages, and download course materials for the full interactive experience
+3. **Hybrid**: Install just the R package but use the website for viewing content
+
+::: callout-important
+**Installation Issues?** If you're having trouble with any installation steps, **ask for help early**! Don't skip ahead - each step builds on the previous ones. On the day of the course, we have a small number of web clients available as backup if installation issues persist.
+:::
+
+### Summary of Installation Steps
+
+If you choose the local setup option, here's what you'll need to do:
+
+1. Install R and RStudio (use the Visual Editor for best notebook experience)
+2. Install the `nfidd` R package
+3. Install cmdstan
+4. Download course materials (if using the hybrid approach you may not need to do this)
+
+**Don't skip any steps** - they all work together to provide the full course experience.
 
 ### Installing R
 
@@ -32,6 +52,15 @@ To install the packages needed in the course, including the `nfidd` package that
 install.packages("pak")
 pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
 ```
+
+::: callout-tip
+**If pak installation fails**, you can use this fallback method:
+
+```{r install_fallback, eval=FALSE}
+install.packages("remotes")
+remotes::install_github("nfidd/nfidd", dependencies = TRUE, upgrade = "always")
+```
+:::
 
 Then you can check that the installation completed successfully by loading the package into your **R** session:
 
@@ -86,17 +115,48 @@ To be able to use the code in each session, you will need a local copy of the co
 
 A benefit of downloading or cloning all the material is that you can interact with the session files directly.
 
-In this course, all content is written using [R Notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html).
+In this course, all content is written using [Quarto](https://quarto.org) notebooks (`.qmd` files).
 This means that we can combine text with code and see the output directly.
 The notebooks are then directly reproduced on the course website (for example, this page).
 
-To interact with each session in the course, we recommend opening the RStudio Project file (`nfidd.RProj`) in the `nfidd` folder you have just downloaded.
-Then you can choose to:
+**Recommended approach**: Open the RStudio Project file (`nfidd.RProj`) in the `nfidd` folder you have downloaded and work directly with the notebook files.
 
--   View each session on the website, and copy-paste the code into your own R script.
-    -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
--   Open the R Notebook for each session.
-    -   Each notebook is saved in `nfidd/sessions/` as a `.qmd` file.
-    -   Execute code with the single green "play" button at the top-right corner of each code chunk ("Run current chunk"). You can also execute code line-by-line using `Ctrl/Cmd + Enter`.
-    -   We suggest using "Visual" view for a better experience (top-left of the RStudio pane).
+::: callout-tip
+## Using RStudio's Visual Editor (Recommended for Notebooks)
+
+1. **Open a session notebook**: Each session is saved as a `.qmd` file in `nfidd/sessions/`
+2. **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source")
+3. **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution
+4. **Visual mode benefits**: Easier to read formatted text and equations, better experience with code chunks and outputs
+
+**Note**: If you can't find the Visual button, make sure you're using RStudio 2022.07 or later.
+:::
+
+**Alternative approaches that also work**:
+-   **Website + R script**: View each session on the website and copy-paste code into your own R script
+    -   Tip: Hover over code chunks on the website to see a "Copy" button in the top-right corner
+-   **Other editors**: Use VS Code or other editors that support Quarto notebooks - the `.qmd` files will work in any Quarto-compatible environment
+    - Tip: The Quarto extension for VS Code also supports a visual editor mode.
+
+## Day-of-Course Updates
+
+If you're returning to the course after some time or joining a live session, you may want to update your setup to ensure you have the latest content and package versions.
+
+### Quick Update (Recommended)
+
+1. **Update the nfidd package** (this is quick and ensures you have the latest functions):
+   ```{r update_package, eval=FALSE}
+   pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
+   ```
+   
+   Or using the fallback method if needed:
+   ```{r update_package_fallback, eval=FALSE}
+   remotes::install_github("nfidd/nfidd", dependencies = TRUE, upgrade = "always")
+   ```
+
+2. **Download fresh course materials** if using local files:
+   - Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+   - Or use `git pull` if you cloned the repository
+
+3. **You don't need to reinstall cmdstan** unless you're having specific issues with it
 
