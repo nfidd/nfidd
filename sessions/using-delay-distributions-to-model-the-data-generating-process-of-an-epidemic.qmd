@@ -306,6 +306,8 @@ This is particularly useful when dealing with arrays such as `inference` because
 
 # Going further
 
+## Challenge
+
 -   Above, we used a Poisson distribution to characterise uncertainty.
     In the Poisson distribution, the variance is the same as the mean.
     Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
@@ -315,8 +317,17 @@ This is particularly useful when dealing with arrays such as `inference` because
     How would this look in stan code?
     Would you expect it to yield a different result?
 
+## Methods in practice
+
 -   The [`primarycensored`](https://github.com/epinowcast/primarycensored) package provides tools for efficiently working with censored and truncated delay distributions.
     It offers both theoretical background on primary and secondary interval censoring and right truncation, as well as practical functions for estimating and using these distributions.
     The package implements deterministic methods that are significantly faster than the Monte Carlo approach used in `censored_delay_pmf()` while providing exact results.
 
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
+
+::: {#refs}
+:::
+
