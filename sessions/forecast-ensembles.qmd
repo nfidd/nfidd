@@ -869,6 +869,24 @@ The best ensembles slightly outperform some of the simple ensembles but there is
 
 # Going further
 
+## Challenge
+
+- Throughout the course we've been carefully building models from our understanding of the underlying data generating process.
+What might be the implications of combining models from different modellers, with different assumptions about this process?
+Think about the reliability and validity of the resulting ensemble forecast. 
+- Would it change how you approach communicating the forecast?
+
+## Methods in the real world
+
+- @howertonContextdependentRepresentationBetweenmodel2023 suggests that the choice of an ensemble method should be informed by an assumption about how to represent uncertainty between models: whether differences between component models is "noisy" variation around a single underlying distribution, or represents structural uncertainty about the system.
+- @sherratt2023 investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
+- @amaral2025 discusses the challenges in improving on the predictive performance of simpler approaches using weighted ensembles.
 
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
+
+::: {#refs}
+:::
 
