@@ -220,10 +220,8 @@ We can see that the random numbers generated from the posterior samples are dist
 
 # Wrap up
 
-Learning objectives for this session were:
-
-- Understanding of common probability distributions used for epidemiological delays
-- Familiarity with using stan to estimate parameters of a probability distribution
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
 ::: {#refs}
 :::
