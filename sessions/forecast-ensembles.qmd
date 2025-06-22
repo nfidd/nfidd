@@ -545,9 +545,10 @@ In order to perform inverse WIS weighting we first need to calculate the WIS for
 model_scores <- quantile_forecasts |>
   score()
 cumulative_scores <- list()
+## filter for scores up to the origin day of the forecast
 for (day_by in unique(model_scores$origin_day)) {
   cumulative_scores[[as.character(day_by)]] <- model_scores |>
-    filter(origin_day <= day_by) |>
+    filter(origin_day < day_by) |>
     summarise_scores(by = "model") |>
     mutate(day_by = day_by)
 }
