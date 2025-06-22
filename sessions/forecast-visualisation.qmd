@@ -395,10 +395,19 @@ Do they seem to under or over predict consistently?
 
 # Going further
 
-- What other ways could we visualise the forecasts especially if we had forecasts from multiple models and locations or both?
+## Challenge
+
+- What other ways could we visualise the forecasts - especially if we had forecasts from multiple models and locations, or both?
 - Based on these visualisations how could we improve the model?
 
+## Methods in practice
+
+- @heldProbabilisticForecastingInfectious2017 makes a compelling argument for the use of probabilistic forecasts and evaluates spatial forecasts based on routine surveillance data.
+- @hadleyVisualPreferencesCommunicating2025 describes the visualisation of modelling results for national COVID-19 policy and decision makers, with recommendations on what aspects of visuals, graphs, and plots policymakers found to be most helpful in COVID-19 response work.
+
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
 
 ## References
 
