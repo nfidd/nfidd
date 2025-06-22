@@ -17,7 +17,9 @@ We will be very happy to have your feedback, comments or any questions on the [c
 
 We recommend exploring these topics in [Further reading](../reference/further_reading). You can also access these in a [living library](https://www.zotero.org/groups/6031904/nowcasting_and_forecasting_infectious_disease_dynamics/library), which you are welcome to contribute to.
 
-All the course material is openly available for you to come back to at any time. If you return to the course after some time, you may want to [update your setup](../reference/getting-started) to ensure you have the latest content and package versions.
+All the course material is openly available for you to come back to at any time. 
+If you return to the course after some time, you may want to [update your setup](../reference/getting-started) to ensure you have the latest content and package versions.
 
-You are free to share and reuse this content in any way. Please consider [including a citation](../reference/authors#how-to-cite) (and/or [let us know](https://github.com/nfidd/nfidd/discussions)!) if you find it useful.
+You are free to share and reuse this content in any way. 
+Please consider [including a citation](../reference/authors#how-to-cite) (and/or [let us know](https://github.com/nfidd/nfidd/discussions)!) if you find it useful.
 
