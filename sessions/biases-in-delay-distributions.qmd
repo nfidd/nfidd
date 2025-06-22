@@ -274,7 +274,8 @@ df_realtime <- df |>
   filter(hosp_time <= 70)
 ```
 
-Depending on where we cut-off observation (i.e. what time) in our outbreak will impact the amount of truncation our data has. Ending observation close to periods of exponential growth will lead to more truncation than if we cut-off observation towards the end of an outbreak when it as been stable or infections have been reducing for some time.
+Depending on where we cut off observation (i.e. what time) in our outbreak will impact the amount of truncation our data has.
+Ending observation close to periods of exponential growth will lead to more truncation than if we cut off observation towards the end of an outbreak when it has been stable or infections have been reducing for some time.
 
 ## Estimating delay distributions accounting for truncation
 
