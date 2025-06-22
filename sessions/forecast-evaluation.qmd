@@ -70,7 +70,7 @@ Note that sharpness is a property of the forecasts themselves, whereas calibrati
 
 ## The forecasting paradigm
 
-The general principle underlying forecast evaluation is to **maximise *sharpness* subject to *calibration***.
+The general principle underlying forecast evaluation is to **maximise *sharpness* subject to *calibration*** [gneiting2007].
 This means that statements about the future should be **correct** (calibration) and should aim to have **narrow uncertainty** (sharpness).
 :::
 
