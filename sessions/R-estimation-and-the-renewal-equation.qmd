@@ -501,7 +501,9 @@ What are the implications for inference?
 - `Epidemia` @bhattSemiMechanisticBayesianModeling2020 implements a regression model approach to $R_t$ estimation.
 - In this course we focused on the instantaneous reproduction number.
 An alternative is the case reproduction number implemented in @wallingaDifferentEpidemicCurves2004.
-- As we've seen in this session, we face many choices and challenges when estimating the reproduction number. @brockhausWhyAreDifferent2023 explores the substantial impact of these choices on resulting estimates. We recommend reading @gosticPracticalConsiderationsMeasuring2020 for further guidance on best practice. 
+- We face many choices when estimating the reproduction number.
+@brockhausWhyAreDifferent2023 explores the impact of these choices on resulting estimates.
+- @gosticPracticalConsiderationsMeasuring2020 has further guidance on best practice. 
 
 # Wrap up
 
