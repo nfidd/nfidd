@@ -1,6 +1,7 @@
 ---
 title: "Forecasting models"
 order: 8
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -793,7 +794,7 @@ Both approaches ultimately aim to capture the same underlying data-generating pr
 
 # Wrap up
 
-# References
+## References
 
 ::: {#refs}
 :::

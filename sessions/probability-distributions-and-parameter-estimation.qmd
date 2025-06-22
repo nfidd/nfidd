@@ -1,6 +1,7 @@
 ---
 title: "Probability distributions and parameter estimation"
 order: 1
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -230,6 +231,8 @@ On the other hand, using available tools avoids duplicated effort, might improve
 
 - Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
 - Share your [questions and thoughts](reference/help)
+
+## References 
 
 ::: {#refs}
 :::

@@ -1,6 +1,7 @@
 ---
 title: "$R_t$ estimation and the renewal equation"
 order: 5
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -515,5 +516,10 @@ An alternative is the case reproduction number implemented in @wallingaDifferent
 :::
 
 
+# Wrap up
 
+## References
+
+::: {#refs}
+:::
 

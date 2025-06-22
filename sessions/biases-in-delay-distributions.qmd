@@ -1,6 +1,7 @@
 ---
 title: "Biases in delay distributions"
 order: 3
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -391,6 +392,8 @@ For a full overview, see the review by [@parkEstimatingEpidemiologicalDelay2024]
 - Share your [questions and thoughts](reference/help)
 
 ## References
+
+## References 
 
 ::: {#refs}
 :::
