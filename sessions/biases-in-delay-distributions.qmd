@@ -272,6 +272,8 @@ df_realtime <- df |>
   filter(hosp_time <= 70)
 ```
 
+Depending on where we cut-off observation (i.e. what time) in our outbreak will impact the amount of truncation our data has. Ending observation close to periods of exponential growth will lead to more truncation than if we cut-off observation towards the end of an outbreak when it as been stable or infections have been reducing for some time.
+
 ## Estimating delay distributions accounting for truncation
 
 If we take the naïve mean of delays we get an underestimate as expected:
@@ -359,8 +361,7 @@ tres |>
 
 ::: callout-tip
 ## Take 10 minutes
-
-Try re-simulating the delays using different parameters of the delay distribution.
+Try ending the outbreak at different time periods and also try re-simulating the delays using different parameters of the delay distribution.
 Can you establish under which conditions the bias in estimation gets worse?
 :::
 
