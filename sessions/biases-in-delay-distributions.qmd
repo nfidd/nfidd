@@ -364,7 +364,7 @@ tres |>
 
 ::: callout-tip
 ## Take 10 minutes
-Try ending the outbreak at different time periods and also try re-simulating the delays using different parameters of the delay distribution.
+Try estimating the delays at different times (i.e. varying the observation cut-off) and also try re-simulating the delays using different parameters of the delay distribution.
 Can you establish under which conditions the bias in estimation gets worse?
 :::
 
