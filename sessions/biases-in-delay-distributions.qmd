@@ -373,7 +373,9 @@ Can you establish under which conditions the bias in estimation gets worse?
 ## Challenge
 
 -   We have looked at censoring and truncation separately, but in reality often both are present. Can you combine the two in a model?
--   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem. There are other solutions that reduce the biases from estimation even further. For a full overview, see the review by [@parkEstimatingEpidemiologicalDelay2024].
+-   The solutions we introduced for addressing censoring and truncation are only some possible ones for the censoring problem.
+There are other solutions that reduce the biases from estimation even further. 
+For a full overview, see the review by [@parkEstimatingEpidemiologicalDelay2024].
 
 ## Methods in practice
 
