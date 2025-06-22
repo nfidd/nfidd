@@ -1,5 +1,5 @@
 ---
-title: "Visualising infectious disease forecasts"
+title: "Forecasting concepts"
 order: 7
 bibliography: nfidd.bib
 ---
@@ -12,7 +12,7 @@ We will see how we can visualise such forecasts, and visually compare them to wh
 
 ## Slides
 
-- [Forecasting as an epidemiological problem](slides/forecasting-as-an-epidemiological-problem)
+- [Introduction to forecasting](slides/introduction-to-forecasting)
 
 ## Objectives
 
