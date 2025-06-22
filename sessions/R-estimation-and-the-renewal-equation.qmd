@@ -1,6 +1,5 @@
 ---
 title: "$R_t$ estimation and the renewal equation"
-bibliography: ../nfidd.bib
 order: 5
 ---
 
