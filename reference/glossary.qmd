@@ -85,22 +85,18 @@ title: "Glossary"
 
 ## Biases in delay distributions
 
--   **Interval censoring**: When we know an event occurred at some time within an interval, but not exactly when.
-    This might be when an event that happens in continuous time (e.g. infection or symptom onset) is rounded to an integer unit (e.g. calendar date, week) in reported data.
+-   **Censoring**: When we don't know the exact timing of events. 
+    Epidemiological data can be *right censored* (the event is known to have occurred after a certain time), *left censored* (the event is known to have occurred before a certain time), or *interval censored* (the event is known to have occurred within a certain time interval). 
+    For example, this might be when an event that happens in continuous time (e.g. infection or symptom onset) is rounded to an integer unit (e.g. calendar date, week) in reported data.
+    In epidemiological delay data, censoring can affect either primary or secondary events (*single interval censoring*) or both (*double interval censoring*).
     This can introduce significant uncertainty when we are estimating the time period between two events.
-    When both the start and end events are interval-censored, this is referred to as **double interval censoring**.
-    Events might also be **right censored** (we know the earliest time it could have occurred, but the latest time is uncertain) or **left censored** (we only know the latest time it could have occurred).
 
--   **Truncation**: When data are incomplete because of a measurement cut-off: for example, when we use data that has been collected before enough time has passed for all the relevant epidemiological events to occur or be observed.
+-   **Truncation**: When data are incomplete because of a measurement cut-off.
+    Real-time epidemiological data are often right truncated when we use data that has been collected before enough time has passed for all the relevant epidemiological events to occur or be observed. 
+    For example, we may be unable to observe intervals (e.g., incubation periods) greater than a threshold (e.g., greater than the number of days elapsed since infection). 
     This is especially a problem if we try to use an incomplete set of secondary event data (such as recent symptom onsets) to infer the complete pattern of primary events (such as infections).
     Our estimates will be biased, because not all primary events are represented.
-    We refer to this as **right truncation**.
-    This is particularly pronounced in real-time analysis during exponentially growing outbreaks.
-    For example, we might be trying to estimate the incubation period during a growing outbreak.
-    Among the many infections have occurred recently, some of these have already shown symptoms, so are included in the latest data.
-    However, we are still waiting for other recently infected cases to show symptoms.
-    If we estimate the incubation period based only on the latest data, we will not be including those cases with longer incubation times as these are only observed after the cut-off time for our analysis.
-    This makes our estimate of the delay distribution artificially short.
+    This is particularly pronounced during exponentially growing outbreak, making our estimate of the delay distribution artificially short.
 
 ## Using delay distributions to model the data generating process
 
