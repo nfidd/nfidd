@@ -42,10 +42,10 @@ With that, we can start to interpret the present (nowcasting) and predict the fu
 
 Throughout the course we will
 
-1.  simulate an example outbreak producing typical infectious disease data in **R** (thus introducing the *generative model*)
-2.  apply the generative model to data in the probabilistic programming language **stan**, to
+1.  use models to simulate data sets in **R** (thus introducing the *generative model*)
+2.  apply the generative model to the simulated data in the probabilistic programming language **stan**, to
     -   learn about the system (conduct inference)
-    -   make predictions (nowcasting/forecasting)
+    -   **make predictions** (nowcasting/forecasting)
 
 Each session in the course:
 

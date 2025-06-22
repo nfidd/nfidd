@@ -1,11 +1,11 @@
 ---
-title: "Forecasting as an epidemiological problem"
+title: "Introduction to forecasting"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 engine: knitr
 format:
   revealjs:
-    output: slides/forecasting-as-an-epidemiological-problem.html
-    footer: "Forecasting as an epidemiological problem"
+    output: slides/introduction-to-forecasting.html
+    footer: "Introduction to forecasting"
     slide-level: 3
 ---
 
