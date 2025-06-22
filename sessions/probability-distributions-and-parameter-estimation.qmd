@@ -11,8 +11,7 @@ We'll want to correctly specify this uncertainty. We can do this best by combini
 
 ## Slides
 
--   [Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
--   [Introduction to stan concepts used in the course](slides/introduction-to-stan)
+-   [Introduction to Bayesian inference with stan](slides/introduction-to-stan)
 
 ## Objectives
 
@@ -24,7 +23,7 @@ The aim of this session is to introduce the concept of probability distributions
 
 ## Source file
 
-The source file of this session is located at `sessions/R-Stan-and-statistical-concepts.qmd`.
+The source file of this session is located at `sessions/probability-distributions-and-parameter-estimation.qmd`.
 
 ## Libraries used
 
@@ -68,10 +67,10 @@ rnorm(n = 10, mean = 0, sd = 1)
 ```
 
 We will use probability distributions to characterise epidemiological delays.
-These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
+These are usually nonnegative because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
 Note that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first.
 
-Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
+Probability distributions that are commonly used in this situation are the gamma or lognormal distributions.
 These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e., gives more probability to occasional very large values, whereas the gamma distribution has more of a tail on the left, i.e., gives more probability to values lower than the mean.
 
 The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$.
