@@ -1,6 +1,7 @@
 ---
 title: "Delay distributions"
 order: 2
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -252,3 +253,8 @@ For example, we could implement a regression approach in e.g. [brms](https://cra
 
 - Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
 - Share your [questions and thoughts](reference/help)
+
+## References
+
+::: {#refs}
+:::
