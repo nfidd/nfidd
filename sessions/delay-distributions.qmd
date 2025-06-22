@@ -245,7 +245,8 @@ Do you get a good fit?
 
 ## Methods in practice
 
--   We could consider a range of tools for fitting a probabilistic distribution to a set of observed delays, such as we have been doing here. For example, we could implement a regression approach in e.g. [brms](https://cran.r-project.org/web/packages/brms/index.html), or use a package such as [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) or the 'naive' model in [`epidist`](https://github.com/epinowcast/epidist). 
+- There are many tools for fitting a distribution to a set of observed delays. 
+For example, we could implement a regression approach in e.g. [brms](https://cran.r-project.org/web/packages/brms/index.html), or use a package such as [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) or the 'naive' model in [`epidist`](https://github.com/epinowcast/epidist). 
 
 # Wrap up
 
