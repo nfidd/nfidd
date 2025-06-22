@@ -4,7 +4,8 @@ title: "Getting started"
 
 ## What is NFIDD?
 
-NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data. This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
+NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data.
+This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
 
 ## Set up
 
@@ -33,8 +34,12 @@ If you choose the local setup option, here's what you'll need to do:
 
 ### Installing R
 
--   [R](http://cran.r-project.org) is used as the main programming language. You can check which version you have by typing `R.version` in your R session. We recommend installing the latest `r R.version$version.string`.
--   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). Its Visual Editor provides the best experience of going through this course. Please make sure you update RStudio to the latest version.
+-   [R](http://cran.r-project.org) is used as the main programming language.
+	You can check which version you have by typing `R.version` in your R session.
+	We recommend installing the latest `r R.version$version.string`.
+-   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). 
+	Its Visual Editor provides the best experience of going through this course. 
+	Please make sure you update RStudio to the latest version.
 
 ### Installing additional requirements
 
@@ -73,7 +78,7 @@ cmdstanr::install_cmdstan()
 ```
 
 ::: callout-note
-This may take a few minutes. 
+This may take a few minutes.
 Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
 :::
 
@@ -103,7 +108,8 @@ If you want to use the local workflow, you will need a local copy of the course 
 
 -   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
 
--   If you prefer to use the hybrid workflow, you can view each session on the website, and copy-paste the code into your own R script. In that case you don't need to download the material.
+-   If you prefer to use the hybrid workflow, you can view each session on the website, and copy-paste the code into your own R script. 
+	In that case you don't need to download the material.
 
     -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
 
@@ -111,7 +117,9 @@ If you want to use the local workflow, you will need a local copy of the course 
 
 A benefit of downloading or cloning all the material is that you can interact with the session files directly.
 
-In this course, all content is written using [Quarto](https://quarto.org) notebooks (`.qmd` files). This means that we can combine text with code and see the output directly. The notebooks are then directly reproduced on the course website (for example, this page).
+In this course, all content is written using [Quarto](https://quarto.org) notebooks (`.qmd` files).
+This means that we can combine text with code and see the output directly. 
+The notebooks are then directly reproduced on the course website (for example, this page).
 
 **Recommended approach**: Work with the notebooks using RStudio's visual editor mode. See guidance on this below.
 
