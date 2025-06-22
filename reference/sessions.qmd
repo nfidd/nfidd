@@ -19,9 +19,8 @@ Monday June 23: 09.00-09.30
 
 Monday June 23: 09.30-10.30
 
--   [Introduction](sessions/slides/introduction-to-statistical-concepts): statistical concepts used in the course (15 mins)
--   [Introduction](sessions/slides/introduction-to-stan): stan concepts used in the course (15 mins)
--   [Practice](sessions/R-Stan-and-statistical-concepts): introduction to estimation in stan (30 mins)
+-   [Introduction](sessions/slides/introduction-to-stan): statistical concepts used in the course and how they can be applied in stan (20 mins)
+-   [Practice](sessions/R-Stan-and-statistical-concepts): introduction to estimation in stan (40 mins)
 
 ## Session 2: Delay distributions
 
