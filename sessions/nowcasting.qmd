@@ -392,7 +392,16 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 - In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
 :::
 
+# Going further
+
+## Methods in practice
+
+- Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394) compares the performance of a range of methods that were used in a nowcasting hub and investigates what might explain performance differences.
+
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
 ## References
 
