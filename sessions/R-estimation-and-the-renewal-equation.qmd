@@ -1,5 +1,6 @@
 ---
 title: "$R_t$ estimation and the renewal equation"
+bibliography: ../nfidd.bib
 order: 5
 ---
 
@@ -495,12 +496,16 @@ What are the implications for inference?
 
 ## Methods in practice
 
-- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here.
+- The `EpiEstim` software provides a range of accessible tools for estimating $R_t$, using a simpler approach than the model we have used here. Alternatively, the `EpiNow2` [@abbottEpiNow2EstimateRealtime2025] package implements a more complex version of the model we have used. Taking a different approach, `Epidemia` @bhattSemiMechanisticBayesianModeling2020 implements a regression model approach to $R_t$ estimation.
+- In this course we focused on the instantaneous reproduction number, which is most suitable for real-time analysis when not all infections have yet been observed. Methods to estimate the case reproduction number are implemented in e.g. @wallingaDifferentEpidemicCurves2004, and are most appropriate using retrospective data that represent a complete final count of an outbreak.
+- As we've seen in this session, we face many choices and challenges when estimating the reproduction number. @brockhausWhyAreDifferent2023 explores the substantial impact of these choices on resulting estimates. We recommend reading @gosticPracticalConsiderationsMeasuring2020 for further guidance on best practice. 
 
 # Wrap up
 
 - Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
 - Share your [questions and thoughts](reference/help)
+
+## References
 
 ::: {#refs}
 :::
