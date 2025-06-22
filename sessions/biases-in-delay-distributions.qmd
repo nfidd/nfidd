@@ -138,6 +138,20 @@ df_dates <- df_dates |>
   )
 ```
 
+To help us think about this lets summarise the original time based incubation period
+
+```{r}
+summary(df$onset_time - df$infection_time)
+```
+
+and then the date based incubation period as we observe it.
+
+```{r}
+summary(df_dates$incubation_period)
+```
+
+You should see that they have nearly the same means but different medians (by about half a day).
+
 ::: callout-tip
 ## Take 5 minutes
 
@@ -172,7 +186,9 @@ res |>
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
 :::
 
-To account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
+There are many ad-hoc solutions to this problem that, for example, introduce a shift in the data by half a day to centre it on mid-day or discretise the distribution and use the difference between two cumulative density functions with a day, or two day interval. Of these all but the two day interval approach introduce more bias than doing nothing as above. See Park et al., [Estimating epidemiological delay distributions for infectious diseases](https://doi.org/10.1101/2024.01.12.24301247) for a detailed discussion of approximate approaches.
+
+To properly account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
 For example, if we know that symptom onset of an individual occurred on 20 June, 2024, and they were admitted to hospital on 22 June, 2024, this could mean an onset-to-hospitalisation delay from 1 day (onset at 23:59 on the 20th, admitted at 0:01 on the 22nd) to 3 days (onset at 0:01 on the 20th, admitted at 23:59 on the 22nd).
 
 We can use this in our delay estimation by making the exact time of the events based on the dates given part of the estimation procedure:
