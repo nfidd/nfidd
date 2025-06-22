@@ -1,14 +1,13 @@
 ---
 title: "Further reading"
-order: 13
+bibliography: ../nfidd.bib
+order: 5
 ---
-
-# Further reading
 
 The following is a highly subjective list of papers we would recommend to read for those interested in engaging further with the topics discussed here. You can also access this via Zotero in an open [living library](https://www.zotero.org/groups/6031904/nowcasting_and_forecasting_infectious_disease_dynamics/library), which you are welcome to contribute to.
 
 ## Delay estimation
-- @parkEstimatingEpidemiologicalDelay2024 provides a comprehensive overview of challenges in estimating delay distribution and how to overcome them.
+- @parkEstimatingEpidemiologicalDelay2024 provide a comprehensive overview of challenges in estimating delay distribution and how to overcome them.
 - @charnigaBestPracticesEstimating2024 summarises challenges in estimating delay distributions into a set of best practices.
 
 ## $R_t$ estimation
