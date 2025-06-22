@@ -236,8 +236,21 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 
 # Going further
 
--   In this session we were in the enviable situation of knowing which distribution was used to generate the data. With real data, of course, we don't have this information available. Try using a different distribution for inference (e.g. normal, or gamma). Do you get a good fit?
+## Challenge
+
+- In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
+With real data, of course, we don't have this information available. 
+Try using a different distribution for inference (e.g. normal, or gamma). 
+Do you get a good fit?
+
+## Methods in practice
+
+- There are many tools for fitting a distribution to a set of observed delays. 
+For example, we could implement a regression approach in e.g. [brms](https://cran.r-project.org/web/packages/brms/index.html), or use a package such as [`fitdistrplus`](https://cran.r-project.org/web/packages/fitdistrplus/index.html) or the 'naive' model in [`epidist`](https://github.com/epinowcast/epidist). 
 
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
 [1] Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!
