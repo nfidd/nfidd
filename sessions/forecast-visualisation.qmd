@@ -1,7 +1,7 @@
 ---
 title: "Visualising infectious disease forecasts"
 order: 7
-bibliography: nfidd.bib
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -400,7 +400,7 @@ Do they seem to under or over predict consistently?
 
 # Wrap up
 
-# References
+## References
 
 ::: {#refs}
 :::

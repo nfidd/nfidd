@@ -1,6 +1,7 @@
 ---
 title: "$R_t$ estimation and the renewal equation"
 order: 5
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -493,5 +494,10 @@ What are the implications for inference?
 - The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
 
 
+# Wrap up
 
+## References
+
+::: {#refs}
+:::
 

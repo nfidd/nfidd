@@ -1,6 +1,7 @@
 ---
 title: "Using delay distributions to model the data generating process"
 order: 4
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -320,3 +321,8 @@ This is particularly useful when dealing with arrays such as `inference` because
     The package implements deterministic methods that are significantly faster than the Monte Carlo approach used in `censored_delay_pmf()` while providing exact results.
 
 # Wrap up
+
+## References
+
+::: {#refs}
+:::

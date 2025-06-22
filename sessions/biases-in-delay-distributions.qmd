@@ -1,6 +1,7 @@
 ---
 title: "Biases in delay distributions"
 order: 3
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -373,6 +374,8 @@ The learning objectives for this session were:
 - Ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
 - Understanding of right truncation in epidemiolgical data
 - Ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+
+## References 
 
 ::: {#refs}
 :::

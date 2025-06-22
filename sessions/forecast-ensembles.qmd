@@ -1,6 +1,7 @@
 ---
 title: "Forecast ensembles"
 order: 9
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -850,3 +851,7 @@ The best ensembles slightly outperform some of the simple ensembles but there is
 
 # Wrap up
 
+## References
+
+::: {#refs}
+:::
