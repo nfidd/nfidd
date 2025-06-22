@@ -8,7 +8,7 @@ format:
 ---
 
 ```{r echo = FALSE, message = FALSE}
-library(ggplot2)
+library("ggplot2")
 set.seed(12345)
 ```
 
