@@ -785,6 +785,12 @@ The PIT histograms are similar to the original scale PIT histograms but the mech
 - We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
 - We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
 - Consider how forecasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? Think about seasonal patterns, long-term trends, holiday effects, or other cyclical behaviours that might influence transmission dynamics and reporting patterns.
+- The statistical models we've discussed here represent just a subset of available forecasting approaches.
+For a comprehensive treatment of time series forecasting models, including ARIMA models as a generalisation of autoregressive approaches with additional features for differencing and moving averages, see [Forecasting: Principles and Practice](https://otexts.com/fpp3/). 
+These models offer a different workflow for thinking about forecasting.
+Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
+Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. Something to think about!
+- Gaussian process models (as implemented in [EpiNow2](https://github.com/epiforecasts/EpiNow2)) provide another flexible approach that can generalise many of these statistical models depending on kernel choice.
 
 # Wrap up
 
