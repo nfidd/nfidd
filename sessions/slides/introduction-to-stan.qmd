@@ -8,6 +8,7 @@ format:
 ---
 
 ```r
+library(ggplot2)
 set.seed(12345)
 ```
 
