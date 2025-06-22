@@ -44,8 +44,8 @@ in real time.
 
 Throughout the course we will
 
-1. simulate typical infectious disease data in **R** <br>
-(the *generative model*)
+1. use models to simulate data sets in **R** <br>
+(the *generative model* of the simulated data)
    
 ```{r outbreak-plot, fig.width=5, fig.height=3, fig.align='center'}
 library(ggplot2)
@@ -66,9 +66,9 @@ ggplot(infection_times, aes(x = infection_time)) +
 
 Throughout the course we will
 
-2. apply the generative model to data in **stan** to 
+2. apply generative models to simulated data in **stan** to
    - learn about the system (conduct inference)
-   - make predictions (nowcasting/forecasting)
+   - **make predictions** (nowcasting/forecasting)
 
 ### Timeline
 
