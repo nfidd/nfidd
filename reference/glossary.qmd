@@ -1,0 +1,209 @@
+---
+title: "Glossary"
+---
+
+## Background
+
+-   **Data generating process**: The underlying mechanisms by which epidemiological events (such as infections) translate into observed outcome data (such as reported symptom onsets).
+    For example, we might use our understanding of the data generating process to build a generative model that includes transmission dynamics, **delay distributions**, or **observation processes**.
+
+-   **Observation process**: The mechanism by which an event becomes reported in surveillance data, through various outcomes such as testing, symptom reporting, or hospitalisation.
+    This process is typically subject to errors and biases, when our data are incomplete (e.g. not all infections are observed) and delayed (observations occur days to weeks after infection).
+    We can include this uncertainty using a probability distribution to account for random variation in the reporting process.
+
+-   **Forward simulation**: A modelling approach that starts with the underlying event that we are interested in, e.g. infection times, and adds probabilistic delays to simulate the subsequent observation process, like symptom onsets or hospitalisations.
+    This approach helps build an intuition for how various epidemiological and observation processes affect what we see in surveillance data, and can be useful for validating delay distribution models.
+
+## Probability and inference
+
+-   **Probability distribution**: A mathematical function that describes the likelihood of different outcomes for an uncertain parameter, used to characterise distributions of, for example, length of time delays, or uncertainty in the number of case counts.
+
+-   **Gamma distribution**: A continuous probability distribution characterised by shape (α) and rate (β) parameters, with mean α/β and variance α/β².
+
+-   **Lognormal distribution**: A continuous probability distribution characterised by meanlog (μ) and sdlog (σ) parameters.
+    Typically has a "heavier tail" than gamma distributions, in this context giving more probability to occasionally very long delays.
+
+-   **Poisson distribution**: A discrete probability distribution characterised by a single parameter λ (lambda), representing the average number of events occurring in a fixed interval, with both mean and variance equal to λ.
+
+-   **Dirichlet distribution**: A continuous multivariate probability distribution characterised by concentration parameters α₁, α₂, ..., αₖ, representing the distribution of probabilities that sum to 1.
+    This is useful for modelling proportional data, ensuring probabilities sum to 1, and we use it in nowcasting to model the reporting delay distribution.
+
+-   **Negative binomial distribution**: A discrete probability distribution characterised by parameters r (number of successes) and p (probability of success), representing the number of failures before achieving r successes, with mean r(1-p)/p and variance r(1-p)/p².
+    In comparison to the **Poisson distribution**, this is useful for considering overdispersion.
+
+-   **Bayesian inference**: An approach that combines prior knowledge with observed data to estimate parameters and their uncertainty, and particularly useful for the analysis of limited or delayed data.
+
+-   **Prior distribution**: The probability distribution that represents our beliefs about a parameter before observing any data.
+    In Bayesian analysis, this is combined with the likelihood of the observed data to produce the posterior distribution.
+    For example, we might use a *weakly informative prior* to allow a parameter to only vary within what we consider to be "realistic" bounds.
+
+-   **Posterior distribution**: The updated probability distribution for a parameter after combining prior beliefs with observed data using Bayesian inference.
+    As a result, this represents our best estimate of the parameter and associated uncertainty.
+
+-   **Likelihood**: The probability of observing the actual data given specific parameter values.
+    A key component in Bayesian inference that quantifies how well different parameter values explain the observed data.
+
+## Estimation procedures
+
+-   **Stan**: A probabilistic programming language for Bayesian statistical inference.
+
+-   **Identifiability**: The property that model parameters can be uniquely determined from the observed data.
+    For example, in practice we cap our estimation of delays at a finite maximum value D to make the model identifiable and computationally feasible.
+
+-   **Truncated distribution**: A probability distribution that has been modified to exclude certain ranges of values.
+    For example, T[0,] in Stan notation truncates a distribution to only allow non-negative values, which is appropriate for parameters like delay times that cannot be negative.
+    Note that this is separate from the more general concept of **truncation**.
+
+-   **Posterior predictive check**: A model validation technique that compares data simulated from the fitted model (using posterior parameter estimates) with the original observed data.
+    Used to assess whether the model adequately captures the patterns in the data.
+
+-   **Adapt_delta**: A technical parameter in Bayesian sampling that controls the step size of the sampler.
+    Higher values (closer to 1) make sampling more careful but slower, often necessary for complex models with difficult-to-explore posterior distributions.
+
+-   **Non-centred parameterisation**: A computational technique used to improve sampling efficiency by generating a random normally distributed variable X with mean 0 and standard deviation σ by multiplying a standard normally distributed variable Y with σ.
+
+-   **Generated quantities**: A block in statistical models used for any calculations that only depend on other parameter estimates, but are not themselves constrained by the data.
+    For example, this is used to create forecasts by extending the model into the future.
+
+## Delay distributions
+
+-   **Delay distributions**: Probability distributions that characterise the time periods inherent in infectious disease transmission and surveillance, such as the incubation period or reporting delays.
+    We use the term "delay" to describe any time duration between two events (whether or not that can be modified).
+    In this material, we discuss a wide range of delays in epidemiological and observation processes:
+
+    -   **Incubation period**: Time from when an individual is infected, to when they display symptoms.
+
+    -   **Onset-to-hospitalisation**: Time from an individual's symptom onset, to that individual's hospital admission.
+
+    -   **Generation time**: Time between infection events in a transmission chain: from when person A becomes infected, to when person A infects person B.
+
+    -   **Serial interval**: Time from symptom onset in a primary case, to symptom onset in their secondary cases.
+        Unlike incubation periods, serial intervals can occasionally be negative if the secondary case develops symptoms before the primary case.
+
+    -   **Reporting delay**: Time from when an epidemiological event occurs, and its appearance in surveillance data.
+        This might vary over time, such as by weekday or season, and/or be subject to biases.
+
+## Biases in delay distributions
+
+-   **Interval censoring**: When we know an event occurred at some time within an interval, but not exactly when.
+    This might be when an event that happens in continuous time (e.g. infection or symptom onset) is rounded to an integer unit (e.g. calendar date, week) in reported data.
+    This can introduce significant uncertainty when we are estimating the time period between two events.
+    When both the start and end events are interval-censored, this is referred to as **double interval censoring**.
+    Events might also be **right censored** (we know the earliest time it could have occurred, but the latest time is uncertain) or **left censored** (we only know the latest time it could have occurred).
+
+-   **Truncation**: When data are incomplete because of a measurement cut-off: for example, when we use data that has been collected before enough time has passed for all the relevant epidemiological events to occur or be observed.
+    This is especially a problem if we try to use an incomplete set of secondary event data (such as recent symptom onsets) to infer the complete pattern of primary events (such as infections).
+    Our estimates will be biased, because not all primary events are represented.
+    We refer to this as **right truncation**.
+    This is particularly pronounced in real-time analysis during exponentially growing outbreaks.
+    For example, we might be trying to estimate the incubation period during a growing outbreak.
+    Among the many infections have occurred recently, some of these have already shown symptoms, so are included in the latest data.
+    However, we are still waiting for other recently infected cases to show symptoms.
+    If we estimate the incubation period based only on the latest data, we will not be including those cases with longer incubation times as these are only observed after the cut-off time for our analysis.
+    This makes our estimate of the delay distribution artificially short.
+
+## Using delay distributions to model the data generating process
+
+-   **Convolution**: A mathematical operation that blends a pattern ("kernel"), such as the probability distribution of a delay, with another input, such as a time series of case counts, to create a third series that represents their overlap.
+    We can use convolutions to model delays at the population scale: for example, we might convolve a probability distribution of the number of days of the incubation period, with a time series count of daily infections, to generate a daily count of resulting symptom onsets.
+    We can also think of the **renewal equation** as representing a convolution of the infection time series with itself.
+
+-   **Discretisation**: The process of converting continuous probability distributions into discrete probability mass functions suitable for daily count data.
+    We use this when we want to use a continuous distribution such as the gamma or lognormal even when epidemiological events are typically **interval censored**, e.g. reported by calendar date rather than exact time.
+
+## R_t estimation and the renewal equation
+
+-   **Effective reproduction number (**$R_t$): The average number of secondary infections caused by a single infectious individual at a given time.
+    This is a more general concept than the *basic* reproduction number, $R_0$, which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
+    In contrast, $R_t$ varies with the population over time, for example as population susceptibility, behaviour, and policy interventions change.
+    There are different definitions of the reproduction number that can be applied to this situation where it changes in time.
+    We focus on the *instantaneous reproduction number*, where any change affects all currently infectious individuals instantaneously.
+    This is used in the basic renewal equation formulation.
+    Alternatively, the *case reproduction number* defines the reproduction number where changes affect individuals at the time that they are infected, but then they continue to have a constant reproduction number throughout their infectious period.
+
+-   **Renewal equation**: The *generative model* that we use to represent the process of infectious disease transmission.
+    The renewal equation links the number of infected people in the population, the **reproduction number**, and the **generation time** distribution.
+    The renewal process describes how new infections arise from previous infections over time.
+    This can be seen as a convolution of the infection time series with itself.
+    In its basic form the renewal equation makes no assumptions about the specific processes that cause $R_t$ to have a certain value and/or change over time.
+    (The classic SIR model is a special case of the renewal equation that might introduce these assumptions.) In this course we only deal with a *deterministic* renewal equation, where if we know the number of infections up to a certain time point, together with the reproduction number, we can work out exactly how many new infections we will see.
+    Sometimes stochasticity is added, to give random variation around the *expectation* of the number of infections.
+
+-   **Random walk**: Random walks are defined to have a constant mean and increasing variance, allowing for smooth temporal changes.
+    A *geometric random walk*, where the logarithm follows a random walk process, is a simple way to model multiplicative growth.
+    A random walk model is a special case of a more general class of **autoregressive (AR) models**, where the next value in the time series is predicted as a combination of previous values.
+
+## Nowcasting
+
+-   **Nowcasting**: Estimating the final count of the incidence of epidemiologically relevant events, by using an incomplete, potentially **truncated** dataset together with information about delays in the **data generating process**.
+    The aim of nowcasting is to complete the **reporting triangle**.
+
+-   **Reporting triangle**: A way of structuring data produced by multiple snapshots (or *vintages*) of counts that are **right truncated**: for example, counts of events that are reported after varying delays, and therefore datasets are repeatedly updated over time.
+    We can present this in a matrix where the rows are the time of the primary event and the columns are the time of report.
+    The absence of the most recent reported data in the matrix creates a triangular shape.
+
+-   **Joint estimation**: The process of simultaneously estimating both the delay distribution and the final count in a nowcast.
+    Rather than using a pre-specified delay distribution in a nowcast, this better accounts for the multiple forms of uncertainty in the delay distribution and observation process.
+
+-   **Autoregressive (AR) models**: A class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
+    For example, the **random walk** model is a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1, plus some noise, when the multiplied value is 0.
+
+-   **Stationary time series**: A time series with statistical properties, such as mean and variance, that do not change over time.
+    This would only be expected for endemic diseases without external seasonal influence.
+    In contrast, a non-stationary time series has a trend that can change over time.
+    To make a non-stationary time series stationary, we might use *differencing*: taking the difference between consecutive values in the time series.
+
+## Forecasting
+
+-   **Forecasting**: Making predictions about future epidemiological events such as case numbers, hospitalisations, or deaths.
+    This is distinct from nowcasting, where forecasts predict future events, rather than events that have already occurred but are only partially observed; and from scenario projections, where forecasts unconditionally attempt to predict future data, rather than quantify what could happen under alternative conditions.
+
+-   **Origin day**: The day on which a forecast was made, using all available data up to that point.
+
+-   **Horizon**: The length of time period (or window) for future predictions.
+
+-   **Hold-out data**: Data not used in the modelling process, meaning it can be compared to modelled predictions to assess their accuracy.
+
+-   **Ensemble model**: The combination of results produced by multiple different models into a single prediction.
+    For example, a simple unweighted ensemble might take a mean or median across values from component forecasts.
+    The median is less sensitive to outlier predictions.
+    Other methods for combination might include weighting different models, for example by past performance.
+
+-   **Vincent average**: An ensemble method that takes averages across quantiles of component distributions to create quantiles of a new distribution.
+
+-   **Mixture ensemble**: An approach that interprets multiple models as multiple possible versions of the truth, with weights assigned to each representing the probability of each one being the true one, creating a weighted mixture distribution of the constituent models.
+
+-   **Quantile regression averaging (QRA)**: An ensemble method that optimises the weight of component predictions directly in order to yield the best scores on past data, rather than simply weighting by past performance.
+
+## Evaluating forecasts and nowcasts
+
+-   **The forecasting paradigm**: The principle that when we evaluate forecasts, we want a measure that maximises for *sharpness* subject to *calibration*:
+
+    -   Statements about the future should aim to have **narrow uncertainty** ("sharpness")
+    -   Statements about the future should be **correct** ("calibration")
+
+-   **Accuracy**: The forecast should be accurate: predicted values should be close to observed values.
+
+-   **Bias**: A measure of how likely a model is to over or under predict observed values.
+    A forecast should be unbiased, meaning that the average predicted value should be equal to the average observed value and shouldn't consistently over- or underestimate.
+
+-   **Calibration**: The agreement between the uncertainty of a probabilistic forecast and the observed frequencies of the predicted event.
+    A forecast should be well calibrated, meaning that the forecast probabilities should match observed frequencies.
+    For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
+
+-   **Sharpness**: As long as other conditions (calibration, unbiasedness, accuracy) are fulfilled, we want prediction intervals to be as narrow as possible (predicting that "anything can happen" might be correct but not very useful).
+
+-   **PIT histogram**: PIT stands for Probability Integral Transform.
+    This is a histogram of the cumulative distribution function of a forecast evaluated at the observed value.
+    Ideally PIT histograms should be uniform.
+    If it is a U shape then the model is overconfident, if it is an inverted U shape then the model is underconfident, and if it is skewed then the model is biased towards the direction of the skew.
+
+-   **Proper scoring rules**: Scoring rules that make sure no model can get better scores than a model that truly generates the data.
+    Proper scoring rules incentivise forecasters to make their best attempt at reproducing the behaviour of the true model.
+
+-   **Continuous Ranked Probability Score (CRPS)**: A proper scoring rule that generalises Mean Absolute Error (MAE) to probabilistic forecasts.
+    The CRPS is a measure of the quality of probabilistic forecasts.
+    It can be thought of as the combination of two key aspects: the accuracy of the forecast in terms of how close the predicted values are to the observed value, and the confidence of the forecast in terms of the spread of the predicted values.
+    Small values are better.
+
+-   **Weighted interval score (WIS)**: A proper scoring rule for quantile forecasts that approximates the Continuous Ranked Probability Score (CRPS).
