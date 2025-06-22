@@ -15,7 +15,8 @@ We will be very happy to have your feedback, comments or any questions on the [c
 
 ## Going further
 
-We recommend exploring these topics in [Further reading](../reference/further_reading). You can also access these in a [living library](https://www.zotero.org/groups/6031904/nowcasting_and_forecasting_infectious_disease_dynamics/library), which you are welcome to contribute to.
+We recommend exploring these topics in [Further reading](../reference/further_reading).
+You can also access these in a [living library](https://www.zotero.org/groups/6031904/nowcasting_and_forecasting_infectious_disease_dynamics/library), which you are welcome to contribute to.
 
 All the course material is openly available for you to come back to at any time. 
 If you return to the course after some time, you may want to [update your setup](../reference/getting-started) to ensure you have the latest content and package versions.
