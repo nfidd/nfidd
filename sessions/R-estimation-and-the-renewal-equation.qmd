@@ -486,11 +486,33 @@ We can see that the estimates are smoother when using the random walk model for 
 
 # Going further
 
+## Challenge
+
 - We have used symptom onsets under the assumption that every infected person develops symptoms. 
 Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. 
 How would you change the model in this case?
 What are the implications for inference?
-- The [`EpiNow2`](https://epiforecasts.io/EpiNow2/) package implements a more complex version of the model we have used here. You will have the opportunity to try it in a later session.
+
+## Methods in practice
+
+- `EpiEstim` provides a range of accessible tools for estimating $R_t$, using a simpler approach than the model we have used here.
+- `EpiNow2` [@abbottEpiNow2EstimateRealtime2025] package again implements a range of models similar to the model we have used here.
+- `Epidemia` @bhattSemiMechanisticBayesianModeling2020 implements a regression model approach to $R_t$ estimation.
+- In this course we focused on the instantaneous reproduction number.
+An alternative is the case reproduction number implemented in @wallingaDifferentEpidemicCurves2004.
+- We face many choices when estimating the reproduction number.
+@brockhausWhyAreDifferent2023 explores the impact of these choices on resulting estimates.
+- @gosticPracticalConsiderationsMeasuring2020 has further guidance on best practice. 
+
+# Wrap up
+
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
+
+## References
+
+::: {#refs}
+:::
 
 
 

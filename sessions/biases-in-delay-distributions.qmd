@@ -359,6 +359,7 @@ If you are feeling adventurous, try to implement one or more of them in the stan
 
 ## Methods in practice
 
+-   @charnigaBestPracticesEstimating2024 summarises challenges in estimating delay distributions into a set of best practices, with a practical flowchart and reporting checklist.
 -   The [`primarycensored`](https://github.com/epinowcast/primarycensored) R package provides a comprehensive framework for dealing with censored and truncated delay distributions.
     It implements many techniques for handling primary event censoring, secondary event censoring, and right truncation in a unified and efficient manner.
     This package can be particularly useful for production-level implementations where performance and accuracy are critical.
@@ -367,12 +368,10 @@ If you are feeling adventurous, try to implement one or more of them in the stan
 
 # Wrap up
 
-The learning objectives for this session were:
+- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Share your [questions and thoughts](reference/help)
 
-- Understanding of how censoring affects the estimation and interpretation of epidemiological delay distributions
-- Ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
-- Understanding of right truncation in epidemiolgical data
-- Ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+## References
 
 ::: {#refs}
 :::
