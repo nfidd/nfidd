@@ -43,7 +43,7 @@ Moving back and forth between continuous and discrete / simulation and estimatio
 
 **Reproduction number**: the average number of secondary infections caused by a single infectious individual and can in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
-**Renewal equation**: relates the number of infected people in the population; the current value of the reproduction number; and a delay distribution of the so-called generation time
+**Renewal equation**: relates the number of infected people in the population; the current value of the reproduction number; and a delay distribution of the generation time
 
 **Random walk**: random noise along a given trajectory. In this course, we use a **geometric random walk**, where we add this random noise to the logarithm.
 
