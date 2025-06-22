@@ -7,7 +7,7 @@ format:
     footer: "Introduction to Bayesian inference with stan"
 ---
 
-```r
+```{r echo = FALSE, message = FALSE}
 library(ggplot2)
 set.seed(12345)
 ```
