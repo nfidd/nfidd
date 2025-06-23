@@ -1,4 +1,4 @@
-# nfidd (development version)
+# nfidd 1.1.0
 
 - fixed a bug in convolution function which affected the earliest part of convoluted time series #475.
 - renamed `target_day` to `origin_day` for clarity #465
