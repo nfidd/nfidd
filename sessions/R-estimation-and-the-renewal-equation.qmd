@@ -6,7 +6,10 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.
+In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. 
+In that session, we linked symptom onsets back to infections. 
+Now we want to link infections themselves together over time, knowing that current infections were infected by past infections.
+Correctly capturing this transmission process is crucial to modelling infections in the present and future.
 
 ## Slides 
 
@@ -312,9 +315,14 @@ ggplot(
 
 # Improving the generative model for the reproduction number
 
-In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
+In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. 
+This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
 
-In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. This can be described as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). We can write this model as
+In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. 
+We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$. 
+This can be described as a random walk model for the reproduction number. 
+In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk, as this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive (i.e as otherwise the same absolute change in the reproduction number would have a larger effect when the reproduction number is small which likely doesn't match your intuition for how outbreaks evolve over time). 
+We can write this model as
 
 $$
 \sigma \sim HalfNormal(0, 0.05) \\
@@ -326,7 +334,10 @@ $$
 \log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
 $$
 
-Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
+Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. 
+This is a so-called _weakly informative prior_ that allows for some variation in the reproduction number over time but not an unrealistic amount. 
+We have also placed a prior on the initial reproduction number, which we have assumed to be log-normally distributed with a mean of -0.1 and a standard deviation of 0.5. 
+This is a weakly informative prior that allows for a wide range of initial reproduction numbers but has a mean of approximately 1.
 The last line is the geometric random walk.
 
 ## Simulating a geometric random walk
@@ -393,7 +404,8 @@ r_rw_inf_fit
 ```
 
 ::: {.callout-note}
-As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
+As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space. 
+This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
 :::
 
 We can again extract and visualise the posteriors in the same way as earlier.
@@ -480,7 +492,8 @@ ggplot(
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
-We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
+We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. 
+The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn't have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day.
 
 :::
 :::
@@ -509,14 +522,6 @@ An alternative is the case reproduction number implemented in @wallingaDifferent
 
 - Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
 - Share your [questions and thoughts](reference/help)
-
-## References
-
-::: {#refs}
-:::
-
-
-# Wrap up
 
 ## References
 
