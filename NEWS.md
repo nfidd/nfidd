@@ -1,5 +1,7 @@
 # nfidd (development version)
 
+- adapted `nfidd_cmdstan_model()` to work with an include path option, and a model file name argument
+
 # nfidd 1.1.0
 
 - fixed a bug in convolution function which affected the earliest part of convoluted time series #475.
