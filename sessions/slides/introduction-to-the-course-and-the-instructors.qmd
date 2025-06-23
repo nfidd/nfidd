@@ -25,7 +25,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 # Why this course?
 
 ::: {.incremental}
-- common question in outbreak response
+- common questions in outbreak response
 - easy to make mistakes
 - no comprehensive training resource
 :::
