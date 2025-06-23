@@ -47,7 +47,7 @@ Before you get started with the course, you will first need to install the follo
 
 #### Installation of the `nfidd` package
 
-To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout, you can use the `pak` package:
+To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout:
 
 ```{r install, eval=FALSE}
 options(repos = c(
