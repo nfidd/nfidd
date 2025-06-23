@@ -15,8 +15,6 @@ While examples often use outbreak scenarios for clarity, participants should con
 ## Delay distributions
 
 - understanding of the ubiquity of delays in epidemiological data
-- understanding of how delays affect population-level epidemiological data via discrete convolutions
-- ability to apply convolutions of discrete probability distributions to epidemiological data in R
 
 ## Biases in delay distributions
 
@@ -27,7 +25,7 @@ While examples often use outbreak scenarios for clarity, participants should con
 
 ## Using delay distributions to model the data generating process
 - understanding of using delay distributions to model population-level data generating processes
-- ability to use *convolutions* to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with *discretisation*
+- ability to use convolutions to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with discretisation
 - understanding of the need to introduce additional uncertainty to account for the observation process at a population level
 
 ## $R_t$ estimation and the renewal equation
@@ -35,7 +33,6 @@ While examples often use outbreak scenarios for clarity, participants should con
 - understanding of the reproduction number and challenges in its estimation
 - awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
 - understanding of the renewal equation as an epidemiological model
-- awareness of connections of the renewal equation with other epidemiological models
 - familiarity with the generation time as a particular type of delay distributions
 - ability to estimate static and time-varying reproduction numbers from time-series data in R
 
