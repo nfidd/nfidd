@@ -372,7 +372,7 @@ In practice more complex methods are often needed to account for structure in th
 Consider how nowcasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? 
 Think about seasonal patterns, long-term trends, or other cyclical behaviours that might influence case reporting patterns.
 
-- This session focussed on the role of the generative process in nowcasting. This is an area of active research but [@Lison2024] gives a good overview of the current state of the art.
+- This session focussed on the role of the generative process in nowcasting. This is an area of active research but [@lisonGenerativeBayesianModeling2024] gives a good overview of the current state of the art.
 - The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets.
 
 # Wrap up
