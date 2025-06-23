@@ -316,4 +316,4 @@ nfidd::nfidd_sample(mod, data = data)
 
 #
 
-[Return to the session](../R-Stan-and-statistical-concepts)
+[Return to the session](../probability-distributions-and-parameter-estimation.qmd)
