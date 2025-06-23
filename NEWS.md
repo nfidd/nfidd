@@ -1,3 +1,5 @@
+# nfidd (development version)
+
 # nfidd 1.1.2
 
 - added the R version of `condition_onsets_by_report()`

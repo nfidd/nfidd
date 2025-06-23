@@ -1,7 +1,7 @@
 Package: nfidd
 Title: Material to support course on nowcasting and forecasting of infectious
     disease dynamics
-Version: 1.1.2
+Version: 1.1.2.9000
 Authors@R: c(
     person(
       given = "NFIDD course contributors",
