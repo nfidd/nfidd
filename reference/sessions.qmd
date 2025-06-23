@@ -10,17 +10,17 @@ comments: false
 
 ## Session 0: Introduction and course overview
 
-Monday June 23: 09.00-09.30
+Monday June 23: 09.00-09.20
 
 -   [Introduction](../sessions/slides/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
 -   [Motivating the course](../sessions/slides/from-line-list-to-decisions): From an epidemiological line list to informing decisions in real-time (20 mins)
 
 ## Session 1: R, Stan, and statistical concept background
 
-Monday June 23: 09.30-10.30
+Monday June 23: 09.20-10.30
 
 -   [Introduction](../sessions/slides/introduction-to-stan): statistical concepts used in the course and how they can be applied in stan (20 mins)
--   [Practice](../sessions/R-Stan-and-statistical-concepts): introduction to estimation in stan (40 mins)
+-   [Practice](../sessions/R-Stan-and-statistical-concepts): introduction to estimation in stan (50 mins)
 
 ## Session 2: Delay distributions
 
