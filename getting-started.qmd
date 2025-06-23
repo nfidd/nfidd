@@ -58,15 +58,6 @@ options(repos = c(
 install.packages("nfidd", dependencies = TRUE)
 ```
 
-::: callout-tip
-**If pak installation fails**, you can use this fallback method:
-
-```{r install_fallback, eval=FALSE}
-install.packages("remotes")
-remotes::install_github("nfidd/nfidd", dependencies = TRUE, upgrade = "always")
-```
-:::
-
 Then you can check that the installation completed successfully by loading the package into your **R** session:
 
 ```{r load, eval=FALSE}
@@ -155,15 +146,8 @@ If you're returning to the course after some time or joining a live session, you
 1.  **Update the nfidd package** (this is quick and ensures you have the latest functions):
 
     ```{r update_package, eval=FALSE}
-    pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
+    install.packages("nfidd", dependencies = TRUE)
     ```
-
-    Or using the fallback method if needed:
-
-    ```{r update_package_fallback, eval=FALSE}
-    remotes::install_github("nfidd/nfidd", dependencies = TRUE, upgrade = "always")
-    ```
-
 2.  **Download fresh course materials** if using local files:
 
     -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
