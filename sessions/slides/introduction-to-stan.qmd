@@ -11,7 +11,6 @@ format:
 ```{r echo = FALSE, message = FALSE}
 library("ggplot2")
 set.seed(12345)
-options(cmdstanr_print_line_numbers = TRUE)
 ```
 
 ### Why statistical concepts?
