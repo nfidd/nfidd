@@ -231,7 +231,7 @@ Familiarise yourself with the model above. What does it do?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- On line 2 we define a new function `condition_onsets_by_report.stan` which takes the number of onsets and reports and the delay distribution as input and returns the nowcasted number of onsets.
+- On line 2 we define a new function `condition_onsets_by_report.stan` which takes the number of onsets and reports and the delay distribution as input and returns the nowcasted number of onsets. To find out more about what this function does, you can inspect the `condition_onsets_by_report` R function or navigate to [condition_onsets_by_report.stan](https://github.com/nfidd/nfidd/blob/main/inst/stan/functions/condition_onsets_by_report.stan).
 - On line 17, this function is used to calculate the nowcasted number of onsets and this is then used in the likelihood.
 - On line 21, we define the generative process for the number of onsets. Here we assume that onsets are independent with each drawn from a normal distribution.
 :::
