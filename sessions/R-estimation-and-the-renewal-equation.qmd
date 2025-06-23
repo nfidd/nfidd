@@ -164,7 +164,8 @@ r_mod
 ::: {.callout-tip}
 ## Take 5 minutes
 Familiarise yourself with the model above.
-Again there is a `functions` block at the beginning of the model (lines 1-3), where we load a function called `renewal()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/renewal.stan).
+Again there is a `functions` block at the beginning of the model (lines 1-3), where we load a function called `renewal()` (line 2) from a file of the same name. 
+This can be found in the `inst/stan/functions` subdirectory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/inst/stan/functions/renewal.stan).
 The functions correspond exactly to our earlier **R** function of the same name.
 Later, this function is called in the `model` block, to generate the time series of infections using the discretised renewal model (line 19).
 Which line defines priors, and which the likelihood?
