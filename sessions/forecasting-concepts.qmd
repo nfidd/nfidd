@@ -407,7 +407,8 @@ Do they seem to under or over predict consistently?
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
+- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Share your [questions and thoughts](../reference/help)
 
 ## References
 
