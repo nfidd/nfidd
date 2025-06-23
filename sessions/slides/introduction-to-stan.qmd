@@ -209,8 +209,8 @@ Idea of Bayesian inference: treat $\theta$ as **random variables** (with a proba
 
 $$ p(\theta | \textrm{data}) = \frac{p(\textrm{data} | \theta) p(\theta)}{p(\textrm{data})}$$
 
-- $p(\textrm{data} | \theta)$ is the /likelihood/
-- $p(\textrm{data})$ is a /normalisation constant/
+- $p(\textrm{data} | \theta)$ is the *likelihood*
+- $p(\textrm{data})$ is a *normalisation constant*
 
 - In words,
   $$\textrm{(posterior)} \propto \textrm{(normalised likelihood)} \times \textrm{(prior)}$$
@@ -221,7 +221,7 @@ $$ p(\theta | \textrm{data}) = \frac{p(\textrm{data} | \theta) p(\theta)}{p(\tex
 
 ### MCMC
 
-- Markov-chain Monte Carlo (MCMC) is a method to generate *samples* of $\theta$ that come from the *posterior distribution* given $\textrm{data}, i.e the **target** of inference.
+- Markov-chain Monte Carlo (MCMC) is a method to generate *samples* of $\theta$ that come from the *posterior distribution* given $\textrm{data}$, i.e the **target** of inference.
 - Many flavours of MCMC exist: Metropolis-Hastings, Hamiltonian Monte Carlo, etc.
 
 ## What is stan and why do we use it?
@@ -287,8 +287,10 @@ Parameters
 ::: {.column width="60%"}
 <br>
 
-```{stan coin_model, output.var = "coin", eval = FALSE, echo = TRUE, file = nfidd::nfidd_cmdstan_model("coin")
+```{r coin_model, output.var = "coin", eval = TRUE, echo = FALSE}
+nfidd::nfidd_cmdstan_model("coin")
 ```
+
 :::
 ::::
 
