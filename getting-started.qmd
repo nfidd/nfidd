@@ -47,19 +47,15 @@ Before you get started with the course, you will first need to install the follo
 
 #### Installation of the `nfidd` package
 
-To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout, you can use the `pak` package:
+To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout, you can use the `remotes` package:
 
-```{r install, eval=FALSE}
-install.packages("pak")
-pak::pak("nfidd/nfidd", dependencies = "all", upgrade = TRUE)
-```
-
-::: callout-tip
-**If pak installation fails**, you can use this fallback method:
-
-```{r install_fallback, eval=FALSE}
+```{r install, eval = FALSE}
 install.packages("remotes")
-remotes::install_github("nfidd/nfidd", dependencies = TRUE, upgrade = "always")
+remotes::install_cran("nfidd", repos = c(
+  "CRAN" = "https://cloud.r-project.org",
+  "stan-dev" = "https://stan-dev.r-universe.dev",
+  "epiforecasts" = "https://epiforecasts.r-universe.dev"
+), dependencies = TRUE, upgrade = TRUE)
 ```
 :::
 
