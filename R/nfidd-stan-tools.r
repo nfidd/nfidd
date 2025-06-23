@@ -257,13 +257,16 @@ nfidd_stan_models <- function(stan_path = nfidd::nfidd_stan_path()) {
 
 #' Create a CmdStanModel with NFIDD Stan functions
 #'
-#' This function creates a CmdStanModel object using a specified Stan model from
-#' the NFIDD package and optionally includes additional user-specified Stan
-#' files.
+#' This function creates a CmdStanModel object using either a specified Stan
+#' model from the NFIDD package or a custom Stan file provided by the user.
 #'
-#' @param model_name Character string specifying which Stan model to use.
+#' @param model_name Character string specifying which Stan model to use from
+#'   the NFIDD package. Ignored if model_file is provided.
+#' @param model_file Character string specifying the path to a custom Stan file.
+#'   If provided, this takes precedence over model_name.
 #' @param include_paths Character vector of paths to include for Stan
-#'  compilation. Defaults to the result of `nfidd_stan_path()`.
+#'   compilation. Defaults to the result of `nfidd_stan_path()` or can be
+#'   overridden using the R option "nfidd.stan_path".
 #' @param ... Additional arguments passed to cmdstanr::cmdstan_model().
 #'
 #' @return A CmdStanModel object.
@@ -276,20 +279,36 @@ nfidd_stan_models <- function(stan_path = nfidd::nfidd_stan_path()) {
 #'
 #' @examplesIf requireNamespace("cmdstanr", quietly = TRUE)
 #' if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
+#'   # Using a model from the NFIDD package
 #'   model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
 #'   model
+#'
 #' }
 nfidd_cmdstan_model <- function(
-    model_name,
-    include_paths = nfidd::nfidd_stan_path(),
+    model_name = NULL,
+    model_file = NULL,
+    include_paths = getOption("nfidd.stan_path", nfidd::nfidd_stan_path()),
     ...) {
-  stan_model <- system.file(
-    "stan", paste0(model_name, ".stan"),
-    package = "nfidd"
-  )
 
-  if (stan_model == "") {
-    stop(sprintf("Model '%s.stan' not found in NFIDD package", model_name))
+  # Determine which Stan file to use
+  if (!is.null(model_file)) {
+    # Use custom model file
+    if (!file.exists(model_file)) {
+      stop(sprintf("Custom model file '%s' not found", model_file))
+    }
+    stan_model <- model_file
+  } else if (!is.null(model_name)) {
+    # Use model from NFIDD package
+    stan_model <- system.file(
+      "stan", paste0(model_name, ".stan"),
+      package = "nfidd"
+    )
+
+    if (stan_model == "") {
+      stop(sprintf("Model '%s.stan' not found in NFIDD package", model_name))
+    }
+  } else {
+    stop("Either model_name or model_file must be provided")
   }
 
   cmdstan_model(

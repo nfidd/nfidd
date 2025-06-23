@@ -4,13 +4,23 @@
 \alias{nfidd_cmdstan_model}
 \title{Create a CmdStanModel with NFIDD Stan functions}
 \usage{
-nfidd_cmdstan_model(model_name, include_paths = nfidd::nfidd_stan_path(), ...)
+nfidd_cmdstan_model(
+  model_name = NULL,
+  model_file = NULL,
+  include_paths = getOption("nfidd.stan_path", nfidd::nfidd_stan_path()),
+  ...
+)
 }
 \arguments{
-\item{model_name}{Character string specifying which Stan model to use.}
+\item{model_name}{Character string specifying which Stan model to use from
+the NFIDD package. Ignored if model_file is provided.}
+
+\item{model_file}{Character string specifying the path to a custom Stan file.
+If provided, this takes precedence over model_name.}
 
 \item{include_paths}{Character vector of paths to include for Stan
-compilation. Defaults to the result of `nfidd_stan_path()`.}
+compilation. Defaults to the result of `nfidd_stan_path()` or can be
+overridden using the R option "nfidd.stan_path".}
 
 \item{...}{Additional arguments passed to cmdstanr::cmdstan_model().}
 }
@@ -18,15 +28,16 @@ compilation. Defaults to the result of `nfidd_stan_path()`.}
 A CmdStanModel object.
 }
 \description{
-This function creates a CmdStanModel object using a specified Stan model from
-the NFIDD package and optionally includes additional user-specified Stan
-files.
+This function creates a CmdStanModel object using either a specified Stan
+model from the NFIDD package or a custom Stan file provided by the user.
 }
 \examples{
 \dontshow{if (requireNamespace("cmdstanr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
+  # Using a model from the NFIDD package
   model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
   model
+
 }
 \dontshow{\}) # examplesIf}
 }
