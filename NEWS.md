@@ -1,5 +1,7 @@
 # nfidd (development version)
 
+- added the R version of `condition_onsets_by_report()`
+
 # nfidd 1.1.1
 
 - adapted `nfidd_cmdstan_model()` to work with an include path option, and a model file name argument
