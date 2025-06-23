@@ -103,6 +103,25 @@ df_dates <- df |>
 head(df_dates)
 ```
 
+::: {.callout-tip}
+## Simulating different censoring intervals
+
+The pattern `floor(vector / interval) * interval` allows you to simulate censoring at different time intervals:
+
+```r
+# Daily censoring (interval = 1) - what we used above
+floor(times / 1) * 1
+
+# Weekly censoring (interval = 7)
+floor(times / 7) * 7
+
+# Hourly censoring (interval = 1/24)
+floor(times / (1/24)) * (1/24)
+```
+
+This rounds values down to the nearest interval boundary, which is useful for exploring how different reporting frequencies affect delay estimation.
+:::
+
 ::: {.callout-note}
 As before we are still not working with dates but numbers.
 This makes handling the data easier - we don't have to make any conversions before using the data in stan.
