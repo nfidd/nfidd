@@ -207,7 +207,8 @@ Spend a few minutes trying to understand the code above. What is the `proportion
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. Note that for days more that 15 days into the past 
+- The `proportion_reported` is the cumulative distribution function of the delay distribution. It gives the probability that a report is made on day 1 or earlier, day 2 or earlier, etc. 
+Note that for days more that 15 days into the past, this is 1, meaning all onsets that occurred on that day have been reported.
 - The `reported_onsets` are the number of onsets that are reported on each day. This is calculated by multiplying the number of onsets by the proportion of onsets that are reported on each day. It has Poisson noise added to it to simulate the stochasticity in the reporting process.
 
 ```{r plot-proportion-reported}
