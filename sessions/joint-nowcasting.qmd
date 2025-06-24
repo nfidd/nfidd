@@ -6,9 +6,14 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-In the last session we introduced the idea of nowcasting using a simple model. However, this approach had problems: we didn't fully account for uncertainty, or for example observation error in the primary events, and it's not a fully generative model of the data reporting process. And as we saw, if we get the delay distribution wrong, we can get the nowcast very wrong. 
+In the last session we introduced the idea of nowcasting using a simple model. 
+However, this approach had problems: we didn't fully account for uncertainty, or for example observation error in the primary events, and it's not a fully generative model of the data reporting process. 
+And as we saw, if we get the delay distribution wrong, we can get the nowcast very wrong. 
 
-A better approach is to jointly estimate the delay distribution together with the nowcast. We can do this by using information from multiple snapshots of the data as it changes over time (using a data structure called the "reporting triangle"). In this session, we'll introduce this approach to joint estimation in nowcasting. At the end we'll then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
+A better approach is to jointly estimate the delay distribution together with the nowcast. 
+We can do this by using information from multiple snapshots of the data as it changes over time (using a data structure called the "reporting triangle"). 
+In this session, we'll introduce this approach to joint estimation in nowcasting. 
+At the end we'll then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
 
 ## Slides
 
@@ -60,7 +65,8 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 ## Motivation
 
-So far we have assumed that the delay distribution is known. In practice, this is often not the case and we need to estimate it from the data.
+So far we have assumed that the delay distribution is known. 
+In practice, this is often not the case and we need to estimate it from the data.
 As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions), this can be done using individual data and then passing this estimate to a simple nowcasting model like those above.
 However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution or observation error of the primary events.
 We can instead estimate the delay distribution and nowcast the data jointly.
