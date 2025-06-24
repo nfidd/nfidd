@@ -529,7 +529,7 @@ sc_forecasts
 ```
 
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting visualisation session](forecasting-visualisation).
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
