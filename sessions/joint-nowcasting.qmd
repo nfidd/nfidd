@@ -78,14 +78,14 @@ $$
 N_{t} = \sum_{d=0}^{D} n_{t,d}
 $$
 
-Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value to make the model identifiable and computationally feasible.
+Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t+d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value to make the model identifiable and computationally feasible.
 We can now construct a model to estimate $n_{t,d}$,
 
 $$
   n_{t,d} \mid \lambda_{t},p_{t,d} \sim \text{Poisson} \left(\lambda_{t} \times p_{t,d} \right),\ t=1,...,T.
 $$
 
-where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t-d$.
+where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t+d$.
 Here $\lambda_{t}$ is the same as the expected number of onsets on day $t$ in the simple nowcasting model above so we again modelled it using a geometric random walk for now.
 We model $p_{t,d}$ as a [Dirichlet distribution](https://distribution-explorer.github.io/multivariate_continuous/dirichlet.html) as it is a distribution over probabilities.
 $p_{t,d}$ is equivalent to the reporting delays we have been using as fixed quantities so far but now estimated within the model.
