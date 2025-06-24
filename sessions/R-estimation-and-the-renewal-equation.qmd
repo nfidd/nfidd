@@ -172,7 +172,7 @@ Which line defines priors, and which the likelihood?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Line 24 defines the prior distribution of $R_t$ at each time point, and Line 25 defines the likelihood using Poisson observation uncertainty.
+Line 23 defines the prior distribution of $R_t$ at each time point, and Line 24 defines the likelihood using Poisson observation uncertainty.
 :::
 
 Once again we can generate estimates from this model:
