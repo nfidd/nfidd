@@ -9,10 +9,11 @@
 ##'   of the (deiscrete) delay distribution. The first element corresponds to a
 ##'   delay of 0, i.e. symptom onsets reported on the same day.
 ##' @return A vector of symptom onsets reduced by the delay distribution.
+##' @export
 condition_onsets_by_report <- function(onsets, delay) {
   onsets_with_delay <- onsets
   for (i in 1:min(length(onsets), length(delay))) {
     onsets_with_delay[n - i + 1] <- onsets[n - i + 1] * delay[i]
   }
-  onsets_with_Delay
+  onsets_with_delay
 }

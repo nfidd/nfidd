@@ -2,6 +2,7 @@
 
 export(add_delays)
 export(censored_delay_pmf)
+export(condition_onsets_by_report)
 export(convolve_with_delay)
 export(geometric_diff_ar)
 export(geometric_random_walk)
