@@ -229,8 +229,8 @@ On the other hand, using available tools avoids duplicated effort, might improve
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](reference/learning_objectives)
-- Share your [questions and thoughts](reference/help)
+- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Share your [questions and thoughts](../reference/help)
 
 ## References 
 
