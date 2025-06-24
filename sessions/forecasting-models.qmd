@@ -541,7 +541,7 @@ sc_scores
 ::: {.callout-note collapse="true"}
 ## Learning more about the output of `score()`
 
-See the documentation for `?metrics_sample` for information on the default sample metrics.
+See the documentation for `?get_metrics.forecast_sample` for information on the default sample metrics.
 :::
 
 ### At a glance
