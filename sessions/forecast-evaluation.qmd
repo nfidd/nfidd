@@ -201,29 +201,21 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 
 ::: {.callout-tip collapse="true"}
 #### Mathematical Definition (optional)
+
+The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $x$ is calculated as
+
+$$
+CRPS(F, x) = \int_{-\infty}^{+\infty} \left( F(y) - \mathbb{1} ({\y \geq x})^2 \right).
+$$
+
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
 
 $$
-CRPS(D, y) = \mathbb{E}_{X \sim D}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]
+CRPS(F, y) = \mathbb{E}_{X \sim F}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim F}[|X - X'|]
 $$
 
-where $X$ and $X'$ are independent random variables sampled from the distribution $D$. To calculate this we simpley replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
+where $X$ and $X'$ are independent random variables sampled from the distribution $F$. To calculate this we simpley replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
 
-This equation can be broke down into the two components:
-
-##### Breakdown of the Components
-
-1. **Expected Absolute Error Between Forecast and Observation**: $\mathbb{E}_{X \sim D}[|X - y|]$
-   This term represents the average absolute difference between the values predicted by the forecasted distribution $D$ and the actual observed value $y$. It measures how far, on average, the forecasted values are from the observed value. A smaller value indicates that the forecasted distribution is closer to the observed value.
-
-2. **Expected Absolute Error Between Two Forecasted Values**: $\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$
-   This term represents the average absolute difference between two independent samples from the forecasted distribution $D$. It measures the internal variability or spread of the forecasted distribution. A larger value indicates a wider spread of the forecasted values.
-
-##### Interpretation
-
-- **First Term** ($\mathbb{E}_{X \sim D}[|X - y|]$): This term penalizes the forecast based on how far the predicted values are from the observed value. It ensures that the forecast is accurate in terms of proximity to the actual observation.
-
-- **Second Term** ($\frac{1}{2} \mathbb{E}_{X, X' \sim D}[|X - X'|]$): This term accounts for the spread of the forecasted distribution. It penalizes forecasts that are too uncertain or have a wide spread. By subtracting this term, the CRPS rewards forecasts that are not only accurate but also confident (i.e., have a narrow spread).
 :::
 
 Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
