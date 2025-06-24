@@ -14,6 +14,7 @@ While examples often use outbreak scenarios for clarity, participants should con
 
 ## Delay distributions
 
+- ability to estimate parameters of epidemiological delay distributions
 - understanding of the ubiquity of delays in epidemiological data
 
 ## Biases in delay distributions
