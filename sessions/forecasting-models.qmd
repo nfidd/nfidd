@@ -58,6 +58,8 @@ set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
 ```
 
+:::
+
 # What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
 
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
@@ -133,6 +135,7 @@ ggplot(data, aes(x = t, y = Rt)) +
        x = "Time",
        y = "Rt")
 ```
+
 :::
 
 The key assumptions we are making here are: 
@@ -435,7 +438,7 @@ forecasts <- bind_rows(
 )
 ```
 
-::: {.callout-tip, collapse="true"}
+::: {.callout-tip}
 ## How did we estimate these forecasts?
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
 
