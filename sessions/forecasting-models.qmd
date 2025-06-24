@@ -162,7 +162,7 @@ A statistical term that can be used to describe a time series with a trend is sa
 More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean and variance, do not change over time.
 In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
 
-The random walk model we used in the [forecast visualisation](forecast-visualisation) session is a special case of a more general class of models called _autoregressive (AR) models_. 
+The random walk model we used in the [forecasting concepts](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
 The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
 
@@ -240,7 +240,7 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecast visualisation](forecast-visualisation) session. We will first load in the data and filter for a forecast origin date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts](forecasting-concepts) session. We will first load in the data and filter for a forecast origin date.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -362,7 +362,7 @@ What do you notice about the forecasts from the more mechanistic and more statis
 ## Solution
 - The more mechanistic model captures the trend in the data very well.
 - The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
-- Neither model simply extend the trend in the way the random walk model did in the [forecast visualisation session](forecast-visualisation).
+- Neither model simply extend the trend in the way the random walk model did in the [forecasting concepts session](forecasting-concepts).
 :::
 
 ::: {.callout-note collapse="true"}
@@ -529,7 +529,7 @@ sc_forecasts
 ```
 
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting visualisation session](forecasting-visualisation).
+Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
