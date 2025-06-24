@@ -360,8 +360,7 @@ What do you notice about the forecasts from the more mechanistic and more statis
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The more mechanistic model captures the downturn in the data very well.
-- However it appears to be somewhat biased as it consistently overpredicts.
+- The more mechanistic model captures the trend in the data very well.
 - The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
 - Neither model simply extend the trend in the way the random walk model did in the [forecast visualisation session](forecast-visualisation).
 :::
