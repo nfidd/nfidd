@@ -214,7 +214,7 @@ $$
 CRPS(F, y) = \mathbb{E}_{X \sim F}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim F}[|X - X'|]
 $$
 
-where $X$ and $X'$ are independent random variables sampled from the distribution $F$. To calculate this we simpley replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
+where $X$ and $X'$ are independent random variables sampled from the distribution $F$. To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
 
 :::
 
