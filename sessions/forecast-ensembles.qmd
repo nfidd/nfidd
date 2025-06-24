@@ -87,7 +87,6 @@ In this session we will use the forecasts from the models we explored in the ses
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
 
 As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
-We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
 data(rw_forecasts, stat_forecasts, mech_forecasts)
