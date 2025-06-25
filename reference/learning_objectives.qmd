@@ -47,18 +47,17 @@ While examples often use outbreak scenarios for clarity, participants should con
 ## Forecasting
 
 - understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation
-- understanding of the difference between forecasts, projections and scenarios
-- familiarity with common forecasting models and their properties, and applicability in epidemiology
-- ability to use a common forecasting model on an epidemiological time series in R
-- ability to use a semi-mechanistic model for forecasting an epidemiological time series in R
-
-## Ensemble models
-
-- understanding of predictive ensembles and their properties
-- ability to create a predictive ensemble of forecasts in R
+- ability to use a forecasting model on an epidemiological time series in R
 
 ## Evaluating forecasts (and nowcasts)
 
 - ability to visually assess forecasts and nowcasts
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
 - ability to score probabilistic forecasts in R
+- ability to compare different models by their forecast scores
+
+## Ensemble models
+
+- understanding of predictive ensembles and their properties
+- ability to create a predictive ensemble of forecasts in R
+
