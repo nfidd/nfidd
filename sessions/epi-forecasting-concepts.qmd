@@ -1,5 +1,5 @@
 ---
-title: "Visualising infectious disease forecasts"
+title: "Concepts of epidemiological forecasting"
 order: 7
 bibliography: nfidd.bib
 ---
