@@ -6,24 +6,26 @@ project:
 website:
   title: "NFIDD"
   site-url: https://nfidd.github.io/nfidd/
+  repo-url: https://github.com/nfidd/nfidd
+  repo-actions: [source, issue]
   description: "Nowcasting and forecasting infectious disease dynamics"
   body-footer: '<script data-goatcounter="https://nfidd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
   open-graph: true
+  favicon: nfidd-favicon.png
   navbar:
     left:
+      - getting-started.qmd
       - sidebar:sessions
-      - text: "Learning objectives"
-        href: learning_objectives.qmd
-      - text: "Getting set up for the course"
-        href: getting-set-up.qmd
-      - text: "Getting help"
-        href: help.qmd
-      - text: "Timetable"
-        href: sessions.qmd
+      - sidebar:reference
+      - authors.qmd
     right:
       - icon: github
         href: https://github.com/nfidd/nfidd
   sidebar:
+    - id: reference
+      title: "Reference"
+      style: "docked"
+      contents: "reference/*.qmd"
     - id: sessions
       title: "Sessions"
       style: "docked"

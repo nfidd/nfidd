@@ -1,6 +1,7 @@
 ---
 title: "Multi-model ensembles"
 author: "Nowcasting and forecasting of infectious disease dynamics"
+bibliography: ../../nfidd.bib
 format:
   revealjs:
     output: slides/forecasting-as-an-epidemiological-problem.html
@@ -75,10 +76,15 @@ Many uncertainties, many approaches: many models
    
 - Also enables consistent evaluation
 
-##
+## 
 
-... European [Respicast](https://respicast.ecdc.europa.eu/)
+Infectious disease forecasting hubs have grown in popularity over the last decade
 
+![](figures/history-of-hubs.png)
+
+[@Reich2022-jo]
+
+## ... for example, the European [Respicast](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)
 
 ## Single model {.smaller}
@@ -99,4 +105,8 @@ Many uncertainties, many approaches: many models
 
 [Return to the session](../forecast-ensembles)
 
+## References
+
+::: {#refs}
+:::
 

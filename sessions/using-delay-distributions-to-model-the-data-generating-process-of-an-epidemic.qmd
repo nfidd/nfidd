@@ -1,6 +1,7 @@
 ---
 title: "Using delay distributions to model the data generating process"
 order: 4
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -203,7 +204,7 @@ We can use this to generate uncertainty around our convolved data.
 
 ```{r uncertain}
 combined <- combined |>
-  mutate(observed = rpois(n(), onsets))
+  mutate(reported_onsets = rpois(n(), onsets))
 ```
 
 ::: callout-tip
@@ -216,7 +217,7 @@ Does a plot of these observations look more like the plots from the [session on 
 ## Solution
 
 ```{r plot-with-poisson}
-ggplot(combined, aes(x = time, y = observed)) +
+ggplot(combined, aes(x = time, y = reported_onsets)) +
   geom_bar(stat = "identity")
 ```
 :::
@@ -234,7 +235,7 @@ mod
 ## Take 10 minutes
 
 Familiarise yourself with the model above.
-Unlike before there is now a `functions` block at the beginning of the model (lines 1-3), where we load a function called `convolve_with_delay()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/stan/functions/convolve_with_delay.stan).
+Unlike before there is now a `functions` block at the beginning of the model (lines 1-3), where we load a function called `convolve_with_delay()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `inst/stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/inst/stan/functions/convolve_with_delay.stan).
 The functions correspond exactly to our earlier **R** function of the same name.
 Later, this functions is called in the `model` block, to generate the time series of symptom onsets (line 18).
 
@@ -254,17 +255,17 @@ We can now use this model to conduct inference, i.e. to try to reconstruct the t
 ```{r inf_fit, results = 'hide', message = FALSE}
 data <- list(
   n = nrow(combined),
-  obs = combined$observed,
+  obs = combined$reported_onsets,
   ip_max = length(gamma_pmf) - 1,
   ip_pmf = gamma_pmf
 )
-inf_fit <- mod$sample(data = data, parallel_chains = 4)
+inf_fit <- nfidd_sample(mod, data = data)
 ```
 
 ::: callout-caution
 Note that this code might take a few minutes to run.
 We have added the `parallel_chains` option to make use of any paralle hardware you may ave.
-If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 500, iter_sampling = 500`).
+If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 250, iter_sampling = 250`).
 :::
 
 ::: callout-tip
@@ -306,6 +307,8 @@ This is particularly useful when dealing with arrays such as `inference` because
 
 # Going further
 
+## Challenge
+
 -   Above, we used a Poisson distribution to characterise uncertainty.
     In the Poisson distribution, the variance is the same as the mean.
     Another common choice is the negative binomial distribution, which has a more flexible relationship between variance and mean.
@@ -315,4 +318,18 @@ This is particularly useful when dealing with arrays such as `inference` because
     How would this look in stan code?
     Would you expect it to yield a different result?
 
+## Methods in practice
+
+-   The [`primarycensored`](https://github.com/epinowcast/primarycensored) package provides tools for efficiently working with censored and truncated delay distributions.
+    It offers both theoretical background on primary and secondary interval censoring and right truncation, as well as practical functions for estimating and using these distributions.
+    The package implements deterministic methods that are significantly faster than the Monte Carlo approach used in `censored_delay_pmf()` while providing exact results.
+
 # Wrap up
+
+- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Share your [questions and thoughts](../reference/help)
+
+## References
+
+::: {#refs}
+:::

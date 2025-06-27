@@ -7,7 +7,8 @@
 \format{
 A data frame with a single column
 \describe{
-  \item{infection_time}{the times at which individuals were infected (and became infectious)}
+  \item{infection_time}{the times at which individuals were infected (and
+  became infectious)}
 }
 }
 \usage{

@@ -15,7 +15,7 @@ data {
 }
 
 parameters {
-  real init_R;         // initial reproduction number
+  real<lower = 0> init_R;         // initial reproduction number
   array[n-1] real rw_noise; // random walk noise
   real<lower = 0> rw_sd; // random walk standard deviation
 }
@@ -28,8 +28,8 @@ transformed parameters {
 
 model {
   // priors
-  init_R ~ normal(-.1, 0.5); // Approximately Normal(1, 0.5)
+  init_R ~ normal(1, 0.5) T[0, ];
   rw_noise ~ std_normal();
-  rw_sd ~ normal(0, 0.05) T[0,];
+  rw_sd ~ normal(0, 0.05) T[0, ];
   obs ~ poisson(onsets);
 }

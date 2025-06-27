@@ -8,27 +8,24 @@ format:
     footer: "Delay distributions at the population level"
 ---
 
-## Individual delays
+## Individual delay distributions
 
-If $f(t)$ is our delay distribution then
+Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
-$$
-p(y_i) = f(y_i - x_i)
-$$
 
-is the probability that *secondary* event of individual $i$ happens at time $y_i$ given its primary event happened at $x_i$.
+**Example:**
 
-## Population level counts
+$f_d$: Probability of having incubation period of $d$ days.
 
-The expected number of individuals $S_t$ that have their secondary event at time $t$ can then be calculated as the sum of these probabilities
-
-$$
-S_t = \sum_i f_{t - x_i}
-$$
-
-. . .
-
-**Note:** If $S_t$ is in discrete time steps then $f_t$ needs to be a discrete probability distribution.
+```{r echo = FALSE, include = TRUE}
+library(ggplot2)
+library(nfidd)
+ip_pmf <- make_ip_pmf()
+ggplot(data.frame(ip_pmf), aes(x = Var1, y = Freq)) +
+  geom_col() +
+  labs(x = "Incubation period", y= "Probability") +
+  theme_minimal()
+```
 
 ## Population level counts
 

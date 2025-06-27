@@ -1,6 +1,7 @@
 ---
 title: "Probability distributions and parameter estimation"
 order: 1
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -11,8 +12,7 @@ We'll want to correctly specify this uncertainty. We can do this best by combini
 
 ## Slides
 
--   [Introduction to statistical concepts used in the course](slides/introduction-to-statistical-concepts)
--   [Introduction to stan concepts used in the course](slides/introduction-to-stan)
+-   [Introduction to Bayesian inference with stan](slides/introduction-to-stan)
 
 ## Objectives
 
@@ -24,7 +24,7 @@ The aim of this session is to introduce the concept of probability distributions
 
 ## Source file
 
-The source file of this session is located at `sessions/R-Stan-and-statistical-concepts.qmd`.
+The source file of this session is located at `sessions/probability-distributions-and-parameter-estimation.qmd`.
 
 ## Libraries used
 
@@ -68,10 +68,10 @@ rnorm(n = 10, mean = 0, sd = 1)
 ```
 
 We will use probability distributions to characterise epidemiological delays.
-These are usually strictly positive because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
+These are usually nonnegative because e.g. one cannot develop symptoms before becoming infected, and therefore the incubation period cannot be less than zero.
 Note that this does not necessarily apply to all distributions, e.g. serial intervals can be negative if person X infects Y but Y develops symptoms first.
 
-Probability distribution that are commonly used in this situation are the gamma or lognormal distributions.
+Probability distributions that are commonly used in this situation are the gamma or lognormal distributions.
 These are fairly similar, with one difference being that the lognormal commonly has a "heavier tail" on the right, i.e., gives more probability to occasional very large values, whereas the gamma distribution has more of a tail on the left, i.e., gives more probability to values lower than the mean.
 
 The gamma distribution is characterised by the `shape` ($\alpha$) and `rate` ($\beta$) parameters, with a mean of $\alpha/\beta$ and variance $\alpha/\beta^2$.
@@ -144,19 +144,30 @@ Which line(s) define the parameter prior distribution(s), which one(s) the likel
 ::: {.callout-note collapse="true"}
 ### Solution
 Lines 13 and 14 define the parametric prior distributions (for parameters alpha and beta).
+The additional qualifier `T[0,]` specifies that the distribution should be _truncated_ with a lower bound of zero (because the alpha and beta parameters of the gamma distribution have to be nonnegative).
 Line 15 defines the likelihood.
 Lines 3 and 4 define the data that has to be supplied to the model.
 :::
 
 We use the model we have defined in conjunction with the gamma distributed random numbers generated earlier to see if we can recover the parameters of the gamma distribution used.
-Once you have familiarised yourself with the model, use the `sample()` function to fit the model.
+Once you have familiarised yourself with the model, we will use the `nfidd_sample()` function to fit the model.
+
+::: {.callout-tip}
+### `nfidd_sample()`
+The `nfidd_sample()` function is a wrapper around the `cmdstanr` `sample()` method.
+It provides sensible defaults for the course and simplifies the syntax.
+In particular, we are generating 500 samples instead of the default of 1000 to make the models run faster.
+When running your models, you can use the [diagnostic capabilities of stan](https://mc-stan.org/docs/cmdstan-guide/diagnose_utility.html#diagnose-warnings-and-recommendations) to test for convergence and ensure that you have generated enough samples: `mod$diagnose()`.
+For example, `nfidd_sample(mod, data = stan_data)` is equivalent to `mod$sample(data = stan_data, parallel_chains = 4, iter_wamup = 500, iter_sampling = 500)`.
+You can still pass additional arguments like `init`, `adapt_delta`, or `max_treedepth` when needed.
+:::
 
 ```{r gamma_inference, results='hide', message=FALSE}
 stan_data <- list(
   N = length(gammas),
   y = gammas
 )
-gamma_fit <- mod$sample(data = stan_data)
+gamma_fit <- nfidd_sample(mod, data = stan_data)
 ```
 
 ::: {.callout-note}
@@ -168,7 +179,7 @@ Here, we pass the length of `gammas` as `N` and the vector `gammas` itself as `y
 
 ::: {.callout-note}
 ### Stan messages
-The`mod$sample` command will produce a lot of messages which we have suppressed above.
+The `nfidd_sample` command will produce a lot of messages which we have suppressed above.
 This is fine and intended to keep the user informed about any issues as well as general progress with the inference.
 This will come in handy later in the course when we fit more complicated models that can take a little while to run.
 :::
@@ -200,9 +211,29 @@ ppc_dens_overlay(y = gammas, yrep = gamma_ppc)
 
 We can see that the random numbers generated from the posterior samples are distributed relatively evenly around the data (in black), i.e., the samples generated earlier that we fitted to.
 
-## Going further
+# Going further
+
+## Challenge
 
 - For the model above we chose truncated normal priors with a mode at 0 and standard deviation 10. If you change the parameters of the prior distributions, does it affect the results?
 - You could try the model included in `lognormal.stan` to estimate parameters of the lognormal distribution.
 
-## Wrap up
+## Methods in practice
+
+- In this course we are building an intuition for the epidemiological processes and uncertainties that underlie typical surveillance data. 
+We'll continue to work in `stan` to build up from simple to more complex models based on our understanding of these data-generating processes. 
+In practice, you might also want to consider other available tools and/or methods. 
+This can be a trade-off: on one hand, adopting an off-the-shelf tool loses the flexibility of a custom approach that is customised to a specific epidemiological context. 
+On the other hand, using available tools avoids duplicated effort, might improve the chances of finding errors, and enables discussing and ultimately enforcing best practice in a rapidly developing field.
+- Throughout the course, we'll suggest some examples of available tools, methods, and best practices for you to consider. We encourage you to choose a strategy for model building that's most appropriate for your context.
+
+# Wrap up
+
+- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Share your [questions and thoughts](../reference/help)
+
+## References 
+
+::: {#refs}
+:::
+

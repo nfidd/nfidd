@@ -4,7 +4,8 @@
 #' generated using the code in data-raw/epicurve.r
 #' @format A data frame with a single column
 #' \describe{
-#'   \item{infection_time}{the times at which individuals were infected (and became infectious)}
+#'   \item{infection_time}{the times at which individuals were infected (and
+#'   became infectious)}
 #' }
 "infection_times"
 
@@ -19,7 +20,8 @@
 #'   \item{.variable}{name of the variable}
 #'   \item{.value}{predicted value}
 #'   \item{.horizon}{the forecast horizon in days}
-#'   \item{target_day}{the day on which the forecast was made (using data up to this day)}
+#'   \item{origin_day}{the day on which the forecast was made (using data up to
+#'   this day)}
 #'   \item{model}{the name of the model}
 #' }
 "mech_forecasts"
@@ -36,7 +38,8 @@
 #'   \item{.variable}{name of the variable}
 #'   \item{.value}{predicted value}
 #'   \item{.horizon}{the forecast horizon in days}
-#'   \item{target_day}{the day on which the forecast was made (using data up to this day)}
+#'   \item{origin_day}{the day on which the forecast was made (using data up to
+#'   this day)}
 #'   \item{model}{the name of the model}
 #' }
 "rw_forecasts"
@@ -54,7 +57,8 @@
 #'   \item{.variable}{name of the variable}
 #'   \item{.value}{predicted value}
 #'   \item{.horizon}{the forecast horizon in days}
-#'   \item{target_day}{the day on which the forecast was made (using data up to this day)}
+#'   \item{origin_day}{the day on which the forecast was made (using data up to
+#'   this day)}
 #'   \item{model}{the name of the model}
 #' }
 "stat_forecasts"

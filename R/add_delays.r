@@ -25,7 +25,7 @@ add_delays <- function(infection_times) {
     )
 
   # Set random 70% of hospitalization dates to NA (30% hospitalized)
-  df <- df |>
+  df |>
     mutate(
       hosp_time = if_else(
         # use the binomial distribution for random binary outcomes
@@ -34,6 +34,4 @@ add_delays <- function(infection_times) {
         NA_real_
       )
     )
-
-  return(df)
 }

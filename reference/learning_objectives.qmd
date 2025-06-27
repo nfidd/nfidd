@@ -1,20 +1,21 @@
 ---
-title: "Independent learning outcomes"
+title: "Learning outcomes"
+order: 2
 comments: false
 ---
 
+The skills and methods taught in this course apply broadly across infectious disease epidemiology, from outbreak response to routine surveillance of endemic diseases. 
+While examples often use outbreak scenarios for clarity, participants should consider how these approaches apply to their epidemiological contexts.
+
 ## R and statistical concepts used
 
-- familiarity with R concepts used in the course
-  - to be completed once the course has been fully written but likely includes functions, accessing documentation, etc.
-- understanding of statistical concepts used in the course
-  - to be completed once the course has been fully written but likely includes discrete and continuous probability distributions
+- understanding of common probability distributions used for epidemiological delays
+- familiarity with using stan to estimate parameters of a probability distribution
 
 ## Delay distributions
 
+- ability to estimate parameters of epidemiological delay distributions
 - understanding of the ubiquity of delays in epidemiological data
-- understanding of how delays affect population-level epidemiological data via discrete convolutions
-- ability to apply convolutions of discrete probability distributions to epidemiological data in R
 
 ## Biases in delay distributions
 
@@ -22,13 +23,17 @@ comments: false
 - ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
 - understanding of right truncation in epidemiolgical data
 - ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
-  
+
+## Using delay distributions to model the data generating process
+- understanding of using delay distributions to model population-level data generating processes
+- ability to use convolutions to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with discretisation
+- understanding of the need to introduce additional uncertainty to account for the observation process at a population level
+
 ## $R_t$ estimation and the renewal equation
 
 - understanding of the reproduction number and challenges in its estimation
 - awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
 - understanding of the renewal equation as an epidemiological model
-- awareness of connections of the renewal equation with other epidemiological models
 - familiarity with the generation time as a particular type of delay distributions
 - ability to estimate static and time-varying reproduction numbers from time-series data in R
 
@@ -42,17 +47,17 @@ comments: false
 ## Forecasting
 
 - understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation
-- understanding of the difference between forecasts, projections and scenarios
-- familiarity with common forecasting models and their properties, and applicability in epidemiology
-- ability to use a common forecasting model on an epidemiological time series in R
-- ability to use a semi-mechanistic model for forecasting an epidemiological time series in R
+- ability to use a forecasting model on an epidemiological time series in R
+
+## Evaluating forecasts (and nowcasts)
+
+- ability to visually assess forecasts and nowcasts
+- familiarity with metrics for evaluating probabilistic forecasts and their properties
+- ability to score probabilistic forecasts in R
+- ability to compare different models by their forecast scores
 
 ## Ensemble models
 
 - understanding of predictive ensembles and their properties
 - ability to create a predictive ensemble of forecasts in R
 
-## Evaluating forecasts (and nowcasts)
-
-- familiarity with metrics for evaluating probabilistic forecasts and their properties
-- ability to score probabilistic forecasts in R

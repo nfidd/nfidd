@@ -1,6 +1,7 @@
 ---
 title: "Nowcasting with an unknown reporting delay"
 order: 6.5
+bibliography: ../nfidd.bib
 ---
 
 # Introduction
@@ -77,14 +78,14 @@ $$
 N_{t} = \sum_{d=0}^{D} n_{t,d}
 $$
 
-Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t-d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value to make the model identifiable and computationally feasible.
+Where $n_{t,d}$ is the number of onsets on day $t$ that are reported on day $t+d$ and $D$ represents the maximum delay between date of reference and time of report which in theory could be infinite but in practice we set to a finite value to make the model identifiable and computationally feasible.
 We can now construct a model to estimate $n_{t,d}$,
 
 $$
   n_{t,d} \mid \lambda_{t},p_{t,d} \sim \text{Poisson} \left(\lambda_{t} \times p_{t,d} \right),\ t=1,...,T.
 $$
 
-where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t-d$.
+where $\lambda_{t}$ is the expected number of onsets on day $t$ and $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t+d$.
 Here $\lambda_{t}$ is the same as the expected number of onsets on day $t$ in the simple nowcasting model above so we again modelled it using a geometric random walk for now.
 We model $p_{t,d}$ as a [Dirichlet distribution](https://distribution-explorer.github.io/multivariate_continuous/dirichlet.html) as it is a distribution over probabilities.
 $p_{t,d}$ is equivalent to the reporting delays we have been using as fixed quantities so far but now estimated within the model.
@@ -187,7 +188,7 @@ joint_data <- list(
   obs = filtered_reporting_triangle$reported_onsets,   # observed symptom onsets
   d = 16               # number of reporting delays
 )
-joint_nowcast_fit <- joint_mod$sample(data = joint_data, parallel_chains = 4)
+joint_nowcast_fit <- nfidd_sample(joint_mod, data = joint_data)
 ```
 
 ```{r joint-nowcast-fit-summary}
@@ -298,10 +299,10 @@ joint_rt_data <- c(joint_data,
     h = 0 # this is a small easter egg for the attentive reader
   )
 )
-joint_rt_fit <- joint_rt_mod$sample(
-  data = joint_rt_data, parallel_chains = 4,
+joint_rt_fit <- nfidd_sample(
+  joint_rt_mod, data = joint_rt_data,
   adapt_delta = 0.95,
-  init = \() list(init_R = 0, rw_sd = 0.01)
+  init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```
 
@@ -358,8 +359,28 @@ This is because we have accounted for the truncation (otherwise it would be spur
 
 # Going further
 
-- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. What happens when you instead use an estimate of the delay distribution from the data? Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions) and see how it affects the simple nowcast models.
+## Challenge
+
+- The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. 
+What happens when you instead use an estimate of the delay distribution from the data? 
+Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions) and see how it affects the simple nowcast models.
 - Despite being fairly involved the joint nowcast model we used here is still quite simple and may struggle to capture more complex patterns in the data.
-In practice more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases).
-- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets. You will have the opportunity to try it in a later session.
-- This session focussed on the role of the generative process in nowcasting. This is an area of active research but [this paper](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012021) gives a good overview of the current state of the art.
+
+## Methods in practice
+
+In practice more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases). 
+Consider how nowcasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? 
+Think about seasonal patterns, long-term trends, or other cyclical behaviours that might influence case reporting patterns.
+
+- This session focussed on the role of the generative process in nowcasting. This is an area of active research but [@lisonGenerativeBayesianModeling2024] gives a good overview of the current state of the art.
+- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets.
+
+# Wrap up
+
+The learning objectives for this session were:
+
+- Awareness of the breadth of methods to perform nowcasting
+- $R_t$ estimation as a nowcasting problem
+
+::: {#refs}
+:::

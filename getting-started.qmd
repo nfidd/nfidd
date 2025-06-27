@@ -1,0 +1,156 @@
+---
+title: "Getting started"
+---
+
+## What is NFIDD?
+
+NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data.
+This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
+
+## Set up
+
+Each session in this course uses R code for demonstration. All the content is self-contained within a software package designed for the course.
+
+**You have three options for using this course:**
+
+1.  **Web-only**: View sessions on the website
+2.  **Local setup**: Install R, packages, and download course materials for the full interactive experience
+3.  **Hybrid**: Install just the packages but use the website for viewing content
+
+::: callout-important
+**Installation Issues?** If you're having trouble with any installation steps, **ask for help early**! Don't skip ahead - each step builds on the previous ones. On the day of the course, we have a small number of web clients available as backup if installation issues persist.
+:::
+
+### Summary of Installation Steps
+
+If you choose the local setup option, here's what you'll need to do:
+
+1.  Install R and RStudio (use the Visual Editor for best notebook experience)
+2.  Install the `nfidd` R package
+3.  Install cmdstan
+4.  Download course materials (if using the hybrid approach you may not need to do this)
+
+**Don't skip any steps** - they all work together to provide the full course experience.
+
+### Installing R
+
+-   [R](http://cran.r-project.org) is used as the main programming language.
+	You can check which version you have by typing `R.version` in your R session.
+	We recommend installing the latest `r R.version$version.string`.
+-   [RStudio](http://www.rstudio.com/products/rstudio/download/) is a popular graphic user interface (GUI). 
+	Its Visual Editor provides the best experience of going through this course. 
+	Please make sure you update RStudio to the latest version.
+
+### Installing additional requirements
+
+Before you get started with the course, you will first need to install the following software.
+
+#### Installation of the `nfidd` package
+
+To install the packages needed in the course, including the `nfidd` package that contains data files and helper functions used throughout:
+
+```{r install, eval=FALSE}
+options(repos = c(
+  "CRAN" = "https://cloud.r-project.org",
+  "stan-dev" = "https://stan-dev.r-universe.dev",
+  "epiforecasts" = "https://epiforecasts.r-universe.dev"
+))
+install.packages("nfidd", dependencies = TRUE)
+```
+
+Then you can check that the installation completed successfully by loading the package into your **R** session:
+
+```{r load, eval=FALSE}
+library("nfidd")
+```
+
+### Installing `cmdstan`
+
+The course relies on running stan through the `cmdstanr` **R** package, which itself uses the `cmdstan` software.
+This requires a separate installation step:
+
+```{r cmdstan_install, eval = FALSE}
+cmdstanr::install_cmdstan()
+```
+
+::: callout-note
+This may take a few minutes.
+Also you're likely to see lots of warnings and other messages printed to your screen - don't worry, this is normal and doesn't mean there is a problem.
+:::
+
+If there are any problems with this, you can try (on Windows) to fix them using
+
+```{r cmdstan_toolchain, eval = FALSE}
+cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+```
+
+You can test that you have a working `cmdstanr` setup using
+
+```{r cmdstan_test}
+cmdstanr::cmdstan_version()
+```
+
+For more details, and for links to resources in case something goes wrong, see the [Getting Started with CmdStanr](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette of the package.
+
+## Accessing the course
+
+If you want to use the local workflow, you will need a local copy of the course material.
+
+-   Directly download the course material:
+
+    ::: callout-tip
+    [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    :::
+
+-   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
+
+-   If you prefer to use the hybrid workflow, you can view each session on the website, and copy-paste the code into your own R script. 
+	In that case you don't need to download the material.
+
+    -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
+
+### Interacting with a local copy of the course material
+
+A benefit of downloading or cloning all the material is that you can interact with the session files directly.
+
+In this course, all content is written using [Quarto](https://quarto.org) notebooks (`.qmd` files).
+This means that we can combine text with code and see the output directly. 
+The notebooks are then directly reproduced on the course website (for example, this page).
+
+**Recommended approach**: Work with the notebooks using RStudio's visual editor mode. See guidance on this below.
+
+::: callout-tip
+## Using RStudio's Visual Editor (Recommended for Notebooks)
+
+1.  **Open a session notebook**: Each session is saved as a `.qmd` file in `nfidd/sessions/`
+2.  **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source")
+3.  **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution
+4.  **Visual mode benefits**: Easier to read formatted text and equations, better experience with code chunks and outputs
+:::
+
+**Alternative approaches that also work**:
+
+**Other editors**: Use VS Code or other editors that support Quarto notebooks. The `.qmd` files will work in any Quarto-compatible environment.
+
+::: callout-tip
+The Quarto extension for VS Code also supports a visual editor mode.
+You can find it in the command palette.
+:::
+
+## Day-of-Course Updates
+
+If you're returning to the course after some time or joining a live session, you may want to update your setup to ensure you have the latest content and package versions.
+
+### Quick Update (Recommended)
+
+1.  **Update the nfidd package** (this is quick and ensures you have the latest functions):
+
+    ```{r update_package, eval=FALSE}
+    install.packages("nfidd", dependencies = TRUE)
+    ```
+2.  **Download fresh course materials** if using local files:
+
+    -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    -   Or use `git pull` if you cloned the repository
+
+3.  **You don't need to reinstall cmdstan** unless you're having specific issues with it
