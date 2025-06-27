@@ -6,9 +6,10 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-Epidemiological forecasts are probabilistic statements about what might happen to population disease burden in the future.
-In this session we will make some simple forecasts using a commonly used infectious disease model, based on the renewal equation.
-We will see how we can visualise such forecasts, and visually compare them to what really happened.
+Epidemiological forecasts are statements about what might happen to population disease burden in the future.
+These statements sometimes will be a simple point estimate. Other times, they might be probabilistic, meaning they are making an explicit statistical statement about the probabilities of different future outcomes.
+In this session we will make some simple forecasts using a decades-old statistical modeling approach, Auto-Regressive Integrated Moving Average (ARIMA), which has also shown itself to be a very capable framework for making predictions of infectious diseases.
+We will see how we can visualise and interpret such forecasts.
 
 ## Slides
 
@@ -24,7 +25,7 @@ The aim of this session is to introduce the concept of forecasting and forecast 
 
 ## Source file
 
-The source file of this session is located at `sessions/forecast-visualisation.qmd`.
+The source file of this session is located at `sessions/forecast-concepts.qmd`.
 
 ## Libraries used
 
