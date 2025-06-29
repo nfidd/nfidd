@@ -13,18 +13,21 @@ format:
 
 How can we use data typically collected in an outbreak to answer questions like
 
+::: {.incremental}
 - what **is** the number of cases now? (*nowcasting*)
 - is it rising/falling and by how much? (*$R_t$ estimation*)
 - what does this mean for the near future (*forecasting*)
+:::
 
 in real time.
 
-### Timeline
+### Timeline 
 
 - delay distributions and how to estimate them (day 1)
 - $R_t$ estimation and the generation interval (day 1)
 - nowcasting (day 2)
-- forecasting and evaluation, ensemble methods (day 2)
+- forecasting and evaluation (day 2)
+- ensemble methods (day 3)
 - applications (day 3)
 
 # Key takeaways
@@ -44,7 +47,8 @@ in real time.
 - we can use **convolutions** to model delays at the population scale
 - when doing so we need to make sure to account for **double interval censoring**
 - **$R_t$ estimation** using the renewal equation is a convolution problem
-- improving the generative model leads to improvements in estimation (**geometric random walk** vs. independent priors)
+- improving the generative model leads to improvements in estimation
+   - **geometric random walk** vs. independent priors
 
 ![](figures/r_convolution_sketch.png)
 
@@ -54,7 +58,19 @@ in real time.
 - it is a **right truncation problem** (same as discussed before)
 - a **joint generative model** can combine delay estimation, nowcasting and $R_t$ estimation
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](figures/germany_historical.png)
+:::
+
+::: {.column width="50%"}
+
 ![](figures/complete_reporting_triangle.png)
+:::
+
+::::
 
 ### Day 2 (cont.): Forecasting {.smaller}
 
@@ -64,27 +80,51 @@ in real time.
 - a wide range of methods are available for making forecasts
 - we can use visualisation and scoring to understand the predictive performance of different models
 
-![](figures/pit-log-scale.png)
+:::: {.columns}
+
+::: {.column width="50%"}
+
+![](figures/forecast-vis.png)
+
+:::
+::: {.column width="50%"}
+
+![](figures/crps-log.png)
+
+:::
+::::
+
+### Day 3: Ensembles {.smaller}
+
+- range of strategies for collating and combining models
+- evaluation useful for model interpretation
+- this might change depending on the use case
+
+![](figures/ensembles-log.png)
 
 ### Day 3: Applications {.smaller}
-
 - the methods introduced here have **wide applications** in infectious disease epidemiology
 - **open-source tools** are available to make this task easier in practice
+- rapid development and many open questions
 
-### Outlook {.smaller}
+# Outlook
 
-- it is worth trying some of these methods here in practice to learn more about typical nowcast/forecast performance and intricacies of infectious disease data
-- one way of doing so is by contributing to forecast hubs
+### Looking back
 
-![](figures/respicast.png)
+- What was interesting?
+- What was challenging?
+- What surprised you?
 
-[https://respicast.ecdc.europa.eu/](https://respicast.ecdc.europa.eu/)
+### Looking forward
 
-### Feedback {.smaller}
+- we have a highly biased selection of [Further reading](../reference/further_reading)
+- all the course material is openly available for you to come back to at any time
+- stay in touch
 
-- please tell us if you enjoyed the course, what worked / didn't work etc.
-- we will send out a survey for feedback
+### Thank you for participating!
 
-# Thank you for attending!
+- we are developing the course
+- we will send out a survey to capture your feedback
 
 [Return to the session](../end-of-course-summary-and-discussion)
+
