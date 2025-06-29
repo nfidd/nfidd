@@ -4,6 +4,11 @@ order: 7
 bibliography: ../nfidd.bib
 ---
 
+```{r echo=FALSE}
+options(width=100)
+```
+
+
 # Introduction
 
 Epidemiological forecasts are statements about what might happen to population disease burden in the future.
@@ -94,21 +99,23 @@ Some have 53.
 Week 1 of a specific year is the first week of the calendar year that has at least four days in it.
 :::
 
-
 ## Look at the data
 
 Here are the first 10 rows of the dataset.
+
 ```{r look-at-data}
 flu_data
 ```
 
 And here is a simple `ggplot`-style figure of the data.
+
 ```{r data-first-plot}
 ggplot(flu_data) +
   geom_path(aes(x=epiweek, y=wili))
 ```
 
 But note that one of the advantages of using `tsibbles` is that there are some default time-series plots that can be made:
+
 ```{r first-autoplot}
 autoplot(flu_data, .vars = wili) +
   labs(title = "National-level ILI data from the US CDC",
@@ -117,14 +124,111 @@ autoplot(flu_data, .vars = wili) +
 
 ## Take 5 minutes
 
-Look at the plot of data carefully. Write down at least three observations about the data. Share notes with your neighbor. What features of this time-series make it easier or harder to predict?
-
+Look at the plot of data carefully.
+Write down at least three observations about the data.
+Share notes with your neighbor.
+What features of this time-series make it easier or harder to predict?
 
 # Fitting a simple forecasting model
 
-To start with, we are going to use the [`fable` package](https://fable.tidyverts.org/) to build some simple forecasting models. There are lots of ways that you might want to consider building your own 
+To start with, we are going to use the [`fable` package](https://fable.tidyverts.org/) to build some simple forecasting models.
 
-## References
+::: {.callout-note collapse="false"}
+## Picking a modeling framework
+
+There are lots of ways that you might want to consider building your own forecasting models in R.
+For example, [the `epipredict` package](https://cmu-delphi.github.io/epipredict/articles/index.html) (modular forecasting designed by epidemiological forecasters), the [`modeltime` R package](https://business-science.github.io/modeltime/), and the [`timetk` R package](https://business-science.github.io/timetk/) would all be reasonable places to start learning about working with time series data with a predictive lens.
+We are going to work with the `fable` package because it is actively developed, fairly mature, and makes it very easy to get up and running with some good, simple working examples.
+
+However, in our own research, we have found that often `fable` models don't provide enough flexibility or complexity to capture all the features that we want.
+So, depending how far down this forecasting rabbit hole we are able to pull you, you may end up wanting to play around with more flexible tools like `epipredict`, or even "rolling your own" models using whatever software you are familiar with.
+:::
+
+The `fable` package has a number of common forecasting models ready for you to use. In this session we're just going to try one without thinking too much about what it is and why it might be good or bad. We're going to start with an Auto-Regressive Integrated Moving Average (ARIMA) model. Some of the core ideas of ARIMA models have been in use for 100 years, although they have been around in their current form for the last 50.[@tsay2000time] We recommend [the FPP3 ARIMA Chapter](https://otexts.com/fpp3/arima.html) as a good applied introduction to ARIMA modeling.
+
+Here is the code to fit an ARIMA model that models the an observation $y_t$ as a function of its previous two observations. As with other regression models in R, you can inspect some details about the fit.
+```{r fit-first-model}
+fit <- flu_data |>
+  model( arima200 = ARIMA(wili ~ pdq(2,0,0)) )
+report(fit)
+```
+
+And now that we've fitted a model, we can use it to make a forecast. We'll start by making a forecast for `h=25` weeks into the future. (Although usually for epidemiological forecasts, this would be a bit further than most models could make accurate or well-calibrated forecasts.)
+
+```{r make-a-forecast}
+first_forecast <- forecast(fit, h=25) 
+
+first_forecast |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of outpatient visits due to ILI")
+```
+
+Note that in the above plot we filtered the observed data so that the resulting plot wasn't dominated by all of the historical seasons of data. The plot shows just last season's observations and "forecasts" for 25 weeks of the 2017/2018 season. Note that the predictions are probabilistic in that they show a predicted mean (the solid line) and an 80% and 95% prediction interval. 
+
+::: callout-tip
+Note that in general for predictive models you want to make sure that your model gives you a __prediction__ interval and not a confidence interval. A prediction interval should (if your model is well "calibrated" -- more on that later) cover the eventual observation with a long-run frequency equal to that of the nominal coverage rate. E.g. If you made prediction intervals for 100 points, the prediction intervals should cover around 80 of the observations. A confidence interval is instead providing you with uncertainty about the _mean_ of the distribution of eventual observations, it is not making a statement about the specific future observation.
+:::
+
+## Take 5 minutes
+
+Look carefully at the forecast and pick out a few things that don't look right to you and then a few things that you think seem reasonable.
+
+
+:::: {.callout-note collapse="true"}
+## Solution
+
+There is not exactly a "right" answer here, but a few things that you jump out to us are:
+
+ - The fact that some of the prediction intervals have negative values. The percent of outpatient visits due to ILI cannot be negative! That doesn't pass the sniff test. 
+ - The mean predictions go up and then level off. There is no notion of a "seasonal peak" in the forecast.
+ - The uncertainty grows for a few horizons and then stays constant. 
+ 
+This is a pretty bad forecast, but here are a few features of the forecast that pass the sniff test:
+
+ - For the first few horizons, the uncertainty gets wider.
+ - For the first few horizons, the predictions go up, which tracks with the recent data trends, and what we might expect from flu season in the early fall.
+ - The mean predictions and prediction intervals are smooth. Unless there is good reason for forecasts to be jagged, it tends to be the sign of a model that has not been overfit to have smooth-ish predictions. (Of course, it might still be a bad forecast.)
+::::
+
+
+Can you brainstorm some ideas to help this model improve? This will be the topic of the upcoming sessions.
+
+## Anatomy of a fable forecast
+
+We will dive into this in more detail later in the course, but it might be interesting now to look under the hood of what format `fable` uses to store the forecast itself. Check it out:
+
+```{r}
+class(first_forecast)
+first_forecast
+```
+
+The `first_forecast` object is `fbl_ts` which is a special kind of `tsibble`, which is in turn a special kind of `data.frame`. In this case, each horizon for which we've asked for a prediction has a row in the dataset. There is a `.mean` column where you can quickly see the predicted mean, and a `wili` column which contains values of class `dist`. Each of these represent the Normal distribution representing the predictive distribution for the WILI value at that horizon.
+
+
+## Take 2 minutes
+
+What mean value do you think the forecast would settle at if we predicted out for a hundred weeks or more?
+
+:::: {.callout-note collapse="true"}
+## Solution
+
+Here is the prediction for `h=25`.
+```{r}
+first_forecast[25,]
+```
+
+Here is the overall mean of the dataset the model was fit to:
+```{r}
+mean(flu_data$wili)
+```
+
+ARIMA models that meet certain regularity conditions will have forecasts that converge to the mean of the dataset.
+::::
+
+
+
+# References
 
 ::: {#refs}
 :::
