@@ -122,6 +122,7 @@ Look at the plot of data carefully. Write down at least three observations about
 
 # Fitting a simple forecasting model
 
+To start with, we are going to use the [`fable` package](https://fable.tidyverts.org/) to build some simple forecasting models. There are lots of ways that you might want to consider building your own 
 
 ## References
 
