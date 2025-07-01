@@ -161,7 +161,7 @@ first_forecast <- forecast(fit, h = 25)
 first_forecast |>
   autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
   labs(title = "WILI, US level",
-       y="% of outpatient visits due to ILI")
+       y = "% of outpatient visits due to ILI")
 ```
 
 Note that in the above plot we filtered the observed data so that the resulting plot wasn't dominated by all of the historical seasons of data. The plot shows just last season's observations and "forecasts" for 25 weeks of the 2017/2018 season. Note that the predictions are probabilistic in that they show a predicted mean (the solid line) and an 80% and 95% prediction interval. 
