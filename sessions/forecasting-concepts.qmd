@@ -156,7 +156,7 @@ report(fit)
 And now that we've fitted a model, we can use it to make a forecast. We'll start by making a forecast for `h=25` weeks into the future. (Although usually for epidemiological forecasts, this would be a bit further than most models could make accurate or well-calibrated forecasts.)
 
 ```{r make-a-forecast}
-first_forecast <- forecast(fit, h=25) 
+first_forecast <- forecast(fit, h = 25) 
 
 first_forecast |>
   autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
