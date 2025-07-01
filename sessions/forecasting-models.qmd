@@ -1,5 +1,5 @@
 ---
-title: "Forecasting models"
+title: "Improving forecasting models"
 order: 8
 bibliography: ../nfidd.bib
 ---
@@ -38,10 +38,10 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `fpp3` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling, and `ggplot2` library for plotting.
+In this session we will use the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling,  `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
 
 ```{r libraries, message = FALSE}
-library("fpp3")
+library("fable")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
@@ -80,9 +80,9 @@ flu_data <- pub_fluview(regions = "nat",
   as_tsibble(index = epiweek, key = region)
 ```
 
-We will now use the function `gg_tsdisplay()` to give a unique view into our dataset.
+We will now use the function `gg_tsdisplay()` from [the `feasts` R package](https://feasts.tidyverts.org/) to give a unique view into our dataset.
 ```{r}
-gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
 ```
 
 In the above plot, the top panel shows the time-series. 
@@ -93,17 +93,18 @@ So for example, the vertical bar at x=1 is just less than one, which means that 
 cor(flu_data$wili, dplyr::lag(flu_data$wili, 1), use = "complete.obs")
 cor(flu_data$wili, dplyr::lag(flu_data$wili, 12), use = "complete.obs")
 ```
+By comparing these values computed directly here to the ACF plot above at lags of 1 and 12, you can see that the values are the same.
 
 The lower right hand panel shows the partial correlation function (PCF). 
 The partial correlation at lag $k$ estimates the correlation between $y_t$ and $y_{t-k}$ after adjusting for the effects of lags 1, ..., k-1.
-There is a lot of additional examples and explanation about interpreting ACF and PCF plots in [FPP3, Chapter 9.5](https://otexts.com/fpp3/non-seasonal-arima.html). 
+There are a lot of additional examples and explanation about interpreting ACF and PCF plots in [FPP3, Chapter 9.5](https://otexts.com/fpp3/non-seasonal-arima.html). 
 
 ## Take 5 minutes
 
-What can you take away from the ACF and PCF plots of the data?
+What can you take away from the ACF and PCF plots of the data? (Same plot as above is reproduced here.)
 
 ```{r, echo=FALSE}
-gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
 ```
 
 :::: {.callout-note collapse="true"}
@@ -124,9 +125,9 @@ We are not going to give an in-depth review of ARIMA models in this course, but 
 
 In general, there are three different knobs on ARIMA models that you can fiddle with. They are:
 
- - the auto-regressive order: how many lags are included ($p$)
- - the differencing order: how many differences do you take of the data ($d$)
- - the moving-average order: how many residual errors are included as predictors ($q$)
+ - **the auto-regressive order**: how many lags are included ($p$)
+ - **the differencing order**: how many differences do you take of the data ($d$)
+ - **the moving-average order**: how many residual errors are included as predictors ($q$)
 
 We will present briefly each of these pieces. But first, a brief detour to describe an important concept: stationarity.
 
@@ -150,19 +151,47 @@ Sometimes a time-series may require two rounds of differencing or seasonal diffe
 An ARIMA model is specified as ARIMA($p$,$d$,$q$), where, as defined above, the $p$, $d$, and $q$ refer to the order of auto-regressive, differencing and moving-average terms. 
 An ARIMA is a kind of regression model, with an outcome being predicted by a set of independent variables.
 
+### ARIMA(1,0,0)
 Here is the equation for an ARIMA(1,0,0) model:
 $$ y_t = \mu_t + \phi_1 y_{t-1} + \varepsilon_t $$
 where $\mu_t$ is a constant (like an intercept term in the regression), $\phi_1$ is a coefficient for the auto-regressive term, and $\varepsilon_t$ is a random error term with mean zero and constant variance. 
 Note the constant variance assumption! 
-This is one of the places where the stationarity assumption is important.
+This is one of the places where the stationarity assumption is comes into play: if the time-series is stationary then constant variance is a reasonable assumption. 
+Here is code to fit and forecast from an ARIMA(1,0,0) model (this is sometimes also referred to as an AR(1) model):
 
+```{r}
+fit_arima100 <- flu_data |>
+  model(ARIMA(wili ~ pdq(1,0,0)))
+report(fit_arima100)
+forecast(fit_arima100, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+### ARIMA(1,1,0)
 Here is an equation for an ARIMA(1,1,0) model:
-$$ y_t - y_{t-1} = \mu_t  + \phi_1 (y_{t-1} - y_{t-2}) + \varepsilon_t.$$
-Another way to think about this is that we've just replaced the dependent outcome variable $y_t$ with $z_t$ as we defined above as the difference.
+$$ y_t - y_{t-1} = \phi_1 (y_{t-1} - y_{t-2}) + \varepsilon_t.$$
+Another way to think about this is that we've just replaced the dependent outcome variable $y_t$ with $z_t$ as we defined above as the difference. 
+Remember that the (1,1,0) part means that we have one auto-regressive term, one differencing and no moving average terms.
+Here is code to fit and forecast from this model:
 
-The above two forms of ARIMA models are fairly easy to conceptualize, but the moving average part is a little bit trickier. Basically, a moving average model uses residuals from the previous timepoints as predictors in the model. 
+```{r}
+fit_arima110 <- flu_data |>
+  model(ARIMA(wili ~ pdq(1,1,0)))
+report(fit_arima110)
+forecast(fit_arima110, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+Note that by default a model with $d=1$ doesn't include a constant term in the model.
+
+### ARIMA(0,0,1)
+The auto-regressive and differencing knobs of ARIMA models are fairly easy to conceptualize, but the moving average part is a little bit trickier. Basically, a moving average model uses residuals from the previous timepoints as predictors in the model. 
 This is actually a common technique in more modern-day machine learning approaches too: learn from your past errors/residuals to improve your model. 
-Here is an example of an ARIMA(0,0,1) model:
+Here is an example of an ARIMA(0,0,1) model in math terms:
 
 $$ y_t = \mu + \varepsilon_t + \theta_1 \varepsilon_{t-1}.$$
 The key thing to note here is that $\varepsilon_t$ is still the same error term as in the earlier equations but the $\varepsilon_{t-1}$ term is included as a predictor in the model, with it's own coefficient $\theta_1$.
@@ -175,9 +204,21 @@ It is important to not get the "moving average" part of an ARIMA model confused 
 These are very different things!
 :::
 
-# Fit a targeted ARIMA model
+Here is code to fit and forecast from the ARIMA(0,0,1 model):
+```{r}
+fit_arima001 <- flu_data |>
+  model(ARIMA(wili ~ pdq(0,0,1)))
+report(fit_arima001)
+forecast(fit_arima001, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
 
-Ok, enough math! Let's get back to our data and fit a model, now that we have introduced the components of an ARIMA model more clearly. 
+
+# Fit a few targeted ARIMA models
+
+Ok, let's get back to looking at our data and figuring out what ARIMA models might be reasonable to choose here.
 There are lots of ways to reason your way into what kind of structure an ARIMA model should take. 
 We are going to demonstrate one path.
 
@@ -185,17 +226,17 @@ We are going to demonstrate one path.
 
 Let's look at our data again.
 ```{r}
-gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
 ```
 The time-series is clearly non-stationary, with a clear periodicity that depends on the week of the season. 
 Let's try first differencing and looking at the data again.
 
-```{r}
-gg_tsdisplay(flu_data, y = difference(wili), plot_type='partial', lag_max = 104)
+```{r, warning=FALSE}
+feasts::gg_tsdisplay(flu_data, y = difference(wili), plot_type='partial', lag_max = 104)
 ```
 It's not stationary (there still are seasonal trends, we will do more to deal with this soon), but it's at least a little bit better.
 
-Based on this plot, let's put on our list of candidate models to fit an ARIMA(2,1,0). 
+Based on this plot, let's put on our list of candidate models to fit an ARIMA(1,1,0), because with one difference in the data we can see that the PACF shows a significant correlation at only a lag of 1 (and at some higher lags that we will ignore for now).
 Recall that in the last session we fit an ARIMA(2,0,0).
 We're going to come up with a list of a few candidate models to fit and then fit them all at once.
 
@@ -221,14 +262,14 @@ We will include some fourth-root transformations in our next round of model fitt
 
 ## Fit models
 
-Let's fit four models total: ARIMA(2,0,0) and ARIMA(2,1,0), each with and without the fourth_root transformation.
+Let's fit four models total: ARIMA(2,0,0) and ARIMA(1,1,0), each with and without the fourth_root transformation.
 ```{r}
 fits <- flu_data |>
   model(
     arima200 = ARIMA(wili ~ pdq(2,0,0)),
-    arima210 = ARIMA(wili ~ pdq(2,1,0)),
+    arima110 = ARIMA(wili ~ pdq(1,1,0)),
     arima200_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
-    arima210_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,1,0))
+    arima110_trans = ARIMA(my_fourth_root(wili) ~ pdq(1,1,0))
   )
 forecast(fits, h=40) |>
   autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
@@ -268,14 +309,17 @@ Here are two relatively straight-forward ways that you could address this:
 
 We're going to try approach 2 because it's a bit easier to get up and running in `fable`.
 You can read more about this approach in [FPP3 Chapter 12.1](https://otexts.com/fpp3/complexseasonality.html#dynamic-harmonic-regression-with-multiple-seasonal-periods).
+The model we will fit below will be an AR(2) model plus some harmonic terms. We can define it mathematically like this:
+$$ y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + \sum_{k=1}^{3} \left[ \alpha_k \cos\left( \frac{2\pi k d(t)}{365} \right) + \beta_k \sin\left( \frac{2\pi k d(t)t}{365} \right) \right] + \varepsilon_t $$
+where $\alpha_k$ and $\beta_k$ are the Fourier coefficients for the sine and cosine terms, and $d(t)$ is a representation of the day of the year from week t.
 
-Note that you can just add a `fourier()` term to your model equation and this will add the Fourier Series terms to the model predictors. 
+Note that you can just add a `fourier()` term to your model equation and this will add the Fourier Series terms shown in the equation above to the model predictors. 
 Here is the new fitted set of models, using just the transformed data, and only using the Fourier Series on the undifferenced data, since we are assuming that this periodic function will model the stationarity directly. 
 ```{r}
 fits <- flu_data |>
   model(
     arima200_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
-    arima210_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,1,0)),
+    arima110_trans = ARIMA(my_fourth_root(wili) ~ pdq(1,1,0)),
     arima200_fourier = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3)))
 forecast(fits, h=40) |>
   autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
@@ -285,29 +329,18 @@ forecast(fits, h=40) |>
 ```
 
 Well, that `arima200_fourier` model can likely be improved, but we have finally arrived at a forecast model that at least passes a visual sanity check.
+In the next session, we will start to think about how these different models and forecasts can be evaluated carefully.
 
-# Going further
+# End-of-session reflection: Bayesian vs. Frequentist modeling
 
-## Challenge
-
-- We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
-- We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
-- We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
-- Consider how forecasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? Think about seasonal patterns, long-term trends, holiday effects, or other cyclical behaviours that might influence transmission dynamics and reporting patterns.
-
-## Methods in practice
-
-- The statistical models we've discussed here represent just a subset of available forecasting approaches.
-For a comprehensive treatment of time series forecasting models, including ARIMA models as a generalisation of autoregressive approaches with additional features for differencing and moving averages, see @hyndmanForecastingPrinciplesPractice2021. 
-These models offer a different workflow for thinking about forecasting.
-Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
-Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. Something to think about!
-- Gaussian process models (as implemented in [EpiNow2](https://github.com/epiforecasts/EpiNow2)) provide another flexible approach that can generalise many of these statistical models depending on kernel choice.
+The statistical models we've discussed in this session represent just a subset of available forecasting approaches.
+These models offer a different workflow for thinking about modeling than the generative models from the nowcasting sessions in the first day of the course.
+Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods such as these ARIMA models work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
+Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. 
+Something to think about!
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
-- Share your [questions and thoughts](../reference/help)
 
 ## References
 
