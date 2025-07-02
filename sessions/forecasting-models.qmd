@@ -150,6 +150,7 @@ Sometimes a time-series may require two rounds of differencing or seasonal diffe
 
 An ARIMA model is specified as ARIMA($p$,$d$,$q$), where, as defined above, the $p$, $d$, and $q$ refer to the order of auto-regressive, differencing and moving-average terms. 
 An ARIMA is a kind of regression model, with an outcome being predicted by a set of independent variables.
+We are going to fit a few overly simple ARIMA models below just to give examples of the math, the fitted values, and what the forecasts look like.
 
 ### ARIMA(1,0,0)
 Here is the equation for an ARIMA(1,0,0) model:
