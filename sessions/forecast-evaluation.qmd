@@ -6,9 +6,10 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-So far we have focused on visualising forecasts, including confronting them with events that were observed after the forecast was made.
-Besides visualising the forecasts, we can also summarise performance quantitatively.
+So far we have focused on building and visualisation simple forecasts.
 In this session you will get to know several ways of assessing different aspects of forecast performance.
+One of these approaches involves visualising forecasts in the context of eventually observed data.
+Another approach involves summarising performance quantitatively.
 
 ## Slides
 
@@ -16,7 +17,7 @@ In this session you will get to know several ways of assessing different aspects
 
 ## Objectives
 
-The aim of this session is to introduce the concept of forecasting, using a simple model, and forecasting evaluation.
+The aim of this session is to introduce the concept of forecast evaluation from a qualitative and quantitative perspective.
 
 ::: {.callout-note collapse="true"}
 
@@ -28,13 +29,14 @@ The source file of this session is located at `sessions/forecasting-evaluation.q
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and package for data wrangling, `ggplot2` library for plotting and the `scoringutils` package for evaluating forecasts.
+In this session we will use the `fable` package for fitting and evaluating simple forecasting models, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `epidatr` package for accessing and downloading versions of epidemiological surveillance data from the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/).
 
 ```{r libraries, message = FALSE}
-library("nfidd")
+library("fable")
 library("dplyr")
 library("ggplot2")
-library("scoringutils")
+library("epidatr")
+theme_set(theme_bw())
 ```
 
 ::: {.callout-tip}
@@ -49,8 +51,7 @@ We also set an option that makes `cmdstanr` show line numbers when printing mode
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
-set.seed(12345)
-options(cmdstanr_print_line_numbers = TRUE)
+set.seed(42) # for Jackie Robinson!
 ```
 
 :::
@@ -58,11 +59,13 @@ options(cmdstanr_print_line_numbers = TRUE)
 # Introduction to forecast evaluation
 
 An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in which situation.
+Different approaches may be appropriate for point forecasts and probabilistic forecasts. 
+We will mostly focus on probabilistic forecasts, as we tend to think that providing probabilities can assist with more nuanced decision-making strategies.
 
 ::: {.callout-tip}
-## What do we look for in a good forecast? Some food for thought:
+## What do we look for in a good probabilistic forecast? Some food for thought:
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
-2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
+2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or under-predict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
 4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 
@@ -75,116 +78,170 @@ This means that statements about the future should be **correct** (calibration) 
 :::
 
 
-# Evaluate your forecast
+# Challenges in forecast evaluation
 
-In order to properly evaluate forecasts from this model we really need to forecast over a period of time, ideally capturing different epidemic dynamics.
-This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
+In order to rigorously evaluate forecasts from a model, there will often be multiple dimensions at play.
+For example, you might run a forecasting experiment where you make forecasts ...
 
-```{r load_forecasts}
-data(rw_forecasts)
-rw_forecasts
+- at multiple different times, based on the data available as of that time
+- for multiple different locations
+- for a number of different horizons into the future, (e.g. 1, 2 and 3 weeks into the future, or 1 through 40 days into the future.)
+- with several or many different modeling approaches
+
+In epidemiological forecasting, it is common to have projects where all four of these dimensions are in play.
+
+Keeping track of these dimensions can be challenging. 
+It also gives us a lot of model output data to work with when using scoring metrics. 
+And raises challenges about doing statistically rigorous "testing" when trying to compare average errors across differnet dimensions.
+
+
+# Visual forecast evaluation
+
+We will now generate some forecasts from one of the models we used earlier and evaluate them.
+However, to set us up for a more multi-dimensional experiment later in this session, we will start by loading in a bit more data than we did before.
+
+```{r load_data}
+flu_data <- epidatr::pub_fluview(regions = c("nat"),
+                                 epiweeks = epirange(200335, 201825)) |> 
+  select(region, epiweek, wili) |> 
+  as_tsibble(index = epiweek, key = region)
 ```
 
-::: {.callout-tip}
-We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecasts dates.
+In the above code, we've pulled data for the 2017/2018 season (previously we had only pulled data up to the start of the 2017/2018 season).
 
-Some important things to note about these forecasts:
+Below, we will fit and forecast from the ARIMA model plus Fourier terms that we used in the last session. 
+Note that we filter the data to start at the beginning of the season!
+This way, the model can't see the data from later in the season when making the prediction (although we still could look at it).
 
-- We used a 14 day forecast horizon.
-- Each forecast used all the data up to the forecast date.
-- We generated 1000 posterior samples for each forecast.
-- We started forecasting 3 weeks into the outbreak, and then forecast once a week (every 7 days), i.e., we created forecasts on day 22, day 29, ... to day 71. We excluded the last 14 days to allow a full forecast.
-- We made these forecasts by modelling simulated symptom onsets in an outbreak as we did before:
+```{r simple-forecasts}
+## remember to define the transformation
+fourth_root <- function(x) x^0.25
+inv_fourth_root <- function(x) x^4
+my_fourth_root <- new_transformation(fourth_root, inv_fourth_root)
 
-```{r, generate-simulated-onsets}
-# simulate data
-gen_time_pmf <- make_gen_time_pmf()
-ip_pmf <- make_ip_pmf()
-onset_df <- simulate_onsets(
-  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
-)
+## here is the model
+fit_fourier_ar2 <- flu_data |>
+  filter(epiweek <= "2017-08-27") |> 
+  model(
+    arima200_fourier = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3))
+    )
+
+## make the forecast
+forecast_fourier_ar2 <- forecast(fit_fourier_ar2, h=40) 
+
+## plot the forecast against all of the data from the 2017/2018 season
+forecast_fourier_ar2 |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
 ```
 
+For the first time in the forecasting part of this course, we have confronted a model with the eventually observed data.
+And... well, what do you think?
+
+## Take 5 minutes
+
+Look at the plot of data and forecasts carefully.
+Write down at least two observations about the forecasts and how well they seem to match the observed data.
+Share notes with your neighbor.
+
+::: {.callout-note collapse="true"}
+## Solution
+Once again, there isn't an exact correct answer here, but here are a few observations.
+
+- The model seems to do fairly well at the tails of the season.
+- The model's predictions for the epidemiologically important part (the peak!) is not very good - it's much too low. The observed data are outside the 95% PI intervals for many weeks in a row.
+
+But, maybe this isn't the end of the world. It is a lot, afterall, to ask a model to predict several months into the future. 
+(We don't ask weather models to do that, generally. Or if we do, we probably don't trust them that much.)
 :::
 
-## Scoring your forecast
+
+# Quantitative forecast evaluation
 
 We now summarise performance quantitatively by using scoring metrics.
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 
 ::: {.callout-tip}
-In this session, we'll use "proper" scoring rules: these are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
+In this session, we'll mostly be using "proper" scoring rules: these are scoring rules for probabilistic forecasts that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
 Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
-For a comprehensive text on proper scoring rules and their mathematical properties, we recommend the classic paper by @gneiting2007.
+For a comprehensive (and fairly technical) text on proper scoring rules and their mathematical properties, we recommend the classic paper by @gneiting2007.
 :::
 
-We will use the [`{scoringutils}`](https://epiforecasts.io/scoringutils/dev/) package to calculate these metrics.
-Our first step is to convert our forecasts into a format that the `{scoringutils}` package can use.
-We will use `as_forecast_sample()` to do this:
+We start by computing some summary metrics across all of the forecasted horizons. 
+We will initially compute three metrics (math details to follow):
 
-```{r convert-forecasts}
-sc_forecasts <- rw_forecasts |>
-  left_join(onset_df, by = "day") |>
-  filter(!is.na(.value)) |>
-  as_forecast_sample(
-    forecast_unit = c(
-      "origin_day", "horizon", "model"
-    ),
-    observed = "onsets",
-    predicted = ".value",
-    sample_id = ".draw"
-  )
-sc_forecasts
-```
-
-As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
-
-
-::: {.callout-tip}
-## Take 2 minutes
-What important information is in the `forecast` object?
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
- - The forecast unit which is the origin day, horizon, and model
- - The type of forecast which is a sample forecast
-:::
-
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
-
-```{r score-forecasts}
-sc_scores <- sc_forecasts |>
-  score()
-
-sc_scores
-```
-
-::: {.callout-note collapse="true"}
-## Learning more about the output of `score()`
-
-See the documentation for `?get_metrics.forecast_sample` for information on the default metrics for forecasts that are represented as samples (in our case the samples generated by the stan model).
-:::
-
-### At a glance
-
-Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+- mean absolute error (MAE)
+- root mean squared error (RMSE)
+- continuous ranked probability score (CRPS)
 
 ```{r}
-sc_scores |>
-  summarise_scores(by = "model")
+accuracy(forecast_fourier_ar2, 
+         data = flu_data, 
+         measures = list(mae = MAE, rmse = RMSE, crps=CRPS))
+```
+
+
+The results shown above are "Test" results, meaning they are metrics computed by comparing the forecasts to the eventually observed data.
+This is compared to "Training" results, which is the metrics computed "in-sample", that is, to the data the model was allowed to see when fitting.
+You can see the training set results (for point-prediction metrics, at least) by passing the model fit object to the `accuracy()` function:
+
+```{r}
+accuracy(fit_fourier_ar2, measures = list(mae = MAE, rmse = RMSE))
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you?
+Because of the flavor of object-oriented programming used in `fable`, it can be tricky to figure out how to find the help pages for functions. 
+For example, typing the standard `?accuracy` does not get you to a useful page. 
+Instead, you need to type `?accuracy.fbl_ts`, since the `forecast_fourier_ar2` is a an object with class `"fbl_ts"`.
 :::
 
-### Continuous ranked probability score
+## Mean absolute error
 
-#### What is the Continuous Ranked Probability Score (CRPS)?
+### What is the Mean Absolute Error (MAE)?
 
-For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours), we can use the Continuous Ranked Probability Score (CRPS). The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts. Note that for deterministic forecasts, CRPS reduces to MAE.
+For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. 
+Mathematically, this can be expressed simply as 
+$$
+MAE(\hat y, y) = \frac{1}{T} \sum_{t=1}^T |\hat y_t - y_t|
+$$
+where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
+
+::: {.callout-tip}
+### Key things to note about the MAE
+  - Small values are better.
+  - As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales. For example, if you are comparing forecasts for counts in location A, where the counts tend to be over ten thousand, to counts from location B, where counts tend to be under 100.
+  - The metric is on the scale of the data. The number MAE returns can be thought of as the average absolute distance between your prediction and the eventually observed value.
+:::
+
+## Mean squared error
+
+### What is the Root Mean Squared Error (RMSE)?
+
+Another common point forecast accuracy measure is the Root Mean Squared Error (MSE), which calculates the square root of the average (mean) squared difference between predicted and observed values. 
+Mathematically, this can be expressed simply as 
+$$
+RMSE(\hat y, y) = \sqrt{\frac{1}{T} \sum_{t=1}^T (\hat y_t - y_t)^2}
+$$
+where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
+
+::: {.callout-tip}
+### Key things to note about the RMSE
+  - Small values are better.
+  - As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales (same as MAE).
+  - It tends to penalize forecasts that have large misses, because those distances will be squared and have an outsize impact on the mean.
+  - The metric is on the scale of the data. 
+:::
+
+
+## Continuous ranked probability score
+
+### What is the Continuous Ranked Probability Score (CRPS)?
+
+For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate, we can use the Continuous Ranked Probability Score (CRPS). 
+The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts. 
+Note that for deterministic forecasts, CRPS reduces to MAE.
 
 The CRPS can be thought about as the combination of two key aspects of forecasting:
 1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
@@ -193,19 +250,21 @@ The CRPS can be thought about as the combination of two key aspects of forecasti
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
 ::: {.callout-tip}
-## Key things to note about the CRPS
+### Key things to note about the CRPS
   - Small values are better
   - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+  - The metric is on the scale of the data. It can be thought of, in a heuristic kind of way, as a measure of distance between the predicted distribution and the observed value.
+
 :::
 
 
 ::: {.callout-tip collapse="true"}
-#### Mathematical Definition (optional)
+### Mathematical Definition (optional)
 
 The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $x$ is calculated as
 
 $$
-CRPS(F, x) = \int_{-\infty}^{+\infty} \left( F(y) - \mathbb{1} ({\y \geq x})^2 \right).
+CRPS(F, y) = \int_{-\infty}^{+\infty} \left( F(x) - \mathbb{1} ({x \geq y})^2 \right) dx.
 $$
 
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
@@ -214,229 +273,108 @@ $$
 CRPS(F, y) = \mathbb{E}_{X \sim F}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim F}[|X - X'|]
 $$
 
-where $X$ and $X'$ are independent random variables sampled from the distribution $F$. To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
+where $X$ and $X'$ are independent random variables sampled from the distribution $F$. 
+To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
 
 :::
 
-Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
+## Looking at the scores by horizon
+
+Whilst the metrics described above are very useful metrics they can be difficult to interpret in isolation. 
+For example, it is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. 
+Let's compare the all of the metrics across different forecast horizons.
 
 ```{r}
-sc_scores |>
-  summarise_scores(by = "horizon") |>
-  ggplot(aes(x = horizon, y = crps)) +
-  geom_point() +
-  labs(title = "CRPS by daily forecast horizon",
-       subtitle = "Summarised across all forecasts")
+metrics_fourier_ar2 <- forecast_fourier_ar2 |> 
+  mutate(h = row_number()) |> 
+  accuracy(data = flu_data, 
+           measures = list(mae = MAE, rmse = RMSE, crps=CRPS),
+           by = c(".model", "h"))
 ```
 
-and at different time points.
-
+And we could plot these metrics by horizon.
 ```{r}
-sc_scores |>
-  summarise_scores(by = "origin_day") |>
-  ggplot(aes(x = origin_day, y = crps)) +
-  geom_point() +
-  labs(title = "CRPS by forecast start date",
-       subtitle = "Summarised across all forecasts", x = "forecast date")
+metrics_fourier_ar2 |> 
+  pivot_longer(
+    cols = c("mae", "rmse", "crps"),
+    names_to = "metric"
+    ) |> 
+  ggplot() +
+  geom_line(aes(x = h, y = value, color = metric)) +
+  facet_wrap(.~metric)
+  
 ```
+
 
 ::: {.callout-tip}
 ## Take 5 minutes 
-How do the CRPS scores change based on forecast date?
-How do the CRPS scores change with forecast horizon?
-What does this tell you about the model?
+How do the scores change with forecast horizon?
+How similar to or different from each other are the metrics?
+What do you think the forecast error trends by horizon would look like if you made one forecast in the middle of the season?
+Which of the additional dimensions mentioned at the top of the lesson would you like to examine more closely for forecast accuracy?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
-  - The CRPS scores increase for forecast dates where incidence is higher. 
-  - The CRPS scores increase with forecast horizon.
-  - As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
-  - However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
+  - All of the metrics increase for horizons where true incidence is higher. 
+  - The forecast errors are strongly associated with the seasonality of the data.
 :::
 
-### PIT histograms
 
-As well as the CRPS we can also look at the calibration and bias of the model. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
+# Comparing three models at multiple time-points
 
-There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
+```{r}
+## set up time-series cross-validation with 732 initial observations and every 4 weeks
+flu_data_tscv <- flu_data |> 
+  stretch_tsibble(
+    .init = 732, 
+    .step = 4
+    )
 
-::: {.callout-tip}
-## Interpreting the PIT histogram
-- Ideally PIT histograms should be uniform. 
-- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
-- If it is skewed then the model is biased towards the direction of the skew.
-:::
+cv_forecasts <- flu_data_tscv |> 
+  model(
+    ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
+    fourier = ARIMA(my_fourth_root(wili) ~ fourier(period = "year", K=3)),
+    fourier_ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3))
+  ) |> 
+  forecast(h = 8) |> 
+  group_by(.id, .model) |> 
+  mutate(h = row_number()) |> 
+  ungroup() |> 
+  as_fable(response = "wili", distribution = wili)
 
-::: {.callout-tip collapse="true"}
-## Mathematical Definition (optional)
+cv_forecasts |> 
+  accuracy(
+    flu_data, 
+    by = c("h", ".model"), 
+    measures = list(mae = MAE, rmse = RMSE, crps=CRPS)
+  ) |> 
+  ggplot(aes(x = h, y = crps, color = .model)) +
+  geom_point() +
+  geom_line()
 
-### Continuous Case
+fit_fourier_only <- flu_data |>
+  filter(epiweek <= "2017-08-27") |> 
+  model(
+    arima200_fourier = ARIMA(my_fourth_root(wili) ~ fourier(period = "year", K=3))
+    )
 
-For a continuous random variable $X$ with cumulative distribution function (CDF) $F_X$, the PIT is defined as:
+## make the forecast
+forecast_fourier_only <- forecast(fit_fourier_only, h=40) 
 
-$$
-Y = F_X(X) 
-$$
-
-where $Y$ is uniformly distributed on $[0, 1]$. 
-
-### Integer Case
-
-When dealing with integer forecasts, the standard PIT does not yield a uniform distribution even if the forecasts are perfectly calibrated [@czado2009].
-To remedy this, there are different solutions (the `get_pit_histogram()` function used below uses the non-randomised version by default):
-
-#### Randomised PIT
-  
-One way to use integer count is a randomised version of the PIT.
-For an integer-valued random variable $X$ with CDF $F_X$, the randomised PIT is defined as:
-
-$$
-U = F_X(k) + v \cdot (F_X(k) - F_X(k-1))
-$$
-
-where:
-
-- $k$ is the observed integer value,
-- $F_X(k)$ is the CDF evaluated at $k$,
-- $v$ is a random variable uniformly distributed on $[0, 1]$.
-
-This transformation ensures that $U$ is uniformly distributed on $[0, 1]$ if the predictive distribution $F_X$ is correctly specified.
-
-#### Non-randomised PIT
-
-A second option is to plot a slightly different variable:
-
-$$
-G(u) = \begin{cases}
-0, & u \leq F_X(k-1), \\
-(u - F_X(k-1))/(F_X(k) - F_X(k-1)), & F_X(k-1) < u < F_X(k), \\
-1, & u \geq F_X(k),
-\end{cases}
-$$
-
-if $k \geq 1$ and
-
-$$
-G(u) = \begin{cases}
-u/F_X(0), & u \leq F_X(0), \\
-1, & u \geq F_X(0),
-\end{cases}
-$$
-
-if $k=0$ where as before
-
-- $k$ is the observed integer value,
-- $F_X(k)$ is the CDF evaluated at $k$.
-
-Again, the transformed G(u) is uniformly distributed on $[0, 1]$ if the predictive distribution $F_X$ is correctly specified.
-
-:::
-
-Let's first look at the overall PIT histogram.
-
-```{r pit-histogram}
-sc_forecasts |>
-  get_pit_histogram() |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  labs(title = "PIT histogram", x = "Predicted quantiles", y = "Density")
+## plot the forecast against all of the data from the 2017/2018 season
+forecast_fourier_only |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
 ```
 
-As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
 
-```{r pit-histogram-horizon}
-sc_forecasts |>
-  mutate(group_horizon = case_when(
-    horizon <= 3 ~ "1-3",
-    horizon <= 7 ~ "4-7",
-    horizon <= 14 ~ "8-14"
-  )) |>
-  get_pit_histogram(by = "group_horizon") |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  facet_wrap(~group_horizon) +
-  labs(title = "PIT by forecast horizon (days)", x = "Predicted quantiles")
-```
-
-and then for different forecast dates.
-
-```{r pit-histogram-date}
-sc_forecasts |>
-  get_pit_histogram(by = "origin_day") |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  facet_wrap(~origin_day) +
-  labs(title = "PIT by forecast date", x = "Predicted quantiles")
-```
-
-::: {.callout-tip}
-## Take 5 minutes
-What do you think of the PIT histograms?
-Do they look well calibrated?
-Do they look biased?
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-- It looks like the model is biased towards overpredicting and that this bias gets worse at longer forecast horizons.
-- Looking over forecast dates it looks like much of  this bias is coming from near the outbreak peak where the model is consistently overpredicting but the model is also over predicting at other times.
-:::
 
 ## Scoring on the log scale
 
-We can also score on the logarithmic scale.
-This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.
-In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates.
-Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
-
-We again use `scoringutils` but first transform both the forecasts and observations to the log scale. 
-
-```{r log-convert-forecasts}
-log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts(
-    fun = log_shift,
-    offset = 1,
-    append = FALSE
-  )
-
-log_scores <- log_sc_forecasts |>
-  score()
-```
-
-For more on scoring on the log scale see [this paper on scoring forecasts on transformed scales](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011393).
-
-### At a glance
-
-```{r}
-log_scores |>
-  summarise_scores(by = "model")
-```
-
-::: {.callout-tip}
-## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? How do you think they will differ from the scores on the natural scale?
-:::
-
-### CRPS
-
-```{r}
-log_scores |>
-  summarise_scores(by = "horizon") |>
-  ggplot(aes(x = horizon, y = crps)) +
-  geom_point() +
-  labs(title = "CRPS by daily forecast horizon, scored on the log scale")
-```
-
-and across different forecast dates
-
-```{r}
-log_scores |>
-  summarise_scores(by = "origin_day") |>
-  ggplot(aes(x = origin_day, y = crps)) +
-  geom_point() +
-  labs(title = "CRPS by forecast date, scored on the log scale")
-```
+?? should we include??
 
 ::: {.callout-tip}
 ## Take 5 minutes 
@@ -472,7 +410,6 @@ The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-det
 # Wrap up
 
 - Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
-- Share your [questions and thoughts](../reference/help)
 
 ::: {#refs}
 :::
