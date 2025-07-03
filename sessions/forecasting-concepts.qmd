@@ -183,9 +183,11 @@ If you made prediction intervals for 100 points, the prediction intervals should
 A confidence interval is instead providing you with uncertainty about the *mean* of the distribution of eventual observations, it is not making a statement about the specific future observation.
 :::
 
+::: callout-tip
 ## Take 5 minutes
 
 Look carefully at the forecast and pick out a few things that don't look right to you and then a few things that you think seem reasonable.
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -221,9 +223,11 @@ In this case, each horizon for which we've asked for a prediction has a row in t
 There is a `.mean` column where you can quickly see the predicted mean, and a `wili` column which contains values of class `dist`.
 Each of these represent the Normal distribution representing the predictive distribution for the WILI value at that horizon.
 
+::: callout-tip
 ## Take 2 minutes
 
 What mean value do you think the forecast would settle at if we predicted out for a hundred weeks or more?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
