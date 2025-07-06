@@ -295,7 +295,7 @@ metrics_fourier_ar2 <- forecast_fourier_ar2 |>
 And we could plot these metrics by horizon.
 ```{r}
 metrics_fourier_ar2 |> 
-  pivot_longer(
+  tidyr::pivot_longer(
     cols = c("mae", "rmse", "crps"),
     names_to = "metric"
     ) |> 
@@ -326,7 +326,7 @@ Which of the additional dimensions mentioned at the top of the lesson would you 
 ```{r}
 ## set up time-series cross-validation with 732 initial observations and every 4 weeks
 flu_data_tscv <- flu_data |> 
-  stretch_tsibble(
+  tsibble::stretch_tsibble(
     .init = 732, 
     .step = 4
     )
