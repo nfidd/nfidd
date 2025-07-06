@@ -25,6 +25,8 @@ Imports:
 Suggests:
     bayesplot,
     covr,
+    epidatr,
+    fpp3,
     ggplot2,
     lintr,
     lubridate,
