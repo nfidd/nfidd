@@ -6,28 +6,30 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-As we saw in the [session on different forecasting models](forecast-models), different modelling approaches have different strength and weaknesses, and we do not usually know in advance which one will produce the best forecast in any given situation.
-We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach.
+As we saw in the sessions on [improving forecasting models](forecasting-models) and [forecast evaluation](forecasting-evaluation), different modelling approaches have different strength and weaknesses, and we do not usually know in advance which one will produce the best forecast in any given situation.
 One way to attempt to draw strength from a diversity of approaches is the creation of so-called *forecast ensembles* from the forecasts produced by different models.
 
-In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
+In this session, we'll start with forecasts from the models we explored in the previous sessions and build ensembles of these models. 
 We will then compare the performance of these ensembles to the individual models and to each other.
 
 ::: {.callout-note collapse="true"}
 ## Representations of probabilistic forecasts
 
 Probabilistic predictions can be described as coming from a probabilistic probability distributions.
-In general and when using complex models such as the one we discuss in this course, these distributions can not be expressed in a simple analytical formal as we can do if, e.g. talking about common probability distributions such as the normal or gamma distributions.
-Instead, we typically use a limited number of samples generated from Monte-Carlo methods to represent the predictive distribution.
-However, this is not the only way to characterise distributions.
+In general, it is not safe to assume that these distributions can be expressed in a simple analytical format as we can do if, e.g. talking about common probability distributions such as the normal or gamma distributions.
+(Although some of the `fable` models, like ARIMA can express forecasts as normal distributions.)
 
-A quantile is the value that corresponds to a given quantile level of a distribution.
+It can be helpful to have a model-agnostic way to represent probabilistic distributions.
+One common way is to use a limited number (say, between 100 and 1000) of **samples** generated from Monte Carlo methods to represent the predictive distribution.
+Another approach uses values that corresponds to a specific set of **quantile** levels of the predictive distribution distribution.
 For example, the median is the 50th quantile of a distribution, meaning that 50% of the values in the distribution are less than the median and 50% are greater.
 Similarly, the 90th quantile is the value that corresponds to 90% of the distribution being less than this value.
 If we characterise a predictive distribution by its quantiles, we specify these values at a range of specific quantile levels, e.g. from 5% to 95% in 5% steps.
+Another approach might be to define **bins** (intervals) that an outcome might fall into and assign probabilities to those bins
 
-Deciding how to represent forecasts depends on many things, for example the method used (and whether it produces samples by default) but also logistic considerations.
+Deciding how to represent forecasts depends on many things, for example the method used (and whether it produces samples by default) but also logistical considerations.
 Many collaborative forecasting projects and so-called forecasting hubs use quantile-based representations of forecasts in the hope to be able to characterise both the centre and tails of the distributions more reliably and with less demand on storage space than a sample-based representation.
+Quantiles are also better than a bin-based representation when the range of possible outcomes is large.
 :::
 
 ## Slides
@@ -36,7 +38,7 @@ Many collaborative forecasting projects and so-called forecasting hubs use quant
 
 ## Objectives
 
-The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the [forecasting models](forecasting-models) session.
+The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the earlier sessions.
 
 ::: {.callout-note collapse="true"}
 
@@ -48,18 +50,20 @@ The source file of this session is located at `sessions/forecast-ensembles.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
-We will also use `qrensemble` for quantile regression averaging and `lopensemble` for mixture ensembles (also called linear opinion pool).
+In this session we will use the `fable` package for fitting simple forecasting models, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `epidatr` package for accessing and downloading versions of epidemiological surveillance data from the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/).
+
+Additionally, we will use the `hubData` and `hubEnsembles` packages for building ensembles.
 
 ```{r libraries, message = FALSE}
-library("nfidd")
+library("fable")
 library("dplyr")
-library("tidyr")
 library("ggplot2")
-library("scoringutils")
-library("qrensemble")
-library("lopensemble")
+library("epidatr")
+library("hubData")
+library("hubEnsembles")
+theme_set(theme_bw())
 ```
+
 
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
@@ -71,56 +75,108 @@ We set a random seed for reproducibility.
 Setting this ensures that you should get exactly the same results on your computer as we do.
 
 ```{r}
-set.seed(123)
+set.seed(42) ## for Douglas Adams!
 ```
 
 :::
+
+# Loading data to forecast
+
+As we have done in previous sessions, we will load some ILI data using the `epidatr` package.
+
+```{r load-epidata}
+flu_data <- epidatr::pub_fluview(regions = c("nat"),
+                                 epiweeks = epirange(200335, 201831)) |> 
+  select(region, epiweek, wili) |> 
+  as_tsibble(index = epiweek, key = region)
+```
+
 
 # Individual forecast models
 
-In this session we will use the forecasts from the models we explored in the session on [forecasting models](forecasting-models). There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time. These were:
+In this session we will use the forecasts from the models we explored in the session on [forecast evaluation](forecast-evaluation). 
+These were:
 
 - A random walk model
-- A differenced autoregressive model referred to as "More statistical"
-- A simple model of susceptible depletion referred to as "More mechanistic"
+- An AR(2) autoregressive model
+- An AR(2) autoregressive model + Fourier terms for seasonality
+- Only Fourier terms for seasonality
 
-For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
-
-As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
+As in the session on [forecast evaluation](forecast-evaluation), we will fit these models to a range of forecast dates.
 
 ```{r load_forecasts}
-data(rw_forecasts, stat_forecasts, mech_forecasts)
-forecasts <- bind_rows(
-  rw_forecasts,
-  mutate(stat_forecasts, model = "More statistical"),
-  mutate(mech_forecasts, model = "More mechanistic")
-)
+## make the time-series cross validation splits
+flu_data_tscv <- flu_data |> 
+  filter(epiweek <= as.Date("2018-07-01")) |> 
+  tsibble::stretch_tsibble(
+    .init = 732, 
+    .step = 4,
+    .id = ".split"
+    )
 
-forecasts
+## generate the forecasts
+cv_models <- flu_data_tscv |> 
+  model(
+    rw = RW(my_fourth_root(wili)),
+    ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
+    fourier = ARIMA(my_fourth_root(wili) ~ pdq(0,0,0) + fourier(period = "year", K=3)),
+    fourier_ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3))
+  ) 
+
+cv_forecasts <- cv_models |> 
+  forecast(h = 8) |> 
+  ## the following 3 lines of code ensure that there is a horizon variable in the forecast data
+  group_by(.split, .model) |> 
+  mutate(h = row_number()) |> 
+  ungroup() |> 
+  ## this ensures that the output is a table object
+  as_fable(response = "wili", distribution = wili)
 ```
 
-::: {.callout-tip collapse="true"}
-## How did we generate these forecasts?
-We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took before for a single forecast date but generalises it to many forecast dates.
-
-Some important things to note about these forecasts:
-
-  - We used a 14 day forecast horizon.
-  - Each forecast used all the data up to the forecast date.
-  - We generated 1000 predictive posterior samples for each forecast.
-  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of the data (excluding the last 14 days to allow a full forecast).
-  - We use the same simulated outbreak data as before:
-
+Plot all the forecasts
 ```{r}
-gen_time_pmf <- make_gen_time_pmf()
-ip_pmf <- make_ip_pmf()
-onset_df <- simulate_onsets(
-  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
-)
-head(onset_df)
+autoplot(
+  cv_forecasts,
+  flu_data_tscv |> filter(epiweek >= as.Date("2017-07-01")),
+  alpha = 0.5
+) +
+  facet_wrap(~.split) +
+  theme(legend.position = "bottom")
 ```
 
-:::
+Motivate pivot to hubverse-style data:
+
+ - `fable` is good for simple models, but we want and need more complexity (e.g., the standard `fable` ensemble tool broke when trying to ensemble these 4 models together)
+ - more generic format for model output coming from different places
+ 
+## callout tip on what is the hubverse
+
+Generate some samples for easier hubverse storage and conversion
+```{r}
+sampled_forecasts <- generate(
+  cv_models, 
+  h=8, 
+  times=100) |> 
+  group_by(.split, region, .model, .rep) |> 
+  mutate(h = row_number())
+```
+
+
+Generate the hubverse-style ensemble, glossing over explanation of all the task-id column settings
+```{r}
+ensemble_forecast <- hubEnsembles::linear_pool(
+  sampled_forecasts_hub,
+  n_output_samples = 100,
+  model_id = "my-ensemble",
+  task_id_cols = c("forecast_date", "h", "target_epiweek"), ## columns that define a forecast task
+  compound_taskid_set = c("forecast_date"), ## column that defines a single trajectory
+  derived_task_ids = c("target_epiweek")    ## column that can be derived from the others
+  )   
+```
+
+
+## visualize the forecasts?
+
 
 # Forecast ensembles
 
@@ -138,34 +194,44 @@ If we have reason to believe that some models are better than others at estimati
 
 As in this session we will be thinking about forecasts in terms quantiles of the predictive distributions, we will need to convert our sample based forecasts to quantile-based forecasts.
 We will do this by focusing at the *marginal distribution* at each predicted time point, that is we treat each time point as independent of all others and calculate quantiles based on the sample predictive trajectories at that time point.
-An easy way to do this is to use the `{scoringutils}` package.
+An easy way to do this is to use the `hubUtils` package, which has utility functions for interacting with hubverse-style data.
 The steps to do this are to first declare the forecasts as `sample` forecasts.
 
-```{r convert-for-scoringutils}
-sample_forecasts <- forecasts |>
-  left_join(onset_df, by = "day") |>
-  filter(!is.na(.value)) |>
-  as_forecast_sample(
-    forecast_unit = c("origin_day", "horizon", "model", "day"),
-    observed = "onsets",
-    predicted = ".value",
-    sample_id = ".draw"
-  )
-sample_forecasts
+```{r convert-for-hubverse}
+sampled_forecasts_hub <- sampled_forecasts |> 
+  rename(value = .sim,
+         model_id = .model,
+         target_epiweek = epiweek) |> 
+  mutate(output_type = "sample",
+         output_type_id = stringr::str_c(region, stringr::str_pad(.rep, width = 3, pad = "0")),
+         forecast_date = target_epiweek - h*7L) |> 
+  ungroup() |> 
+  as_tibble() |> 
+  select(model_id,
+         forecast_date, 
+         target_epiweek,
+         h,
+         output_type,
+         output_type_id,
+         value)
+sampled_forecasts_hub
 ```
 
 and then convert to `quantile` forecasts.
 
 ```{r convert-to-quantile}
-quantile_forecasts <- sample_forecasts |>
-  as_forecast_quantile()
+quantiles_to_save <- c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975)
+quantile_forecasts <- sampled_forecasts_hub |>
+  hubUtils::convert_output_type(
+    to = list(quantile = quantiles_to_save)
+    )
 quantile_forecasts
 ```
 
 ::: {.callout-tip collapse="true"}
 #### What is happening here?
 
-- Internally `scoringutils` is calculating the quantiles of the sample-based forecasts.
+- Internally `hubUtils` is calculating the quantiles of the sample-based forecasts.
 - It does this by using a set of default quantiles but different ones can be specified by the user to override the default.
 - It then calls the `quantile()` function from base R to calculate the quantiles.
 - This is estimating the value that corresponds to each given quantile level by ordering the samples and then taking the value at the appropriate position.
@@ -188,15 +254,13 @@ The procedure of calculating quantiles of a new distribution as a weighted avera
 #### Construction
 
 We can calculate the mean quantile ensemble by taking the mean of the forecasts at each quantile level.
+This function could be coded up in a few lines using `dplyr`-style functions, but it is also already built for us by the hubverse, so we will use the `hubEnsembles::simple_ensemble()` function for this:
 
 ```{r mean-ensemble}
 mean_ensemble <- quantile_forecasts |>
-  as_tibble() |>
-  summarise(
-    predicted = mean(predicted),
-    observed = unique(observed),
-    model = "Mean ensemble",
-    .by = c(origin_day, horizon, quantile_level, day)
+  hubEnsembles::simple_ensemble(
+    model_id = "mean_ensemble",
+    agg_fun = mean ## this is the default, but writing it to be explicit
   )
 ```
 
@@ -204,12 +268,9 @@ Similarly, we can calculate the median ensemble by taking the median of the fore
 
 ```{r median-ensemble}
 median_ensemble <- quantile_forecasts |>
-  as_tibble() |>
-  summarise(
-    predicted = median(predicted),
-    observed = unique(observed),
-    model = "Median ensemble",
-    .by = c(origin_day, horizon, quantile_level, day)
+  hubEnsembles::simple_ensemble(
+    model_id = "median_ensemble",
+    agg_fun = median ## this is the default, but writing it to be explicit
   )
 ```
 
@@ -228,106 +289,34 @@ simple_ensembles <- bind_rows(
 How do these ensembles visually differ from the individual models? Lets start by plotting a single forecast from each model and comparing them.
 
 ```{r plot-single-forecasts}
-plot_ensembles <- function(data, obs_data) {
-  data |>
-    pivot_wider(names_from = quantile_level, values_from = predicted) |>
-    ggplot(aes(x = day)) +
-    geom_ribbon(
-    aes(
-      ymin = .data[["0.05"]], ymax = .data[["0.95"]], fill = model,
-        group = origin_day
-      ),
-      alpha = 0.2
-    ) +
-    geom_ribbon(
-      aes(
-        ymin = .data[["0.25"]], ymax = .data[["0.75"]], fill = model,
-        group = origin_day
-      ),
-      alpha = 0.5
-    ) +
-    geom_point(
-      data = obs_data,
-      aes(x = day, y = onsets), color = "black"
-    ) +
-    scale_color_binned(type = "viridis") +
-    facet_wrap(~model) +
-    theme(legend.position = "none")
-}
-
-plot_single_forecasts <- simple_ensembles |>
-  filter(origin_day == 57) |>
-  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
-
-plot_single_forecasts
-```
-
-Again we can get a different perspective by plotting the forecasts on the log scale.
-
-```{r plot-single-forecasts-log}
-plot_single_forecasts +
-  scale_y_log10()
+hubVis::plot_step_ahead_model_output(
+  model_out_tbl = simple_ensembles,
+  target_data = flu_data |> 
+    rename(observation = wili) |> 
+    filter(epiweek >= as.Date("2017-09-01")),
+  use_median_as_point = TRUE,
+  x_col_name = "target_epiweek",
+  x_target_col_name = "epiweek",
+  facet = "forecast_date",
+  facet_nrow = 3,
+  intervals = 0.8,
+  fill_transparency = 0.5,
+  interactive = TRUE
+)
 ```
 
 ::: {.callout-tip}
 ##### Take 2 minutes
-How do these ensembles compare to the individual models?
-How do they differ from each other?
+How do these ensembles differ from each other?
+(Hint: the plot above is interactive, so you can zoom in/out and click on one model in the legend to select/de-select a model for targeted comparison.)
 :::
 
 ::: {.callout-note collapse="true"}
 ##### Solution
-How do these ensembles compare to the individual models?
+The ensembles are mostly very similar to each other, except for during the peak of the season, when the `fourier` model is predicting something very different from the other forecasts. In those cases, the mean is impacted more, since that single outlying forecast pulls the mean down. However, median remains close to the three other models that have close agreement, at least for the first few horizons.
 
-- Both of the simple ensembles appear to be less variable than the statistical models but are more variable than the mechanistic model.
-- Both ensembles are more like the statistical models than the mechanistic model.
-
-How do they differ from each other?
-
-- The mean ensemble has slightly tighter uncertainty bounds than the median ensemble.
 :::
 
-Now lets plot a range of forecasts from each model and ensemble.
-
-```{r plot-multiple-forecasts}
-plot_multiple_forecasts <- simple_ensembles |>
-  plot_ensembles(onset_df |> filter(day >= 21)) +
-  lims(y = c(0, 400))
-
-plot_multiple_forecasts
-```
-
-Again we can get a different perspective by plotting the forecasts on the log scale.
-
-```{r plot-multiple-forecasts-log}
-plot_multiple_forecasts +
-  scale_y_log10()
-```
-
-
-::: {.callout-tip}
-##### Take 2 minutes
-How do these ensembles compare to the individual models?
-
-How do they differ from each other?
-
-Are there any differences across forecast dates?
-:::
-
-::: {.callout-note collapse="true"}
-##### Solution
-How do these ensembles compare to the individual models?
-
-- As before, the ensembles appear to be less variable than the statistical models but more variable than the mechanistic model.
-
-How do they differ from each other?
-
-- The mean ensemble has marginally tighter uncertainty bounds than the median ensemble as for the single forecast.
-
-Are there any differences across forecast dates?
-
-- The mean ensemble appears to be more variable across forecast dates than the median ensemble with this being more pronounced after the peak of the outbreak.
-:::
 
 #### Evaluation 
 
