@@ -168,7 +168,7 @@ See the documentation for `?get_metrics.forecast_sample` for information on the 
 
 ### At a glance
 
-Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores. Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores (by default calculating a mean across all forecasts). Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
 
 ```{r}
 sc_scores |>
