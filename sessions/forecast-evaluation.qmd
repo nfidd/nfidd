@@ -547,7 +547,7 @@ p1 <- cv_forecasts |>
 
 p2 <- flu_data |> 
   filter(epiweek >= as.Date("2017-09-01")) |> 
-  autoplot()
+  autoplot(wili)
 
 gridExtra::grid.arrange(p1, p2)
 ```
@@ -566,7 +566,9 @@ What do these results this tell you about the models?
 At horizons 1 and 2 the errors are similar, alhough the `rw` model has moderately higher CRPS. 
 At larger horizons, there is a clearer distinction between the models, with the `fourier` and `fourier_ar2` models lower than the others, and `fourier_ar2` showing the best accuracy of any of the models
 
-- By forecast_date, 
+- By forecast_date, the models show similar forecast error for dates early and late in the season with the larger differences coming at the weeks with higher incidence, especially around the "second peak" of the data. 
+
+- Projecting a flat line from the data (what the random walk does, essentially) does not do well at the important and dynamic times of the season. The combination of factoring in some auto-regressive and seasonal dynamics appears to do the best over this experiment.
 :::
 
 # Going further
@@ -575,12 +577,14 @@ At larger horizons, there is a clearer distinction between the models, with the 
 
 - In which other ways could we summarise the performance of the forecasts?
 - What other metrics could we use?
+- Which aspects of forecast accuracy does CRPS address and how?
 - There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model and typically the metrics you use will depend on the context of the forecast. 
 What attributes of the forecast are most important to you?
 - One useful way to think about evaluating forecasts is to consider exploring the scores as a data analysis in its own right. 
 For example, you could look at how the scores change over time, how they change with different forecast horizons, or how they change with different models. 
 This can be a useful way to understand the strengths and weaknesses of your model. 
 Explore some of these aspects using the scores from this session.
+- Expand the experiment run in the session above to include forecasts made in every week, instead of every 4 weeks. Does this change the evaluation results?
 
 ## Methods in practice
 
