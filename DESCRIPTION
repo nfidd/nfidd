@@ -37,10 +37,15 @@ Suggests:
     testthat (>= 3.0.0),
     qrensemble (>= 0.1.0),
     lopensemble (>= 0.1.0),
-    roxyglobals
+    roxyglobals,
+    hubData,
+    hubUtils,
+    hubEnsembles,
+    hubVis
 Additional_repositories:
     https://stan-dev.r-universe.dev,
-    https://epiforecasts.r-universe.dev
+    https://epiforecasts.r-universe.dev,
+    https://hubverse-org.r-universe.dev
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
