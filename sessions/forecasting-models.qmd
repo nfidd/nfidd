@@ -243,8 +243,9 @@ We're going to come up with a list of a few candidate models to fit and then fit
 
 One clear feature of the original (not differenced) data is that the variance is small during the summer months (the flu off-season) and very high during the peaks of the season. 
 Let's implement a transformation to try to get something closer to constant variance.
-Through a lot of experimentation, we've found that a fourth-root transformation often does a reasonable job at stabilizing variance.
+Through a lot of experimentation, we've found that a fourth-root transformation often does a reasonable job at stabilizing variance.[@ray_flusion_2025]
 And, it has the added benefit of making it so that predictions will never be negative. (Remember that problem from last session?)
+Other transformations might be reasonable too (there is [a whole section on them in the FPP3 textbook](https://otexts.com/fpp3/transformations.html#transformations)), and this is something often worth doing a bit of exploration for with your particular dataset.
 
 We're going to use `fable`-specified standards to define two transformation functions
 ```{r}
@@ -306,7 +307,7 @@ However, using seasonal ARIMA models with weekly data is complicated, because so
 Here are two relatively straight-forward ways that you could address this:
 
 1. Define a "season-year" where "week 1" is the start of each season (maybe the first week of September) and count to 52 from there. If there is a 53rd week, drop it. Model with a periodicity of 52.
-2. Include Fourier series terms (sums of sine and cosine terms with a fixed periodicity of 365 days) to fit annual periodic trends.
+2. Include [Fourier series terms](https://en.wikipedia.org/wiki/Fourier_series#Synthesis) (sums of sine and cosine terms with a fixed periodicity of 365 days) to fit annual periodic trends.
 
 We're going to try approach 2 because it's a bit easier to get up and running in `fable`.
 You can read more about this approach in [FPP3 Chapter 12.1](https://otexts.com/fpp3/complexseasonality.html#dynamic-harmonic-regression-with-multiple-seasonal-periods).

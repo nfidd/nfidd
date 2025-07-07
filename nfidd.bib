@@ -1,3 +1,22 @@
+
+@article{ray_flusion_2025,
+	title = {Flusion: {Integrating} multiple data sources for accurate influenza predictions},
+	volume = {50},
+	issn = {1755-4365},
+	shorttitle = {Flusion},
+	url = {https://www.sciencedirect.com/science/article/pii/S1755436524000719},
+	doi = {10.1016/j.epidem.2024.100810},
+	abstract = {Over the last ten years, the US Centers for Disease Control and Prevention (CDC) has organized an annual influenza forecasting challenge with the motivation that accurate probabilistic forecasts could improve situational awareness and yield more effective public health actions. Starting with the 2021/22 influenza season, the forecasting targets for this challenge have been based on hospital admissions reported in the CDC’s National Healthcare Safety Network (NHSN) surveillance system. Reporting of influenza hospital admissions through NHSN began within the last few years, and as such only a limited amount of historical data are available for this target signal. To produce forecasts in the presence of limited data for the target surveillance system, we augmented these data with two signals that have a longer historical record: 1) ILI+, which estimates the proportion of outpatient doctor visits where the patient has influenza; and 2) rates of laboratory-confirmed influenza hospitalizations at a selected set of healthcare facilities. Our model, Flusion, is an ensemble model that combines two machine learning models using gradient boosting for quantile regression based on different feature sets with a Bayesian autoregressive model. The gradient boosting models were trained on all three data signals, while the autoregressive model was trained on only data for the target surveillance signal, NHSN admissions; all three models were trained jointly on data for multiple locations. In each week of the influenza season, these models produced quantiles of a predictive distribution of influenza hospital admissions in each state for the current week and the following three weeks; the ensemble prediction was computed by averaging these quantile predictions. Flusion emerged as the top-performing model in the CDC’s influenza prediction challenge for the 2023/24 season. In this article we investigate the factors contributing to Flusion’s success, and we find that its strong performance was primarily driven by the use of a gradient boosting model that was trained jointly on data from multiple surveillance signals and multiple locations. These results indicate the value of sharing information across multiple locations and surveillance signals, especially when doing so adds to the pool of available training data.},
+	urldate = {2025-04-08},
+	journal = {Epidemics},
+	author = {Ray, Evan L. and Wang, Yijin and Wolfinger, Russell D. and Reich, Nicholas G.},
+	month = mar,
+	year = {2025},
+	keywords = {Forecasting, Infectious disease, Gradient boosting, Transfer learning},
+	pages = {100810},
+	file = {ScienceDirect Snapshot:/Users/nick/Zotero/storage/BJ3NYD2A/S1755436524000719.html:text/html},
+}
+
 @Article{funk2018real,
   author          = {Funk, Sebastian and Camacho, Anton and Kucharski, Adam J.
                   and Eggo, Rosalind M. and Edmunds, W. John},
