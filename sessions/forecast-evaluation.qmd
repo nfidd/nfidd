@@ -47,7 +47,6 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
@@ -58,12 +57,15 @@ set.seed(42) # for Jackie Robinson!
 
 # Introduction to forecast evaluation
 
-An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in which situation.
+An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in different situations.
 Different approaches may be appropriate for point forecasts and probabilistic forecasts. 
 We will mostly focus on probabilistic forecasts, as we tend to think that providing probabilities can assist with more nuanced decision-making strategies.
 
 ::: {.callout-tip}
-## What do we look for in a good probabilistic forecast? Some food for thought:
+## What do we look for in a good probabilistic forecast? 
+
+Here are definitions of four desirable characteristics of good probabilistic forecasts:
+
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
 2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or under-predict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
@@ -102,7 +104,7 @@ However, to set us up for a more multi-dimensional experiment later in this sess
 
 ```{r load_data}
 flu_data <- epidatr::pub_fluview(regions = c("nat"),
-                                 epiweeks = epirange(200335, 201825)) |> 
+                                 epiweeks = epirange(200335, 201831)) |> 
   select(region, epiweek, wili) |> 
   as_tsibble(index = epiweek, key = region)
 ```
@@ -176,10 +178,12 @@ We will initially compute three metrics (math details to follow):
 - root mean squared error (RMSE)
 - continuous ranked probability score (CRPS)
 
+In the code below, we ask `fable` to compute the accuracy metrics for the forecast object we created above by confronting it with the data in the `flu_data` object.
+
 ```{r}
 accuracy(forecast_fourier_ar2, 
          data = flu_data, 
-         measures = list(mae = MAE, rmse = RMSE, crps=CRPS))
+         measures = list(mae = MAE, rmse = RMSE, crps = CRPS))
 ```
 
 
@@ -197,11 +201,24 @@ For example, typing the standard `?accuracy` does not get you to a useful page.
 Instead, you need to type `?accuracy.fbl_ts`, since the `forecast_fourier_ar2` is a an object with class `"fbl_ts"`.
 :::
 
+## Take 5 minutes
+
+Do the "Training" results show more or less accuracy than the "Test" results? Why? (Hint: You could use the "tip" above to figure out exactly what the "Training" results are measuring.) 
+
+::: {.callout-note collapse="true"}
+## Solution
+The "Test" results are computed for one forecast made for 1 through 40 steps into the future and averaging across those.
+
+According to the help page obtained by running `?accuracy.fbl_ts`: "Accuracy measures can be computed directly from models as the one-step-ahead fitted residuals are available." 
+When we computed the "Training" set results, we just passed `accuracy()` the model object, so it is computing the metrics only on 1-step ahead forecasts, which generally will be more accurate since they are "closer" to observed data.
+:::
+
+
 ## Mean absolute error
 
 ### What is the Mean Absolute Error (MAE)?
 
-For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. 
+For point forecasts (single value predictions), forecast accuracy is often measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. 
 Mathematically, this can be expressed simply as 
 $$
 MAE(\hat y, y) = \frac{1}{T} \sum_{t=1}^T |\hat y_t - y_t|
@@ -264,7 +281,7 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $x$ is calculated as
 
 $$
-CRPS(F, y) = \int_{-\infty}^{+\infty} \left( F(x) - \mathbb{1} ({x \geq y})^2 \right) dx.
+CRPS(F, y) = \int_{-\infty}^{+\infty} \left( F(x) - \mathbb{1} ({x \geq y}) \right)^2 dx.
 $$
 
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
@@ -288,10 +305,12 @@ Let's compare the all of the metrics across different forecast horizons.
 metrics_fourier_ar2 <- forecast_fourier_ar2 |> 
   mutate(h = row_number()) |> 
   accuracy(data = flu_data, 
-           measures = list(mae = MAE, rmse = RMSE, crps=CRPS),
+           measures = list(mae = MAE, rmse = RMSE, crps = CRPS),
            by = c(".model", "h"))
+metrics_fourier_ar2
 ```
 
+Above you can see the top few rows of errors. 
 And we could plot these metrics by horizon.
 ```{r}
 metrics_fourier_ar2 |> 
@@ -306,13 +325,10 @@ metrics_fourier_ar2 |>
 ```
 
 
-::: {.callout-tip}
 ## Take 5 minutes 
 How do the scores change with forecast horizon?
 How similar to or different from each other are the metrics?
-What do you think the forecast error trends by horizon would look like if you made one forecast in the middle of the season?
 Which of the additional dimensions mentioned at the top of the lesson would you like to examine more closely for forecast accuracy?
-:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -323,26 +339,187 @@ Which of the additional dimensions mentioned at the top of the lesson would you 
 
 # Comparing three models at multiple time-points
 
+Let's run a real-life forecasting experiment now, comparing three different models. 
+The experimental set-up will be:
+
+ - we will forecast from 3 different models
+ - each model will make forecasts at every fourth week throughout the 2017/2018 season.
+ - for each time a model makes a forecast, it will make it for 8 steps into the future.
+
+## Time-series cross-validation 
+This kind of experimental set-up is called "cross-validation". 
+And because we are doing this on time-series data, it is referred to as "time-series cross-validation". 
+(If you are interested, you can read a little bit more about time-series cross-validation in the [FPP3 book](https://otexts.com/fpp3/tscv.html).)
+
+The image below (generated with some code extracted from ChatGPT, with just a few very small tweaks) shows the experimental set-up. 
+Each row of tiles corresponds to one "split" of the data, or one week where we are making a forecast.
+Blue tiles correspond to "training set" weeks (weeks of data the model is able train on).
+There are actually many more weeks of training data, but they are omitted so we can focus on the red weeks.
+Red tiles show the weeks that forecasts are made for.
+
+```{r, echo=FALSE}
+## From ChatGPT, with some small additional prompts and modifications
+# Parameters
+total_weeks <- 52
+forecast_horizon <- 8
+step_size <- 4
+train_start <- 1
+
+# Generate CV splits
+cv_windows <- list()
+split_num <- 1
+forecast_start <- 4  # First forecast starts at week 20
+
+while ((forecast_start + forecast_horizon - 1) <= total_weeks) {
+  train_end <- forecast_start - 1
+  test_start <- forecast_start
+  test_end <- test_start + forecast_horizon - 1
+  
+  # Padded split label
+  split_label <- paste0("Split_", formatC(split_num, width = 2, flag = "0"))
+  
+  # Build the data frame for this split
+  split_df <- data.frame(
+    week = c(train_start:train_end, test_start:test_end),
+    type = c(rep("Train", train_end - train_start + 1),
+             rep("Test", forecast_horizon)),
+    split = split_label
+  )
+  
+  cv_windows[[split_num]] <- split_df
+  
+  # Step forward
+  forecast_start <- forecast_start + step_size
+  split_num <- split_num + 1
+}
+
+# Combine all splits
+cv_df <- bind_rows(cv_windows)
+
+# Plotting
+ggplot(cv_df, aes(x = week, y = split, fill = type)) +
+  geom_tile(color = "black") +
+  scale_fill_manual(values = c("Train" = "#a6cee3", "Test" = "#fb9a99")) +
+  labs(title = "Time-Series CV (Expanding Window)",
+       x = "Week", y = "CV Split") +
+  scale_y_discrete(limits = rev(unique(cv_df$split))) +
+  theme_minimal()
+```
+
+
+The code below shows how to use the `tsibble::stretch_tsibble()` function to set up the cross-validation experiment. 
+We looked at the dataset itself and saw that we wanted the first split to have 732 training weeks of data (that brings us to the start of the 2017 season), so that is the `.init` argument.
+We want to make forecasts every 4 weeks, so we set `.step = 4`.
+And, we want the resulting dataset to have a column called `.split` which will define each separate dataset.
 ```{r}
-## set up time-series cross-validation with 732 initial observations and every 4 weeks
 flu_data_tscv <- flu_data |> 
+  filter(epiweek <= as.Date("2018-07-01")) |> 
   tsibble::stretch_tsibble(
     .init = 732, 
-    .step = 4
+    .step = 4,
+    .id = ".split"
     )
+flu_data_tscv
+```
 
+The resulting dataset (the top of which is shown above), now has many more rows than the initial dataset, since it basically is creating duplicate versions of the dataset, one for each unique value in the `.split` column.
+
+For this experiment, let's define four models:
+
+1. a random walk: this is what it sounds like. Each forecast takes a random walk from the last observed value. This is equivalent to an ARIMA(0,1,0) model. 
+2. the AR(2) model that we fit earlier.
+3. a model that just has fourier terms.
+4. a model that has both the AR(2) and fourier terms.
+
+The following code generates the forecasts for each cross-validation split and for all horizons.
+```{r}
 cv_forecasts <- flu_data_tscv |> 
   model(
+    rw = RW(my_fourth_root(wili)),
     ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
     fourier = ARIMA(my_fourth_root(wili) ~ fourier(period = "year", K=3)),
     fourier_ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3))
   ) |> 
   forecast(h = 8) |> 
-  group_by(.id, .model) |> 
+  ## the following 3 lines of code ensure that there is a horizon variable in the forecast data
+  group_by(.split, .model) |> 
   mutate(h = row_number()) |> 
   ungroup() |> 
+  ## this ensures that the output is a table object
   as_fable(response = "wili", distribution = wili)
+```
 
+
+A common mistake in forecasting is to make forecasts and then just skip to looking at the metrics!
+Let's pause here to look at a few of the forecasts.
+```{r}
+cv_forecasts |>
+  filter(.split == 1) |> 
+  tsibble::update_tsibble(key=c(.model, region)) |>  
+  as_fable(response = "wili", distribution = wili) |> 
+  autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+```{r}
+cv_forecasts |>
+  filter(.split == 4) |> 
+  tsibble::update_tsibble(key=c(.model, region)) |>  
+  as_fable(response = "wili", distribution = wili) |> 
+  autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+```{r}
+cv_forecasts |>
+  filter(.split == 6) |> 
+  tsibble::update_tsibble(key=c(.model, region)) |>  
+  as_fable(response = "wili", distribution = wili) |> 
+  autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+```{r}
+cv_forecasts |>
+  filter(.split == 8) |> 
+  tsibble::update_tsibble(key=c(.model, region)) |>  
+  as_fable(response = "wili", distribution = wili) |> 
+  autoplot(flu_data |> filter(epiweek >= as.Date("2016-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+## Take 5 minutes
+
+Based on the above plots (and you could make a few more at different splits if you wanted to), which forecast model(s) do you expect to have the best forecast accuracy metrics? 
+Why?
+
+
+## Evaluating the experimental forecasts
+
+Let's start by looking at an overall tabular summary of forecast accuracy.
+
+```{r, tab-overall-summary}
+cv_forecasts |> 
+  accuracy(
+    flu_data, 
+    measures = list(mae = MAE, rmse = RMSE, crps=CRPS)
+  ) |> 
+  arrange(crps)
+```
+According to each metric, the `fourier_ar2` model is the most accurate overall.
+
+Often, results show differences across some of the experimental dimensions. 
+Here, re-calculate the forecast errors and we plot the CRPS values as a function of horizon
+
+```{r}
 cv_forecasts |> 
   accuracy(
     flu_data, 
@@ -352,41 +529,44 @@ cv_forecasts |>
   ggplot(aes(x = h, y = crps, color = .model)) +
   geom_point() +
   geom_line()
+```
 
-fit_fourier_only <- flu_data |>
-  filter(epiweek <= "2017-08-27") |> 
-  model(
-    arima200_fourier = ARIMA(my_fourth_root(wili) ~ fourier(period = "year", K=3))
-    )
+And here we compute the error based on the week the forecast was made and compare it to the observed data.
+```{r}
+p1 <- cv_forecasts |> 
+  mutate(forecast_date = epiweek - h*7L) |> 
+  accuracy(
+    flu_data, 
+    by = c("forecast_date", ".model"), 
+    measures = list(mae = MAE, rmse = RMSE, crps=CRPS)
+  ) |> 
+  ggplot(aes(x = forecast_date, y = crps, color = .model)) +
+  geom_point() +
+  geom_line() +
+  theme(legend.position = "bottom")
 
-## make the forecast
-forecast_fourier_only <- forecast(fit_fourier_only, h=40) 
+p2 <- flu_data |> 
+  filter(epiweek >= as.Date("2017-09-01")) |> 
+  autoplot()
 
-## plot the forecast against all of the data from the 2017/2018 season
-forecast_fourier_only |>
-  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
-  facet_wrap(~.model) +
-  labs(title = "WILI, US level",
-       y="% of visits")
+gridExtra::grid.arrange(p1, p2)
 ```
 
 
 
-## Scoring on the log scale
 
-?? should we include??
-
-::: {.callout-tip}
 ## Take 5 minutes 
+How do the CRPS scores change based on horizon?
 How do the CRPS scores change based on forecast date?
-How do the CRPS scores change with forecast horizon?
-What does this tell you about the model?
-:::
+What do these results this tell you about the models?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- As for the natural scale CRPS scores increase with forecast horizon but now the increase appears to be linear vs exponential.
-- There has been a reduction in the CRPS scores for forecast dates near the outbreak peak compared to other forecast dates but this is still the period where the model is performing worst.
+- The CRPS scores for all models increase with forecast horizon.
+At horizons 1 and 2 the errors are similar, alhough the `rw` model has moderately higher CRPS. 
+At larger horizons, there is a clearer distinction between the models, with the `fourier` and `fourier_ar2` models lower than the others, and `fourier_ar2` showing the best accuracy of any of the models
+
+- By forecast_date, 
 :::
 
 # Going further
