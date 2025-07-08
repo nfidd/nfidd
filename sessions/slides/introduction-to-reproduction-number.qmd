@@ -52,6 +52,10 @@ However, unlike the infection to symptoms case here we don't assume that the two
 
 **What is this scaling?**
 
+## The renewal equation as a convolution
+
+![](figures/r_convolution_sketch.png)
+
 ## The scaling factor: reproduction number
 
 Let's assume we have $I_0$ infections at time 0, and the scaling doesn't change in time.
@@ -75,10 +79,6 @@ I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
 $$
 
 We can estimate $R_t$ from a time series of infections using the renewal equation.
-
-## The renewal equation as convolution
-
-![](figures/r_convolution_sketch.png)
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
