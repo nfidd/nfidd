@@ -326,10 +326,11 @@ This is because we are fitting a model to the reporting triangle which is a much
 
 ::: {.callout-note collapse="true"}
 ## Key learning points
-- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks
+- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data.
 - When reporting delays don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
-- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment
+- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment. 
+They avoid issues of passing estimates between the nowcast and the reproduction number estimation model.
 :::
 
 ::: {.callout-note}
