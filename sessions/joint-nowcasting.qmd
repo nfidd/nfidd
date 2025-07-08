@@ -151,16 +151,18 @@ tail(available_onsets)
 
 ## Understanding the data structure
 
-Notice how this simulation creates a different data structure than in the concepts session.
+Notice how this simulation creates a similar, but different, data structure than in the concepts session.
 
-::: {.callout-important}
+::: {.callout-note}
 ## Three-dimensional epidemiological data
 
 So far we've worked with data that has two dimensions. Such as:
+
 - **Onset day**: when symptoms began
 - **Onset counts**: the number of cases that occurred on each day
 
 Now we are introducing a third dimension:
+
 - **Report day**: when the case enters our surveillance system
 
 This means that to recover the true onset counts we need to sum across the third dimension and we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
