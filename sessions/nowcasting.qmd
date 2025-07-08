@@ -90,11 +90,12 @@ We can now convert this to a time series of symptom onsets and reports:
 ```{r aggregate}
 ## create time series of infections, onsets, and reports
 df_co <- df_co |>
-  transmute(
+  mutate(
     infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
-  )
+  ) |>
+  select(-infection_time, -onset_time, -report_time)
 
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
@@ -126,7 +127,8 @@ We can see that if we plot the final data set of symptom onsets alongside the cu
 ```{r plot_cut_final}
 # Use full outbreak dataset
 final <- df |>
-  transmute(onset_day = floor(onset_time))
+  mutate(onset_day = floor(onset_time)) |>
+  select(-onset_time)
 final_onset_ts <- final |>
   count(day = onset_day, name = "onsets")
 final_all_days <- expand_grid(day = seq(0, max(final_onset_ts$day))) |>
@@ -201,7 +203,7 @@ tail(reported_onset_df)
 ```
 
 ::: {.callout-tip}
-## Take 5 minutes
+## Take 3 minutes
 Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
 :::
 
@@ -226,7 +228,7 @@ mod
 ```
 
 ::: {.callout-tip}
-## Take 5 minutes
+## Take 2 minutes
 Familiarise yourself with the model above. What does it do?
 :::
 
@@ -318,7 +320,7 @@ ggplot(rw_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 2 minute
 What do you think of the nowcast now? Does it look better than the previous one?
 :::
 
@@ -332,7 +334,12 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
-## What happens if we get the delay distribution wrong?
+## What happens if we get the delay distribution wrong? {.optional}
+
+::: {.callout-note}
+## Optional section
+This section can be skipped if time is limited. It demonstrates the importance of accurate delay distribution estimation.
+:::
 
 In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
 In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.
@@ -382,7 +389,7 @@ ggplot(gamma_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 2 minute
 What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
 :::
 
