@@ -154,13 +154,13 @@ tail(available_onsets)
 Notice how this simulation creates a different data structure than in the concepts session.
 
 ::: {.callout-important}
-## Three dimensional epidemiological data
+## Three-dimensional epidemiological data
 
 So far we've worked with data that has two dimensions. Such as:
 - **Onset day**: when symptoms began
 - **Onset counts**: the number of cases that occurred on each day
 
-Now we are introdcing a third dimension:
+Now we are introducing a third dimension:
 - **Report day**: when the case enters our surveillance system
 
 This means that to recover the true onset counts we need to sum across the third dimension and we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
@@ -218,7 +218,7 @@ This data structure is sometimes called the "reporting triangle" in the literatu
 
 ![Reporting triangle visualisation](slides/figures/reporting_triangle.png)
 
-The aim of nowcasting is to complete this triangle by estimating the missing entries ($n_{t,d}^{miss}$).
+Nowcasting aims to complete this triangle by estimating the missing entries ($n_{t,d}^{miss}$).
 
 ![Completed reporting triangle](slides/figures/complete_reporting_triangle.png)
 
@@ -230,7 +230,7 @@ Once completed, we sum across the rows to get our nowcast of the true onset coun
 
 For fitting the joint model specification follows our data simulation approach but we have to make choices about how to model the expected number of onsets $\lambda_{t}$ and the probability of reporting $p_{t,d}$.
 
-As usual we start by loading the model:
+As usual, we start by loading the model:
 
 ```{r stan-joint-nowcast}
 joint_mod <- nfidd_cmdstan_model("joint-nowcast")
@@ -240,11 +240,11 @@ joint_mod
 ::: {.callout-tip collapse="true"}
 ## Model details
 This time we won't go into details of the model.
-For now, it is important that you understand the concept but as the models get more complex we hope that you trust us that the model does what we describe above.
+For now, it is important that you understand the concept, but as the models get more complex, we hope that you trust us that the model does what we describe above.
 
-Once thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
+One thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
 This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
-In most situations this number would be unknown so what we do here is closer to what one would do in the real world.
+In most situations, this number would be unknown, so what we do here is closer to what one would do in the real world.
 :::
 
 ::: {.callout-note}
@@ -258,7 +258,7 @@ What are the models we have picked for the onesets ($\lambda_{t}$) and the repor
 - $p_{t,d}$ is modelled using a Dirichlet distribution (i.e. a multinomial distribution with a constraint that the sum of the probabilities is 1 - this allows the delay distribution to be flexible).
 :::
 
-We then fit it do data:
+We then fit it to data:
 
 ```{r joint-nowcast-fit, results = 'hide', message = FALSE}
 joint_data <- list(
@@ -280,7 +280,7 @@ joint_nowcast_fit
 ```
 
 ::: {.callout-important}
-One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model.
+One benefit of this model is that, because we have decomposed the data into the reporting triangle, we can make a nowcast that uses the data we have available, augmented with predictions from the model.
 This should give us more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved).
 :::
 
@@ -319,10 +319,10 @@ Look back at the last three nowcasts. How do they compare? What are the advantag
 The nowcast with the geometric random walk was better but still struggled to capture the generative process of the data.
 The joint nowcast was the best of the three as it properly handled the uncertainty and allowed us to fit the delay distribution versus relying on known delays.
 - However, the joint nowcast is still quite simple (in the sense that no detailed mechanism or reporting process is being modelled) and so may struggle to capture more complex patterns in the data.
-In particular the prior model for the geometric random walk assumes that onsets are the same as the previous day with some statistical noise.
+In particular, the prior model for the geometric random walk assumes that onsets are the same as the previous day with some statistical noise.
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
-- In addition, whilst we say it is "quite simple" as should be clear from the code it is quite complex and computationally intensive.
-This is because we are fitting a model to the reporting triangle which is a much larger data set and so the model is relatively quite slow to fit.
+- In addition, whilst we say it is "quite simple" as should be clear from the code, it is quite complex and computationally intensive.
+This is because we are fitting a model to the reporting triangle, which is a much larger data set and so the model is relatively quite slow to fit.
 :::
 
 
@@ -331,21 +331,21 @@ This is because we are fitting a model to the reporting triangle which is a much
 ::: {.callout-note collapse="true"}
 ## Key learning points
 - The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data.
-- When reporting delays don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
+- When reporting delays, don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
 - Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment. 
 They avoid issues of passing estimates between the nowcast and the reproduction number estimation model.
 :::
 
 ::: {.callout-note}
-This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together but don't worry if you don't understand all of it.
+This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together.
 :::
 
 In the previous sessions, we have seen how to estimate the reproduction number and how to nowcast the data.
 We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly.
 This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
-As in the [renewal sesssion](R-estimation-and-the-renewal-equation) we need to define the generation time distribution and a incubation period distribution.
+As in the [renewal session](R-estimation-and-the-renewal-equation), we need to define the generation time distribution and an incubation period distribution.
 We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity.
 These are:
 
@@ -377,7 +377,7 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 ## Solution
 Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
-We would also remove the `generated quantities` block as we are not nowcasting the data and simplify the observations to just the number of onsets.
+We would also remove the `generated quantities` block as we are not nowcasting the data, and simplify the observations to just the number of onsets.
 :::
 
 Now let's fit the final model for this session!
@@ -400,14 +400,14 @@ joint_rt_fit <- nfidd_sample(
 ```
 
 ::: {.callout-tip}
-We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult to explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
+We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult-to-explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
 :::
 
 ```{r joint-nowcast-rt-fit-summary}
 joint_rt_fit
 ```
 
-First we can extract the nowcast and plot the nowcast alongside the observed data:
+First, we can extract the nowcast and plot the nowcast alongside the observed data:
 ```{r joint-nowcast-with-r}
 joint_nowcast_with_r_onsets <- joint_rt_fit |>
   gather_draws(nowcast[day]) |>
@@ -457,16 +457,16 @@ This is because we have accounted for the truncation (otherwise it would be spur
 - The simple nowcast models we showed here assumed perfect knowledge of the delay distribution. 
 What happens when you instead use an estimate of the delay distribution from the data? 
 Try and do this using methods from [session on biases in delay distributions](sessions/biases-in-delay-distributions) and see how it affects the simple nowcast models.
-- Despite being fairly involved the joint nowcast model we used here is still quite simple and may struggle to capture more complex patterns in the data.
+- Despite being fairly involved, the joint nowcast model we used here is still quite simple and may struggle to capture more complex patterns in the data.
 
 ## Methods in practice
 
-In practice more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases). 
+In practice, more complex methods are often needed to account for structure in the reporting process, time-varying delay distributions, or delays that vary by other factors (such as the age of cases). 
 Consider how nowcasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? 
 Think about seasonal patterns, long-term trends, or other cyclical behaviours that might influence case reporting patterns.
 
-- This session focussed on the role of the generative process in nowcasting. This is an area of active research but [@lisonGenerativeBayesianModeling2024] gives a good overview of the current state of the art.
-- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different data sets.
+- This session focused on the role of the generative process in nowcasting. This is an area of active research but [@lisonGenerativeBayesianModeling2024] gives a good overview of the current state of the art.
+- The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different datasets.
 
 # Wrap up
 
