@@ -25,21 +25,29 @@ set.seed(123)
 Prior for infections at time $t$ is independent from infections at all other time points.
 Is this reasonable?
 
-## Infections depend on previous infections
+## What if we convolve infections with infections?
 
-Remember the definition of the generation time distribution $g(t)$:
+We can extend the convolution concept from the last session:
 
-*infection* (person A) to *infection* (person B, infected by A)
+- **Previous session:** infections → symptoms (via incubation period)
+- **This session:** infections → infections (via generation time)
 
-Through this, infections depend on previous infections:
+## Generation time: infection to infection
+
+Here rather than the time from *infection* (person A) to *symptoms* (person B, infected by A) we have the time from *infection* (person A) to *infection* (person B, infected by A).
+
+This is known as the generation time distribution ($g(t)$).
+
+Using the same notation as before, we can write the convolution as:
 
 $$
 I_t = \mathrm{scaling} \times \sum_{t' < t} I_t' g(t - t')
 $$
 
+However, unlike the infection to symptoms case here we don't assume that the two time series have the same magnitude so need to introduce a scaling.
 What is this scaling?
 
-## Scaling of infections with previous infections
+## The scaling factor: reproduction number
 
 Let's assume we have $I_0$ infections at time 0, and the scaling doesn't change in time.
 
@@ -51,11 +59,11 @@ $$
 I = \mathrm{scaling} \times \sum_{t=0}^\infty I_0 g(t) = \mathrm{scaling} * I_0
 $$
 
-The scaling can be interpreted as the (time-varying) reproduction number $R_t$.
+The scaling can be interpreted as the reproduction number $R_0$ (assuming a susceptible population).
 
 ## The renewal equation
 
-If $R_t$ can change over time, it can still be interpreted as the ("instantaneous") reproduction number:
+If $R_t$ can change over time, it can be interpreted as the ("instantaneous") reproduction number:
 
 $$
 I_t = R_t \times \sum_{t' < t} I_t' g(t - t')
