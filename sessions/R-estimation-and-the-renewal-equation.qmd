@@ -287,7 +287,8 @@ How do the assumptions about the infections time series differ between the model
 ## Solution
 
 The model has a similar number of parameters but the assumptions about the infections time series are different.
-The model used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) assumes that the number of infections each day is independent and identically distributed, while the model used here assumes that the number of infections each day is dependent on the number of infections on previous days due to the renewal equation.
+The model used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) assumes that the number of infections each day is independent and identically distributed.
+In contrast, the model used here assumes that the number of infections each day is dependent on the number of infections on previous days due to the renewal equation.
 Now it is Rt that is assumed to be independent and identically distributed.
 :::
 
