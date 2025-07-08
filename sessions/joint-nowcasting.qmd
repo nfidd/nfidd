@@ -101,7 +101,7 @@ reporting_delay_pmf <- censored_delay_pmf(
 plot(reporting_delay_pmf)
 ```
 
-We can then simulate the data by day, onset day, and reporting day by applying the reporting delay distribution to the onsets (notice how this is nearly identical to the convolution we saw in the [convolutions session](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) expect that we are not applying the sum):
+We can then simulate the data by day, onset day, and reporting day by applying the reporting delay distribution to the onsets (notice how this is nearly identical to the convolution we saw in the [convolutions session](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic) except that we are not applying the sum):
 
 ```{r simulate-reporting-triangle}
 reporting_triangle <- onset_df |>
