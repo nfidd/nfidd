@@ -82,7 +82,7 @@ set.seed(42) ## for Douglas Adams!
 
 # Loading data to forecast
 
-As we have done in previous sessions, we will load some ILI data using the `epidatr` package.
+As we have done in previous sessions, we will load some ILI data using the `epidatr` package,
 
 ```{r load-epidata}
 flu_data <- epidatr::pub_fluview(regions = c("nat"),
@@ -90,6 +90,14 @@ flu_data <- epidatr::pub_fluview(regions = c("nat"),
   select(region, epiweek, wili) |> 
   as_tsibble(index = epiweek, key = region)
 ```
+
+and define a fourth-root transformation 
+```{r fourth-root}
+fourth_root <- function(x) x^0.25
+inv_fourth_root <- function(x) x^4
+my_fourth_root <- new_transformation(fourth_root, inv_fourth_root)
+```
+
 
 
 # Individual forecast models
@@ -320,18 +328,33 @@ The ensembles are mostly very similar to each other, except for during the peak 
 
 #### Evaluation 
 
-As in the [forecast evaluation session](forecast-evaluation), we can evaluate the accuracy of the ensembles using the `{scoringutils}` package and in particular the `score()` function.
+As in the [forecast evaluation session](forecast-evaluation), we can evaluate the accuracy of the ensembles.
+Here, instead of using the `fable` utilities, we will start to use the hubverse `hubEvals` package which relies on the `scoringutils` package under the hood.
 
+In the hubverse, there is a representation of observations called [`oracle output` data](https://docs.hubverse.io/en/latest/user-guide/target-data.html#oracle-output). 
+This is a way of representing an observed data point as if it were a prediction from an oracle model. 
+The package `hubEvals` expects observations to be stored in this format, so we will first begin by restrucurting the `flu_data` into this format.
+
+```{r make-oracle-output}
+target_epiweeks <- unique(all_forecasts$epiweek)
+
+flu_data |> 
+  filter(epiweek %in% target_epiweeks) |> 
+  
+```
+
+Now we are ready to compute some scores
 ```{r score-ensembles}
-ensemble_scores <- simple_ensembles |>
-  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
-  score()
+hubEvals::score_model_out(
+  all_forecasts,
+  
+)
 ```
 
 ::: {.callout-note}
-The **weighted interval score (WIS)** is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
+The **weighted interval score (WIS)** is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.[@bracherEvaluatingEpidemicForecasts2021]
 
-We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
+We see it here as we are scoring quantiles and known distributions hence we cannot use CRPS as we did before.
 :::
 
 Again we start with a high level overview of the scores by model.
