@@ -94,7 +94,7 @@ In epidemiological forecasting, it is common to have projects where all four of 
 
 Keeping track of these dimensions can be challenging. 
 It also gives us a lot of model output data to work with when using scoring metrics. 
-And raises challenges about doing statistically rigorous "testing" when trying to compare average errors across differnet dimensions.
+And raises challenges about doing statistically rigorous "testing" when trying to compare average errors across different dimensions.
 
 
 # Visual forecast evaluation
@@ -236,7 +236,7 @@ where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point predictio
 
 ### What is the Root Mean Squared Error (RMSE)?
 
-Another common point forecast accuracy measure is the Root Mean Squared Error (MSE), which calculates the square root of the average (mean) squared difference between predicted and observed values. 
+Another common point forecast accuracy measure is the Root Mean Squared Error (RMSE), which calculates the square root of the average (mean) squared difference between predicted and observed values. 
 Mathematically, this can be expressed simply as 
 $$
 RMSE(\hat y, y) = \sqrt{\frac{1}{T} \sum_{t=1}^T (\hat y_t - y_t)^2}
@@ -297,7 +297,7 @@ To calculate this we simply replace $X$ and $X'$ by samples from our posterior d
 
 ## Looking at the scores by horizon
 
-Whilst the metrics described above are very useful metrics they can be difficult to interpret in isolation. 
+Whilst the metrics described above are very useful they can be difficult to interpret in isolation. 
 For example, it is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. 
 Let's compare the all of the metrics across different forecast horizons.
 
@@ -568,7 +568,8 @@ At larger horizons, there is a clearer distinction between the models, with the 
 
 - By forecast_date, the models show similar forecast error for dates early and late in the season with the larger differences coming at the weeks with higher incidence, especially around the "second peak" of the data. 
 
-- Projecting a flat line from the data (what the random walk does, essentially) does not do well at the important and dynamic times of the season. The combination of factoring in some auto-regressive and seasonal dynamics appears to do the best over this experiment.
+- Projecting a flat line from the data (what the random walk does, essentially) does not do well at the important and dynamic times of the season.
+The combination of factoring in some auto-regressive and seasonal dynamics appears to do the best over this experiment.
 :::
 
 # Going further
