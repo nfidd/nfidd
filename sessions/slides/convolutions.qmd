@@ -10,9 +10,13 @@ format:
 
 ## Individual delay distributions
 
+If we know individual events, we can add a draw from the delay distribution and sum up the resulting delays.
+
+## Individual delay distributions
+
 Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
-If we know individual events, we can add a draw from the delay distribution and sum up the resulting delays.
+. . .
 
 **Example:**
 
