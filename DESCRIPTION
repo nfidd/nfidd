@@ -39,6 +39,7 @@ Suggests:
     lopensemble (>= 0.1.0),
     roxyglobals
 Additional_repositories:
+    https://hubverse-org.r-universe.dev,
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev
 Encoding: UTF-8
