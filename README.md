@@ -1,7 +1,8 @@
 
 # Nowcasting and forecasting infectious disease dynamics
 
-This repository contains the material to create the nfidd course page.
+This repository contains the material to create the nfidd sismid course
+page.
 
 All the raw material is in the folder `sessions/` and is written in
 `quarto`. Any changes to the quarto files are automatically updated on
