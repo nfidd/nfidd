@@ -108,21 +108,12 @@ Thursday: 14.15-15.00
 -   [Practice](../sessions/forecast-evaluation): evaluating forecasts with various metrics (30 mins)
 -   Wrap up (5 mins)
 
-## Session 11: Complex forecasting models
+## Session 11: Forecasting with ensembles
 
-Thursday: 15.30-16.00
-
--   [Introduction](../sessions/slides/complex-models): advanced models (10 mins)
--   [Practice](../sessions/complex-models):
-    - ARIMA with multiple locations (10 mins)
-    - VARIMA with multiple locations (10 mins)
-
-## Session 12: Forecasting with ensembles
-
-Thursday: 16.00-17.00
+Thursday: 15.30-17.00
 
 -   [Introduction](../sessions/slides/introduction-to-ensembles): strategies for collating and combining models (10 mins)
--   [Practice](../sessions/forecast-ensembles): evaluating methods for ensemble forecasts (45 mins)
+-   [Practice](../sessions/forecast-ensembles): evaluating methods for ensemble forecasts (75 mins)
 -   Wrap up (5 mins)
 
 # Day 3: Forecast hubs, advanced topics and course summary
@@ -133,7 +124,7 @@ Friday: 09.00-09.15
 
 -   Day 2 review (15 mins)
 
-## Session 13: Forecast hubs
+## Session 12: Forecast hubs
 
 Friday: 09.15-10.30
 
@@ -143,7 +134,7 @@ Friday: 09.15-10.30
     - ensembles with existing hub (30 mins)
 -   Wrap up (5 mins)
 
-## Session 14: Local hub playground
+## Session 13: Local hub playground
 
 Friday: 11.00-12.00
 
@@ -155,7 +146,7 @@ Friday: 12.00-13.00
 
 -   Lunch
 
-## Session 15: Forecasting and Nowcasting integration
+## Session 14: Forecasting and Nowcasting integration
 
 Friday: 13.00-14.00
 
@@ -163,7 +154,7 @@ Friday: 13.00-14.00
 -   [Practice](../sessions/forecasting-nowcasting): connecting nowcasting and forecasting using ARIMA models (45 mins)
 -   Wrap up (5 mins)
 
-## Session 16: Advanced topics
+## Session 15: Advanced topics
 
 Friday: 14.00-15.00
 
@@ -171,7 +162,7 @@ Friday: 14.00-15.00
 -   [Practice](../sessions/advanced-forecasting): hierarchical ARIMA or forecast reconciliation (45 mins)
 -   Wrap up (5 mins)
 
-## Session 17: Research talks and wrap-up
+## Session 16: Research talks and wrap-up
 
 Friday: 15.30-17.00
 
