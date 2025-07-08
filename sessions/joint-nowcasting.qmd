@@ -188,6 +188,7 @@ $$
 $$
 
 where:
+
 - $\lambda_{t}$ is the expected number of onsets on day $t$
 - $p_{t,d}$ is the probability that an onset on day $t$ is reported on day $t+d$
 
@@ -197,6 +198,7 @@ This approach jointly estimates the delay distribution ($p_{t,d}$) and the under
 ## Modelling options
 
 We now have two main modelling options:
+
   - How we model the expected number of onsets $\lambda_{t}$
   - How we model the probability of reporting $p_{t,d}$
 
@@ -208,6 +210,7 @@ A key insight is that we can split each $n_{t,d}$ into observed and unobserved c
 $$n_{t,d} = n_{t,d}^{obs} + n_{t,d}^{miss}$$
 
 where:
+
 - $n_{t,d}^{obs}$ is what we observe (when $t+d \leq$ current day)
 - $n_{t,d}^{miss}$ is what we need to estimate (when $t+d >$ current day)
 
@@ -256,6 +259,7 @@ What are the models we have picked for the onesets ($\lambda_{t}$) and the repor
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 - $\lambda_{t}$ is modelled using a geometric random walk.
 - $p_{t,d}$ is modelled using a Dirichlet distribution (i.e. a multinomial distribution with a constraint that the sum of the probabilities is 1 - this allows the delay distribution to be flexible).
 :::
@@ -317,6 +321,7 @@ Look back at the last three nowcasts. How do they compare? What are the advantag
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 - The simple nowcast struggled to capture the generative process of the data and so produced poor nowcasts.
 The nowcast with the geometric random walk was better but still struggled to capture the generative process of the data.
 The joint nowcast was the best of the three as it properly handled the uncertainty and allowed us to fit the delay distribution versus relying on known delays.
@@ -332,6 +337,7 @@ This is because we are fitting a model to the reporting triangle, which is a muc
 
 ::: {.callout-note collapse="true"}
 ## Key learning points
+
 - The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data.
 - When reporting delays, don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
@@ -447,6 +453,7 @@ What about the reproduction number?
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 - Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model can capture the trend in infections and account for delays from infection to onset and onset to report.
 - The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation).
 This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
