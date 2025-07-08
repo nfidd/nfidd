@@ -369,7 +369,8 @@ They still appear to roughly follow the true Rt trajectory, but the uncertainty 
 Rt still crosses 1 at the peak of the outbreak which is consistent with the true Rt trajectory.
 Towards the end of the outbreak the model is not able to capture the true Rt trajectory as well as the previous model.
 It instead appears to be reverting to having a mean of 1 which is the prior mean.
-This is because we have specified the generative process for the reproduction number to be independent and identically distributed, which is not consistent with the true Rt trajectory and now their is not enough data (due to the delay distribution) to estimate the reproduction number at each time point (due to truncation).
+This is because we have specified the generative process for the reproduction number to be independent and identically distributed, which is not consistent with the true Rt trajectory.
+Now, there is not enough data (due to the delay distribution) to estimate the reproduction number at each time point (due to truncation).
 :::
 
 # Improving the generative model for the reproduction number
