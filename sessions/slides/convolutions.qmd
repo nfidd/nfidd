@@ -10,10 +10,6 @@ format:
 
 ## Individual delay distributions
 
-If we know individual events, we can add a draw from the delay distribution and sum up the resulting delays.
-
-## Individual delay distributions
-
 Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
 . . .
@@ -33,6 +29,8 @@ ggplot(data.frame(ip_pmf), aes(x = Var1, y = Freq)) +
 ```
 
 ## Individual to population: A simple example
+
+If we know individual events, we can add a draw from the delay distribution and sum up the resulting delays.
 
 ```{r echo = FALSE, include = TRUE}
 # Create a simple schematic showing individual delays
