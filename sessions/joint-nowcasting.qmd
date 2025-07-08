@@ -254,7 +254,7 @@ In most situations, this number would be unknown, so what we do here is closer t
 
 ::: {.callout-note}
 ## Take two minutes
-What are the models we have picked for the onesets ($\lambda_{t}$) and the reporting delay distribution ($p_{t,d}$)?
+What are the models we have picked for the onsets ($\lambda_{t}$) and the reporting delay distribution ($p_{t,d}$)?
 :::
 
 ::: {.callout-note collapse="true"}
