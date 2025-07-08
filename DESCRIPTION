@@ -4,7 +4,7 @@ Title: Material to support course on nowcasting and forecasting of infectious
 Version: 1.1.2.9000
 Authors@R: c(
     person(
-      given = "NFIDD course contributors",
+      given = "NFIDD SISMID course contributors",
       family = "",
       role = c("cre", "aut"),
       email = "epiforecasts@gmail.com"
@@ -13,8 +13,8 @@ Authors@R: c(
 Description: Resources to support a short course on nowcasting and forecasting
     of infectious disease dynamics.
 License: MIT + file LICENSE
-URL: https://github.com/nfidd/nfidd
-BugReports: https://github.com/nfidd/nfidd/issues
+URL: https://github.com/nfidd/sismid
+BugReports: https://github.com/nfidd/sismid/issues
 Depends:
     R (>= 4.2.0)
 Imports:

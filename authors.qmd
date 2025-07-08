@@ -8,11 +8,19 @@ The NFIDD course was developed by the **NFIDD course contributors**:
 - [Kath Sherratt](https://github.com/kathsherratt)
 - [Sebastian Funk](https://github.com/sbfnk)
 
+The SISMID course was adapted by the **SISMID course contributors**:
+
+- [Sam Abbott](https://github.com/seabbs)
+- [Thomas Robacker](https://github.com/trobacker)
+- [Nick Reich](https://github.com/nickreich)
+
 ## How to Cite
 
 If you use materials from this course in your work, please cite:
 
 > NFIDD course contributors (2025). NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics. Version [VERSION]. DOI: [PLACEHOLDER - Zenodo DOI will be added upon release]
+
+> SISMID course contributors (2025). NFIDD SISMID: Nowcasting and Forecasting Infectious Disease Dynamics - SISMID. Version [VERSION]. DOI: [PLACEHOLDER - Zenodo DOI will be added upon release]
 
 ### BibTeX Entry
 
@@ -24,6 +32,17 @@ If you use materials from this course in your work, please cite:
   version = {[VERSION]},
   doi = {[PLACEHOLDER - Zenodo DOI]},
   url = {https://nfidd.github.io/nfidd/}
+}
+```
+
+```bibtex
+@misc{sismid2025,
+  author = {{Sam Abbott, Thomas Robacker, Nick Reich}},
+  title = {{NFIDD SISMID: Nowcasting and Forecasting Infectious Disease Dynamics - SISMID}},
+  year = {2025},
+  version = {[VERSION]},
+  doi = {[PLACEHOLDER - Zenodo DOI]},
+  url = {https://nfidd.github.io/sismid/}
 }
 ```
 

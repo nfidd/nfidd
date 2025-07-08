@@ -5,7 +5,8 @@ title: "Getting started"
 ## What is NFIDD?
 
 NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data.
-This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
+We have adapted this course for the [SISMID](https://sismid.sph.emory.edu/) course on nowcasting and forecasting infectious disease dynamics.
+This course, in both its original and SISMID versions, is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
 
 ## Set up
 
@@ -99,10 +100,10 @@ If you want to use the local workflow, you will need a local copy of the course 
 -   Directly download the course material:
 
     ::: callout-tip
-    [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    [[**Download**]{.underline}](https://github.com/nfidd/sismid/archive/refs/heads/main.zip)
     :::
 
--   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
+-   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/sismid).
 
 -   If you prefer to use the hybrid workflow, you can view each session on the website, and copy-paste the code into your own R script. 
 	In that case you don't need to download the material.
@@ -150,7 +151,7 @@ If you're returning to the course after some time or joining a live session, you
     ```
 2.  **Download fresh course materials** if using local files:
 
-    -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/sismid/archive/refs/heads/main.zip)
     -   Or use `git pull` if you cloned the repository
 
 3.  **You don't need to reinstall cmdstan** unless you're having specific issues with it
