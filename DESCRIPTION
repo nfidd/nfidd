@@ -41,7 +41,8 @@ Suggests:
     hubData,
     hubUtils,
     hubEnsembles,
-    hubVis
+    hubVis,
+    hubEvals
 Additional_repositories:
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev,
