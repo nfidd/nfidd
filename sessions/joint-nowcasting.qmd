@@ -80,8 +80,6 @@ This builds on the data simulation approach we used in the concepts session, but
 Recall from the [nowcasting concepts session](sessions/nowcasting) that we simulated individual reporting delays and then aggregated them. 
 Now we'll simulate the same process but at the population level with observation error - for the same reasons we made this change in the [convolutions session](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
 
-Instead of simulating individual delays, we'll simulate the entire reporting process at the population level. 
-
 First, let's generate our simulated onset dataset as before:
 
 ```{r, load-simulated-onset}
