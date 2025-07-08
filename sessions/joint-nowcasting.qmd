@@ -221,11 +221,11 @@ The joint model uses the observed data to estimate both the delay distribution a
 
 This data structure is sometimes called the "reporting triangle" in the literature because when visualised as a matrix (with onset days as rows and reporting days as columns), the observed data ($n_{t,d}^{obs}$) creates a triangular shape.
 
-![Reporting triangle visualisation](slides/figures/reporting_triangle.png)
+![Reporting triangle visualisation (by Johannes Bracher)](slides/figures/reporting_triangle.png)
 
 Nowcasting aims to complete this triangle by estimating the missing entries ($n_{t,d}^{miss}$).
 
-![Completed reporting triangle](slides/figures/complete_reporting_triangle.png)
+![Completed reporting triangle (by Johannes Bracher)](slides/figures/complete_reporting_triangle.png)
 
 Once completed, we sum across the rows to get our nowcast of the true onset counts.
 :::
