@@ -122,6 +122,8 @@ tail(reporting_triangle)
 
 We also apply the Poisson observation error to the reported onsets to capture our uncertainty in the reporting process (remember we have lost uncertainty in the onsets as we are not individually simulating the reporting delays).
 
+To recover the onsets onsets by day we group by day and then sum reported onsets across report days.
+
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
   summarise(noisy_onsets = sum(reported_onsets), .by = day)
