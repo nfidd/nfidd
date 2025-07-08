@@ -129,7 +129,7 @@ We can see that if we plot the final data set of symptom onsets alongside the cu
 # Use full outbreak dataset
 final <- df |>
   transmute(onset_day = floor(onset_time))
-refinal_onset_ts <- final |>
+final_onset_ts <- final |>
   count(day = onset_day, name = "onsets")
 final_all_days <- expand_grid(day = seq(0, max(final_onset_ts$day))) |>
   full_join(final_onset_ts, by = "day") |>
