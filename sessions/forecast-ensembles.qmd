@@ -143,6 +143,7 @@ cv_forecasts <- cv_models |>
 ```
 
 We plot all the forecasts, with one plot for each cross-validation split of the data.
+
 ```{r}
 autoplot(
   cv_forecasts,
@@ -157,29 +158,22 @@ autoplot(
 
 One important thing about working with forecast data in practice is that following some standard ways of representing individual forecasts can make it easier to do a wider range of analyses with a broad array of models.
 While `fable` is good for some fairly simple modeling, we will want and need more complexity and a more flexible representation of forecast data.
-In this section, we will start using hubverse-style data for forecast output formats. 
+In this section, we will start using hubverse-style data for forecast output formats.
 
 ::: callout-tip
 ## What is the hubverse?
 
-The [hubverse](https://hubverse.io/) is a project designed to improve public health outcomes through collaborative modeling. 
+The [hubverse](https://hubverse.io/) is a project designed to improve public health outcomes through collaborative modeling.
 Hubverse data standards and software support collaborative modeling "hubs" around the world, including in Europe, Paraguay, Australia, the US and Canada.
 The standards were developed for and by folks doing epidemiological forecasting and projections, but they are general and could be used by practitioners in other fields as well.
 
 Two key hubverse terms to keep in mind are:
 
- -   A **modeling task** is a specific thing that is being predicted. 
- It is represented by a specific set of variables that the hubverse calls "task-id variables". 
- In the example that we have been working with, the modeling task is defined by the date the forecast is made (`"forecast_date"`) and the horizon being predicted (`"h"`).
- Note that we have also been predicting for a given location (`"region"`), although we've only been predicting for one location so far.
- Also, each prediction refers to a specific epiweek (`"target_epiweek"`) although this is entirely defined by `"forecast_date"` and `"h"`, so in this way we can think of it as a "derived" variable.
- -   A **output type** refers to the way that a specific prediction is represented in data.
- Common output types are mean, median, quantile and sample. 
- The hubverse documentation site has [more detail on these and other output types](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
-
+-   A **modeling task** is a specific thing that is being predicted. It is represented by a specific set of variables that the hubverse calls "task-id variables". In the example that we have been working with, the modeling task is defined by the date the forecast is made (`"forecast_date"`) and the horizon being predicted (`"h"`). Note that we have also been predicting for a given location (`"region"`), although we've only been predicting for one location so far. Also, each prediction refers to a specific epiweek (`"target_epiweek"`) although this is entirely defined by `"forecast_date"` and `"h"`, so in this way we can think of it as a "derived" variable.
+-   A **output type** refers to the way that a specific prediction is represented in data. Common output types are mean, median, quantile and sample. The hubverse documentation site has [more detail on these and other output types](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
 :::
 
-A strength of the hubverse data standards is that it facilitates comparison and synthesis of models that are made with a wide variety of different modeling tools. 
+A strength of the hubverse data standards is that it facilitates comparison and synthesis of models that are made with a wide variety of different modeling tools.
 If you can format your output data according to the simple standards, then your model could be part of a modeling hub.
 
 ## Reformatting model output
@@ -187,7 +181,7 @@ If you can format your output data according to the simple standards, then your 
 Forecasts in `fable` follow their own standard format, and interacting with them requires an advanced understanding of `tibble` objects.
 Most of the `fable` models that we have used return distributional objects (a standard representation of, say, a Normal distribution) as the output, although some models return samples by default.
 We will migrate our existing forecasts from `fable` models into samples, as this is a flexible format.
-However, we will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output. 
+However, we will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output.
 If we were worried about this (and not so worried about eating up the RAM on our computer), we could extract many thousands of samples to reduce variability in the output.
 
 To start with, we will use the `generate()` function to create 100 sampled trajectories (at 1 to 8 weeks ahead) from each of the fitted models above.
@@ -227,11 +221,12 @@ sampled_forecasts_hub
 
 One of the foundational data structures for hubverse-style output is the three columns:
 
-- `output_type`: here we have `sample` trajectories
-- `output_type_id`: for `sample` output type, this column contains unique IDs that identify, for each `forecast_date`, which rows are from the same trajectory.
-- `value`: this is the actual predicted value.
+-   `output_type`: here we have `sample` trajectories
+-   `output_type_id`: for `sample` output type, this column contains unique IDs that identify, for each `forecast_date`, which rows are from the same trajectory.
+-   `value`: this is the actual predicted value.
 
 We can quickly visualize these sample trajectory outputs to see the structure of the forecasts for one week and one model:
+
 ```{r}
 sampled_forecasts_hub |> 
   filter(forecast_date == as.Date("2018-01-14"),
@@ -243,7 +238,6 @@ sampled_forecasts_hub |>
   geom_line(data = flu_data |> filter(epiweek >= as.Date("2017-09-01")), 
             aes(x=epiweek, y=wili))
 ```
-
 
 # Forecast ensembles
 
@@ -333,9 +327,9 @@ all_quantile_forecasts <- bind_rows(
 
 How do these ensembles visually differ from the individual models?
 Lets start by plotting a single forecast from each model and comparing them.
-Here we are using the `hubVis` package which creates (by default) an interactive figure using `plotly`. 
+Here we are using the `hubVis` package which creates (by default) an interactive figure using `plotly`.
 
-```{r plot-single-forecasts}
+```{r plot-single-forecasts, fig.height = 12}
 hubVis::plot_step_ahead_model_output(
   model_out_tbl = all_quantile_forecasts,
   target_data = flu_data |> 
@@ -345,7 +339,7 @@ hubVis::plot_step_ahead_model_output(
   x_col_name = "target_epiweek",
   x_target_col_name = "epiweek",
   facet = "forecast_date",
-  facet_nrow = 3,
+  facet_nrow = 6,
   intervals = 0.8,
   fill_transparency = 0.5,
   interactive = TRUE
@@ -396,7 +390,6 @@ We see it here as we are scoring quantiles and known distributions hence we cann
 
 Again we start with a high level overview of the scores by model.
 
-
 ```{r score-overview}
 forecast_scores <- hubEvals::score_model_out(
   all_quantile_forecasts,
@@ -404,9 +397,9 @@ forecast_scores <- hubEvals::score_model_out(
   by = "model_id"
 )
 forecast_scores|> 
-  arrange(wis)
+  arrange(wis) |> 
+  knitr::kable(digits = 2)
 ```
-
 
 ::: callout-tip
 ##### Take 5 minutes
@@ -423,8 +416,7 @@ What do you think the scores are telling you?
 Which model do you think is best?
 
 -   The `fourier_ar2` model appears to be the best performing ensemble model overall according to WIS, although both ensemble models have less bias.
--   Often ensemble forecasts will be better than all individual models, but as this example shows, this is not always the case. 
-It is often not the case when one model is substantially better than the others, so the ensemble gives too much weight to models that aren't that good.
+-   Often ensemble forecasts will be better than all individual models, but as this example shows, this is not always the case. It is often not the case when one model is substantially better than the others, so the ensemble gives too much weight to models that aren't that good.
 
 What other scoring breakdowns might you want to look at?
 
@@ -436,7 +428,7 @@ What other scoring breakdowns might you want to look at?
 A simple method that is often used to improve ensemble performance is to prune out models that perform very poorly.
 Balancing this can be tricky however as it can be hard to know how much to prune.
 The key tradeoff to consider is how much to optimise for which models have performed well in the past (and what your definition of the past is, for example all time or only the last few weeks) versus how much you want to allow for the possibility that these models may not perform well in the future.
-There is strong evidence from multiple forecasting challenges that forecast accuracy from a given model can vary widely over time.[ray_comparing_2023] 
+There is strong evidence from multiple forecasting challenges that forecast accuracy from a given model can vary widely over time.\[ray_comparing_2023\]
 
 #### Construction
 
@@ -490,7 +482,7 @@ filtered_ensembles <- bind_rows(
 
 As for the simple ensembles, we can plot a single forecast from each model and ensemble.
 
-```{r plot-single-filtered-forecasts}
+```{r plot-single-filtered-forecasts, fig.height = 12}
 hubVis::plot_step_ahead_model_output(
   model_out_tbl = filtered_ensembles,
   target_data = flu_data |> 
@@ -500,13 +492,12 @@ hubVis::plot_step_ahead_model_output(
   x_col_name = "target_epiweek",
   x_target_col_name = "epiweek",
   facet = "forecast_date",
-  facet_nrow = 3,
+  facet_nrow = 6,
   intervals = 0.8,
   fill_transparency = 0.5,
   interactive = TRUE
 )
 ```
-
 
 ::: callout-tip
 ##### Take 2 minutes
@@ -525,9 +516,7 @@ How do the filtered ensembles compare to the simple ensembles?
 
 Which do you think is best?
 
--   Visually, the filtered ensembles appear very similar. 
-This makes sense given we know there are only three models left in the ensemble.
-There are a few places where it appears the median is a bit closer to the observed data.
+-   Visually, the filtered ensembles appear very similar. This makes sense given we know there are only three models left in the ensemble. There are a few places where it appears the median is a bit closer to the observed data.
 :::
 
 #### Evaluation
@@ -541,7 +530,8 @@ filtered_forecast_scores <- hubEvals::score_model_out(
   by = "model_id"
 )
 filtered_forecast_scores |> 
-  arrange(wis)
+  arrange(wis) |> 
+  knitr::kable(digits = 2)
 ```
 
 ::: callout-tip
@@ -556,30 +546,9 @@ How do the filtered ensembles compare to the simple ensembles?
 How do the filtered ensembles compare to the simple ensembles?
 
 -   The filtered ensembles appear to be more accurate than the simple ensembles.
--   The ensembles still do not quite beat out the `fourier_ar2` model, although the gap has narrowed. 
+-   The ensembles still do not quite beat out the `fourier_ar2` model, although the gap has narrowed.
 -   In general, the median ensemble improved more than the mean ensemble after the filtering.
 :::
-
-
-## Weighted ensembles
-
-The simple mean and median we used to average quantiles earlier treats every model as the same.
-We could try to improve performance by replacing this with a weighted mean (or weighted median), for example giving greater weight to models that have made better forecasts in the past.
-
-
-:::: {.callout-note collapse="true"}
-#### Does weighting improve ensemble forecasts?
-
-There is a rich literature on weighting individual forecasts to improve an ensemble.
-In epidemiological forecasting, the track record is mixed.
-In settings where a long track record (multiple seasons) of performance can be measured and where the accuracy of individual models doesn't vary too much, then weighting has been shown to help with influenza[@reich_accuracy_2019], dengue fever[@colon-gonzalez_probabilistic_2021], and some COVID-19[@ray_comparing_2023] forecasts.
-However, in forecasting COVID-19 cases and hospitalizations, where model performance fluctuated over time, it was harder to see improvements in weighted ensembles.[@ray_comparing_2023]
-
-However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989,@claeskens_forecast_2016] 
-::::
-
-Due to time restrictions, we will not focus on weighted ensembles at this point in the course.
-
 
 ## Sample-based ensembles
 
@@ -611,7 +580,7 @@ sampled_forecasts_hub
 
 We can generate a linear opinion pool of the samples from these models, where we specify that we want to sample unique *trajectories* predicted by each model.
 In this example, a trajectory is defined by a `"model_id"` and `"forecast_date"` combination.
-In the code below, we specify that we want to generate a linear opinion pool ensemble that has a total of 100 sample trajectories (in this case, it will sample 25 trajectories from each model) for each `"forecast_date"`. 
+In the code below, we specify that we want to generate a linear opinion pool ensemble that has a total of 100 sample trajectories (in this case, it will sample 25 trajectories from each model) for each `"forecast_date"`.
 As we did earlier, we compute one "filtered" ensemble that removes the random walk model.
 
 ```{r}
@@ -628,7 +597,7 @@ lop_ensemble_filtered <- sampled_forecasts_hub |>
   filter(model_id != "rw") |> 
   hubEnsembles::linear_pool(
   n_output_samples = 100,
-  model_id = "lop_ensemble",
+  model_id = "lop_ensemble_filtered",
   task_id_cols = c("forecast_date", "h", "target_epiweek"), ## columns that define a forecast task
   compound_taskid_set = c("forecast_date"), ## column that defines a single trajectory
   derived_task_ids = c("target_epiweek")    ## column that can be derived from the others
@@ -637,25 +606,94 @@ lop_ensemble_filtered <- sampled_forecasts_hub |>
 
 ### Visualize sample-based forecasts
 
-Compare the individual and ensemble forecasts visually
+To facilitate visual and quantitative comparisons with the earlier ensemble forecasts, we convert the new ensemble forecasts to quantiles and then plot them.
+
+```{r, fig.height = 12}
+all_forecasts <- bind_rows(
+  lop_ensemble,
+  lop_ensemble_filtered
+) |> 
+  hubUtils::convert_output_type(to = list(quantile = quantiles_to_save)) |> 
+  bind_rows(filtered_ensembles)
+
+hubVis::plot_step_ahead_model_output(
+  model_out_tbl = all_forecasts,
+  target_data = flu_data |> 
+    rename(observation = wili) |> 
+    filter(epiweek >= as.Date("2017-09-01")),
+  use_median_as_point = TRUE,
+  x_col_name = "target_epiweek",
+  x_target_col_name = "epiweek",
+  facet = "forecast_date",
+  facet_nrow = 6,
+  intervals = 0.8,
+  fill_transparency = 0.8,
+  interactive = TRUE,
+  pal_color = "Set3"
+)
+```
+
+::: callout-tip
+### Take 5 minutes
+
+Using the interactive plot, isolate just the `lop_ensemble_filtered` and `median_ensemble_filtered`.
+How and when are they different from each other?
+:::
+
+::: {.callout-note collapse="true"}
+### Solution
+
+The LOP ensembles tend to be a bit wider than the other ensemble forecasts, especially at times when the forecasts disagree more.
+:::
 
 ### Evaluate sample-based forecasts
 
-Run same evaluation as above
+Looking at the same overall by-model evaluations as we ran earlier, the LOP ensembles are "in the pack" with the other ensembles, but do not provide substantial improvements over the other ensembles.
+
+```{r}
+forecast_scores <- hubEvals::score_model_out(
+  all_forecasts,
+  oracle_output, 
+  by = "model_id"
+)
+forecast_scores|> 
+  arrange(wis) |> 
+  knitr::kable(digits = 2)
+```
+
+## Weighted ensembles
+
+The simple mean and median we used to average quantiles earlier treats every model as the same.
+We could try to improve performance by replacing this with a weighted mean (or weighted median), for example giving greater weight to models that have made better forecasts in the past.
+
+::: {.callout-note collapse="true"}
+#### Does weighting improve ensemble forecasts?
+
+There is a rich literature on weighting individual forecasts to improve an ensemble.
+In epidemiological forecasting, the track record is mixed.
+In settings where a long track record (multiple seasons) of performance can be measured and where the accuracy of individual models doesn't vary too much, then weighting has been shown to help with influenza[@reich_accuracy_2019], dengue fever[@colon-gonzalez_probabilistic_2021], and some COVID-19[@ray_comparing_2023] forecasts.
+However, in forecasting COVID-19 cases and hospitalizations, where model performance fluctuated over time, it was harder to see improvements in weighted ensembles.[@ray_comparing_2023]
+
+However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989,@claeskens_forecast_2016]
+:::
+
+Due to time restrictions, we will not focus on weighted ensembles at this point in the course.
 
 
 # Going further
 
 ## Challenge
 
--   Throughout the course we've been carefully building models from our understanding of the underlying data generating process. What might be the implications of combining models from different modellers, with different assumptions about this process? Think about the reliability and validity of the resulting ensemble forecast.
--   Would it change how you approach communicating the forecast?
+-   Given the performance by forecast date shown by the different models, would you expect a weighted ensemble to perform better than the unweighted ensemble?
+-   
 
 ## Methods in the real world
 
 -   @howertonContextdependentRepresentationBetweenmodel2023 suggests that the choice of an ensemble method should be informed by an assumption about how to represent uncertainty between models: whether differences between component models is "noisy" variation around a single underlying distribution, or represents structural uncertainty about the system.
 -   @sherrattPredictivePerformanceMultimodel2023 investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
 -   @amaralPostprocessingWeightedCombination2025 discusses the challenges in improving on the predictive performance of simpler approaches using weighted ensembles.
+-   @ray_comparing_2023 evaluates the performance of ensemble forecasts in predicting COVID-19 cases, hospitalization and deaths, both with weighted and unweighted ensembles.
+-   @reich_accuracy_2019 evaluates the performance of ensemble forecasts in the context of seasonal influenza.
 
 # Wrap up
 
