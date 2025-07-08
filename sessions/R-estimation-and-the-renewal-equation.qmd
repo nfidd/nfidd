@@ -238,7 +238,7 @@ ggplot(inf_posterior, mapping = aes(x = infection_day)) +
        subtitle = "Model 1: renewal equation from infections")
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other?
@@ -276,13 +276,14 @@ r_inf_mod <- nfidd_cmdstan_model("estimate-inf-and-r")
 r_inf_mod
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 Familiarise yourself with the model above.
 Compare it to the model used earlier in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections).
 Does this model have more parameters?
 How do the assumptions about the infections time series differ between the models?
+::: 
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -291,8 +292,6 @@ The model has a similar number of parameters but the assumptions about the infec
 The model used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) assumes that the number of infections each day is independent and identically distributed.
 In contrast, the model used here assumes that the number of infections each day is dependent on the number of infections on previous days due to the renewal equation.
 Now it is Rt that is assumed to be independent and identically distributed.
-:::
-
 :::
 
 We then generate estimates from this model:
@@ -312,10 +311,10 @@ r_inf_fit <- nfidd_sample(
 )
 ```
 
-::: callout-note
-Generally one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
-When testing this model we noticed that sometimes the model failed to fit the data at all.
-Because of this we added an argument to start sampling with `init_R` set to 1.
+::: .{callout-note}
+Generally, one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
+When testing this model, we noticed that sometimes the model failed to fit the data at all.
+Because of this, we added an argument to start sampling with `init_R` set to 1.
 This makes sure the sampler starts fitting the model from a sensible value and avoids fitting failiures.
 :::
 
@@ -357,7 +356,7 @@ ggplot(
   geom_line(alpha = 0.1)
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 What do you think of these estimates? 
@@ -416,7 +415,7 @@ You can have a look at an R function for performing the geometric random walk:
 geometric_random_walk
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 5 minutes
 
 Look at this function and try to understand what it does.
@@ -443,10 +442,10 @@ ggplot(data, aes(x = t, y = R)) +
        y = "R")
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
-Repeat this multiple times either with the same parameters or changing some to get a feeling for what this does compared to the normal(1,1) prior.
+Repeat this multiple times, either with the same parameters or changing some to get a feeling for what this does compared to the normal(1,1) prior.
 
 :::
 
@@ -483,7 +482,7 @@ r_rw_inf_fit <- nfidd_sample(
 r_rw_inf_fit
 ```
 
-::: callout-note
+::: .{callout-note}
 As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space.
 This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
 :::
@@ -525,13 +524,14 @@ ggplot(
        subtitle = "Model 3: renewal equation with random walk")
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 What do you think of these estimates? 
 In particular, what do you think of the estimates at the beginning and end of the outbreak? 
 Are they consistent with the true Rt trajectory and with each other? 
 Are they consistent with the estimates from the previous model?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -539,8 +539,6 @@ Are they consistent with the estimates from the previous model?
 The estimates are smoothest so far, and the model is able to capture the true Rt trajectory more accurately than the previous model.
 Unlike the previous model, the model is able to capture the true Rt trajectory at the end of the outbreak with variance increasing towards the date of estimation.
 The infection estimates are the least uncertain from any model and potentially overly certain as they don't fully cover the observed infections.
-:::
-
 :::
 
 ## Comparing the models
@@ -580,7 +578,7 @@ ggplot(
   theme(legend.position = "bottom")
 ```
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 Revisit your answers to the previous questions in this session. 
@@ -598,7 +596,7 @@ The random walk model is the most realistic model, as it is able to capture the 
 The model that fits directly to infections is the best fit for the data, but depends on the availability of infections data which in practice is never available.
 :::
 
-::: callout-tip
+::: .{callout-tip}
 ## Take 2 minutes
 
 Compare the results across the models used in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
