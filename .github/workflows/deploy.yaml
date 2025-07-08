@@ -27,6 +27,7 @@ jobs:
         with:
           use-public-rspm: true
           extra-repositories:
+            https://hubverse-org.r-universe.dev,
             https://stan-dev.r-universe.dev,
             https://epiforecasts.r-universe.dev
 
