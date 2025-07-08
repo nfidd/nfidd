@@ -358,7 +358,10 @@ ggplot(
 ::: callout-tip
 ## Take 2 minutes
 
-What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other? Are they consistent with the estimates from the previous model?
+What do you think of these estimates? 
+In particular, what do you think of the estimates at the beginning and end of the outbreak? 
+Are they consistent with the true Rt trajectory and with each other? 
+Are they consistent with the estimates from the previous model?
 :::
 
 ::: {.callout-note collapse="true"}
