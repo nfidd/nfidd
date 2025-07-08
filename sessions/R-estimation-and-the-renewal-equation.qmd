@@ -68,7 +68,8 @@ We now express this relationship via the renewal equation, which links these rec
 
 Remember that this is a more general concept than the *basic* reproduction number $R_0$ which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.
 
-The reproduction number $R_t$ (sometimes called the *effective* reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual and can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
+The reproduction number $R_t$ (sometimes called the *effective* reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual.
+It can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.
 
 In most mechanistic models of infectious diseases (starting with the simplest SIR model), $R_t$ arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as $R_0 S/N$ where $S$ is the current number of susceptibles in the population of size $N$.
 By fitting such models to data it is then possible to calculate the value of $R_t$ at any point in time.
