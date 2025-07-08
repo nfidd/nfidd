@@ -12,6 +12,7 @@ format:
 
 Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
+If we know individual events, we can add a draw from the delay distribution and sum up the resulting delays.
 
 **Example:**
 
@@ -27,23 +28,31 @@ ggplot(data.frame(ip_pmf), aes(x = Var1, y = Freq)) +
   theme_minimal()
 ```
 
-## Population level counts
+## Individual to population: A simple example
 
-If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
+```{r echo = FALSE, include = TRUE}
+# Create a simple schematic showing individual delays
+set.seed(123)
+infections <- data.frame(
+  person = paste("Person", 1:6),
+  infection_day = c(1, 1, 2, 2, 3, 3),
+  delay = c(2, 4, 1, 3, 2, 5),
+  onset_day = c(3, 5, 3, 5, 5, 8)
+)
 
-$$
-S_t = \sum_{t'} P_{t'} f_{t - t'}
-$$
+# Create a schematic plot
+ggplot(infections, aes(y = person)) +
+  geom_segment(aes(x = infection_day, xend = onset_day), 
+               arrow = arrow(length = unit(0.3, "cm")), size = 1.2) +
+  geom_point(aes(x = infection_day), color = "red", size = 3) +
+  geom_point(aes(x = onset_day), color = "blue", size = 3) +
+  labs(x = "Day", y = "Individual", 
+       title = "Individual delays from infection to symptom onset") +
+  theme_minimal() +
+  scale_x_continuous(breaks = 1:8)
+```
 
-This operation is called a (discrete) **convolution** of $P$ with $f$.
-
-We can use convolutions with the delay distribution that applies at the *individual* level to determine *population-level* counts.
-
-## Example: infections to symptom onsets
-
-![](figures/infections_onset_sketch.png)
-
-## Why use a convolution, not individual delays?
+## Why not use individual delays?
 
 - we don't always have individual data available
 - we often model other processes at the population level (such as transmission) and so being able to model delays on the same scale is useful
@@ -52,6 +61,22 @@ We can use convolutions with the delay distribution that applies at the *individ
 ::: {.fragment .fade-in}
 - **however, a downside is that we won't have realistic uncertainty, especially if the number of individuals is small**
 :::
+
+## Convolution: From individual to population
+
+![](figures/infections_onset_sketch.png)
+
+## Population level counts: The mathematics
+
+If the number of individuals $P_{t'}$ that have their primary event at time $t'$ then we can rewrite this as
+
+$$
+S_t = \sum_{t'} P_{t'} f_{t - t'}
+$$
+
+This operation is called a (discrete) **convolution** of $P$ with $f_d$.
+
+We can use convolutions with the delay distribution that applies at the *individual* level to determine *population-level* counts.
 
 ## What if $f$ is continuous?
 
