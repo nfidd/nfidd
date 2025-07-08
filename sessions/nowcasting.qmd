@@ -90,11 +90,12 @@ We can now convert this to a time series of symptom onsets and reports:
 ```{r aggregate}
 ## create time series of infections, onsets, and reports
 df_co <- df_co |>
-  transmute(
+  mutate(
     infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
-  )
+  ) |>
+  select(-infection_time, -onset_time, -report_time)
 
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
@@ -126,7 +127,8 @@ We can see that if we plot the final data set of symptom onsets alongside the cu
 ```{r plot_cut_final}
 # Use full outbreak dataset
 final <- df |>
-  transmute(onset_day = floor(onset_time))
+  mutate(onset_day = floor(onset_time)) |>
+  select(-onset_time)
 final_onset_ts <- final |>
   count(day = onset_day, name = "onsets")
 final_all_days <- expand_grid(day = seq(0, max(final_onset_ts$day))) |>
