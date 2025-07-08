@@ -242,7 +242,15 @@ This is because we are fitting a model to the reporting triangle which is a much
 :::
 
 
-# Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions
+# Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions {.optional}
+
+::: {.callout-note collapse="true"}
+## Key learning points
+- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks
+- When reporting delays don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
+- Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
+- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment
+:::
 
 ::: {.callout-note}
 This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together but don't worry if you don't understand all of it.
