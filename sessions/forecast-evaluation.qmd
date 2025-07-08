@@ -13,14 +13,13 @@ Another approach involves summarising performance quantitatively.
 
 ## Slides
 
-- [Forecast evaluation](slides/forecast-evaluation)
+-   [Forecast evaluation](slides/forecast-evaluation)
 
 ## Objectives
 
 The aim of this session is to introduce the concept of forecast evaluation from a qualitative and quantitative perspective.
 
-::: {.callout-note collapse="true"}
-
+:::: {.callout-note collapse="true"}
 # Setup
 
 ## Source file
@@ -39,37 +38,36 @@ library("epidatr")
 theme_set(theme_bw())
 ```
 
-::: {.callout-tip}
+::: callout-tip
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 :::
 
 ## Initialisation
 
-We set a random seed for reproducibility. 
+We set a random seed for reproducibility.
 Setting this ensures that you should get exactly the same results on your computer as we do.
 This is not strictly necessary but will help us talk about the models.
 
 ```{r}
 set.seed(42) # for Jackie Robinson!
 ```
-
-:::
+::::
 
 # Introduction to forecast evaluation
 
 An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in different situations.
-Different approaches may be appropriate for point forecasts and probabilistic forecasts. 
+Different approaches may be appropriate for point forecasts and probabilistic forecasts.
 We will mostly focus on probabilistic forecasts, as we tend to think that providing probabilities can assist with more nuanced decision-making strategies.
 
-::: {.callout-tip}
-## What do we look for in a good probabilistic forecast? 
+::: callout-tip
+## What do we look for in a good probabilistic forecast?
 
 Here are definitions of four desirable characteristics of good probabilistic forecasts:
 
-1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
-2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or under-predict.
-3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
-4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
+1.  **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
+2.  **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or under-predict.
+3.  **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
+4.  **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 
 Note that sharpness is a property of the forecasts themselves, whereas calibration, unbiasedness, and accuracy are properties that emerge from comparing forecasts to observed data.
 
@@ -79,23 +77,21 @@ The general principle underlying forecast evaluation is to **maximise *sharpness
 This means that statements about the future should be **correct** (calibration) and should aim to have **narrow uncertainty** (sharpness).
 :::
 
-
 # Challenges in forecast evaluation
 
 In order to rigorously evaluate forecasts from a model, there will often be multiple dimensions at play.
 For example, you might run a forecasting experiment where you make forecasts ...
 
-- at multiple different times, based on the data available as of that time
-- for multiple different locations
-- for a number of different horizons into the future, (e.g. 1, 2 and 3 weeks into the future, or 1 through 40 days into the future.)
-- with several or many different modeling approaches
+-   at multiple different times, based on the data available as of that time
+-   for multiple different locations
+-   for a number of different horizons into the future, (e.g. 1, 2 and 3 weeks into the future, or 1 through 40 days into the future.)
+-   with several or many different modeling approaches
 
 In epidemiological forecasting, it is common to have projects where all four of these dimensions are in play.
 
-Keeping track of these dimensions can be challenging. 
-It also gives us a lot of model output data to work with when using scoring metrics. 
+Keeping track of these dimensions can be challenging.
+It also gives us a lot of model output data to work with when using scoring metrics.
 And raises challenges about doing statistically rigorous "testing" when trying to compare average errors across different dimensions.
-
 
 # Visual forecast evaluation
 
@@ -111,7 +107,7 @@ flu_data <- epidatr::pub_fluview(regions = c("nat"),
 
 In the above code, we've pulled data for the 2017/2018 season (previously we had only pulled data up to the start of the 2017/2018 season).
 
-Below, we will fit and forecast from the ARIMA model plus Fourier terms that we used in the last session. 
+Below, we will fit and forecast from the ARIMA model plus Fourier terms that we used in the last session.
 Note that we filter the data to start at the beginning of the season!
 This way, the model can't see the data from later in the season when making the prediction (although we still could look at it).
 
@@ -140,7 +136,8 @@ forecast_fourier_ar2 |>
 ```
 
 For the first time in the forecasting part of this course, we have confronted a model with the eventually observed data.
-And... well, what do you think?
+And...
+well, what do you think?
 
 ## Take 5 minutes
 
@@ -150,33 +147,34 @@ Share notes with your neighbor.
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 Once again, there isn't an exact correct answer here, but here are a few observations.
 
-- The model seems to do fairly well at the tails of the season.
-- The model's predictions for the epidemiologically important part (the peak!) is not very good - it's much too low. The observed data are outside the 95% PI intervals for many weeks in a row.
+-   The model seems to do fairly well at the tails of the season.
+-   The model's predictions for the epidemiologically important part (the peak!) is not very good - it's much too low. The observed data are outside the 95% PI intervals for many weeks in a row.
 
-But, maybe this isn't the end of the world. It is a lot, afterall, to ask a model to predict several months into the future. 
+But, maybe this isn't the end of the world.
+It is a lot, afterall, to ask a model to predict several months into the future.
 (We don't ask weather models to do that, generally. Or if we do, we probably don't trust them that much.)
 :::
-
 
 # Quantitative forecast evaluation
 
 We now summarise performance quantitatively by using scoring metrics.
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 
-::: {.callout-tip}
+::: callout-tip
 In this session, we'll mostly be using "proper" scoring rules: these are scoring rules for probabilistic forecasts that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
 Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
 For a comprehensive (and fairly technical) text on proper scoring rules and their mathematical properties, we recommend the classic paper by @gneiting2007.
 :::
 
-We start by computing some summary metrics across all of the forecasted horizons. 
+We start by computing some summary metrics across all of the forecasted horizons.
 We will initially compute three metrics (math details to follow):
 
-- mean absolute error (MAE)
-- root mean squared error (RMSE)
-- continuous ranked probability score (CRPS)
+-   mean absolute error (MAE)
+-   root mean squared error (RMSE)
+-   continuous ranked probability score (CRPS)
 
 In the code below, we ask `fable` to compute the accuracy metrics for the forecast object we created above by confronting it with the data in the `flu_data` object.
 
@@ -186,7 +184,6 @@ accuracy(forecast_fourier_ar2,
          measures = list(mae = MAE, rmse = RMSE, crps = CRPS))
 ```
 
-
 The results shown above are "Test" results, meaning they are metrics computed by comparing the forecasts to the eventually observed data.
 This is compared to "Training" results, which is the metrics computed "in-sample", that is, to the data the model was allowed to see when fitting.
 You can see the training set results (for point-prediction metrics, at least) by passing the model fit object to the `accuracy()` function:
@@ -195,85 +192,83 @@ You can see the training set results (for point-prediction metrics, at least) by
 accuracy(fit_fourier_ar2, measures = list(mae = MAE, rmse = RMSE))
 ```
 
-::: {.callout-tip}
-Because of the flavor of object-oriented programming used in `fable`, it can be tricky to figure out how to find the help pages for functions. 
-For example, typing the standard `?accuracy` does not get you to a useful page. 
+::: callout-tip
+Because of the flavor of object-oriented programming used in `fable`, it can be tricky to figure out how to find the help pages for functions.
+For example, typing the standard `?accuracy` does not get you to a useful page.
 Instead, you need to type `?accuracy.fbl_ts`, since the `forecast_fourier_ar2` is a an object with class `"fbl_ts"`.
 :::
 
 ## Take 5 minutes
 
-Do the "Training" results show more or less accuracy than the "Test" results? Why? (Hint: You could use the "tip" above to figure out exactly what the "Training" results are measuring.) 
+Do the "Training" results show more or less accuracy than the "Test" results?
+Why?
+(Hint: You could use the "tip" above to figure out exactly what the "Training" results are measuring.)
 
 ::: {.callout-note collapse="true"}
 ## Solution
+
 The "Test" results are computed for one forecast made for 1 through 40 steps into the future and averaging across those.
 
-According to the help page obtained by running `?accuracy.fbl_ts`: "Accuracy measures can be computed directly from models as the one-step-ahead fitted residuals are available." 
-When we computed the "Training" set results, we just passed `accuracy()` the model object, so it is computing the metrics only on 1-step ahead forecasts, which generally will be more accurate since they are "closer" to observed data.
+According to the help page obtained by running `?accuracy.fbl_ts`: "Accuracy measures can be computed directly from models as the one-step-ahead fitted residuals are available." When we computed the "Training" set results, we just passed `accuracy()` the model object, so it is computing the metrics only on 1-step ahead forecasts, which generally will be more accurate since they are "closer" to observed data.
 :::
-
 
 ## Mean absolute error
 
 ### What is the Mean Absolute Error (MAE)?
 
-For point forecasts (single value predictions), forecast accuracy is often measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. 
-Mathematically, this can be expressed simply as 
-$$
+For point forecasts (single value predictions), forecast accuracy is often measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values.
+Mathematically, this can be expressed simply as $$
 MAE(\hat y, y) = \frac{1}{T} \sum_{t=1}^T |\hat y_t - y_t|
-$$
-where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
+$$ where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
 
-::: {.callout-tip}
+::: callout-tip
 ### Key things to note about the MAE
-  - Small values are better.
-  - As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales. For example, if you are comparing forecasts for counts in location A, where the counts tend to be over ten thousand, to counts from location B, where counts tend to be under 100.
-  - The metric is on the scale of the data. The number MAE returns can be thought of as the average absolute distance between your prediction and the eventually observed value.
+
+-   Small values are better.
+-   As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales. For example, if you are comparing forecasts for counts in location A, where the counts tend to be over ten thousand, to counts from location B, where counts tend to be under 100.
+-   The metric is on the scale of the data. The number MAE returns can be thought of as the average absolute distance between your prediction and the eventually observed value.
 :::
 
 ## Mean squared error
 
 ### What is the Root Mean Squared Error (RMSE)?
 
-Another common point forecast accuracy measure is the Root Mean Squared Error (RMSE), which calculates the square root of the average (mean) squared difference between predicted and observed values. 
-Mathematically, this can be expressed simply as 
-$$
+Another common point forecast accuracy measure is the Root Mean Squared Error (RMSE), which calculates the square root of the average (mean) squared difference between predicted and observed values.
+Mathematically, this can be expressed simply as $$
 RMSE(\hat y, y) = \sqrt{\frac{1}{T} \sum_{t=1}^T (\hat y_t - y_t)^2}
-$$
-where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
+$$ where $y_t$ is the observed value at time $t$, $\hat y_t$ is the point prediction, and $T$ is the total number of predictions.
 
-::: {.callout-tip}
+::: callout-tip
 ### Key things to note about the RMSE
-  - Small values are better.
-  - As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales (same as MAE).
-  - It tends to penalize forecasts that have large misses, because those distances will be squared and have an outsize impact on the mean.
-  - The metric is on the scale of the data. 
-:::
 
+-   Small values are better.
+-   As it is an absolute scoring rule it can be difficult to use to compare forecasts where the observed values are on different scales (same as MAE).
+-   It tends to penalize forecasts that have large misses, because those distances will be squared and have an outsize impact on the mean.
+-   The metric is on the scale of the data.
+:::
 
 ## Continuous ranked probability score
 
 ### What is the Continuous Ranked Probability Score (CRPS)?
 
-For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate, we can use the Continuous Ranked Probability Score (CRPS). 
-The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts. 
+For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate, we can use the Continuous Ranked Probability Score (CRPS).
+The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts.
 Note that for deterministic forecasts, CRPS reduces to MAE.
 
-The CRPS can be thought about as the combination of two key aspects of forecasting:
-1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
-2. The confidence of the forecast in terms of the spread of the predicted values.
+The CRPS can be thought about as the combination of two key aspects of forecasting: 1.
+The accuracy of the forecast in terms of how close the predicted values are to the observed value.
+2.
+The confidence of the forecast in terms of the spread of the predicted values.
 
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
-::: {.callout-tip}
+::: callout-tip
 ### Key things to note about the CRPS
-  - Small values are better
-  - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
-  - The metric is on the scale of the data. It can be thought of, in a heuristic kind of way, as a measure of distance between the predicted distribution and the observed value.
 
+-   Small values are better
+-   As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
+-   The metric is on the scale of the data. It can be thought of, in a heuristic kind of way, as a measure of distance between the predicted distribution and the observed value.
 :::
-
 
 ::: {.callout-tip collapse="true"}
 ### Mathematical Definition (optional)
@@ -290,15 +285,14 @@ $$
 CRPS(F, y) = \mathbb{E}_{X \sim F}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim F}[|X - X'|]
 $$
 
-where $X$ and $X'$ are independent random variables sampled from the distribution $F$. 
+where $X$ and $X'$ are independent random variables sampled from the distribution $F$.
 To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
-
 :::
 
 ## Looking at the scores by horizon
 
-Whilst the metrics described above are very useful they can be difficult to interpret in isolation. 
-For example, it is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. 
+Whilst the metrics described above are very useful they can be difficult to interpret in isolation.
+For example, it is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions.
 Let's compare the all of the metrics across different forecast horizons.
 
 ```{r}
@@ -310,8 +304,9 @@ metrics_fourier_ar2 <- forecast_fourier_ar2 |>
 metrics_fourier_ar2
 ```
 
-Above you can see the top few rows of errors. 
+Above you can see the top few rows of errors.
 And we could plot these metrics by horizon.
+
 ```{r}
 metrics_fourier_ar2 |> 
   tidyr::pivot_longer(
@@ -324,34 +319,45 @@ metrics_fourier_ar2 |>
   
 ```
 
+## Take 5 minutes
 
-## Take 5 minutes 
 How do the scores change with forecast horizon?
 How similar to or different from each other are the metrics?
 Which of the additional dimensions mentioned at the top of the lesson would you like to examine more closely for forecast accuracy?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-  - All of the metrics increase for horizons where true incidence is higher. 
-  - The forecast errors are strongly associated with the seasonality of the data.
-:::
 
+-   All of the metrics increase for horizons where true incidence is higher.
+-   The forecast errors are strongly associated with the seasonality of the data.
+:::
 
 # Comparing three models at multiple time-points
 
-Let's run a real-life forecasting experiment now, comparing three different models. 
+Let's run a real-life forecasting experiment now, comparing three different models.
 The experimental set-up will be:
 
- - we will forecast from 3 different models
- - each model will make forecasts at every fourth week throughout the 2017/2018 season.
- - for each time a model makes a forecast, it will make it for 8 steps into the future.
+-   we will forecast from 3 different models
+-   each model will make forecasts at every fourth week throughout the 2017/2018 season.
+-   for each time a model makes a forecast, it will make it for 8 steps into the future.
 
-## Time-series cross-validation 
-This kind of experimental set-up is called "cross-validation". 
-And because we are doing this on time-series data, it is referred to as "time-series cross-validation". 
+## Time-series cross-validation
+
+This kind of experimental set-up is called "cross-validation".
+Running an experiment in this way mimics what happens during real-time forecasting, when forecasts are made each week using available data.
+And because we are doing this on time-series data, it is referred to as "time-series cross-validation".
 (If you are interested, you can read a little bit more about time-series cross-validation in the [FPP3 book](https://otexts.com/fpp3/tscv.html).)
 
-The image below (generated with some code extracted from ChatGPT, with just a few very small tweaks) shows the experimental set-up. 
+::: {.callout-note collapse="true"}
+## Real-time forecasting realism
+
+One thing about forecasting in real-time that is not replicated with the above experiment is that data in real-time are often incompletely reported (similar to data issues discussed in the first half of the course).
+In the experiment below, we are only subsetting the complete and final version of the data and assuming that this is what the model would have seen in real time.
+Knowing what we know about public health surveillance datasets, this is an optimistic assumption.
+To increase realism in an experiment like this, we could use `epidatr` to extract specific versions of data as they were available in real-time and forecast from those datasets.
+:::
+
+The image below (generated with some code extracted from ChatGPT, with just a few very small tweaks) shows the experimental set-up.
 Each row of tiles corresponds to one "split" of the data, or one week where we are making a forecast.
 Blue tiles correspond to "training set" weeks (weeks of data the model is able train on).
 There are actually many more weeks of training data, but they are omitted so we can focus on the red weeks.
@@ -406,14 +412,14 @@ ggplot(cv_df, aes(x = week, y = split, fill = type)) +
   theme_minimal()
 ```
 
-
-The code below shows how to use the `tsibble::stretch_tsibble()` function to set up the cross-validation experiment. 
+The code below shows how to use the `tsibble::stretch_tsibble()` function to set up the cross-validation experiment.
 We looked at the dataset itself and saw that we wanted the first split to have 732 training weeks of data (that brings us to the start of the 2017 season), so that is the `.init` argument.
 We want to make forecasts every 4 weeks, so we set `.step = 4`.
 And, we want the resulting dataset to have a column called `.split` which will define each separate dataset.
+
 ```{r}
 flu_data_tscv <- flu_data |> 
-  filter(epiweek <= as.Date("2018-07-01")) |> 
+  filter(epiweek <= as.Date("2018-06-01")) |> 
   tsibble::stretch_tsibble(
     .init = 732, 
     .step = 4,
@@ -426,18 +432,19 @@ The resulting dataset (the top of which is shown above), now has many more rows 
 
 For this experiment, let's define four models:
 
-1. a random walk: this is what it sounds like. Each forecast takes a random walk from the last observed value. This is equivalent to an ARIMA(0,1,0) model. 
-2. the AR(2) model that we fit earlier.
-3. a model that just has fourier terms.
-4. a model that has both the AR(2) and fourier terms.
+1.  a random walk: this is what it sounds like. Each forecast takes a random walk from the last observed value. This is equivalent to an ARIMA(0,1,0) model.
+2.  the AR(2) model that we fit earlier.
+3.  a model that just has fourier terms and no ARIMA terms (you have to specify `pdq(0,0,0)` otherwise `fable` will insert some auto-selected terms in there for you).
+4.  a model that has both the AR(2) and fourier terms.
 
 The following code generates the forecasts for each cross-validation split and for all horizons.
+
 ```{r}
 cv_forecasts <- flu_data_tscv |> 
   model(
     rw = RW(my_fourth_root(wili)),
     ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
-    fourier = ARIMA(my_fourth_root(wili) ~ fourier(period = "year", K=3)),
+    fourier = ARIMA(my_fourth_root(wili) ~ pdq(0,0,0) + fourier(period = "year", K=3)),
     fourier_ar2 = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3))
   ) |> 
   forecast(h = 8) |> 
@@ -449,9 +456,9 @@ cv_forecasts <- flu_data_tscv |>
   as_fable(response = "wili", distribution = wili)
 ```
 
-
 A common mistake in forecasting is to make forecasts and then just skip to looking at the metrics!
 Let's pause here to look at a few of the forecasts.
+
 ```{r}
 cv_forecasts |>
   filter(.split == 1) |> 
@@ -498,9 +505,8 @@ cv_forecasts |>
 
 ## Take 5 minutes
 
-Based on the above plots (and you could make a few more at different splits if you wanted to), which forecast model(s) do you expect to have the best forecast accuracy metrics? 
+Based on the above plots (and you could make a few more at different splits if you wanted to), which forecast model(s) do you expect to have the best forecast accuracy metrics?
 Why?
-
 
 ## Evaluating the experimental forecasts
 
@@ -514,9 +520,10 @@ cv_forecasts |>
   ) |> 
   arrange(crps)
 ```
+
 According to each metric, the `fourier_ar2` model is the most accurate overall.
 
-Often, results show differences across some of the experimental dimensions. 
+Often, results show differences across some of the experimental dimensions.
 Here, re-calculate the forecast errors and we plot the CRPS values as a function of horizon
 
 ```{r}
@@ -532,6 +539,7 @@ cv_forecasts |>
 ```
 
 And here we compute the error based on the week the forecast was made and compare it to the observed data.
+
 ```{r}
 p1 <- cv_forecasts |> 
   mutate(forecast_date = epiweek - h*7L) |> 
@@ -552,49 +560,48 @@ p2 <- flu_data |>
 gridExtra::grid.arrange(p1, p2)
 ```
 
+## Take 5 minutes
 
-
-
-## Take 5 minutes 
 How do the CRPS scores change based on horizon?
 How do the CRPS scores change based on forecast date?
 What do these results this tell you about the models?
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- The CRPS scores for all models increase with forecast horizon.
-At horizons 1 and 2 the errors are similar, alhough the `rw` model has moderately higher CRPS. 
-At larger horizons, there is a clearer distinction between the models, with the `fourier` and `fourier_ar2` models lower than the others, and `fourier_ar2` showing the best accuracy of any of the models
 
-- By forecast_date, the models show similar forecast error for dates early and late in the season with the larger differences coming at the weeks with higher incidence, especially around the "second peak" of the data. 
+**By horizon**
 
-- Projecting a flat line from the data (what the random walk does, essentially) does not do well at the important and dynamic times of the season.
-The combination of factoring in some auto-regressive and seasonal dynamics appears to do the best over this experiment.
+-   Notably, the accuracy declines (the CRPS increases) for all models across horizons except for the `fourier` model. This is because the fourier model is predicting the same thing every week: seasonal average. The forecast does not align itself with recent data observations, it just predicts the historical seasonal average.
+-   At horizons 1 and 2 the errors are similar for the `ar2`, `fourier_ar2` and `rw` models, although the `rw` model has moderately higher CRPS.
+-   At larger horizons, there is a clearer distinction between the models, with the `fourier` and `fourier_ar2` models lower than the others, and `fourier_ar2` showing the best accuracy of any of the models.
+-   It is interesting to see that around 8 weeks the `fourier_ar2` and `fourier` models converge in terms of accuracy. It seems that the auto-regressive components of the model seem to "add benefit" to the forecast accuracy for around 8 weeks. After that, a seasonal average is doing about the same.
+
+**By forecast date**
+
+-   By forecast_date, the models show similar forecast error for dates early and late in the season with the larger differences coming at the weeks with higher incidence.
+
+-   Projecting a flat line from the data (what the random walk does, essentially) does not do well at the important and dynamic times of the season.
+    The combination of factoring in some auto-regressive and seasonal dynamics appears to do the best over this experiment.
 :::
 
 # Going further
 
 ## Challenge
 
-- In which other ways could we summarise the performance of the forecasts?
-- What other metrics could we use?
-- Which aspects of forecast accuracy does CRPS address and how?
-- There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model and typically the metrics you use will depend on the context of the forecast. 
-What attributes of the forecast are most important to you?
-- One useful way to think about evaluating forecasts is to consider exploring the scores as a data analysis in its own right. 
-For example, you could look at how the scores change over time, how they change with different forecast horizons, or how they change with different models. 
-This can be a useful way to understand the strengths and weaknesses of your model. 
-Explore some of these aspects using the scores from this session.
-- Expand the experiment run in the session above to include forecasts made in every week, instead of every 4 weeks. Does this change the evaluation results?
+-   In which other ways could we summarise the performance of the forecasts?
+-   What other metrics could we use?
+-   Which aspects of forecast accuracy does CRPS address and how?
+-   There is no one-size-fits-all approach to forecast evaluation, often you will need to use a combination of metrics to understand the performance of your model and typically the metrics you use will depend on the context of the forecast. What attributes of the forecast are most important to you?
+-   One useful way to think about evaluating forecasts is to consider exploring the scores as a data analysis in its own right. For example, you could look at how the scores change over time, how they change with different forecast horizons, or how they change with different models. This can be a useful way to understand the strengths and weaknesses of your model. Explore some of these aspects using the scores from this session.
+-   Expand the experiment run in the session above to include forecasts made in every week, instead of every 4 weeks. Does this change the evaluation results?
 
 ## Methods in practice
 
-- There are many other metrics that can be used to evaluate forecasts. 
-The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-details.html) for the `{scoringutils}` package has a good overview of these metrics and how to use them.
+-   There are many other metrics that can be used to evaluate forecasts. The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-details.html) for the `{scoringutils}` package has a good overview of these metrics and how to use them.
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+-   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
 
 ::: {#refs}
 :::
