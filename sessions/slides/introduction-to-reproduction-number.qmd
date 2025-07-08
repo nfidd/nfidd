@@ -38,14 +38,19 @@ Here rather than the time from *infection* (person A) to *symptoms* (person B, i
 
 This is known as the generation time distribution ($g(t)$).
 
-Using the same notation as before, we can write the convolution as:
+## Generation time: notation
+
+We can write the convolution as:
 
 $$
 I_t = \mathrm{scaling} \times \sum_{t' < t} I_t' g(t - t')
 $$
 
 However, unlike the infection to symptoms case here we don't assume that the two time series have the same magnitude so need to introduce a scaling.
-What is this scaling?
+
+. . .
+
+**What is this scaling?**
 
 ## The scaling factor: reproduction number
 
