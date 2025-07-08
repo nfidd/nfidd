@@ -48,8 +48,8 @@ infections <- data.frame(
 ggplot(infections, aes(y = person)) +
   geom_segment(aes(x = infection_day, xend = onset_day), 
                arrow = arrow(length = unit(0.3, "cm")), size = 1.2) +
-  geom_point(aes(x = infection_day), color = "red", size = 3) +
-  geom_point(aes(x = onset_day), color = "blue", size = 3) +
+  geom_point(aes(x = infection_day), color = "red", size = 5) +
+  geom_point(aes(x = onset_day), color = "blue", size = 5) +
   labs(x = "Day", y = "Individual", 
        title = "Individual delays from infection to symptom onset") +
   theme_minimal() +
