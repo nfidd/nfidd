@@ -82,7 +82,7 @@ set.seed(42) ## for Douglas Adams!
 ```
 ::::
 
-# Loading data to forecast
+# Loading data
 
 As we have done in previous sessions, we will load some ILI data using the `epidatr` package,
 
@@ -93,7 +93,7 @@ flu_data <- epidatr::pub_fluview(regions = c("nat"),
   as_tsibble(index = epiweek, key = region)
 ```
 
-and define a fourth-root transformation
+and define a fourth-root transformation for our forecast models
 
 ```{r fourth-root}
 fourth_root <- function(x) x^0.25
@@ -138,7 +138,7 @@ cv_forecasts <- cv_models |>
   group_by(.split, .model) |> 
   mutate(h = row_number()) |> 
   ungroup() |> 
-  ## this ensures that the output is a table object
+  ## this ensures that the output is a fable object
   as_fable(response = "wili", distribution = wili)
 ```
 
@@ -172,20 +172,6 @@ sampled_forecasts <- generate(
   mutate(h = row_number())
 ```
 
-Generate the hubverse-style ensemble, glossing over explanation of all the task-id column settings
-
-```{r}
-ensemble_forecast <- hubEnsembles::linear_pool(
-  sampled_forecasts_hub,
-  n_output_samples = 100,
-  model_id = "my-ensemble",
-  task_id_cols = c("forecast_date", "h", "target_epiweek"), ## columns that define a forecast task
-  compound_taskid_set = c("forecast_date"), ## column that defines a single trajectory
-  derived_task_ids = c("target_epiweek")    ## column that can be derived from the others
-  )   
-```
-
-## visualize the forecasts?
 
 # Forecast ensembles
 
@@ -197,14 +183,14 @@ This procedure is also sometimes called *stacking*, and the resulting forecasts 
 We will first consider forecasts based on the individual quantiles of each model.
 This corresponds to a situation where each forecast aims to correctly determine a single target predictive distribution.
 By taking an average of all models, we aim to get a better estimate of this distribution than from the individual models.
-If we have reason to believe that some models are better than others at estimating this distribution, we can create a weighted version of this average.
+If we have reason to believe that some models are **consistently** better than others at estimating this distribution, we could try to create a weighted version of this average.
 
 ### Converting sample-based forecasts to quantile-based forecasts
 
-As in this session we will be thinking about forecasts in terms quantiles of the predictive distributions, we will need to convert our sample based forecasts to quantile-based forecasts.
-We will do this by focusing at the *marginal distribution* at each predicted time point, that is we treat each time point as independent of all others and calculate quantiles based on the sample predictive trajectories at that time point.
+In this session we will be thinking about forecasts in terms quantiles of the predictive distributions, we will need to convert our sample based forecasts to quantile-based forecasts.
+We will do this by focusing on the *marginal distribution* at each predicted time point, that is we treat each time point as independent of all others and calculate quantiles based on the sample predictive trajectories at that time point.
 An easy way to do this is to use the `hubUtils` package, which has utility functions for interacting with hubverse-style data.
-The steps to do this are to first declare the forecasts as `sample` forecasts.
+The steps to do this are to first do some reformatting so the forecasts can be seen as hubverse-style `sample` forecasts.
 
 ```{r convert-for-hubverse}
 sampled_forecasts_hub <- sampled_forecasts |> 
@@ -226,7 +212,7 @@ sampled_forecasts_hub <- sampled_forecasts |>
 sampled_forecasts_hub
 ```
 
-and then convert to `quantile` forecasts.
+Now we convert these `sample` forecasts to `quantile` forecasts.
 
 ```{r convert-to-quantile}
 quantiles_to_save <- c(0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.975)
@@ -284,7 +270,7 @@ median_ensemble <- quantile_forecasts |>
 We combine the ensembles into a single data frame along with the individual forecasts in order to make visualisation easier.
 
 ```{r combine-ensembles}
-simple_ensembles <- bind_rows(
+all_quantile_forecasts <- bind_rows(
   mean_ensemble,
   median_ensemble,
   quantile_forecasts
@@ -295,10 +281,11 @@ simple_ensembles <- bind_rows(
 
 How do these ensembles visually differ from the individual models?
 Lets start by plotting a single forecast from each model and comparing them.
+Here we are using the `hubVis` package which creates (by default) an interactive figure using `plotly`. 
 
 ```{r plot-single-forecasts}
 hubVis::plot_step_ahead_model_output(
-  model_out_tbl = simple_ensembles,
+  model_out_tbl = all_quantile_forecasts,
   target_data = flu_data |> 
     rename(observation = wili) |> 
     filter(epiweek >= as.Date("2017-09-01")),
@@ -314,7 +301,7 @@ hubVis::plot_step_ahead_model_output(
 ```
 
 ::: callout-tip
-##### Take 2 minutes
+##### Take 5 minutes
 
 How do these ensembles differ from each other?
 (Hint: the plot above is interactive, so you can zoom in/out and click on one model in the legend to select/de-select a model for targeted comparison.)
@@ -324,8 +311,8 @@ How do these ensembles differ from each other?
 ##### Solution
 
 The ensembles are mostly very similar to each other, except for during the peak of the season, when the `fourier` model is predicting something very different from the other forecasts.
-In those cases, the mean is impacted more, since that single outlying forecast pulls the mean down.
-However, median remains close to the three other models that have close agreement, at least for the first few horizons.
+In those cases, the mean ensemble is impacted more, since that single outlying forecast pulls the mean down at various quantile levels.
+However, the median ensemble remains close to the three other models that have close agreement, at least for the first few horizons.
 :::
 
 #### Evaluation
@@ -334,24 +321,18 @@ As in the [forecast evaluation session](forecast-evaluation), we can evaluate th
 Here, instead of using the `fable` utilities, we will start to use the hubverse `hubEvals` package which relies on the `scoringutils` package under the hood.
 
 In the hubverse, there is a representation of observations called [`oracle output` data](https://docs.hubverse.io/en/latest/user-guide/target-data.html#oracle-output).
-This is a way of representing an observed data point as if it were a prediction from an oracle model.
-The package `hubEvals` expects observations to be stored in this format, so we will first begin by restrucurting the `flu_data` into this format.
+This is a way of representing an observed data point as if it were a prediction from an oracle model, that is, one that knows the future before it happens.
+The package `hubEvals` expects observations to be stored in this format, so we will first begin by restructuring the `flu_data` into this format.
 
 ```{r make-oracle-output}
-target_epiweeks <- unique(all_forecasts$epiweek)
+target_epiweeks <- unique(all_quantile_forecasts$target_epiweek)
 
-flu_data |> 
+oracle_output <- flu_data |> 
   filter(epiweek %in% target_epiweeks) |> 
-  
-```
+  rename(target_epiweek = epiweek,
+         oracle_value = wili) |> 
+  select(-region)
 
-Now we are ready to compute some scores
-
-```{r score-ensembles}
-hubEvals::score_model_out(
-  all_forecasts,
-  
-)
 ```
 
 ::: callout-note
@@ -363,10 +344,17 @@ We see it here as we are scoring quantiles and known distributions hence we cann
 
 Again we start with a high level overview of the scores by model.
 
+
 ```{r score-overview}
-ensemble_scores |>
-  summarise_scores(by = c("model"))
+forecast_scores <- hubEvals::score_model_out(
+  all_quantile_forecasts,
+  oracle_output, 
+  by = "model_id"
+)
+forecast_scores|> 
+  arrange(wis)
 ```
+
 
 ::: callout-tip
 ##### Take 5 minutes
@@ -382,8 +370,9 @@ What other scoring breakdowns might you want to look at?
 What do you think the scores are telling you?
 Which model do you think is best?
 
--   The mean ensemble appears to be the best performing ensemble model overall.
--   However, the more mechanistic model appears to be the best performing model overall.
+-   The `fourier_ar2` model appears to be the best performing ensemble model overall according to WIS, although both ensemble models have less bias.
+-   Often ensemble forecasts will be better than all individual models, but as this example shows, this is not always the case. 
+It is often not the case when one model is substantially better than the others, so the ensemble gives too much weight to models that aren't that good.
 
 What other scoring breakdowns might you want to look at?
 
@@ -395,10 +384,11 @@ What other scoring breakdowns might you want to look at?
 A simple method that is often used to improve ensemble performance is to prune out models that perform very poorly.
 Balancing this can be tricky however as it can be hard to know how much to prune.
 The key tradeoff to consider is how much to optimise for which models have performed well in the past (and what your definition of the past is, for example all time or only the last few weeks) versus how much you want to allow for the possibility that these models may not perform well in the future.
+There is strong evidence from multiple forecasting challenges that forecast accuracy from a given model can vary widely over time.[ray_comparing_2023] 
 
 #### Construction
 
-As we just saw, the random walk model (our original baseline model) is performing poorly in comparison to the other models.
+As we just saw, the random walk model is performing poorly in comparison to the other models.
 We can remove this model from the ensemble and see if this improves the performance of the ensemble.
 
 ::: callout-warning
@@ -409,34 +399,28 @@ In the real world you would not do this as you would not have access to the test
 :::
 
 ```{r remove-rw}
-filtered_models <- quantile_forecasts |>
-  filter(model != "Random walk")
+filtered_forecasts <- quantile_forecasts |>
+  filter(model_id != "rw")
 ```
 
 We then need to recalculate the ensembles.
 First the mean ensemble,
 
 ```{r recalculate-ensembles}
-filtered_mean_ensembles <- filtered_models |>
-  as_tibble() |>
-  summarise(
-    predicted = mean(predicted),
-    observed = unique(observed),
-    model = "Mean filtered ensemble",
-    .by = c(origin_day, horizon, quantile_level, day)
+filtered_mean_ensembles <- filtered_forecasts |>
+  hubEnsembles::simple_ensemble(
+    model_id = "mean_ensemble_filtered",
+    agg_fun = mean ## this is the default, but writing it to be explicit
   )
 ```
 
 and then the median ensemble.
 
 ```{r recalculate-median-ensemble}
-filtered_median_ensembles <- filtered_models |>
-  as_tibble() |>
-  summarise(
-    predicted = median(predicted),
-    observed = unique(observed),
-    model = "Median filtered ensemble",
-    .by = c(origin_day, horizon, quantile_level, day)
+filtered_median_ensembles <- filtered_forecasts |>
+  hubEnsembles::simple_ensemble(
+    model_id = "median_ensemble_filtered",
+    agg_fun = median ## this is the default, but writing it to be explicit
   )
 ```
 
@@ -446,7 +430,7 @@ We combine these new ensembles with our previous ensembles in order to make visu
 filtered_ensembles <- bind_rows(
   filtered_mean_ensembles,
   filtered_median_ensembles,
-  simple_ensembles
+  all_quantile_forecasts
 )
 ```
 
@@ -455,41 +439,29 @@ filtered_ensembles <- bind_rows(
 As for the simple ensembles, we can plot a single forecast from each model and ensemble.
 
 ```{r plot-single-filtered-forecasts}
-filtered_ensembles |>
-  filter(origin_day == 57) |>
-  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
+hubVis::plot_step_ahead_model_output(
+  model_out_tbl = filtered_ensembles,
+  target_data = flu_data |> 
+    rename(observation = wili) |> 
+    filter(epiweek >= as.Date("2017-09-01")),
+  use_median_as_point = TRUE,
+  x_col_name = "target_epiweek",
+  x_target_col_name = "epiweek",
+  facet = "forecast_date",
+  facet_nrow = 3,
+  intervals = 0.8,
+  fill_transparency = 0.5,
+  interactive = TRUE
+)
 ```
 
-and on the log scale.
-
-```{r plot-single-filtered-forecasts-log}
-filtered_ensembles |>
-  filter(origin_day == 57) |>
-  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
-  scale_y_log10()
-```
-
-To get an overview we also plot a range of forecasts from each model and ensemble.
-
-```{r plot-multiple-filtered-forecasts}
-plot_multiple_filtered_forecasts <- filtered_ensembles |>
-  plot_ensembles(onset_df |> filter(day >= 21)) +
-  lims(y = c(0, 400))
-plot_multiple_filtered_forecasts
-```
-
-and on the log scale.
-
-```{r plot-multiple-filtered-forecasts-log}
-plot_multiple_filtered_forecasts +
-  scale_y_log10()
-```
 
 ::: callout-tip
 ##### Take 2 minutes
 
-How do the filtered ensembles compare to the simple ensembles?
-Which do you think is best?
+Use the interactive plot above to answer these questions.
+How do the mean and median filtered ensembles compare to their simple ensemble counterparts?
+Which of the two filtered ensembles do you think is better?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -497,33 +469,27 @@ Which do you think is best?
 
 How do the filtered ensembles compare to the simple ensembles?
 
--   The filtered ensembles appear to be less variable than the simple ensembles.
--   The filtered ensembles appear to be more like the mechanistic model than the simple ensembles.
+-   The filtered ensembles appear to be less variable and closer to the eventual observations than the simple ensembles, especially during times of rapid change.
 
 Which do you think is best?
 
--   Visually, the filtered ensembles appear very similar. This makes sense given we know there are only two models left in the ensemble.
+-   Visually, the filtered ensembles appear very similar. 
+This makes sense given we know there are only three models left in the ensemble.
+There are a few places where it appears the median is a bit closer to the observed data.
 :::
 
 #### Evaluation
 
-Let us score the filtered ensembles.
+Let us score the filtered ensembles to obtain a high level overview of the scores by model.
 
 ```{r score-filtered-ensembles}
-filtered_ensemble_scores <- filtered_ensembles |>
-  as_forecast_quantile(
-    forecast_unit = c(
-      "origin_day", "horizon", "model"
-    )
-  ) |>
-  score()
-```
-
-Again we can get a high level overview of the scores by model.
-
-```{r score-overview-filtered}
-filtered_ensemble_scores |>
-  summarise_scores(by = c("model"))
+filtered_forecast_scores <- hubEvals::score_model_out(
+  filtered_ensembles,
+  oracle_output, 
+  by = "model_id"
+)
+filtered_forecast_scores |> 
+  arrange(wis)
 ```
 
 ::: callout-tip
@@ -538,147 +504,159 @@ How do the filtered ensembles compare to the simple ensembles?
 How do the filtered ensembles compare to the simple ensembles?
 
 -   The filtered ensembles appear to be more accurate than the simple ensembles.
--   As you would expect they are an average of the more mechanistic model and the more statistical model.
--   As there are only two models in the ensemble, the median and mean ensembles are identical.
--   For the first time there are features of the ensemble that outperform the more mechanistic model though it remains the best performing model overall.
+-   The ensembles still do not quite beat out the `fourier_ar2` model, although the gap has narrowed. 
+-   In general, the median ensemble improved more than the mean ensemble after the filtering.
 :::
 
 ### Weighted ensembles
 
 The simple mean and median we used to average quantiles earlier treats every model as the same.
-We could try to improve performance by replacing this with a weighted mean (or weighted median), for example given greater weight to models that have proven to make better forecasts.
+We could try to improve performance by replacing this with a weighted mean (or weighted median), for example giving greater weight to models that have made better forecasts in the past.
 Here we will explore two common weighting methods based on quantile averaging:
 
 -   Inverse WIS weighting
 -   Quantile regression averaging
 
-Inverse WIS weighting is a simple method that weights the forecasts by the inverse of their WIS over some period (note that identifying what this period should be in order to produce the best forecasts is not straightforward as predictive performance may vary over time if models are good at different things).
+Inverse WIS weighting is a simple method that weights the forecasts by the inverse of their WIS over some period.
+(Note that identifying what this period should be in order to produce the best forecasts is not straightforward as predictive performance may vary over time if models are good at different things).
 The main benefit of WIS weighting over other methods is that it is simple to understand and implement.
 However, it does not optimise the weights directly to produce the best forecasts.
 It relies on the hope that giving more weight to better performing models yields a better ensemble
 
 Quantile regression averaging (QRA), on the other hand, optimises the weights directly in order to yield the best scores on past data.
 
-#### Construction
+:::: {.callout-note collapse="true"}
+#### Does weighting improve ensemble forecasts?
 
-##### Inverse WIS weighting
+There is a rich literature on weighting individual forecasts to improve an ensemble.
+In epidemiological forecasting, the track record is mixed.
+In settings where a long track record (multiple seasons) of performance can be measured and where the accuracy of individual models doesn't vary too much, then weighting has been shown to help with influenza[@reich_accuracy_2019], dengue fever[@colon-gonzalez_probabilistic_2021], and some COVID-19[@ray_comparing_2023] forecasts.
+However, in forecasting COVID-19 cases and hospitalizations, where model performance fluctuated over time, it was harder to see improvements in weighted ensembles.[@ray_comparing_2023]
 
-In order to perform inverse WIS weighting we first need to calculate the WIS for each model.
-We already have this from the previous evaluation so we can reuse this.
+However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989,@claeskens_forecast_2016] 
+::::
 
-```{r calc-wis}
-model_scores <- quantile_forecasts |>
-  score()
-cumulative_scores <- list()
-## filter for scores up to the origin day of the forecast
-for (day_by in unique(model_scores$origin_day)) {
-  cumulative_scores[[as.character(day_by)]] <- model_scores |>
-    filter(origin_day < day_by) |>
-    summarise_scores(by = "model") |>
-    mutate(day_by = day_by)
-}
-weights_per_model <- bind_rows(cumulative_scores) |>
-  select(model, day_by, wis) |>
-  mutate(inv_wis = 1 / wis) |>
-  mutate(
-    inv_wis_total_by_date = sum(inv_wis), .by = day_by
-  ) |>
-  mutate(weight = inv_wis / inv_wis_total_by_date) |> ## normalise
-  select(model, origin_day = day_by, weight)
+<!-- #### Construction -->
 
-weights_per_model |>
-  pivot_wider(names_from = model, values_from = weight)
-```
+<!-- ##### Inverse WIS weighting -->
 
-Now lets apply the weights to the forecast models.
-As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
+<!-- In order to perform inverse WIS weighting we first need to calculate the WIS for each model. -->
+<!-- We already have this from the previous evaluation so we can reuse this. -->
 
-```{r apply-weights}
-inverse_wis_ensemble <- quantile_forecasts |>
-  as_tibble() |>
-  left_join(
-    weights_per_model |>
-      mutate(origin_day = origin_day + 14),
-    by = c("model", "origin_day")
-  ) |>
-  # assign equal weights if no weights are available
-  mutate(weight = ifelse(is.na(weight), 1/3, weight)) |>
-  summarise(
-    predicted = sum(predicted * weight),
-    observed = unique(observed),
-    model = "Inverse WIS ensemble",
-    .by = c(origin_day, horizon, quantile_level, day)
-  )
-```
+<!-- ```{r calc-wis} -->
+<!-- model_scores <- quantile_forecasts |> -->
+<!--   score() -->
+<!-- cumulative_scores <- list() -->
+<!-- ## filter for scores up to the origin day of the forecast -->
+<!-- for (day_by in unique(model_scores$origin_day)) { -->
+<!--   cumulative_scores[[as.character(day_by)]] <- model_scores |> -->
+<!--     filter(origin_day < day_by) |> -->
+<!--     summarise_scores(by = "model") |> -->
+<!--     mutate(day_by = day_by) -->
+<!-- } -->
+<!-- weights_per_model <- bind_rows(cumulative_scores) |> -->
+<!--   select(model, day_by, wis) |> -->
+<!--   mutate(inv_wis = 1 / wis) |> -->
+<!--   mutate( -->
+<!--     inv_wis_total_by_date = sum(inv_wis), .by = day_by -->
+<!--   ) |> -->
+<!--   mutate(weight = inv_wis / inv_wis_total_by_date) |> ## normalise -->
+<!--   select(model, origin_day = day_by, weight) -->
 
-##### Quantile regression averaging
+<!-- weights_per_model |> -->
+<!--   pivot_wider(names_from = model, values_from = weight) -->
+<!-- ``` -->
 
-We futher to perform quantile regression averaging (QRA) for each forecast date.
-Again we need to consider how many previous forecasts we wish to use to inform each ensemble forecast.
-Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble.
-We use the `qrensemble` package to perform this task.
+<!-- Now lets apply the weights to the forecast models. -->
+<!-- As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble. -->
 
-```{r qra}
-forecast_dates <- quantile_forecasts |>
-  as_tibble() |>
-  pull(origin_day) |>
-  unique()
+<!-- ```{r apply-weights} -->
+<!-- inverse_wis_ensemble <- quantile_forecasts |> -->
+<!--   as_tibble() |> -->
+<!--   left_join( -->
+<!--     weights_per_model |> -->
+<!--       mutate(origin_day = origin_day + 14), -->
+<!--     by = c("model", "origin_day") -->
+<!--   ) |> -->
+<!--   # assign equal weights if no weights are available -->
+<!--   mutate(weight = ifelse(is.na(weight), 1/3, weight)) |> -->
+<!--   summarise( -->
+<!--     predicted = sum(predicted * weight), -->
+<!--     observed = unique(observed), -->
+<!--     model = "Inverse WIS ensemble", -->
+<!--     .by = c(origin_day, horizon, quantile_level, day) -->
+<!--   ) -->
+<!-- ``` -->
 
-qra_by_forecast <- function(
-  quantile_forecasts,
-  forecast_dates,
-  group = c("target_end_date"), 
-  ...
-) {
-  lapply(forecast_dates, \(x) {
-    quantile_forecasts |>
-      mutate(target_end_date = x) |>
-      dplyr::filter(origin_day <= x) |>
-      dplyr::filter(origin_day >= x - (3 * 7 + 1)) |>
-      dplyr::filter(origin_day == x | day <= x) |>
-      qra(
-        group = group,
-        target = c(origin_day = x),
-        ...
-      )
-  })
-}
+<!-- ##### Quantile regression averaging -->
 
-qra_ensembles_obj <- qra_by_forecast(
-  quantile_forecasts,
-  forecast_dates[-1],
-  group = c("target_end_date")
-)
+<!-- We futher to perform quantile regression averaging (QRA) for each forecast date. -->
+<!-- Again we need to consider how many previous forecasts we wish to use to inform each ensemble forecast. -->
+<!-- Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble. -->
+<!-- We use the `qrensemble` package to perform this task. -->
 
-qra_weights <- seq_along(qra_ensembles_obj) |>
-  lapply(\(i) attr(qra_ensembles_obj[[i]], "weights") |>
-    mutate(origin_day = forecast_dates[i + 1])
-  ) |>
-  bind_rows() |>
-  dplyr::filter(quantile == 0.5) |>
-  select(-quantile)
+<!-- ```{r qra} -->
+<!-- forecast_dates <- quantile_forecasts |> -->
+<!--   as_tibble() |> -->
+<!--   pull(origin_day) |> -->
+<!--   unique() -->
 
-qra_ensembles <- qra_ensembles_obj |>
-  bind_rows()
-```
+<!-- qra_by_forecast <- function( -->
+<!--   quantile_forecasts, -->
+<!--   forecast_dates, -->
+<!--   group = c("target_end_date"),  -->
+<!--   ... -->
+<!-- ) { -->
+<!--   lapply(forecast_dates, \(x) { -->
+<!--     quantile_forecasts |> -->
+<!--       mutate(target_end_date = x) |> -->
+<!--       dplyr::filter(origin_day <= x) |> -->
+<!--       dplyr::filter(origin_day >= x - (3 * 7 + 1)) |> -->
+<!--       dplyr::filter(origin_day == x | day <= x) |> -->
+<!--       qra( -->
+<!--         group = group, -->
+<!--         target = c(origin_day = x), -->
+<!--         ... -->
+<!--       ) -->
+<!--   }) -->
+<!-- } -->
 
-Instead of creating a single optimised ensemble and using this for all forecast horizons we might also want to consider a separate optimised QRA ensemble for each forecast horizon, reflecting that models might perform differently depending on how far ahead a forecast is produced.
-We can do this using `qra()` with the `group` argument.
+<!-- qra_ensembles_obj <- qra_by_forecast( -->
+<!--   quantile_forecasts, -->
+<!--   forecast_dates[-1], -->
+<!--   group = c("target_end_date") -->
+<!-- ) -->
 
-```{r qra-by-horizon}
-qra_ensembles_by_horizon <- qra_by_forecast(
-  quantile_forecasts,
-  forecast_dates[-c(1:2)],
-  group = c("horizon", "target_end_date"),
-  model = "QRA by horizon"
-)
+<!-- qra_weights <- seq_along(qra_ensembles_obj) |> -->
+<!--   lapply(\(i) attr(qra_ensembles_obj[[i]], "weights") |> -->
+<!--     mutate(origin_day = forecast_dates[i + 1]) -->
+<!--   ) |> -->
+<!--   bind_rows() |> -->
+<!--   dplyr::filter(quantile == 0.5) |> -->
+<!--   select(-quantile) -->
 
-qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |>
-  lapply(\(i) attr(qra_ensembles_by_horizon[[i]], "weights") |>
-    mutate(origin_day = forecast_dates[i + 2])
-  ) |>
-  bind_rows()
-```
+<!-- qra_ensembles <- qra_ensembles_obj |> -->
+<!--   bind_rows() -->
+<!-- ``` -->
+
+<!-- Instead of creating a single optimised ensemble and using this for all forecast horizons we might also want to consider a separate optimised QRA ensemble for each forecast horizon, reflecting that models might perform differently depending on how far ahead a forecast is produced. -->
+<!-- We can do this using `qra()` with the `group` argument. -->
+
+<!-- ```{r qra-by-horizon} -->
+<!-- qra_ensembles_by_horizon <- qra_by_forecast( -->
+<!--   quantile_forecasts, -->
+<!--   forecast_dates[-c(1:2)], -->
+<!--   group = c("horizon", "target_end_date"), -->
+<!--   model = "QRA by horizon" -->
+<!-- ) -->
+
+<!-- qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |> -->
+<!--   lapply(\(i) attr(qra_ensembles_by_horizon[[i]], "weights") |> -->
+<!--     mutate(origin_day = forecast_dates[i + 2]) -->
+<!--   ) |> -->
+<!--   bind_rows() -->
+<!-- ``` -->
+
 
 ## Sample-based weighted ensembles
 
