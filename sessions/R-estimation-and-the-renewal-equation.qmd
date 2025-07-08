@@ -238,7 +238,7 @@ ggplot(inf_posterior, mapping = aes(x = infection_day)) +
        subtitle = "Model 1: renewal equation from infections")
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other?
@@ -276,7 +276,7 @@ r_inf_mod <- nfidd_cmdstan_model("estimate-inf-and-r")
 r_inf_mod
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 Familiarise yourself with the model above.
@@ -356,7 +356,7 @@ ggplot(
   geom_line(alpha = 0.1)
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 What do you think of these estimates? 
@@ -415,8 +415,8 @@ You can have a look at an R function for performing the geometric random walk:
 geometric_random_walk
 ```
 
-::: .{callout-tip}
-## Take 5 minutes
+::: callout-tip
+## Take 2 minutes
 
 Look at this function and try to understand what it does.
 Note that we use the fact that we can generate a random normally distributed variable $X$ with mean 0 and standard deviation $\sigma$ by mutiplying a standard normally distributed variable (i.e., mean 0 and standard deviation 1) $Y$ with $\sigma$.
@@ -442,7 +442,7 @@ ggplot(data, aes(x = t, y = R)) +
        y = "R")
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 Repeat this multiple times, either with the same parameters or changing some to get a feeling for what this does compared to the normal(1,1) prior.
@@ -524,7 +524,7 @@ ggplot(
        subtitle = "Model 3: renewal equation with random walk")
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 What do you think of these estimates? 
@@ -578,7 +578,7 @@ ggplot(
   theme(legend.position = "bottom")
 ```
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 Revisit your answers to the previous questions in this session. 
@@ -596,7 +596,7 @@ The random walk model is the most realistic model, as it is able to capture the 
 The model that fits directly to infections is the best fit for the data, but depends on the availability of infections data which in practice is never available.
 :::
 
-::: .{callout-tip}
+::: callout-tip
 ## Take 2 minutes
 
 Compare the results across the models used in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
