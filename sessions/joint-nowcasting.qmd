@@ -65,8 +65,12 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 ## Motivation
 
-In the [nowcasting concepts session](sessions/nowcasting) we saw that getting the delay distribution wrong can lead to very poor nowcasts. 
-We also saw that simple nowcasting models don't fully account for uncertainty or observation error in the primary events.
+So far we have assumed that the delay distribution is known. 
+In practice, this is often not the case and we need to estimate it from the data.
+As we discussed in the [session on biases in delay distributions](sessions/biases-in-delay-distributions), this can be done using individual data and then passing this estimate to a simple nowcasting model.
+However, this has the disadvantage that the nowcasting model does not take into account the uncertainty in the delay distribution or observation error of the primary events (and potentially some other issues we will cover in this session).
+
+In the [nowcasting concepts session](sessions/nowcasting) we also saw that getting the delay distribution wrong can lead to very poor nowcasts.
 
 A better approach is to jointly estimate the delay distribution together with the nowcast. 
 This builds on the data simulation approach we used in the concepts session, but now we model the entire process at the population level with observation error.
