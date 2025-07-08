@@ -142,8 +142,7 @@ cv_forecasts <- cv_models |>
   as_fable(response = "wili", distribution = wili)
 ```
 
-Plot all the forecasts
-
+We plot all the forecasts, with one plot for each cross-validation split of the data.
 ```{r}
 autoplot(
   cv_forecasts,
@@ -154,14 +153,44 @@ autoplot(
   theme(legend.position = "bottom")
 ```
 
-Motivate pivot to hubverse-style data:
+# Forecast representation and format
 
--   `fable` is good for simple models, but we want and need more complexity (e.g., the standard `fable` ensemble tool broke when trying to ensemble these 4 models together)
--   more generic format for model output coming from different places
+One important thing about working with forecast data in practice is that following some standard ways of representing individual forecasts can make it easier to do a wider range of analyses with a broad array of models.
+While `fable` is good for some fairly simple modeling, we will want and need more complexity and a more flexible representation of forecast data.
+In this section, we will start using hubverse-style data for forecast output formats. 
 
-## callout tip on what is the hubverse
+::: callout-tip
+## What is the hubverse?
 
-Generate some samples for easier hubverse storage and conversion
+The [hubverse](https://hubverse.io/) is a project designed to improve public health outcomes through collaborative modeling. 
+Hubverse data standards and software support collaborative modeling "hubs" around the world, including in Europe, Paraguay, Australia, the US and Canada.
+The standards were developed for and by folks doing epidemiological forecasting and projections, but they are general and could be used by practitioners in other fields as well.
+
+Two key hubverse terms to keep in mind are:
+
+ -   A **modeling task** is a specific thing that is being predicted. 
+ It is represented by a specific set of variables that the hubverse calls "task-id variables". 
+ In the example that we have been working with, the modeling task is defined by the date the forecast is made (`"forecast_date"`) and the horizon being predicted (`"h"`).
+ Note that we have also been predicting for a given location (`"region"`), although we've only been predicting for one location so far.
+ Also, each prediction refers to a specific epiweek (`"target_epiweek"`) although this is entirely defined by `"forecast_date"` and `"h"`, so in this way we can think of it as a "derived" variable.
+ -   A **output type** refers to the way that a specific prediction is represented in data.
+ Common output types are mean, median, quantile and sample. 
+ The hubverse documentation site has [more detail on these and other output types](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
+
+:::
+
+A strength of the hubverse data standards is that it facilitates comparison and synthesis of models that are made with a wide variety of different modeling tools. 
+If you can format your output data according to the simple standards, then your model could be part of a modeling hub.
+
+## Reformatting model output
+
+Forecasts in `fable` follow their own standard format, and interacting with them requires an advanced understanding of `tibble` objects.
+Most of the `fable` models that we have used return distributional objects (a standard representation of, say, a Normal distribution) as the output, although some models return samples by default.
+We will migrate our existing forecasts from `fable` models into samples, as this is a flexible format.
+However, we will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output. 
+If we were worried about this (and not so worried about eating up the RAM on our computer), we could extract many thousands of samples to reduce variability in the output.
+
+To start with, we will use the `generate()` function to create 100 sampled trajectories (at 1 to 8 weeks ahead) from each of the fitted models above.
 
 ```{r}
 sampled_forecasts <- generate(
@@ -170,27 +199,11 @@ sampled_forecasts <- generate(
   times=100) |> 
   group_by(.split, region, .model, .rep) |> 
   mutate(h = row_number())
+sampled_forecasts
 ```
 
-
-# Forecast ensembles
-
-We will now move to creating forecasts as a combination of multiple forecasts.
-This procedure is also sometimes called *stacking*, and the resulting forecasts are said to come from *ensembles* of forecast models.
-
-## Quantile-based ensembles
-
-We will first consider forecasts based on the individual quantiles of each model.
-This corresponds to a situation where each forecast aims to correctly determine a single target predictive distribution.
-By taking an average of all models, we aim to get a better estimate of this distribution than from the individual models.
-If we have reason to believe that some models are **consistently** better than others at estimating this distribution, we could try to create a weighted version of this average.
-
-### Converting sample-based forecasts to quantile-based forecasts
-
-In this session we will be thinking about forecasts in terms quantiles of the predictive distributions, we will need to convert our sample based forecasts to quantile-based forecasts.
-We will do this by focusing on the *marginal distribution* at each predicted time point, that is we treat each time point as independent of all others and calculate quantiles based on the sample predictive trajectories at that time point.
-An easy way to do this is to use the `hubUtils` package, which has utility functions for interacting with hubverse-style data.
-The steps to do this are to first do some reformatting so the forecasts can be seen as hubverse-style `sample` forecasts.
+These forecasts above are still in `fable`-style formatting.
+The code below renames and reformats columns and makes this valid hubverse-style model output.
 
 ```{r convert-for-hubverse}
 sampled_forecasts_hub <- sampled_forecasts |> 
@@ -211,6 +224,45 @@ sampled_forecasts_hub <- sampled_forecasts |>
          value)
 sampled_forecasts_hub
 ```
+
+One of the foundational data structures for hubverse-style output is the three columns:
+
+- `output_type`: here we have `sample` trajectories
+- `output_type_id`: for `sample` output type, this column contains unique IDs that identify, for each `forecast_date`, which rows are from the same trajectory.
+- `value`: this is the actual predicted value.
+
+We can quickly visualize these sample trajectory outputs to see the structure of the forecasts for one week and one model:
+```{r}
+sampled_forecasts_hub |> 
+  filter(forecast_date == as.Date("2018-01-14"),
+         model_id == "fourier_ar2") |> 
+  ggplot() +
+  geom_line(aes(x = target_epiweek, y = value, group = output_type_id), 
+            color = "red",
+            alpha = 0.2) +
+  geom_line(data = flu_data |> filter(epiweek >= as.Date("2017-09-01")), 
+            aes(x=epiweek, y=wili))
+```
+
+
+# Forecast ensembles
+
+Now that we have standardized our data formatting, we will now move to creating forecasts as a combination of multiple forecasts.
+This procedure is also sometimes called *stacking*, and the resulting forecasts are said to come from *ensembles* of forecast models.
+
+## Quantile-based ensembles
+
+We will first consider forecasts based on the individual quantiles of each model.
+This corresponds to a situation where each forecast aims to correctly determine a single target predictive distribution.
+By taking an average of all models, we aim to get a better estimate of this distribution than from the individual models.
+If we have reason to believe that some models are **consistently** better than others at estimating this distribution, we could try to create a weighted version of this average.
+
+### Converting sample-based forecasts to quantile-based forecasts
+
+In this session we will be thinking about forecasts in terms quantiles of the predictive distributions, we will need to convert our sample-based forecasts to quantile-based forecasts.
+We will do this by focusing on the *marginal distribution* at each predicted time point, that is we treat each time point as independent of all others and calculate quantiles based on the sample predictive trajectories at that time point.
+An easy way to do this is to use the `hubUtils` package, which has utility functions for interacting with hubverse-style data.
+The steps to do this are to first do some reformatting so the forecasts can be seen as hubverse-style `sample` forecasts.
 
 Now we convert these `sample` forecasts to `quantile` forecasts.
 
@@ -508,22 +560,12 @@ How do the filtered ensembles compare to the simple ensembles?
 -   In general, the median ensemble improved more than the mean ensemble after the filtering.
 :::
 
-### Weighted ensembles
+
+## Weighted ensembles
 
 The simple mean and median we used to average quantiles earlier treats every model as the same.
 We could try to improve performance by replacing this with a weighted mean (or weighted median), for example giving greater weight to models that have made better forecasts in the past.
-Here we will explore two common weighting methods based on quantile averaging:
 
--   Inverse WIS weighting
--   Quantile regression averaging
-
-Inverse WIS weighting is a simple method that weights the forecasts by the inverse of their WIS over some period.
-(Note that identifying what this period should be in order to produce the best forecasts is not straightforward as predictive performance may vary over time if models are good at different things).
-The main benefit of WIS weighting over other methods is that it is simple to understand and implement.
-However, it does not optimise the weights directly to produce the best forecasts.
-It relies on the hope that giving more weight to better performing models yields a better ensemble
-
-Quantile regression averaging (QRA), on the other hand, optimises the weights directly in order to yield the best scores on past data.
 
 :::: {.callout-note collapse="true"}
 #### Does weighting improve ensemble forecasts?
@@ -536,346 +578,71 @@ However, in forecasting COVID-19 cases and hospitalizations, where model perform
 However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989,@claeskens_forecast_2016] 
 ::::
 
-<!-- #### Construction -->
-
-<!-- ##### Inverse WIS weighting -->
-
-<!-- In order to perform inverse WIS weighting we first need to calculate the WIS for each model. -->
-<!-- We already have this from the previous evaluation so we can reuse this. -->
-
-<!-- ```{r calc-wis} -->
-<!-- model_scores <- quantile_forecasts |> -->
-<!--   score() -->
-<!-- cumulative_scores <- list() -->
-<!-- ## filter for scores up to the origin day of the forecast -->
-<!-- for (day_by in unique(model_scores$origin_day)) { -->
-<!--   cumulative_scores[[as.character(day_by)]] <- model_scores |> -->
-<!--     filter(origin_day < day_by) |> -->
-<!--     summarise_scores(by = "model") |> -->
-<!--     mutate(day_by = day_by) -->
-<!-- } -->
-<!-- weights_per_model <- bind_rows(cumulative_scores) |> -->
-<!--   select(model, day_by, wis) |> -->
-<!--   mutate(inv_wis = 1 / wis) |> -->
-<!--   mutate( -->
-<!--     inv_wis_total_by_date = sum(inv_wis), .by = day_by -->
-<!--   ) |> -->
-<!--   mutate(weight = inv_wis / inv_wis_total_by_date) |> ## normalise -->
-<!--   select(model, origin_day = day_by, weight) -->
-
-<!-- weights_per_model |> -->
-<!--   pivot_wider(names_from = model, values_from = weight) -->
-<!-- ``` -->
-
-<!-- Now lets apply the weights to the forecast models. -->
-<!-- As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble. -->
-
-<!-- ```{r apply-weights} -->
-<!-- inverse_wis_ensemble <- quantile_forecasts |> -->
-<!--   as_tibble() |> -->
-<!--   left_join( -->
-<!--     weights_per_model |> -->
-<!--       mutate(origin_day = origin_day + 14), -->
-<!--     by = c("model", "origin_day") -->
-<!--   ) |> -->
-<!--   # assign equal weights if no weights are available -->
-<!--   mutate(weight = ifelse(is.na(weight), 1/3, weight)) |> -->
-<!--   summarise( -->
-<!--     predicted = sum(predicted * weight), -->
-<!--     observed = unique(observed), -->
-<!--     model = "Inverse WIS ensemble", -->
-<!--     .by = c(origin_day, horizon, quantile_level, day) -->
-<!--   ) -->
-<!-- ``` -->
-
-<!-- ##### Quantile regression averaging -->
-
-<!-- We futher to perform quantile regression averaging (QRA) for each forecast date. -->
-<!-- Again we need to consider how many previous forecasts we wish to use to inform each ensemble forecast. -->
-<!-- Here we decide to use up to 3 weeks of previous forecasts to inform each QRA ensemble. -->
-<!-- We use the `qrensemble` package to perform this task. -->
-
-<!-- ```{r qra} -->
-<!-- forecast_dates <- quantile_forecasts |> -->
-<!--   as_tibble() |> -->
-<!--   pull(origin_day) |> -->
-<!--   unique() -->
-
-<!-- qra_by_forecast <- function( -->
-<!--   quantile_forecasts, -->
-<!--   forecast_dates, -->
-<!--   group = c("target_end_date"),  -->
-<!--   ... -->
-<!-- ) { -->
-<!--   lapply(forecast_dates, \(x) { -->
-<!--     quantile_forecasts |> -->
-<!--       mutate(target_end_date = x) |> -->
-<!--       dplyr::filter(origin_day <= x) |> -->
-<!--       dplyr::filter(origin_day >= x - (3 * 7 + 1)) |> -->
-<!--       dplyr::filter(origin_day == x | day <= x) |> -->
-<!--       qra( -->
-<!--         group = group, -->
-<!--         target = c(origin_day = x), -->
-<!--         ... -->
-<!--       ) -->
-<!--   }) -->
-<!-- } -->
-
-<!-- qra_ensembles_obj <- qra_by_forecast( -->
-<!--   quantile_forecasts, -->
-<!--   forecast_dates[-1], -->
-<!--   group = c("target_end_date") -->
-<!-- ) -->
-
-<!-- qra_weights <- seq_along(qra_ensembles_obj) |> -->
-<!--   lapply(\(i) attr(qra_ensembles_obj[[i]], "weights") |> -->
-<!--     mutate(origin_day = forecast_dates[i + 1]) -->
-<!--   ) |> -->
-<!--   bind_rows() |> -->
-<!--   dplyr::filter(quantile == 0.5) |> -->
-<!--   select(-quantile) -->
-
-<!-- qra_ensembles <- qra_ensembles_obj |> -->
-<!--   bind_rows() -->
-<!-- ``` -->
-
-<!-- Instead of creating a single optimised ensemble and using this for all forecast horizons we might also want to consider a separate optimised QRA ensemble for each forecast horizon, reflecting that models might perform differently depending on how far ahead a forecast is produced. -->
-<!-- We can do this using `qra()` with the `group` argument. -->
-
-<!-- ```{r qra-by-horizon} -->
-<!-- qra_ensembles_by_horizon <- qra_by_forecast( -->
-<!--   quantile_forecasts, -->
-<!--   forecast_dates[-c(1:2)], -->
-<!--   group = c("horizon", "target_end_date"), -->
-<!--   model = "QRA by horizon" -->
-<!-- ) -->
-
-<!-- qra_weights_by_horizon <- seq_along(qra_ensembles_by_horizon) |> -->
-<!--   lapply(\(i) attr(qra_ensembles_by_horizon[[i]], "weights") |> -->
-<!--     mutate(origin_day = forecast_dates[i + 2]) -->
-<!--   ) |> -->
-<!--   bind_rows() -->
-<!-- ``` -->
+Due to time restrictions, we will not focus on weighted ensembles at this point in the course.
 
 
-## Sample-based weighted ensembles
+## Sample-based ensembles
 
 Quantile averaging can be interpreted as a combination of different uncertain estimates of a true distribution of a given shape.
 Instead, we might want to interpret multiple models as multiple possible versions of this truth, with weights assigned to each of them representing the probability of each one being the true one.
-In that case, we want to create a (weighted) mixture distribution of the constituent models.
-This can be done from samples, with weights tuned to optimise the CRPS.
-The procedure is also called a linear opinion pool.
-Once again one can create unweighted, filtered unweighted and weighted ensembles.
-For now we will just consider weighted ensembles.
-We use the `lopensemble` package to perform this task.
-
-```{r mixture}
-## lopensemble expects a "date" column indicating the timing of forecasts
-lop_forecasts <- sample_forecasts |>
-  rename(date = day)
-
-lop_by_forecast <- function(
-  sample_forecasts,
-  forecast_dates,
-  group = c("target_end_date"),
-  ...
-) {
-  lapply(forecast_dates, \(x) {
-    y <- sample_forecasts |>
-      mutate(target_end_date = x) |>
-      dplyr::filter(origin_day <= x) |>
-      dplyr::filter(origin_day >= x - (3 * 7 + 1)) |>
-      dplyr::filter(origin_day == x | date <= x)
-    lop <- mixture_from_samples(y) |>
-      filter(date > x) |>
-      mutate(origin_day = x)
-    return(lop)
-  })
-}
-
-lop_ensembles_obj <- lop_by_forecast(
-  lop_forecasts,
-  forecast_dates[-1]
-)
-
-lop_weights <- seq_along(lop_ensembles_obj) |>
-  lapply(\(i) attr(lop_ensembles_obj[[i]], "weights") |>
-    mutate(origin_day = forecast_dates[i + 1])
-  ) |>
-  bind_rows()
-
-## combine and generate quantiles from the resulting samples
-lop_ensembles <- lop_ensembles_obj |>
-  bind_rows() |>
-  mutate(model = "Linear Opinion Pool") |>
-  rename(day = date) |> ## rename column back for later plotting
-  as_forecast_sample() |>
-  as_forecast_quantile()
-
-```
-
-## Compare the different ensembles
-
-We have created a number of ensembles which we can now compare.
-
-```{r combine-weigthed-ensembles}
-weighted_ensembles <- bind_rows(
-  inverse_wis_ensemble,
-  qra_ensembles,
-  qra_ensembles_by_horizon,
-  filtered_ensembles,
-  lop_ensembles
-) |>
-  # remove the repeated filtered ensemble
-  filter(model != "Mean filtered ensemble")
-```
-
-### Visualisation
-
-#### Single forecasts
-
-Again we start by plotting a single forecast from each model and ensemble.
-
-```{r plot-single-weighted-forecasts}
-weighted_ensembles |>
-  filter(origin_day == 57) |>
-  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14))
-```
-
-and on the log scale.
-
-```{r plot-single-weighted-forecasts-log}
-weighted_ensembles |>
-  filter(origin_day == 57) |>
-  plot_ensembles(onset_df |> filter(day >= 57, day <= 57 + 14)) +
-  scale_y_log10()
-```
-
-### Multiple forecasts
-
-As before we can plot a range of forecasts from each model and ensemble.
-
-```{r plot-multiple-weighted-forecasts}
-plot_multiple_weighted_forecasts <- weighted_ensembles |>
-  plot_ensembles(onset_df |> filter(day >= 21)) +
-  lims(y = c(0, 400))
-plot_multiple_weighted_forecasts
-```
-
-and on the log scale.
-
-```{r plot-multiple-weighted-forecasts-log}
-plot_multiple_weighted_forecasts +
-  scale_y_log10()
-```
+In that case, we want to create a (possibly weighted) mixture distribution of the constituent models.
+This can be done very straight-forwardly using samples.
+The procedure is sometimes called a linear opinion pool.
 
 ::: callout-tip
-##### Take 2 minutes
+##### Comparing ensembling methods
 
-How do the weighted ensembles compare to the simple ensembles?
-Which do you think is best?
-Are you surprised by the results?
-Can you think of any reasons that would explain them?
+This nice figure from Howerton et al. shows visually the difference between different ensembling approaches.[@howertonContextdependentRepresentationBetweenmodel2023]
+
+![Comparing LOP vs vincent averaging for ensemble.](slides/figures/lop-vs-vincent.jpg)
+
+Above we used Vincent averaging through the `hubEnsembles::simple_ensemble()` function.
+Below we will use the linear opinion pool, illustrated by the LOP line in the figure.
 :::
 
-::: {.callout-note collapse="true"}
-#### Solution
+We will start by adding two new unweighted ensemble approaches (one filtered, one not, similar to the section above) to our growing collection of models.
+Recall that we had created hubverse-style sample-based forecasts.
 
-How do the weighted ensembles compare to the simple ensembles?
-:::
-
-### Model weights
-
-We can also compare the weights that the different weighted ensembles we have created assign to each model.
-
-```{r plot-model-weights}
-weights <- rbind(
-  weights_per_model |> mutate(method = "Inverse WIS"),
-  qra_weights |> mutate(method = "QRA"),
-  lop_weights |> mutate(method = "LOP")
-)
-weights |>
-  ggplot(aes(x = origin_day, y = weight, fill = model)) +
-  geom_col(position = "stack") +
-  facet_grid(~ method) +
-  theme(legend.position = "bottom")
+```{r}
+sampled_forecasts_hub
 ```
 
-::: callout-tip
-#### Take 2 minutes
+### Generate sample-based ensembles
 
-Are the weights assigned to models different between the three methods?
-How do the weights change over time?
-Are you surprised by the results given what you know about the models performance?
-:::
+We can generate a linear opinion pool of the samples from these models, where we specify that we want to sample unique *trajectories* predicted by each model.
+In this example, a trajectory is defined by a `"model_id"` and `"forecast_date"` combination.
+In the code below, we specify that we want to generate a linear opinion pool ensemble that has a total of 100 sample trajectories (in this case, it will sample 25 trajectories from each model) for each `"forecast_date"`. 
+As we did earlier, we compute one "filtered" ensemble that removes the random walk model.
 
-::: {.callout-note collapse="true"}
-#### Solution
+```{r}
+lop_ensemble <- sampled_forecasts_hub |> 
+  hubEnsembles::linear_pool(
+  n_output_samples = 100,
+  model_id = "lop_ensemble",
+  task_id_cols = c("forecast_date", "h", "target_epiweek"), ## columns that define a forecast task
+  compound_taskid_set = c("forecast_date"), ## column that defines a single trajectory
+  derived_task_ids = c("target_epiweek")    ## column that can be derived from the others
+  )   
 
-Are the weights assigned to models different between the three methods?
-
--   There are major differences especially early on, where the LOP ensemble prefers the random walk model and QRA the more statistical model.
--   The inverse WIS model transitions from fairly even weights early on to giving most weights to the mechanistic model, however it does so in a more balanced manner than the optimised ensemble, giving substantial weight to all three models.
-
-How do the weights change over time?
-
--   Early on the more statistical models have higher weights in the respective ensemble methods.
--   Gradually the mechanistic model gains weight in both models and by the end of the forecast horizon it represents the entire ensemble.
-
-Are you surprised by the results given what you know about the models performance?
-
--   As the random walk model is performing poorly, you would expect it to have low weights but actually it often doesn't. This implies that its poor performance is restricted to certain parts of the outbreak.
--   The mechanistic model performs really well overall and dominates the final optimised ensemble.
-:::
-
-### Evaluation
-
-For a final evaluation we can look at the scores for each model and ensemble again.
-We remove the two weeks of forecasts as these do not have a quantile regression average forecasts as these require training data to estimate.
-
-```{r score-weighted-ensembles}
-weighted_ensemble_scores <- weighted_ensembles |>
-  filter(origin_day >= 29) |>
-  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
-  score()
+lop_ensemble_filtered <- sampled_forecasts_hub |> 
+  filter(model_id != "rw") |> 
+  hubEnsembles::linear_pool(
+  n_output_samples = 100,
+  model_id = "lop_ensemble",
+  task_id_cols = c("forecast_date", "h", "target_epiweek"), ## columns that define a forecast task
+  compound_taskid_set = c("forecast_date"), ## column that defines a single trajectory
+  derived_task_ids = c("target_epiweek")    ## column that can be derived from the others
+  )   
 ```
 
-Again we can get a high level overview of the scores by model.
+### Visualize sample-based forecasts
 
-```{r score-overview-weighted}
-weighted_ensemble_scores |>
-  summarise_scores(by = c("model"))
-```
+Compare the individual and ensemble forecasts visually
 
-Remembering the session on [forecast evaluation](forecast-evaluation), we should also check performance on the log scale.
+### Evaluate sample-based forecasts
 
-```{r score-overview-weighted-log}
-log_ensemble_scores <- weighted_ensembles |>
-  filter(origin_day >= 29) |>
-  as_forecast_quantile(forecast_unit = c("origin_day", "horizon", "model")) |>
-    transform_forecasts(
-    fun = log_shift,
-    offset = 1,
-    append = FALSE
-  ) |>
-  score()
+Run same evaluation as above
 
-log_ensemble_scores |>
-  summarise_scores(by = c("model"))
-```
-
-::: callout-tip
-#### Take 2 minutes
-
-How do the weighted ensembles compare to the simple ensembles on the natural and log scale?
-:::
-
-::: {.callout-note collapse="true"}
-#### Solution
-
-The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles.
-Why might this be the case?
-:::
 
 # Going further
 
