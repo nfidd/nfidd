@@ -114,6 +114,8 @@ reporting_triangle <- onset_df |>
     reported_onsets = rpois(n(), onsets * reporting_delay)
   ) |>
   mutate(reported_day = day + d)
+
+tail(reporting_triangle)
 ```
 
 We also apply the Poisson observation error to the reported onsets to capture our uncertainty in the reporting process (remember we have lost uncertainty in the onsets as we are not individually simulating the reporting delays).
@@ -121,6 +123,8 @@ We also apply the Poisson observation error to the reported onsets to capture ou
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
   summarise(noisy_onsets = sum(reported_onsets), .by = day)
+
+tail(noisy_onsets_df)
 ```
 
 As we only observed reported cases up to the current day we need to filter it to only include the data we have observed:
@@ -128,6 +132,8 @@ As we only observed reported cases up to the current day we need to filter it to
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
+
+tail(noisy_onsets_df)
 ```
 
 Finally, we sum this to get the counts we actually observe. This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
@@ -135,6 +141,8 @@ Finally, we sum this to get the counts we actually observe. This is the same as 
 ```{r counts-observed}
 available_onsets <- filtered_reporting_triangle |>
   summarise(available_onsets = sum(reported_onsets), .by = day)
+
+tail(available_onsets)
 ```
 
 ## Understanding the data structure
@@ -216,6 +224,8 @@ Once completed, we sum across the rows to get our nowcast of the true onset coun
 
 ## Fitting the joint model
 
+For fitting the joint model specification follows our data simulation approach but we have to make choices about how to model the expected number of onsets $\lambda_{t}$ and the probability of reporting $p_{t,d}$.
+
 As usual we start by loading the model:
 
 ```{r stan-joint-nowcast}
@@ -231,6 +241,17 @@ For now, it is important that you understand the concept but as the models get m
 Once thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
 This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
 In most situations this number would be unknown so what we do here is closer to what one would do in the real world.
+:::
+
+::: {.callout-note}
+## Take two minutes
+What are the models we have picked for the onesets ($\lambda_{t}$) and the reporting delay distribution ($p_{t,d}$)?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+- $\lambda_{t}$ is modelled using a geometric random walk.
+- $p_{t,d}$ is modelled using a Dirichlet distribution (i.e. a multinomial distribution with a constraint that the sum of the probabilities is 1 - this allows the delay distribution to be flexible).
 :::
 
 We then fit it do data:
@@ -256,7 +277,7 @@ joint_nowcast_fit
 
 ::: {.callout-important}
 One benefit of this model is that because we have decomposed the data into the reporting triangle we can make a nowcast that uses the data we have available augmented with predictions from the model.
-This should give us far more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved).
+This should give us more accurate uncertainty estimates than the simple nowcasting models above (see `stan/functions/combine_obs_with_predicted_obs_rng.stan` but note the code is fairly involved).
 :::
 
 We now extract this nowcast:
