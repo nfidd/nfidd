@@ -38,6 +38,7 @@ Suggests:
     hubUtils,
     hubEnsembles,
     hubEvals,
+    hubData,
     hubVis
 Additional_repositories:
     https://hubverse-org.r-universe.dev,
