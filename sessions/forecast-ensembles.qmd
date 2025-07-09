@@ -63,7 +63,6 @@ library("ggplot2")
 library("epidatr")
 library("hubUtils")
 library("hubEvals")
-library("hubData")
 library("hubEnsembles")
 theme_set(theme_bw())
 ```

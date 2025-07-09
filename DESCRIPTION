@@ -35,11 +35,8 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     roxyglobals,
-    hubData,
     hubUtils,
-    hubEnsembles,
-    hubVis,
-    hubEvals
+    hubEnsembles
 Additional_repositories:
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev,
