@@ -8,7 +8,7 @@ format:
 ---
 
 ```{r instructors}
-instructors <- c("sbfnk", "seabbs", "kathsherratt")
+instructors <- c("seabbs", "trobacker", "nickreich")
 ```
 
 ```{r get_contributors}
@@ -25,7 +25,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 # Why this course?
 
 ::: {.incremental}
-- common questions in outbreak response
+- common questions in real-time modelling of infectious disease dynamics
 - easy to make mistakes
 - no comprehensive training resource
 :::

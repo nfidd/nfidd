@@ -143,7 +143,7 @@ censored_delay_pmf
 ```
 
 ::: callout-note
-## Take 5 minutes
+## Take 3 minutes
 
 Try to understand the `censored_delay_pmf()` function above.
 Try it with a few different probability distributions and parameters, e.g. for the parameters given above and a maximum delay of 2 weeks (14 days) it would be:
@@ -179,6 +179,43 @@ How would you create the time series of symptom onsets from infections, using th
 ```{r applied_convolution}
 onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 ```
+
+Let's examine the convolution result to understand how it works.
+First, we look at the infections and delay distribution:
+
+```{r convolution_example}
+head(inf_ts$infections)
+head(gamma_pmf)
+```
+
+Now let's look at the resulting onsets:
+
+```{r head_onsets}
+head(onsets)
+```
+
+To understand what's happening, let's work through the first few rows.
+
+For day 1, only infections from day 1 can contribute:
+
+```{r day1_calculation}
+inf_ts$infections[1] * gamma_pmf[1]
+```
+
+For day 2, infections from both day 1 and day 2 can contribute:
+
+```{r day2_calculation}
+inf_ts$infections[1] * gamma_pmf[2] + inf_ts$infections[2] * gamma_pmf[1]
+```
+
+For day 3, infections from days 1, 2, and 3 can contribute:
+
+```{r day3_calculation}
+inf_ts$infections[1] * gamma_pmf[3] + inf_ts$infections[2] * gamma_pmf[2] + inf_ts$infections[3] * gamma_pmf[1]
+```
+
+Each day's onsets are the sum of all previous infections weighted by the probability of observing them on that day.
+
 :::
 
 We can plot these symptom onsets:
@@ -232,7 +269,7 @@ mod
 ```
 
 ::: callout-tip
-## Take 10 minutes
+## Take 5 minutes
 
 Familiarise yourself with the model above.
 Unlike before there is now a `functions` block at the beginning of the model (lines 1-3), where we load a function called `convolve_with_delay()` (line 2) from a file of the same name which can be found in the subdirectory `functions` of the `inst/stan` directory or [viewed on the github repo](https://github.com/nfidd/nfidd/blob/main/inst/stan/functions/convolve_with_delay.stan).

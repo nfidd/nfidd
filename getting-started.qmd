@@ -5,7 +5,8 @@ title: "Getting started"
 ## What is NFIDD?
 
 NFIDD (Nowcasting and Forecasting Infectious Disease Dynamics) is an MIT-licensed library of [sessions](course-info/sessions) for learning about nowcasting and forecasting of infectious disease surveillance data.
-This course is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
+We have adapted this course for the [SISMID](https://sismid.sph.emory.edu/) course on nowcasting and forecasting infectious disease dynamics.
+This course, in both its original and SISMID versions, is a living resource designed to help epidemiologists, public health professionals, and researchers understand and apply real-time analysis methods to infectious disease surveillance data.
 
 ## Set up
 
@@ -25,7 +26,7 @@ Each session in this course uses R code for demonstration. All the content is se
 
 If you choose the local setup option, here's what you'll need to do:
 
-1.  Install R and RStudio (use the Visual Editor for best notebook experience)
+1.  Install R and RStudio
 2.  Install the `nfidd` R package
 3.  Install cmdstan
 4.  Download course materials (if using the hybrid approach you may not need to do this)
@@ -94,18 +95,20 @@ For more details, and for links to resources in case something goes wrong, see t
 
 ## Accessing the course
 
-If you want to use the local workflow, you will need a local copy of the course material.
+If you want to use the local workflow (recommended), you will need a local copy of the course material.
 
 -   Directly download the course material:
 
     ::: callout-tip
-    [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    [[**Download**]{.underline}](https://github.com/nfidd/sismid/archive/refs/heads/main.zip)
     :::
 
--   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/nfidd).
+-   Alternatively, if you are familiar with git you can clone the [repo](https://github.com/nfidd/sismid).
 
--   If you prefer to use the hybrid workflow, you can view each session on the website, and copy-paste the code into your own R script. 
-	In that case you don't need to download the material.
+-   If you prefer to use a hybrid workflow, you can view each session on the website (where formatting is nicest).
+Using this approach you can either copy-paste the code from the webpages into your own R script or use the `.qmd` files as Notebooks where you can go from chunk to chunk running the code. 
+
+    -   Tip: if you decide to copy-paste code, then you don't need to download the material.
 
     -   Tip: if you hover over each code chunk on the website you can use a "Copy" button at the top right corner.
 
@@ -122,20 +125,24 @@ The notebooks are then directly reproduced on the course website (for example, t
 ::: callout-tip
 ## Using RStudio's Visual Editor (Recommended for Notebooks)
 
-1.  **Open a session notebook**: Each session is saved as a `.qmd` file in `nfidd/sessions/`
-2.  **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source")
-3.  **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution
+1.  **Open a session notebook**: Each session is saved as a `.qmd` file in `nfidd/sessions/`.
+2.  **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source").
+3.  **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution.
 4.  **Visual mode benefits**: Easier to read formatted text and equations, better experience with code chunks and outputs
 :::
 
 **Alternative approaches that also work**:
 
-**Other editors**: Use VS Code or other editors that support Quarto notebooks. The `.qmd` files will work in any Quarto-compatible environment.
+1. **Other visual editors**: Use VS Code or other editors that support Quarto notebooks. 
+The `.qmd` files will work in any Quarto-compatible environment.
 
 ::: callout-tip
 The Quarto extension for VS Code also supports a visual editor mode.
 You can find it in the command palette.
 :::
+
+2. **Other source code editors**: Use RStudio, VS Code, or other editors that support interactive notebooks (without necessarily using the WYSIWYG formatting of "Visual" mode)  and use the notebooks, but only in the source-code mode. This can be helpful if you want a more bare-bones experience of interacting with the code and data.
+
 
 ## Day-of-Course Updates
 
@@ -150,7 +157,7 @@ If you're returning to the course after some time or joining a live session, you
     ```
 2.  **Download fresh course materials** if using local files:
 
-    -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/nfidd/archive/refs/heads/main.zip)
+    -   Download the latest version: [[**Download**]{.underline}](https://github.com/nfidd/sismid/archive/refs/heads/main.zip)
     -   Or use `git pull` if you cloned the repository
 
 3.  **You don't need to reinstall cmdstan** unless you're having specific issues with it

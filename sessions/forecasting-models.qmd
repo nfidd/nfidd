@@ -1,21 +1,28 @@
 ---
-title: "Building simple forecasting models"
+title: "Improving forecasting models"
 order: 8
 bibliography: ../nfidd.bib
 ---
 
+
+```{r echo=FALSE}
+options(width=100)
+```
+
+
 # Introduction
 
-We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
-In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model. We'll again evaluate these models to see what effect these different approaches might have.
+Learning how to look at time-series data and identify features that might make a particular dataset easier or harder to predict is a skill that takes time to get good at.
+It is a common pitfall to just start throwing models at data, without really looking at the data themselves, or making detailed comparisons of forecasts to observations.  
 
 ## Slides
 
-- [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
+- [Improving forecasting models](slides/improving-forecasting-models)
 
 ## Objectives
 
-The aim of this session is to introduce some common forecasting models and to evaluate them.
+The goal of this session is to start to introduce you in a bit more depth to the ARIMA modeling framework, and to some important forecasting practices. 
+We will focus on learning how to look at data, transformations and summaries of time-series data, and forecasts, to infer what kinds of model structures will help improve predictions.
 
 ::: {.callout-caution}
 None of the models introduced in this section are designed for real-world use!
@@ -31,15 +38,14 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference and the `scoringutils` package for evaluating forecasts.
+In this session we will use the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling,  `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
 
 ```{r libraries, message = FALSE}
-library("nfidd")
+library("fable")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
-library("tidybayes")
-library("scoringutils")
+library("epidatr")
 ```
 
 ::: {.callout-tip}
@@ -50,713 +56,293 @@ The best way to interact with the material is via the [Visual Editor](https://do
 
 We set a random seed for reproducibility. 
 Setting this ensures that you should get exactly the same results on your computer as we do.
-We also set an option that makes `cmdstanr` show line numbers when printing model code.
-This is not strictly necessary but will help us talk about the models.
 
 ```{r}
 set.seed(123)
-options(cmdstanr_print_line_numbers = TRUE)
 ```
 
 :::
 
-# What did we learn about the random walk model from the [forecast evaluation session](forecast-evaluation)?
+# Looking carefully at the data
 
-- It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
-- It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
+Let's introduce some mathematical notation that we will continue to use throughout the forecasting sessions in this class. 
+We define $y_t$ as the observed signal of interest at time $t$. For the example we have looked at this is the weighted ILI proportion for the US in week $t$. 
+We sometimes talk about the "lagged" values of a time-series. This is a short-hand way to refer to values of the time-series some steps back in time from the current value. So the value $y_{t-3}$ is referred to as the "lag-three" value of $y_t$. 
+In R, you can access these values of a vector using the `dplyr::lag()` function. (Note: there is also a `stats::lag()` function that handles lags a little bit differently.)
+In forecasting, since we are using prior observations to predict future ones, having some notation and terminology for and functions to refer to the previous observations will be useful.
 
-::: {.callout-note collapse="true"}
-## What did a geometric random walk model look like again?
-
-```{r geometric-random-walk-sim}
-R <- geometric_random_walk(init = 1, noise = rnorm(100), std = 0.1)
-data <- tibble(t = seq_along(R), R = R)
-
-ggplot(data, aes(x = t, y = R)) +
-  geom_line() +
-  labs(title = "Simulated data from a random walk model",
-       x = "Time",
-       y = "R")
-```
-
-:::
-
-# Forecasting models as a spectrum
-
-A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
-However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
-The worst case is that we have mistaken beliefs about the underlying mechanisms and use these to make predictions which are systematically wrong and misleading.
-In these cases, forecasters often use _statistical models_ to make predictions which have little or no mechanistic basis.
-In our work, we have found that a combination of mechanistic and statistical models can be very powerful but that identifying the best model for a given forecasting task can be challenging.
-
-## Adding more mechanistic structure to the renewal model
-
-One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast evaluation](forecast-evaluation) session, we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
-
-::: {.callout-warning}
-This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
-:::
-
-This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
-
-$$
-R_t = \frac{S_{t-1}}{N} R_0
-$$
-
-::: {.callout-note}
-This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
-:::
-
-::: {.callout-note collapse="true"}
-
-## What behaviour would we expect from this model?
+We start by loading in the same dataset that we looked at in the previous session.
 
 ```{r}
-n <- 100
-N <- 1000
-R0 <- 1.5
-S <- rep(NA, n)
-S[1] <- N
-Rt <- rep(NA, n) ## reproduction number
-Rt[1] <- R0
-I <- rep(NA, n)
-I[1] <- 1
-for (i in 2:n) {
-  Rt[i] <- (S[i-1]) / N * R0
-  I[i] <- I[i-1] * Rt[i]
-  S[i] <- S[i-1] - I[i]
-}
-
-data <- tibble(t = 1:n, Rt = Rt)
-
-ggplot(data, aes(x = t, y = Rt)) +
-  geom_line() +
-  labs(title = "Simulated data from an SIR model",
-       x = "Time",
-       y = "Rt")
+flu_data <- pub_fluview(regions = "nat", 
+                        epiweeks = epirange(200335, 201735)) |> 
+  select(region, epiweek, wili) |> 
+  as_tsibble(index = epiweek, key = region)
 ```
 
-:::
+We will now use the function `gg_tsdisplay()` from [the `feasts` R package](https://feasts.tidyverts.org/) to give a unique view into our dataset.
+```{r}
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+```
 
-The key assumptions we are making here are: 
-
-- The population is constant and we roughly know the size of the population.
-- The reproduction number only changes due to susceptible depletion
-- The number of new cases at each time is proportional to the number of susceptibles in the population.
-
-We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Let's load the model:
+In the above plot, the top panel shows the time-series. 
+The lower left panel plots the auto-correlation function plotted for up to lag 104. It is commonly referred to as an ACF plot. Along the x-axis is the lag value and the y-axis is the correlation between $y_t$ and $y_{t-k}$ where $k$ is the lag value.
+So for example, the vertical bar at x=1 is just less than one, which means that when we compute the correlation between $y_t$ and $y_{t-1}$ across our whole dataset, it is very high. We can do this explicitly here for comparison for lags 1 and 12:
 
 ```{r}
-mech_mod <- nfidd_cmdstan_model("mechanistic-r")
-mech_mod
+cor(flu_data$wili, dplyr::lag(flu_data$wili, 1), use = "complete.obs")
+cor(flu_data$wili, dplyr::lag(flu_data$wili, 12), use = "complete.obs")
 ```
+By comparing these values computed directly here to the ACF plot above at lags of 1 and 12, you can see that the values are the same.
 
-## Adding more statistical structure to the renewal model
+The lower right hand panel shows the partial correlation function (PCF). 
+The partial correlation at lag $k$ estimates the correlation between $y_t$ and $y_{t-k}$ after adjusting for the effects of lags 1, ..., k-1.
+There are a lot of additional examples and explanation about interpreting ACF and PCF plots in [FPP3, Chapter 9.5](https://otexts.com/fpp3/non-seasonal-arima.html). 
 
-Adding more mechanistic structure is not always possible and, if we don't specify mechanisms correctly, might make forecasts worse.
-Rather than adding more mechanistic structure to the renewal model, we could add more statistical structure with the aim of improving performance.
-Before we do this, we need to think about what we want from a forecasting model.
-As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
-We know that we want it to be able to adapt to trends in the reproduction number and that we want it to be able to capture the noise in the data.
-A statistical term that can be used to describe a time series with a trend is saying that the time series is _non-stationary_.
-More specifically, a _stationary_ time series is defined as one whose statistical properties, such as mean and variance, do not change over time.
-In infectious disease epidemiology, this would only be expected for endemic diseases without external seasonal influence.
-
-The random walk model we used in the [forecasting concepts](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
-AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
-The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
-
- For the log-transformed reproduction number ($log(R_t)$), the model is:
-
-$$
-log(R_t) = \phi log(R_{t-1}) + \epsilon_t
-$$
-
-where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
-
-::: {.callout-note collapse="true"}
-## What behaviour would we expect from this model?
-
-```{r}
-n <- 100
-phi <- 0.4
-sigma <- 0.1
-log_R <- rep(NA, n)
-log_R[1] <- rnorm(1, 0, sigma)
-for (i in 2:n) {
-  log_R[i] <- phi * log_R[i-1] + rnorm(1, 0, sigma)
-}
-data <- tibble(t = 1:n, R = exp(log_R))
-
-ggplot(data, aes(x = t, y = R)) +
-  geom_line() +
-  labs(title = "Simulated data from an exponentiated AR(1) model",
-       x = "Time",
-       y = "R")
-```
-:::
-
-However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
-
-Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
-
-$$
-log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
-$$
-
-
-::: {.callout-note collapse="true"}
-## What behaviour would we expect from this model?
-
-Again we look at an R function that implements this model:
-
-```{r geometric-diff-ar}
-geometric_diff_ar
-```
-
-We can use this function to simulate a differenced AR process:
-
-```{r}
-R <- geometric_diff_ar(init = 1, noise = rnorm(100), std = 0.1, damp = 0.1)
-
-data <- tibble(t = seq_along(R), R = R)
-
-ggplot(data, aes(x = t, y = R)) +
-  geom_line() +
-  labs(title = "Simulated data from an exponentiated AR(1) model with differencing",
-       x = "Time",
-       y = "R")
-```
-
-:::
-
-We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
-
-```{r}
-stat_mod <- nfidd_cmdstan_model("statistical-r")
-stat_mod
-```
-
-
-# Forecasting with the mechanistic and statistical models
-
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts](forecasting-concepts) session. We will first load in the data and filter for a forecast origin date.
-
-```{r, load-simulated-onset}
-gen_time_pmf <- make_gen_time_pmf()
-ip_pmf <- make_ip_pmf()
-onset_df <- simulate_onsets(
-  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
-)
-onset_df
-
-# we'll make a forecast on day non day 41, pretending we haven't seen the later
-# data
-cutoff <- 41
-
-filtered_onset_df <- onset_df |>
-  filter(day <= cutoff)
-```
-
-We will now fit the more mechanistic model to the data.
-```{r fit_mech_model, results = 'hide', message = FALSE}
-horizon <- 28
-
-data <- list(
-  n = nrow(filtered_onset_df),
-  I0 = 1,
-  obs = filtered_onset_df$onsets,
-  gen_time_max = length(gen_time_pmf),
-  gen_time_pmf = gen_time_pmf,
-  ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = horizon, # Here we set the number of days to forecast into the future
-  N_prior = c(10000, 2000) # the prior for the population size
-)
-mech_forecast_fit <- nfidd_sample(mech_mod, data = data)
-```
-
-```{r mech-forcast-print}
-mech_forecast_fit
-```
-
-We will now fit the more statistical model to the data.
-
-```{r fit_stat_model, results = 'hide', message = FALSE}
-data <- list(
-  n = nrow(filtered_onset_df),
-  I0 = 1,
-  obs = filtered_onset_df$onsets,
-  gen_time_max = length(gen_time_pmf),
-  gen_time_pmf = gen_time_pmf,
-  ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = horizon # Here we set the number of days to forecast into the future
-)
-stat_forecast_fit <- nfidd_sample(
-  stat_mod, data = data,
-  # again set the initial values to make fitting more numerically stable
-  init = \() list(init_R = 1, rw_sd = 0.01)
-)
-```
-
-Finally, we can extract the forecasts from the models and plot them.
-
-```{r extract-forecast}
-mech_forecast <- mech_forecast_fit |>
-  gather_draws(forecast[day]) |>
-  ungroup() |>
-  mutate(day = day + cutoff)
-
-stat_forecast <- stat_forecast_fit |>
-  gather_draws(forecast[day]) |>
-  ungroup() |>
-  mutate(day = day + cutoff)
-
-forecast <- bind_rows(
-  mutate(mech_forecast, model = "more mechanistic"),
-  mutate(stat_forecast, model = "more statistical")
-) |>
-  ungroup()
-
-target_onsets <- onset_df |>
-  filter(day > cutoff) |>
-  filter(day <= cutoff + horizon)
-```
-
-
-```{r plot_forecast}
-forecast |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(x = day)) +
-  geom_line(
-    alpha = 0.1,
-    aes(y = .value, group = interaction(.draw, model), colour = model)
-  ) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
-  lims(y = c(0, 500))
-```
-
-and on the log scale
-
-```{r plot_log_forecast}
-forecast |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(x = day)) +
-  geom_line(
-    alpha = 0.1,
-    aes(y = .value, group = interaction(.draw, model), colour = model)
-  ) +
-  geom_point(data = target_onsets, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10() +
-  guides(colour = guide_legend(override.aes = list(alpha = 1)))
-```
-
-::: {.callout-tip}
-## Take 2 minutes
-What do you notice about the forecasts from the more mechanistic and more statistical models?
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-- The more mechanistic model captures the trend in the data very well.
-- The more statistical model produces some very large forecasts but also has significant probability mass on a a more rapid reduction that ultimately observed.
-- Neither model simply extend the trend in the way the random walk model did in the [forecasting concepts session](forecasting-concepts).
-:::
-
-::: {.callout-note collapse="true"}
-As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
-
-```{r plot-stat-rt}
-stat_forecast_fit |>
-  gather_draws(R[day]) |>
-  ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(y = .value, x = day)) +
-  geom_hline(yintercept = 1, linetype = "dashed") +
-  geom_line(aes(group = .draw), alpha = 0.1)
-```
-:::
-
-::: {.callout-tip}
-## What happens when you are very wrong about the population size? (optional)
-
-In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
-
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-
-```{r very-wrong, results = 'hide', message = FALSE}
-data <- list(
-  n = nrow(filtered_onset_df),
-  I0 = 1,
-  obs = filtered_onset_df$onsets,
-  gen_time_max = length(gen_time_pmf),
-  gen_time_pmf = gen_time_pmf,
-  ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = horizon, # Here we set the number of days to forecast into the future
-  N_prior = c(100, 20) # the prior for the population size
-)
-
-mech_forecast_fit_diff <- nfidd_sample(
-  mech_mod, data = data
-)
-
-mech_forecast_diff <- mech_forecast_fit_diff |>
-  gather_draws(forecast[day]) |>
-  ungroup() |>
-  mutate(day = day + cutoff)
-```
-
-```{r very-wrong-plot}
-mech_forecast_diff |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(y = .value, x = day)) +
-  geom_line(alpha = 0.1, aes(group = .draw)) +
-  geom_point(
-    data = target_onsets, aes(x = day, y = onsets),
-    color = "black"
-  )
-```
-:::
-
-# Evaluating forecasts from our models
-
-As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
-
-```{r load_forecasts}
-data(rw_forecasts, stat_forecasts, mech_forecasts)
-forecasts <- bind_rows(
-  rw_forecasts,
-  mutate(stat_forecasts, model = "More statistical"),
-  mutate(mech_forecasts, model = "More mechanistic")
-)
-```
-
-::: {.callout-tip}
-## How did we estimate these forecasts?
-We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
-
-Some important things to note about these forecasts:
-
-  - We used a 14 day forecast horizon.
-  - Each forecast used all the data up to the forecast date.
-  - We generated 1000 posterior samples for each forecast.
-  - We started forecasting 3 weeks into the outbreak and then forecast every 7 days until the end of  the data (excluding the last 14 days to allow a full forecast).
-  - We use the same simulated outbreak data:
-
-```{r}
-head(onset_df)
-```
-
-:::
-
-## Visualising your forecast
-
-
-```{r plot-all-forecasts}
-forecasts |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(x = day)) +
-  geom_line(aes(y = .value, group = interaction(.draw, origin_day), col = origin_day), alpha = 0.1) +
-  geom_point(data = onset_df |>
-    filter(day >= 21),
-    aes(x = day, y = onsets), color = "black") +
-  scale_color_binned(type = "viridis") +
-  facet_wrap(~model) +
-  lims(y = c(0, 500))
-```
-
-
-As for the single forecast it is helpful to also plot the forecast on the log scale.
-
-```{r plot-all-forecasts-log}
-forecasts |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(x = day)) +
-  geom_line(
-    aes(y = .value, group = interaction(.draw, origin_day), col = origin_day),
-    alpha = 0.1
-  ) +
-  geom_point(data = onset_df, aes(x = day, y = onsets), color = "black") +
-  scale_y_log10(limits = c(NA, 500)) +
-  scale_color_binned(type = "viridis") +
-  facet_wrap(~model)
-```
-
-::: {.callout-tip}
 ## Take 5 minutes
-How do these forecasts compare?
-Which do you prefer?
-:::
 
-::: {.callout-note collapse="true"}
+What can you take away from the ACF and PCF plots of the data? (Same plot as above is reproduced here.)
+
+```{r, echo=FALSE}
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+```
+
+:::: {.callout-note collapse="true"}
 ## Solution
-How do these forecasts compare?
 
-- The more mechanistic model captures the downturn in the data very well.
-- Past the peak all models were comparable.
-- The more statistical model captures the downturn faster than the random walk but less fast than the more mechanistic mode.
-- The more statistical model sporadically predicts a more rapidly growing outbreak than occurred early on.
-- The more statistical model is more uncertain than the mechanistic model but less uncertain than the random walk.
+The ACF plots show that there is a lot of correlation between lagged observations. 
+For the first 10 or so lags, observations tend to be positively correlated and then after that, the correlations are periodic, with strong negative lags around every 25-26 weeks (~ 6 months) and strong positive lags every ~52 weeks/1 year. 
+The correlations with the most recent 5-7 weeks of data are stronger than the correlations with the observations at the same time of year in the previous season.
 
-Which do you prefer?
+The PCF plots show that once you adjust for the other timepoints, much of the correlation disappears. 
+There do appear to be significant signals (both positive and negative) at lags 1 and 2 and at lags around 52 weeks. 
+This suggests that we might want to consider a model that can see very recent lags as well as some annual periodicity or seasonality.
+::::
 
-- The more mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
-- If we weren't confident in the effective susceptible population the AR model might be preferable.
+# Some ARIMA model basics
+
+We are not going to give an in-depth review of ARIMA models in this course, but we encourage you to check out the [FPP3 Chapter on ARIMA models](https://otexts.com/fpp3/arima.html), which provides a very accessible introduction to the concepts and math behind this powerful modeling framework.
+
+In general, there are three different knobs on ARIMA models that you can fiddle with. They are:
+
+ - **the auto-regressive order**: how many lags are included ($p$)
+ - **the differencing order**: how many differences do you take of the data ($d$)
+ - **the moving-average order**: how many residual errors are included as predictors ($q$)
+
+We will present briefly each of these pieces. But first, a brief detour to describe an important concept: stationarity.
+
+
+::: callout-tip
+## What is stationarity?
+
+A time-series is considered stationary if it does not have a clear trend or regular periodicity. 
+More statistically speaking, the time-series is stationary if the expected value and variance of the time-series is the same for any window of time points selected. 
+For ARIMA models to work well, ideally the time-series that is being modeled will be stationary. 
+As we will see in this and later sessions, there are many different ways to try to make the time-series stationary. 
+
+A common trick to make a time-series stationary is to take "differences" of the observations. So rather than the time-series of interest being $y_1, ..., y_t, ...$, you create a new set of observations $z_t = y_t-y_{t-1}$. 
+Oftentimes, even if $y_t$ is not stationary, $z_t$ will be. 
+Sometimes a time-series may require two rounds of differencing or seasonal differencing (subtracting off the values from the previous season or two) to become stationary.
 :::
 
-## Scoring your forecast
+
+## ARIMA model as a regression
+
+An ARIMA model is specified as ARIMA($p$,$d$,$q$), where, as defined above, the $p$, $d$, and $q$ refer to the order of auto-regressive, differencing and moving-average terms. 
+An ARIMA is a kind of regression model, with an outcome being predicted by a set of independent variables.
+We are going to fit a few overly simple ARIMA models below just to give examples of the math, the fitted values, and what the forecasts look like.
+
+### ARIMA(1,0,0)
+Here is the equation for an ARIMA(1,0,0) model:
+$$ y_t = \mu_t + \phi_1 y_{t-1} + \varepsilon_t $$
+where $\mu_t$ is a constant (like an intercept term in the regression), $\phi_1$ is a coefficient for the auto-regressive term, and $\varepsilon_t$ is a random error term with mean zero and constant variance. 
+Note the constant variance assumption! 
+This is one of the places where the stationarity assumption is comes into play: if the time-series is stationary then constant variance is a reasonable assumption. 
+Here is code to fit and forecast from an ARIMA(1,0,0) model (this is sometimes also referred to as an AR(1) model):
+
+```{r}
+fit_arima100 <- flu_data |>
+  model(ARIMA(wili ~ pdq(1,0,0)))
+report(fit_arima100)
+forecast(fit_arima100, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+### ARIMA(1,1,0)
+Here is an equation for an ARIMA(1,1,0) model:
+$$ y_t - y_{t-1} = \phi_1 (y_{t-1} - y_{t-2}) + \varepsilon_t.$$
+Another way to think about this is that we've just replaced the dependent outcome variable $y_t$ with $z_t$ as we defined above as the difference. 
+Remember that the (1,1,0) part means that we have one auto-regressive term, one differencing and no moving average terms.
+Here is code to fit and forecast from this model:
+
+```{r}
+fit_arima110 <- flu_data |>
+  model(ARIMA(wili ~ pdq(1,1,0)))
+report(fit_arima110)
+forecast(fit_arima110, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+Note that by default a model with $d=1$ doesn't include a constant term in the model.
+
+### ARIMA(0,0,1)
+The auto-regressive and differencing knobs of ARIMA models are fairly easy to conceptualize, but the moving average part is a little bit trickier. Basically, a moving average model uses residuals from the previous timepoints as predictors in the model. 
+This is actually a common technique in more modern-day machine learning approaches too: learn from your past errors/residuals to improve your model. 
+Here is an example of an ARIMA(0,0,1) model in math terms:
+
+$$ y_t = \mu + \varepsilon_t + \theta_1 \varepsilon_{t-1}.$$
+The key thing to note here is that $\varepsilon_t$ is still the same error term as in the earlier equations but the $\varepsilon_{t-1}$ term is included as a predictor in the model, with it's own coefficient $\theta_1$.
 
 
-```{r convert-forecasts}
-sc_forecasts <- forecasts |>
-  left_join(onset_df, by = "day") |>
-  filter(!is.na(.value)) |>
-  as_forecast_sample(
-    forecast_unit = c(
-      "origin_day", "horizon", "model"
-    ),
-    observed = "onsets",
-    predicted = ".value",
-    sample_id = ".draw"
+::: callout-tip
+## Don't get confused by "moving average" terminology!
+
+It is important to not get the "moving average" part of an ARIMA model confused with a models that smooth noisy data (like loess), which can sometimes also be referred to as "moving averages". 
+These are very different things!
+:::
+
+Here is code to fit and forecast from the ARIMA(0,0,1 model):
+```{r}
+fit_arima001 <- flu_data |>
+  model(ARIMA(wili ~ pdq(0,0,1)))
+report(fit_arima001)
+forecast(fit_arima001, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  labs(title = "WILI, US level",
+       y="% of visits")
+```
+
+
+# Fit a few targeted ARIMA models
+
+Ok, let's get back to looking at our data and figuring out what ARIMA models might be reasonable to choose here.
+There are lots of ways to reason your way into what kind of structure an ARIMA model should take. 
+We are going to demonstrate one path.
+
+## Using data inspection to inform model choices
+
+Let's look at our data again.
+```{r}
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+```
+The time-series is clearly non-stationary, with a clear periodicity that depends on the week of the season. 
+Let's try first differencing and looking at the data again.
+
+```{r, warning=FALSE}
+feasts::gg_tsdisplay(flu_data, y = difference(wili), plot_type='partial', lag_max = 104)
+```
+It's not stationary (there still are seasonal trends, we will do more to deal with this soon), but it's at least a little bit better.
+
+Based on this plot, let's put on our list of candidate models to fit an ARIMA(1,1,0), because with one difference in the data we can see that the PACF shows a significant correlation at only a lag of 1 (and at some higher lags that we will ignore for now).
+Recall that in the last session we fit an ARIMA(2,0,0).
+We're going to come up with a list of a few candidate models to fit and then fit them all at once.
+
+One clear feature of the original (not differenced) data is that the variance is small during the summer months (the flu off-season) and very high during the peaks of the season. 
+Let's implement a transformation to try to get something closer to constant variance.
+Through a lot of experimentation, we've found that a fourth-root transformation often does a reasonable job at stabilizing variance.[@ray_flusion_2025]
+And, it has the added benefit of making it so that predictions will never be negative. (Remember that problem from last session?)
+Other transformations might be reasonable too (there is [a whole section on them in the FPP3 textbook](https://otexts.com/fpp3/transformations.html#transformations)), and this is something often worth doing a bit of exploration for with your particular dataset.
+
+We're going to use `fable`-specified standards to define two transformation functions
+```{r}
+fourth_root <- function(x) x^0.25
+inv_fourth_root <- function(x) x^4
+
+my_fourth_root <- new_transformation(fourth_root, inv_fourth_root)
+```
+
+And then we can plot the data using this transformation:
+```{r}
+autoplot(flu_data, .vars = fourth_root(wili))
+```
+It's not perfect, but it's better.
+We will include some fourth-root transformations in our next round of model fitting.
+
+## Fit models
+
+Let's fit four models total: ARIMA(2,0,0) and ARIMA(1,1,0), each with and without the fourth_root transformation.
+```{r}
+fits <- flu_data |>
+  model(
+    arima200 = ARIMA(wili ~ pdq(2,0,0)),
+    arima110 = ARIMA(wili ~ pdq(1,1,0)),
+    arima200_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
+    arima110_trans = ARIMA(my_fourth_root(wili) ~ pdq(1,1,0))
   )
-sc_forecasts
+forecast(fits, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
 ```
 
+The above plots show 40-week ahead forecasts from each of the four models.
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
-
-```{r score-forecasts}
-sc_scores <- sc_forecasts |>
-  score()
-
-sc_scores
-```
-
-::: {.callout-note collapse="true"}
-## Learning more about the output of `score()`
-
-See the documentation for `?get_metrics.forecast_sample` for information on the default sample metrics.
-:::
-
-### At a glance
-
-Let's summarise the scores by model first.
-
-```{r}
-sc_scores |>
-  summarise_scores(by = "model")
-```
-
-::: {.callout-tip}
-## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
-:::
-
-### Continuous ranked probability score
-
-As in the [forecast evaluation session](forecast-evaluation), we will start by looking at the CRPS by horizon and forecast date.
-
-::: {.callout-tip}
-## Reminder: Key things to note about the CRPS
-  - Small values are better
-  - When scoring absolute values (e.g. number of cases) it can be difficult to compare forecasts across scales (i.e., when case numbers are different, for example between locations or at different times).
-:::
-
-First by forecast horizon.
-
-```{r}
-sc_scores |>
-  summarise_scores(by = c("model", "horizon")) |>
-  ggplot(aes(x = horizon, y = crps, col = model)) +
-  geom_point()
-```
-
-and across different forecast dates
-
-```{r}
-sc_scores |>
-  summarise_scores(by = c("origin_day", "model")) |>
-  ggplot(aes(x = origin_day, y = crps, col = model)) +
-  geom_point()
-```
-
-::: {.callout-tip}
-## Take 5 minutes 
-How do the CRPS values change based on forecast date?
-How do the CRPS values change with forecast horizon?
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-How do the CRPS values change based on forecast horizon?
-
-- All models have increasing CRPS with forecast horizon.
-- The more mechanistic model has the lowest CRPS at all forecast horizon.
-- The more stastical model starts to outperform the random walk model at longer time horizons.
-
-How do the CRPS values change with forecast date?
-
-- The more statistical model does particularly poorly around the peak of the outbreak but outperforms the random walk model.
-- The more mechanistic model does particularly well around the peak of the outbreak versus all other models
-- The more statistical model starts to outperform the other models towards the end of the outbreak.
-
-:::
-
-### PIT histograms
-
-::: {.callout-tip}
-## Reminder: Interpreting the PIT histogram
-- Ideally PIT histograms should be uniform. 
-- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
-- If it is skewed then the model is biased towards the direction of the skew.
-:::
-
-
-Let's first look at the overall PIT histogram.
-
-```{r pit-histogram}
-sc_forecasts |>
-  get_pit_histogram(by = "model") |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  facet_wrap(~model) +
-  labs(x = "Predicted quantiles")
-```
-
-As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
-
-```{r pit-histogram-horizon}
-sc_forecasts |>
-  mutate(group_horizon = case_when(
-    horizon <= 3 ~ "1-3",
-    horizon <= 7 ~ "4-7",
-    horizon <= 14 ~ "8-14"
-  )) |>
-  get_pit_histogram(by = c("model", "group_horizon")) |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  facet_grid(vars(model), vars(group_horizon)) +
-  labs(x = "Predicted quantiles")
-```
-
-and then for different forecast dates.
-
-```{r pit-histogram-date, fig.width = 10}
-sc_forecasts |>
-  get_pit_histogram(by = c("model", "origin_day")) |>
-  ggplot(aes(x = mid, y = density)) +
-  geom_col() +
-  facet_grid(vars(model), vars(origin_day)) +
-  labs(x = "Predicted quantiles")
-```
-
-::: {.callout-tip}
 ## Take 5 minutes
-What do you think of the PIT histograms?
-:::
 
-::: {.callout-note collapse="true"}
+None of the forecasts above look great. But which of these models do you think is doing the most reasonable (or least unreasonable) things?
+
+:::: {.callout-note collapse="true"}
 ## Solution
-What do you think of the PIT histograms?
 
-- The more mechanistic model is reasonably well calibrated but has a slight tendency to be overconfident.
-- The random walk is biased towards overpredicting.
-- The more statistical model is underconfident.
-- Across horizons the more mechanistic model is only liable to underpredict at the longest horizons.
-- The random walk model is initially relatively unbiased and well calibrated but becomes increasingly likely to overpredict as the horizon increases.
-- The forecast date stratified PIT histograms are hard to interpret. We may need to find other ways to visualise bias and calibration at this level of stratification (see the `{scoringutils}` documentation for some ideas).
+Once again, there is not exactly a "right" answer here, but here are a few things to consider:
 
-:::
+ - The fact that both of the `_trans` forecasts (the ones with the fourth-root transformation) stay positive seems pretty critical. The other forecasts routinely predict impossible values!
+ - The `arima210_trans` model has quite high uncertainty at longer horizons in a way that seems reasonable.
+ 
+Again, all of these forecasts are not very good, but they are progress.
+::::
 
-## Scoring on the log scale
+# Doing something about seasonality
 
-Again as in the [forecast evaluation session](forecast-evaluation), we will also score the forecasts on the log scale.
+The seasonality feature is a critical part of these data. 
+Let's do something to model it!
 
-```{r log-convert-forecasts}
-log_sc_forecasts <- sc_forecasts |>
-  transform_forecasts(
-    fun = log_shift,
-    offset = 1,
-    append = FALSE
-  )
+There is a whole part of ARIMA modeling that accounts for seasonality (they are called Seasonal ARIMA or SARIMA models). 
+However, using seasonal ARIMA models with weekly data is complicated, because some years have 52 weeks and some have 53.
+Here are two relatively straight-forward ways that you could address this:
 
-log_sc_scores <- log_sc_forecasts |>
-  score()
-```
+1. Define a "season-year" where "week 1" is the start of each season (maybe the first week of September) and count to 52 from there. If there is a 53rd week, drop it. Model with a periodicity of 52.
+2. Include [Fourier series terms](https://en.wikipedia.org/wiki/Fourier_series#Synthesis) (sums of sine and cosine terms with a fixed periodicity of 365 days) to fit annual periodic trends.
 
+We're going to try approach 2 because it's a bit easier to get up and running in `fable`.
+You can read more about this approach in [FPP3 Chapter 12.1](https://otexts.com/fpp3/complexseasonality.html#dynamic-harmonic-regression-with-multiple-seasonal-periods).
+The model we will fit below will be an AR(2) model plus some harmonic terms. We can define it mathematically like this:
+$$ y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + \sum_{k=1}^{3} \left[ \alpha_k \cos\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) + \beta_k \sin\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) \right] + \varepsilon_t $$
+where $\alpha_k$ and $\beta_k$ are the Fourier coefficients for the sine and cosine terms, and $d(t)$ is a function that returns the integer day of the year representing the first day of week $t$.
 
-::: {.callout-tip}
-Reminder: For more on scoring on the log scale see @bosse2023scorin on scoring forecasts on transformed scales.
-:::
-
-### At a glance
-
+Note that you can just add a `fourier()` term to your model equation and this will add the Fourier Series terms shown in the equation above to the model predictors. 
+Here is the new fitted set of models, using just the transformed data, and only using the Fourier Series on the undifferenced data, since we are assuming that this periodic function will model the stationarity directly. 
 ```{r}
-log_sc_scores |>
-  summarise_scores(by = "model")
+fits <- flu_data |>
+  model(
+    arima200_trans = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0)),
+    arima110_trans = ARIMA(my_fourth_root(wili) ~ pdq(1,1,0)),
+    arima200_fourier = ARIMA(my_fourth_root(wili) ~ pdq(2,0,0) + fourier(period = "year", K=3)))
+forecast(fits, h=40) |>
+  autoplot(flu_data |> filter(epiweek >= as.Date("2015-09-01"))) +
+  facet_wrap(~.model) +
+  labs(title = "WILI, US level",
+       y="% of visits")
 ```
 
-::: {.callout-tip}
-## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
-:::
+Well, that `arima200_fourier` model can likely be improved, but we have finally arrived at a forecast model that at least passes a visual sanity check, in the sense that it captures the seasonality that we know is present in the data.
+In the next session, we will start to think about how these different models and forecasts can be evaluated carefully.
 
-### CRPS
+# End-of-session reflection: Bayesian vs. Frequentist modeling
 
-```{r}
-log_sc_scores |>
-  summarise_scores(by = c("model", "horizon")) |>
-  ggplot(aes(x = horizon, y = crps, col = model)) +
-  geom_point()
-```
-
-```{r}
-log_sc_scores |>
-  summarise_scores(by = c("origin_day", "model")) |>
-  ggplot(aes(x = origin_day, y = crps, col = model)) +
-  geom_point()
-```
-
-::: {.callout-tip}
-## Take 5 minutes 
-How do the CRPS values on the log scale compare to the scores on the original scale?
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-- The performance of the mechanistic model is more variable across forecast horizon than on the natural scale.
-- On the log scale the by horizon performance of the random walk and more statistical mdoel is more comparable than on the log scale.
-- The period of high incidence dominates the origin day stratified scores less on the log scale. We see that all models performed less well early and late on.
-:::
-
-# Going further
-
-## Challenge
-
-- We have only looked at three forecasting models here. There are many more models that could be used. For example, we could use a more complex mechanistic model which captures more of the underlying dynamics of the data generating process. We could also use a more complex statistical model which captures more of the underlying structure of the data.
-- We could also combine the more mechanistic and more statistical models to create a hybrid model which captures the best of both worlds (maybe).
-- We could also use a more complex scoring rule to evaluate the forecasts. For example, we could use a multivariate scoring rule which captures more of the structure of the data.
-- Consider how forecasting approaches might differ in non-outbreak settings: What additional factors might you need to account for when applying these methods to routine surveillance data? Think about seasonal patterns, long-term trends, holiday effects, or other cyclical behaviours that might influence transmission dynamics and reporting patterns.
-
-## Methods in practice
-
-- The statistical models we've discussed here represent just a subset of available forecasting approaches.
-For a comprehensive treatment of time series forecasting models, including ARIMA models as a generalisation of autoregressive approaches with additional features for differencing and moving averages, see @hyndmanForecastingPrinciplesPractice2021. 
-These models offer a different workflow for thinking about forecasting.
-Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
-Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. Something to think about!
-- Gaussian process models (as implemented in [EpiNow2](https://github.com/epiforecasts/EpiNow2)) provide another flexible approach that can generalise many of these statistical models depending on kernel choice.
+The statistical models we've discussed in this session represent just a subset of available forecasting approaches.
+These models offer a different workflow for thinking about modeling than the generative models from the nowcasting sessions in the first day of the course.
+Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods such as these ARIMA models work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
+Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. 
+Something to think about!
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
-- Share your [questions and thoughts](../reference/help)
 
 ## References
 

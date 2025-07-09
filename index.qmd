@@ -1,5 +1,5 @@
 ---
-title: "Nowcasting and forecasting infectious disease dynamics"
+title: "Nowcasting and forecasting infectious disease dynamics - SISMID"
 site: distill::distill_website
 comments: false
 about:
@@ -7,7 +7,7 @@ about:
   links:
     - icon: chat-fill
       text: Dive into the course
-      href: nfidd/sessions/introduction-and-course-overview.html
+      href: sismid/sessions/introduction-and-course-overview.html
     - icon: github
       text: Visit us on GitHub
       href: https://github.com/nfidd/nfidd
@@ -17,8 +17,8 @@ about:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-A course and living resource for learning about nowcasting and forecasting infectious disease dynamics.
+A course and living resource for learning about nowcasting and forecasting infectious disease dynamics originally developed by the [nfidd](https://nfidd.github.io/nfidd) team and adapted for [SISMID](https://sismid.sph.emory.edu/).
 
-We invite anyone to use the materials here in their own teaching and learning. For questions and discussion of the course or its content, we welcome all users to the [Discussion board](https://github.com/nfidd/nfidd/discussions). We welcome all forms of [contributions, additions and suggestions](https://github.com/nfidd/nfidd/issues) for improving the materials. 
+We invite anyone to use the materials here in their own teaching and learning. For questions and discussion of the course or its content, we welcome all users to the [Discussion board](https://github.com/nfidd/sismid/discussions). We welcome all forms of [contributions, additions and suggestions](https://github.com/nfidd/sismid/issues) for improving the materials. 
 
-All materials here are provided under the permissive [MIT License](https://github.com/nfidd/nfidd/blob/main/LICENSE).
+All materials here are provided under the permissive [MIT License](https://github.com/nfidd/sismid/blob/main/LICENSE).
