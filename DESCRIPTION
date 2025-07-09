@@ -33,15 +33,19 @@ Suggests:
     posterior,
     purrr,
     rmarkdown,
-    scoringutils (>= 2.0.0),
     testthat (>= 3.0.0),
-    qrensemble (>= 0.1.0),
-    lopensemble (>= 0.1.0),
-    roxyglobals
+    roxyglobals,
+    hubUtils,
+    hubEnsembles,
+    hubEvals,
+    hubVis
 Additional_repositories:
     https://hubverse-org.r-universe.dev,
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev
+Remotes:
+    hubverse-org/hubEvals,
+    hubverse-org/hubVis
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
