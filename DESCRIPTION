@@ -36,7 +36,8 @@ Suggests:
     testthat (>= 3.0.0),
     roxyglobals,
     hubUtils,
-    hubEnsembles
+    hubEnsembles,
+    hubEvals
 Additional_repositories:
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev,
