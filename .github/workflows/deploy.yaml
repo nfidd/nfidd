@@ -27,9 +27,9 @@ jobs:
         with:
           use-public-rspm: true
           extra-repositories:
+            https://hubverse-org.r-universe.dev,
             https://stan-dev.r-universe.dev,
-            https://epiforecasts.r-universe.dev,
-            https://hubverse-org.r-universe.dev
+            https://epiforecasts.r-universe.dev
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
