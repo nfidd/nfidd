@@ -27,9 +27,10 @@ The source file of this session is located at `sessions/real-world-forecasts.qmd
 
 ## Libraries used
 
-In this session we will use the `dplyr` package for data wrangling, the `ggplot2` library for plotting, and the following [hubverse](https://hubverse.io/) packages: `hubData`, hubUtils`, `hubEvals` and `hubEnsembles`.
+In this session we will use the `nfidd` package to access some stored datasets, the `dplyr` package for data wrangling, the `ggplot2` library for plotting, and the following [hubverse](https://hubverse.io/) packages: `hubData`, hubUtils`, `hubEvals` and `hubEnsembles`.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("dplyr")
 library("ggplot2")
 library("hubData")
@@ -73,11 +74,150 @@ The US COVID-19 Forecast Hub ran from
 
 # The forecasts
 
+We will start by accessing forecast data from the COVID-19 Forecast Hub. 
+Both the forecast and target data are stored in an S3 bucket that can be accessed using `hubData`.
+
+::: callout-tip
+For a complete list of hubs (many of which have public data available) check out the hubverse [list of hubs](https://hubverse.io/community/hubs.html).
+:::
+
+
 ## Accessing forecast data from the cloud
+
+```{r load-forecasts, eval=FALSE}
+hub_path_cloud <- hubData::s3_bucket("s3://covid19-forecast-hub")
+hub_con_cloud <- hubData::connect_hub(hub_path_cloud, skip_checks = TRUE)
+
+covid_forecasts <- hub_con_cloud |> 
+  dplyr::filter(
+    output_type == "quantile",
+    target == "wk inc covid hosp"
+    ) |> 
+  dplyr::collect()
+```
+
+```{r}
+data(covid_forecasts)
+```
+
 
 ## Accessing target data from the cloud
 
+Here is code to query the time-series data from the cloud-based hub.
+```{r load-ts-target-data, eval = FALSE}
+covid_time_series <- connect_target_timeseries(hub_path_cloud) |> 
+  filter(target == "wk inc covid hosp") |> 
+  dplyr::collect()
+```
+
+However, to ensure reproducibility (since this is a live dataset), we have downloaded this object for you already as of July 9, 2025, and it is available to load in from the course R package directly.
+```{r load-ts-target-data-archived}
+data(covid_time_series)
+```
+
+
+
 ## Exploratory data analysis and visualization
+
+Now that we've downloaded the forecast and target data, let's just do a few basic explorations to make sure we understand the dimensions of our data.
+Ideally, the hubverse should ensure that the data is relatively "clean", no typos in targets, no missing quantile levels, no negative predictions, etc...
+But let's start by just getting a sense of how many unique values we have for `location`, `horizon`, `target_end_date`, etc...
+
+```{r eda-unique-vals}
+unique_per_column <- covid_forecasts  |> 
+  select(-value) |> 
+  purrr::map(~ sort(unique(.x)))
+
+print(unique_per_column)
+```
+
+From the above, we can see that
+
+-   the forecasts were made every week from `r min(unique_per_column$reference_date)` until `r max(unique_per_column$reference_date)`,
+-   there is just one target and we only have quantile values for it,
+-   we have forecasts for horizons -1 to 3, 
+-   there are 23 quantile levels present in the data,
+-   there are 17 models,
+-   the location codes are numbers.
+
+Before we go any further, let's fix the location codes to be state abbreviations.
+```{r state-abbrs}
+data(covid_locations)
+
+covid_forecasts <- covid_forecasts |> 
+  left_join(covid_locations)
+covid_time_series <- covid_time_series |> 
+  left_join(covid_locations)
+```
+
+
+Let's just do a quick visualization of forecasts from one week to make sure we understand the structure of the forecasts.
+
+```{r forecast-viz-sanity-check}
+covid_forecasts |> 
+  filter(reference_date == "2025-02-15", abbreviation == "GA") |> 
+  hubVis::plot_step_ahead_model_output(
+    target_data = covid_time_series |> 
+      filter(as_of == as.Date("2025-07-09"),
+             abbreviation == "GA"),
+    use_median_as_point = TRUE,
+    x_col_name = "target_end_date",
+    x_target_col_name = "date",
+    pal_color = "Set3"
+  )
+```
+
+
+Do all models have the same number of predictions? 
+Let's look at this a few different ways.
+
+Here is a tabular summary showing some summary stats about how often and how much each model submitted:
+```{r model-submission-summary}
+covid_forecasts |> 
+  group_by(model_id) |> 
+  summarise(
+    n_submissions = n_distinct(reference_date),
+    n_rows = n(),
+    n_horizons = n_distinct(horizon),
+    n_locations = n_distinct(location)
+  ) |> 
+  arrange(-n_submissions)
+```
+
+And here is a visual showing more details about submissions each week by model:
+
+```{r model-submission-viz}
+covid_forecasts |> 
+  group_by(model_id, reference_date) |> 
+  summarise(
+    n_rows = n(),
+    n_locations = n_distinct(location)
+  ) |> 
+  ungroup() |> 
+  mutate(model_id = reorder(model_id, n_rows, FUN = sum)) |> 
+  ggplot() +
+  geom_tile(aes(x = reference_date, y = model_id, fill = n_locations))
+```
+
+A common challenge in real-time forecasting competitions is that sometimes one week doesn't submit a model.
+
+::: callout-tip
+### Take 2 minutes
+
+What are some reasons you can imagine for a model not being submitted in a given week?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Here are some real examples of why models have not been submitted in a given week:
+
+-   The target dataset is not released (as was the case one week in January 2025).
+-   The modeler who runs the model every week is sick or on vacation.
+-   A model may have joined mid-season because it was still in development.
+-   A model have have gone offline because a team stopped participating.
+-   ... (there are likely other reasons too)
+:::
 
 ## What are the models?
 
@@ -157,8 +297,9 @@ In this session, we'll mostly be using "proper" scoring rules: these are scoring
 
 ## Challenge
 
--   In which other ways could we summarise the performance of the forecasts?
--   What other metrics could we use?
+-   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). 
+Using the code above, try to replicate some of the analyses in this session for a different hub. 
+What challenges and obstacles do you run into?
 -   
 
 ## Methods in practice
