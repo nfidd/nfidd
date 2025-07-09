@@ -37,7 +37,8 @@ Suggests:
     roxyglobals,
     hubUtils,
     hubEnsembles,
-    hubEvals
+    hubEvals,
+    hubVis
 Additional_repositories:
     https://hubverse-org.r-universe.dev,
     https://stan-dev.r-universe.dev,
