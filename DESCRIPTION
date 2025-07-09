@@ -42,6 +42,8 @@ Additional_repositories:
     https://hubverse-org.r-universe.dev,
     https://stan-dev.r-universe.dev,
     https://epiforecasts.r-universe.dev
+Remotes:
+    hubverse-org/hubEvals
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
