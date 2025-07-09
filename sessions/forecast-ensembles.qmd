@@ -157,10 +157,9 @@ autoplot(
 # Forecast representation and format
 
 One important thing about working with forecast data in practice is that following some standard ways of representing individual forecasts can make it easier to do a wider range of analyses with a broad array of models.
-While `fable` is good for some fairly simple modeling, we will want and need more complexity and a more flexible representation of forecast data.
-In this section, we will start using hubverse-style data for forecast output formats.
+In this section, we will start using hubverse-style data for forecast output formats, as we find it to be a flexible, easily extensible, and general set-up for data formats that will enable activities on the last day of the class.
 
-::: callout-tip
+::: {.callout-tip collapse="true"}
 ## What is the hubverse?
 
 The [hubverse](https://hubverse.io/) is a project designed to improve public health outcomes through collaborative modeling.
@@ -180,9 +179,16 @@ If you can format your output data according to the simple standards, then your 
 
 Forecasts in `fable` follow their own standard format, and interacting with them requires an advanced understanding of `tibble` objects.
 Most of the `fable` models that we have used return distributional objects (a standard representation of, say, a Normal distribution) as the output, although some models return samples by default.
-We will migrate our existing forecasts from `fable` models into samples, as this is a flexible format.
-However, we will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output.
+We will migrate our existing forecasts from `fable` models into samples, as this is a flexible, interchangeable format.
+
+::: {.callout-tip collapse="true"}
+### Gory details on data reformatting
+
+We will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output.
 If we were worried about this (and not so worried about eating up the RAM on our computer), we could extract many thousands of samples to reduce variability in the output.
+To learn more about the pros and cons of other model output type formats, check out the [hubverse website](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
+
+:::
 
 To start with, we will use the `generate()` function to create 100 sampled trajectories (at 1 to 8 weeks ahead) from each of the fitted models above.
 
@@ -249,7 +255,7 @@ This procedure is also sometimes called *stacking*, and the resulting forecasts 
 We will first consider forecasts based on the individual quantiles of each model.
 This corresponds to a situation where each forecast aims to correctly determine a single target predictive distribution.
 By taking an average of all models, we aim to get a better estimate of this distribution than from the individual models.
-If we have reason to believe that some models are **consistently** better than others at estimating this distribution, we could try to create a weighted version of this average.
+If we have reason to believe that some models are **consistently** better than others at estimating this distribution, then this might be reason to try to create a weighted version of this average.
 
 ### Converting sample-based forecasts to quantile-based forecasts
 
@@ -293,7 +299,7 @@ The procedure of calculating quantiles of a new distribution as a weighted avera
 #### Construction
 
 We can calculate the mean quantile ensemble by taking the mean of the forecasts at each quantile level.
-This function could be coded up in a few lines using `dplyr`-style functions, but it is also already built for us by the hubverse, so we will use the `hubEnsembles::simple_ensemble()` function for this:
+This function is also already built for us by the hubverse, so we will use the `hubEnsembles::simple_ensemble()` function for this:
 
 ```{r mean-ensemble}
 mean_ensemble <- quantile_forecasts |>
@@ -609,7 +615,7 @@ lop_ensemble_filtered <- sampled_forecasts_hub |>
 To facilitate visual and quantitative comparisons with the earlier ensemble forecasts, we convert the new ensemble forecasts to quantiles and then plot them.
 
 ```{r, fig.height = 12}
-all_forecasts <- bind_rows(
+forecasts_with_lop <- bind_rows(
   lop_ensemble,
   lop_ensemble_filtered
 ) |> 
@@ -617,7 +623,7 @@ all_forecasts <- bind_rows(
   bind_rows(filtered_ensembles)
 
 hubVis::plot_step_ahead_model_output(
-  model_out_tbl = all_forecasts,
+  model_out_tbl = forecasts_with_lop,
   target_data = flu_data |> 
     rename(observation = wili) |> 
     filter(epiweek >= as.Date("2017-09-01")),
@@ -643,7 +649,7 @@ How and when are they different from each other?
 ::: {.callout-note collapse="true"}
 ### Solution
 
-The LOP ensembles tend to be a bit wider than the other ensemble forecasts, especially at times when the forecasts disagree more.
+The LOP ensemble tends to be a bit wider than the `other ensemble forecasts`median_ensemble_filtered` forecast, especially at times when the individual component forecasts disagree more.
 :::
 
 ### Evaluate sample-based forecasts
@@ -652,7 +658,7 @@ Looking at the same overall by-model evaluations as we ran earlier, the LOP ense
 
 ```{r}
 forecast_scores <- hubEvals::score_model_out(
-  all_forecasts,
+  forecasts_with_lop,
   oracle_output, 
   by = "model_id"
 )
@@ -674,10 +680,9 @@ In epidemiological forecasting, the track record is mixed.
 In settings where a long track record (multiple seasons) of performance can be measured and where the accuracy of individual models doesn't vary too much, then weighting has been shown to help with influenza[@reich_accuracy_2019], dengue fever[@colon-gonzalez_probabilistic_2021], and some COVID-19[@ray_comparing_2023] forecasts.
 However, in forecasting COVID-19 cases and hospitalizations, where model performance fluctuated over time, it was harder to see improvements in weighted ensembles.[@ray_comparing_2023]
 
-However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989,@claeskens_forecast_2016]
+However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989;@claeskens_forecast_2016]
 :::
 
-Due to time restrictions, we will not focus on weighted ensembles at this point in the course.
 
 
 # Going further
@@ -685,7 +690,6 @@ Due to time restrictions, we will not focus on weighted ensembles at this point 
 ## Challenge
 
 -   Given the performance by forecast date shown by the different models, would you expect a weighted ensemble to perform better than the unweighted ensemble?
--   
 
 ## Methods in the real world
 
