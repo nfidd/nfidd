@@ -45,6 +45,7 @@ Additional_repositories:
     https://epiforecasts.r-universe.dev
 Remotes:
     hubverse-org/hubEvals,
+    hubverse-org/hubData,
     hubverse-org/hubVis
 Encoding: UTF-8
 Language: en-GB

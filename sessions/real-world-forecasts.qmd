@@ -1,0 +1,174 @@
+---
+title: "Evaluating real-world outbreak forecasts"
+order: 12
+bibliography: ../nfidd.bib
+---
+
+# Introduction
+
+So far in this course we have focused on building, visualising, evaluating, and combining "toy" forecast models in somewhat synthetic settings.
+In this session you will work with real forecasts from an existing modeling hub.
+This will expose many of the challenges involved with real-time forecasting, as well as the benefits of coordinated modeling efforts.
+
+## Slides
+
+-   [Real-world forecasts](slides/real-world-forecasts)
+
+## Objectives
+
+The aim of this session is to develop advanced skills in working with real forecasts and an appreciation for the challenges of real-time forecasting.
+
+:::: {.callout-note collapse="true"}
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/real-world-forecasts.qmd`.
+
+## Libraries used
+
+In this session we will use the `dplyr` package for data wrangling, the `ggplot2` library for plotting, and the following [hubverse](https://hubverse.io/) packages: `hubData`, hubUtils`, `hubEvals` and `hubEnsembles`.
+
+```{r libraries, message = FALSE}
+library("dplyr")
+library("ggplot2")
+library("hubData")
+library("hubUtils")
+library("hubEvals")
+library("hubEnsembles")
+theme_set(theme_bw())
+```
+
+::: callout-tip
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility.
+Setting this ensures that you should get exactly the same results on your computer as we do.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(5050) # for Shohei Ohtani!
+```
+::::
+
+# Introduction to the US COVID-19 Forecast Hub
+
+The US COVID-19 Forecast Hub ran from 
+
+::: callout-tip
+## Some detail about the hub research
+
+:::
+
+## Forecast dimensions
+
+ - weeks
+ - locations
+ - output-types
+ - targets
+
+
+# The forecasts
+
+## Accessing forecast data from the cloud
+
+## Accessing target data from the cloud
+
+## Exploratory data analysis and visualization
+
+## What are the models?
+
+
+# Evaluating forecasts
+
+## Overall model comparison
+
+Look at number of forecasts, consider filtering...
+
+## Additional metrics
+
+### Prediction interval coverage
+
+
+### Relative scores
+
+
+### Log-scale scores
+
+
+### Revisit overall comparison
+
+::: callout-tip
+### Take 5 minutes: revisit overall model comparison
+
+Revisit overall model comparison, looking in particular at the metrics above.
+:::
+
+::: {.callout-note collapse="true"}
+### Solution
+
+Once again, there isn't an exact correct answer here, but here are a few observations...
+
+:::
+
+## Model comparison by horizon
+
+
+## Model comparison by forecast date
+
+
+# Ensembling forecasts
+
+## Which models were available each week?
+
+
+## Rebuild LOP and median ensembles
+
+Assumptions needed for LOP with quantiles.
+
+## Build weighted ensemble
+
+
+## Compare all ensembles over time
+
+
+::: callout-tip
+## Take 5 minutes
+
+What mean value do you think the forecast would settle at if we predicted out for a hundred weeks or more?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Once again, there isn't an exact correct answer here, but here are a few observations...
+
+:::
+
+
+::: callout-tip
+In this session, we'll mostly be using "proper" scoring rules: these are scoring rules for probabilistic forecasts that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
+:::
+
+# Going further
+
+## Challenge
+
+-   In which other ways could we summarise the performance of the forecasts?
+-   What other metrics could we use?
+-   
+
+## Methods in practice
+
+-   
+
+# Wrap up
+
+-   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+
+# References
+::: {#refs}
+:::
