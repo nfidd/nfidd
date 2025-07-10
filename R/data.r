@@ -72,7 +72,7 @@
 #' all outpatient doctor's office visits due to ILI in a given epidemiological
 #' week.
 #'
-#' @format A [tibble::tibble()] with a 7 columns
+#' @format A [tibble::tibble()] with a 3 columns and 780 rows
 #' \describe{
 #'   \item{region}{the region for which `wili` is represented, all "nat" for
 #'   national here.}
