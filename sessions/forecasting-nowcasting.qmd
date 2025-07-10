@@ -1,0 +1,658 @@
+---
+title: "Combining nowcasting and forecasting"
+order: 15
+bibliography: ../nfidd.bib
+---
+
+# Introduction
+
+In the previous sessions, we've explored nowcasting (estimating what current data will look like once all reports are in) and forecasting (predicting future trends) as separate problems.
+However, in real-time epidemic analysis, these challenges are connected.
+When we want to forecast from the most recent data, we face the problem that this data is incomplete due to reporting delays.
+
+In this session, we'll explore different approaches to handling this challenge, from simple methods that ignore the problem to joint models.
+
+## Slides
+
+- [Combining nowcasting and forecasting](slides/forecasting-nowcasting)
+
+## Objectives
+
+This session aims to show how to combine nowcasting and forecasting to make better predictions when data are subject to reporting delays.
+
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/forecasting-nowcasting.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference, and `scoringutils` for forecast evaluation.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("tidybayes")
+library("scoringutils")
+```
+
+::: {.callout-tip}
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility. 
+Setting this ensures that you should get exactly the same results on your computer as we do.
+We also set an option that makes `cmdstanr` show line numbers when printing model code.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(123)
+options(cmdstanr_print_line_numbers = TRUE)
+```
+
+:::
+
+# The challenge: forecasting with incomplete data
+
+## Motivation
+
+As we've seen in previous sessions, epidemiological data often arrives with delays.
+When we want to forecast future trends, we ideally want to use the most recent data available.
+However, this recent data is incomplete due to reporting delays.
+
+The traditional approach is to wait until data is "complete" (or nearly so) before forecasting.
+But this might mean forecasting from data that is 2 or more weeks old (though more often a few days for most reporting to be complete).
+As we've seen, forecasts degrade quickly with longer forecast horizons, so even our forecasts of "what is happening now" might end up being quite uncertain.
+
+## The nowcasting-forecasting continuum
+
+As we discussed in the renewal equation session, even nowcasting $R_t$ in real-time is partly a forecast for recent time points due to delays from infection to the reporting of data.
+Nowcasting and forecasting aren't distinct activities - they exist on a continuum:
+
+- **Nowcasting**: We have *some* data from the dates we're predicting
+- **Forecasting**: We have *no* data from the dates we're predicting
+
+Some methods (particularly Bayesian generative models) make this connection explicit, while others require more thought about how to link these two tasks.
+
+# Simulating data for our analysis
+
+We'll start by generating synthetic data that mimics the challenges we face in real-time epidemic analysis.
+This builds on the approach from the [joint nowcasting session](sessions/joint-nowcasting), but now we'll also create a dataset filtered at a two-week forecast horizon for evaluation.
+
+## Generate the underlying epidemic
+
+First, let's generate our simulated onset dataset as we did in previous sessions:
+
+```{r load-simulated-onset}
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
+head(onset_df)
+
+# Set our analysis cutoff point
+cutoff <- 71
+forecast_horizon <- 14  # We'll forecast 14 days ahead
+```
+
+## Apply reporting delays
+
+Now we'll simulate reporting delays and create our reporting triangle:
+
+```{r simulate-reporting-delays}
+reporting_delay_pmf <- censored_delay_pmf(
+  rlnorm, max = 15, meanlog = 1, sdlog = 0.5
+)
+plot(reporting_delay_pmf)
+```
+
+```{r simulate-reporting-triangle}
+reporting_triangle <- onset_df |>
+  filter(day < cutoff) |>
+  mutate(
+    reporting_delay = list(
+      tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
+    )
+  ) |>
+  unnest(reporting_delay) |>
+  mutate(
+    reported_onsets = rpois(n(), onsets * reporting_delay)
+  ) |>
+  mutate(reported_day = day + d)
+
+# Filter to what would be observed by the cutoff
+filtered_reporting_triangle <- reporting_triangle |>
+  filter(reported_day <= cutoff)
+
+tail(filtered_reporting_triangle)
+```
+
+## Create forecast evaluation datasets
+
+For our analysis, we need two additional datasets:
+
+1. **Complete data at forecast horizon**: What we would observe if we waited 2 weeks
+2. **Filtered data for naive approach**: Data that is "complete" at the time of forecast
+
+```{r create-evaluation-datasets}
+# Dataset 1: What we observe after waiting 2 weeks (for evaluation)
+complete_at_horizon <- reporting_triangle |>
+  filter(reported_day <= cutoff + forecast_horizon) |>
+  summarise(complete_onsets = sum(reported_onsets), .by = day)
+
+# Dataset 2: "Complete" data for naive approach (e.g., >14 days old)
+naive_complete_threshold <- 14
+naive_data <- available_onsets |>
+  filter(day <= cutoff - naive_complete_threshold)
+
+# Visualise the different datasets
+ggplot() +
+  geom_line(data = onset_df |> filter(day < cutoff), 
+            aes(x = day, y = onsets), 
+            color = "black", linetype = "dashed") +
+  geom_line(data = complete_at_horizon, 
+            aes(x = day, y = complete_onsets), 
+            color = "blue") +
+  geom_line(data = available_onsets, 
+            aes(x = day, y = available_onsets), 
+            color = "red") +
+  geom_line(data = naive_data, 
+            aes(x = day, y = available_onsets), 
+            color = "green", linewidth = 1.2) +
+  geom_vline(xintercept = cutoff, linetype = "dotted") +
+  geom_vline(xintercept = cutoff - naive_complete_threshold, 
+             linetype = "dotted", color = "green") +
+  labs(
+    x = "Day",
+    y = "Onsets",
+    title = "Different views of the data",
+    subtitle = "Black dashed: true, Blue: complete at horizon, Red: available now, Green: 'complete' for naive"
+  ) +
+  theme_minimal()
+```
+
+# Approach 1: Complete data approach
+
+The simplest approach is to filter to only "complete" data and forecast from there using the renewal model from the reproduction number session.
+This throws away recent information but avoids the bias from right truncation.
+
+```{r complete-data-approach}
+# Filter to "complete" data only (>14 days old)
+complete_data_forecast_data <- naive_data
+
+# Use the renewal model to estimate Rt and forecast
+# This is the same model from the reproduction number session
+complete_data_fit <- nfidd_sample(
+  "estimate-inf-and-r-rw-forecast", 
+  data = list(
+    T = nrow(complete_data_forecast_data),
+    inc = complete_data_forecast_data$available_onsets,
+    gen_time = gen_time_pmf,
+    h = forecast_horizon + naive_complete_threshold  # Forecast to beyond cutoff
+  )
+)
+
+# Extract forecast samples
+complete_data_forecasts <- complete_data_fit |>
+  gather_draws(forecast[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  mutate(
+    actual_day = day + min(complete_data_forecast_data$day) - 1,
+    approach = "Complete data"
+  )
+```
+
+
+
+```{r plot-complete-data-forecast}
+# Plot forecast from forecast date onwards
+forecast_start_day <- max(complete_data_forecast_data$day)
+evaluation_end_day <- max(complete_at_horizon$day)
+
+ggplot() +
+  # Final observed data (truth) for evaluation period
+  geom_point(data = complete_at_horizon |> 
+               filter(day >= forecast_start_day, day <= evaluation_end_day), 
+            aes(x = day, y = complete_onsets), 
+            color = "black", size = 1) +
+  # Complete data forecast ribbons from forecast start
+  geom_line(data = complete_data_forecasts |>
+              filter(actual_day >= forecast_start_day, actual_day <= evaluation_end_day),
+            aes(x = actual_day, y = .value, group = .draw),
+            color = "red", alpha = 0.1) +
+  # Mark cutoff date (when we actually want forecasts from)
+  geom_vline(xintercept = cutoff, 
+             linetype = "dashed", color = "blue", linewidth = 1) +
+  xlim(forecast_start_day, evaluation_end_day) +
+  labs(
+    x = "Day",
+    y = "Onsets",
+    title = "Complete data approach: Long forecast horizon",
+    subtitle = "Blue line: cutoff (when we want forecasts from)"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+
+Examine the naive approach:
+- How far back does the forecast have to start from?
+- What happens to forecast uncertainty over the long horizon?
+- Why might this approach miss recent changes in transmission?
+- What key assumption does this make about data completeness?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- **Forecast starts 14 days before cutoff**: The approach has to start forecasting from day 57 (cutoff - 14) to reach day 71 (cutoff), creating a very longerforecast horizon
+- **Uncertainty grows**: Forecasting over 28+ days (14 to reach cutoff + 14 forecast horizon) leads to very wide prediction intervals when using a random walk for $R_t$
+- **Misses recent transmission changes**: Any changes in $R_t$ in the recent 14 days are completely ignored, potentially missing important epidemiological trends
+- **Assumes perfect completeness**: Assumes data >14 days old is completely reported, which may not be true for all reporting systems
+
+:::
+
+# Approach 2: Pipeline approach (point estimates)
+
+This approach combines two separate models: first nowcast using a geometric random walk, then forecast using the renewal equation.
+
+## Step 1: Fit geometric random walk nowcast
+
+We start by fitting the geometric random walk nowcast to the reporting triangle data, as we did in the joint nowcasting session.
+
+```{r simple-correction-step1}
+# Fit geometric random walk nowcast (as in joint nowcasting session)
+geometric_nowcast_fit <- nfidd_sample(
+  "joint-nowcast-with-r", 
+  data = list(
+    n = length(unique(filtered_reporting_triangle$day)),
+    m = nrow(filtered_reporting_triangle),
+    p = filtered_reporting_triangle |>
+     group_by(day) |>
+     filter(d == max(d)) |>
+     mutate(d = d + 1) |>
+     pull(d),
+    obs = filtered_reporting_triangle$reported_onsets,
+    d = 16
+  )
+)
+```
+
+## Step 2: Extract nowcast point estimates
+
+From the nowcast posterior, we extract point estimates (medians) to use in the forecasting step. This loses uncertainty information.
+
+```{r simple-correction-step2}
+# Extract nowcast point estimates
+nowcast_estimates <- geometric_nowcast_fit |>
+  gather_draws(nowcast[day]) |>
+  median_qi(.value) |>
+  select(day, nowcast = .value)
+
+head(nowcast_estimates)
+```
+
+## Step 3: Combine with older "complete" data
+
+We create a complete time series by combining the older "complete" data with our nowcast estimates for recent days.
+
+```{r simple-correction-step3}
+# Combine with older "complete" data  
+pipeline_data <- bind_rows(
+  naive_data |> select(day, onsets = available_onsets),
+  nowcast_estimates |> filter(day > max(naive_data$day))
+) |>
+  arrange(day)
+
+tail(pipeline_data)
+```
+
+## Step 4: Forecast using renewal model
+
+Now we use the renewal model to forecast from this combined dataset.
+
+```{r simple-correction-step4}
+# Forecast using renewal model
+pipeline_forecast_fit <- nfidd_sample(
+  "estimate-inf-and-r-rw-forecast",
+  data = list(
+    T = nrow(pipeline_data),
+    inc = pipeline_data$onsets,
+    gen_time = gen_time_pmf,
+    h = forecast_horizon
+  )
+)
+
+# Extract forecast samples
+pipeline_forecasts <- pipeline_forecast_fit |>
+  gather_draws(forecast[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  mutate(
+    actual_day = day + min(pipeline_data$day) - 1,
+    approach = "Pipeline"
+  )
+```
+
+## Visualise the pipeline forecast
+
+```{r plot-pipeline-forecast}
+# Plot pipeline forecast from cutoff onwards
+ggplot() +
+  # Final observed data (truth) for evaluation period
+  geom_point(data = complete_at_horizon |> 
+               filter(day >= cutoff, day <= cutoff + forecast_horizon), 
+            aes(x = day, y = complete_onsets), 
+            color = "black", size = 1) +
+  # Pipeline forecast ribbons from cutoff
+  geom_line(data = pipeline_forecasts |>
+              filter(actual_day >= cutoff, actual_day <= cutoff + forecast_horizon),
+            aes(x = actual_day, y = .value, group = .draw),
+            color = "blue", alpha = 0.1) +
+  # Mark cutoff date
+  geom_vline(xintercept = cutoff, 
+             linetype = "dashed", color = "blue", linewidth = 1) +
+  xlim(cutoff, cutoff + forecast_horizon) +
+  labs(
+    x = "Day",
+    y = "Onsets",
+    title = "Pipeline approach: Forecasting from nowcast + old data",
+    subtitle = "Blue line: cutoff (forecast start)"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+
+Compare this pipeline approach to the naive approach:
+- What additional information does it use?
+- What are the limitations of using point estimates from the nowcast?
+- How might model mismatch between the geometric and renewal models affect results?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- This approach uses all available data, including the recent truncated observations
+- However, it only uses point estimates from the nowcast, losing uncertainty information
+- The geometric random walk and renewal equation represent different generative processes [@lison2024], which can lead to inconsistencies as we saw in the [joint nowcasting session](sessions/joint-nowcasting)
+
+:::
+
+# Approach 3: Pipeline approach (with uncertainty)
+
+This approach would sample from the nowcast posterior and then forecast from multiple trajectories.
+We describe the approach but don't implement it as it's computationally expensive.
+
+The approach works as follows:
+
+1. **Sample multiple nowcast realisations**: Instead of using point estimates from the geometric nowcast, we would sample 100+ different nowcast trajectories from the posterior distribution.
+
+2. **Forecast from each trajectory**: For each of the 100+ nowcast samples, we would combine it with the older "complete" data and fit the renewal forecasting model separately.
+
+3. **Combine forecast distributions**: We would then combine all the resulting forecast distributions to get final predictions that include some uncertainty from the nowcasting step.
+
+::: {.callout-tip}
+## Take 3 minutes
+
+Consider this approach compared to Approaches 1 and 2:
+- What advantage does it have over the simple pipeline approach?
+- Why is it computationally expensive compared to a joint model?
+- What fundamental problem does it still have regarding model consistency?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- **Advantage**: Unlike Approach 2, it propagates some uncertainty from the nowcast into the forecast, giving more realistic prediction intervals
+- **Computational cost**: Requires fitting the renewal model many times (once per nowcast sample), making it very slow compared to a single joint model fit
+- **Model mismatch remains**: Still uses different generative processes (geometric for nowcast, renewal for forecast), creating inconsistencies [@lison2024]
+
+:::
+
+# Approach 4: Joint approach
+
+This approach extends the joint nowcasting model to include forecasting, using a consistent renewal process throughout.
+
+```{r joint-nowcast-forecast}
+# Assuming the joint model now supports forecasting (to be implemented)
+joint_forecast_fit <- nfidd_sample(
+  "joint-nowcast-with-r", 
+  data = list(
+    n = length(unique(filtered_reporting_triangle$day)),
+    m = nrow(filtered_reporting_triangle),
+    p = filtered_reporting_triangle |>
+     group_by(day) |>
+     filter(d == max(d)) |>
+     mutate(d = d + 1) |>
+     pull(d),
+    obs = filtered_reporting_triangle$reported_onsets,
+    d = 16,
+    forecast_days = forecast_horizon,  # New parameter for forecasting
+    gen_time = gen_time_pmf            # Generation time for renewal process
+  )
+)
+
+# Extract both nowcast and forecast
+joint_results <- joint_forecast_fit |>
+  gather_draws(forecast[day]) |>  # This would include both nowcast and forecast
+  ungroup()
+```
+
+::: {.callout-tip}
+## Take 5 minutes
+
+What are the advantages of the joint model approach?
+- How does it address the model mismatch problem?
+- What uncertainties does it properly account for?
+- Why might it perform better than the pipeline approaches?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- Uses a single consistent generative model (renewal process) for both nowcasting and forecasting
+- Properly propagates all uncertainties (reporting delays, nowcast estimates, $R_t$ evolution)
+- Avoids the model mismatch between geometric random walk and renewal equation [@lison2024]
+- Accounts for correlations between nowcast and forecast uncertainty
+
+:::
+
+## Model extensions needed:
+
+The joint model would need to extend the current nowcasting model with:
+
+1. **Forecast horizon parameters** - extend time indices beyond the observation period
+2. **$R_t$ projection** - continue the random walk for $R_t$ into the future  
+3. **Generated quantities** - predict future infections and observable outcomes
+
+:::{.callout-note}
+## Computational considerations
+
+The joint model is more complex and slower to fit than the simpler approaches.
+In practice, we might:
+- Use efficient Stan implementations
+- Pre-compile models
+- Consider approximate methods for real-time use
+:::
+
+# Evaluation and comparison
+
+We'll evaluate all four approaches against what will finally be reported (our `complete_at_horizon` dataset) using proper scoring rules.
+
+## Prepare evaluation data
+
+```{r prepare-evaluation}
+# Create evaluation dataset - what we're forecasting against
+evaluation_data <- complete_at_horizon |>
+  filter(day > cutoff, day <= cutoff + forecast_horizon) |>
+  mutate(
+    forecast_horizon = day - cutoff,
+    observed = complete_onsets
+  ) |>
+  select(day, forecast_horizon, observed)
+
+head(evaluation_data)
+```
+
+## Quantitative evaluation using scoringutils
+
+```{r forecast-evaluation}
+# Combine all forecast results (this would come from implementing the approaches above)
+# For now, we'll create placeholder forecast results
+
+# Example structure for forecast results:
+# forecast_results <- bind_rows(
+#   # Approach 1: Naive
+#   naive_forecasts |> mutate(model = "Naive"),
+#   # Approach 2: Simple correction  
+#   simple_forecasts |> mutate(model = "Simple correction"),
+#   # Approach 3: Correction with uncertainty
+#   uncertainty_forecasts |> mutate(model = "Simple + uncertainty"),
+#   # Approach 4: Joint model
+#   joint_forecasts |> mutate(model = "Joint model")
+# )
+
+# Calculate scores using scoringutils
+# scores <- forecast_results |>
+#   score()
+```
+
+## Overall performance table
+
+```{r performance-table}
+# Create summary table showing overall performance
+# overall_performance <- scores |>
+#   filter(forecast_horizon <= 14) |>
+#   summarise_scores(by = "model") |>
+#   select(model, crps, interval_score, coverage_50, coverage_90) |>
+#   arrange(crps)
+
+# knitr::kable(overall_performance, 
+#              caption = "Overall forecast performance by approach")
+```
+
+## Performance by forecast horizon
+
+```{r performance-by-horizon}
+# Plot showing how performance varies by forecast horizon
+# horizon_performance <- scores |>
+#   summarise_scores(by = c("model", "forecast_horizon"))
+#
+# ggplot(horizon_performance, aes(x = forecast_horizon, y = crps, color = model)) +
+#   geom_line(size = 1) +
+#   geom_point() +
+#   labs(
+#     x = "Forecast horizon (days)",
+#     y = "CRPS (lower is better)",
+#     title = "Forecast performance by horizon",
+#     color = "Approach"
+#   ) +
+#   theme_minimal() +
+#   theme(legend.position = "bottom")
+```
+
+::: {.callout-tip}
+## Take 10 minutes
+
+Compare the four approaches across the evaluation metrics:
+1. Which performs best overall and why?
+2. How does performance vary by forecast horizon?
+3. What patterns do you see in interval coverage?
+4. How do the computational costs compare?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+From this evaluation, we would typically see:
+
+- **Naive approach**: Performs poorly, especially at shorter horizons where truncation bias is strongest
+- **Pipeline approach**: Better than naive but shows model mismatch issues [@lison2024]
+- **Simple correction + uncertainty**: Improved coverage but computationally expensive and still has model mismatch
+- **Joint model**: Best overall performance with proper uncertainty propagation and consistent generative process
+
+The joint model typically shows:
+- Lower CRPS (better probabilistic accuracy) 
+- Better calibrated prediction intervals
+- More stable performance across forecast horizons
+- Addresses the fundamental issue of using consistent generative models throughout
+
+:::
+
+# Going further
+
+## Software implementations
+
+For production use, several packages implement these concepts:
+
+- **EpiNow2**: Production-ready joint nowcasting and forecasting
+- **epinowcast**: Next-generation framework with flexible model specification  
+- **covidcast**: Real-time analysis tools developed during COVID-19
+
+## Key extensions
+
+- **Hierarchical models**: Multiple locations with shared parameters
+- **Time-varying delays**: Account for changing reporting patterns
+- **External predictors**: Mobility, weather, policy changes
+- **Ensemble approaches**: Combine multiple models for robustness
+
+# Wrap up
+
+## Key takeaways
+
+1. **Truncation bias is real**: Ignoring recent incomplete data biases forecasts
+2. **Model consistency matters**: Using the same generative process for nowcast and forecast avoids mismatch issues [@lison2024]  
+3. **Uncertainty propagation**: Joint models properly account for all sources of uncertainty
+4. **Trade-offs**: Balance computational cost, accuracy, and interpretability
+
+## Connecting to course themes
+
+This session brings together:
+- Proper uncertainty quantification (Sessions 1-2)
+- Understanding generative processes (Session 7) 
+- Forecast evaluation (Session 9)
+- Real-world epidemic analysis challenges
+
+# References
+
+## Key papers:
+
+- @abbott2020: EpiNow2 methodology
+- @bastos2019: Joint nowcasting and forecasting framework
+- @bosse2022: Forecast evaluation in epidemics
+- @bracher2021: COVID-19 forecast hub methodology
+- @funk2019: Real-time forecasting challenges
+- @gneiting2007: Probabilistic forecasting theory
+- @hawryluk2021: Gaussian process nowcasting
+- @lison2024: Benefits of joint modeling
+- @mcgough2020: Nowcasting by Bayesian smoothing
+
+## R packages:
+
+- [EpiNow2](https://epiforecasts.io/EpiNow2/)
+- [epinowcast](https://package.epinowcast.org/)
+- [scoringutils](https://epiforecasts.io/scoringutils/)
+- [covidcast](https://cmu-delphi.github.io/covidcast/covidcastR/)
+
+## Additional resources:
+
+- [Epiforecasts blog posts](https://epiforecasts.io/posts/)
+- [COVID-19 Forecast Hub](https://covid19forecasthub.org/)
+- [Real-time analysis course materials](https://github.com/epiforecasts/nowcasting-course)

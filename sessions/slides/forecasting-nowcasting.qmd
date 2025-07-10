@@ -1,11 +1,11 @@
 ---
-title: "Joint nowcasting and forecasting"
+title: "Combining nowcasting and forecasting"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 engine: knitr
 format: 
   revealjs:
-    output: slides/joint-nowcasting-forecasting-slides.html
-    footer: "Joint nowcasting and forecasting"
+    output: slides/forecasting-nowcasting.html
+    footer: "Combining nowcasting and forecasting"
     chalkboard: true
     slide-level: 3
 ---
@@ -48,26 +48,26 @@ Predict what an epidemiological time series will look like *after all delayed re
 - Some methods (e.g., Bayesian generative models) make this connection clear
 - Others require more thought about how to link them
 
-### Approach 1: Naive approach
+### Approach 1: Complete data approach
 
 - Filter to "complete" data only
 - Standard forecast from truncated series
 - **Problem**: Throws away recent information
 
-### Approach 2: Simple correction
+### Approach 2: Pipeline approach (point estimates)
 
 - Point estimate correction for truncation
 - Forecast from "adjusted" data  
 - **Problem**: No uncertainty propagation
 
-### Approach 3: Simple correction with uncertainty
+### Approach 3: Pipeline approach (with uncertainty)
 
 - Sample from nowcast posterior
 - Forecast from multiple trajectories
 - **Better**: Some uncertainty propagation
 - **But**: Still treating nowcast and forecast as separate steps
 
-### Approach 4: Joint model
+### Approach 4: Joint approach
 
 - Simultaneous nowcast and forecast
 - Full Bayesian inference
@@ -86,10 +86,10 @@ For each approach:
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Generate example data with realistic truncation
-2. Implement 4 forecasting approaches
+2. Implement 4 forecasting approaches (complete data, pipeline, joint)
 3. Compare performance quantitatively
 4. Discuss trade-offs and applications
 
 #
 
-[Return to the session](../joint-nowcasting-forecasting)
+[Return to the session](../forecasting-nowcasting)
