@@ -215,7 +215,7 @@ renewal_model
 
 These models are optimised for readability and not robustness or performance.
 For real-world versions of these models, see the `EpiNow2` and `epinowcast` packages.
-
+For the more complex models we might also consider using approximtate fitting methods such as variational inference or integrated nested Laplace approximations.
 :::
 
 ::: {.callout-tip}
@@ -502,6 +502,24 @@ joint_model <- nfidd_cmdstan_model("joint-nowcast-with-r")
 joint_model
 ```
 
+::: {.callout-tip}
+## Take 3 minutes
+
+What parts of the joint model allow for forecasting? 
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- The joint model includes a `generated quantities` block that generates forecasts for future days using the same renewal process as for the observed data.
+- The parameter `h` specifies the number of days to forecast beyond the observed data.
+- In the `generated quantities` block, the model simulates future random walk noise, extends the $R_t$ trajectory, and generates future infections and onsets.
+- Forecasts are then drawn from the predictive distribution for each future day, ensuring that both nowcasting and forecasting are handled within a single, consistent generative framework.
+- This is exactly the same as for the `renewal_model` as we are only forecasting the final number of onsets and not simulating the reporting process.
+
+:::
+
 Now we fit the joint model with forecasting parameters:
 
 ```{r joint-fit}
@@ -613,28 +631,6 @@ What are the advantages of the joint model approach?
 
 :::
 
-::: {.callout-tip}
-## Take 5 minutes
-
-What parts of the joint model allow for forecasting? The joint model would need to extend the current nowcasting model with:
-
-1. **Forecast horizon parameters** - extend time indices beyond the observation period
-2. **$R_t$ projection** - continue the random walk for $R_t$ into the future  
-3. **Generated quantities** - predict future infections and observable outcomes
-
-:::
-
-
-
-:::{.callout-note}
-## Computational considerations
-
-The joint model is more complex and slower to fit than the simpler approaches.
-In practice, we might:
-- Use efficient Stan implementations from software packages like `epinowcast`
-- Consider approximate methods for real-time use
-:::
-
 # Evaluation and comparison
 
 We'll evaluate all four approaches against what will finally be reported (our `complete_at_horizon` dataset) using proper scoring rules.
@@ -654,48 +650,55 @@ evaluation_data <- complete_at_horizon |>
 head(evaluation_data)
 ```
 
+## Visualise all the forecasts together
+
+As in all other sessions, we first visualise the forecasts together.
+
+```{r plot-all-forecasts}
+forecast_results <- bind_rows(
+  complete_data_forecasts |>
+    filter(actual_day > cutoff),
+  pipeline_forecasts,
+  joint_forecasts
+)
+
+forecast_results |>
+  ggplot(aes(x = actual_day, y = .value, group = .draw, color = approach)) +
+  geom_line(alpha = 0.1) +
+  geom_point(data = evaluation_data, aes(x = day, y = observed, group = NULL, color = NULL), color = "black", size = 1) +
+  scale_y_log10() +
+  labs(x = "Day", y = "Onsets", title = "All forecast approaches") +
+  theme_minimal() +
+  guides(color = guide_legend(
+    title = "Approach", override.aes = list(alpha = 1, linewidth = 1))
+  ) +
+  theme(legend.position = "bottom")
+```
+
 ## Quantitative evaluation using scoringutils
 
-We combine forecast results from both approaches that we implemented and compare them against our evaluation data:
+Using `scoringutils`, We first create a forecast sample object
 
 ```{r forecast-evaluation}
-# Combine forecast results from the two approaches we implemented
-forecast_results <- bind_rows(
-  # Approach 1: Complete data (naive)
-  complete_data_forecasts |> 
-    filter(actual_day > cutoff, actual_day <= cutoff + forecast_horizon) |>
+sc_forecasts <- forecast_results |>
+    left_join(evaluation_data, by = c("actual_day" = "day")) |>
+    group_by(approach, actual_day) |>
     mutate(
-      model = "Complete data",
-      forecast_horizon = actual_day - cutoff,
-      forecast_date = cutoff
+      .draw = row_number()
     ) |>
-    select(model, forecast_date, forecast_horizon, actual_day, .value, .draw),
-  
-  # Approach 2: Pipeline
-  pipeline_forecasts |> 
-    filter(actual_day > cutoff, actual_day <= cutoff + forecast_horizon) |>
-    mutate(
-      model = "Pipeline",
-      forecast_horizon = actual_day - cutoff,
-      forecast_date = cutoff
-    ) |>
-    select(model, forecast_date, forecast_horizon, actual_day, .value, .draw)
-) |>
-  # Add observed values for scoring
-  left_join(
-    evaluation_data |> select(day, observed), 
-    by = c("actual_day" = "day")
-  ) |>
-  filter(!is.na(observed))
+    as_forecast_sample(
+      forecast_unit = c("approach", "actual_day"),
+      observed = "observed",
+      predicted = ".value",
+      sample_id = ".draw"
+    )
+sc_forecasts
+```
 
-# Calculate scores using scoringutils
-scores <- forecast_results |>
-  as_forecast_sample(
-    forecast_unit = c("model", "forecast_date", "forecast_horizon"),
-    observed = "observed",
-    predicted = ".value",
-    sample_id = ".draw"
-  ) |>
+and then calculate the scores:
+
+```{r forecast-evaluation-scores}
+scores <- sc_forecasts |>
   score()
 
 head(scores)
@@ -708,9 +711,7 @@ We summarise the performance across all forecast horizons:
 ```{r performance-table}
 # Create summary table showing overall performance
 overall_performance <- scores |>
-  filter(forecast_horizon <= 14) |>
-  summarise_scores(by = "model") |>
-  select(model, crps, interval_score, coverage_50, coverage_90) |>
+  summarise_scores(by = "approach") |>
   arrange(crps)
 
 knitr::kable(overall_performance, 
@@ -725,12 +726,14 @@ We examine how performance varies with forecast horizon:
 ```{r performance-by-horizon}
 # Calculate performance by horizon
 horizon_performance <- scores |>
-  summarise_scores(by = c("model", "forecast_horizon"))
+  summarise_scores(by = c("approach", "actual_day"))
 
 # Plot showing how performance varies by forecast horizon
-ggplot(horizon_performance, aes(x = forecast_horizon, y = crps, color = model)) +
+ggplot(horizon_performance) +
+  aes(x = actual_day, y = crps, color = approach) +
   geom_line(linewidth = 1) +
-  geom_point() +
+  geom_point(size = 1) +
+  scale_y_log10() +
   labs(
     x = "Forecast horizon (days)",
     y = "CRPS (lower is better)",
@@ -742,7 +745,7 @@ ggplot(horizon_performance, aes(x = forecast_horizon, y = crps, color = model)) 
 ```
 
 ::: {.callout-tip}
-## Take 10 minutes
+## Take 5 minutes
 
 Compare the four approaches across the evaluation metrics:
 1. Which performs best overall and why?
@@ -754,19 +757,16 @@ Compare the four approaches across the evaluation metrics:
 
 ::: {.callout-note collapse="true"}
 ## Solution
+From this evaluation, we can see:
 
-From this evaluation, we would typically see:
+- **Complete data approach**: Performs much worse overall, with CRPS of 182 compared to ~19-20 for the other approaches. Performance degrades rapidly with longer forecast horizons.
+- **Pipeline approach**: Shows the best overall performance (CRPS = 18.8) but has some systematic underprediction bias (-0.67).
+- **Joint approach**: Slightly worse overall performance (CRPS = 20.5) with some overprediction bias (0.69) and higher dispersion, indicating greater uncertainty.
 
-- **Naive approach**: Performs poorly, especially at shorter horizons where truncation bias is strongest
-- **Pipeline approach**: Better than naive but shows model mismatch issues [@lison2024]
-- **Simple correction + uncertainty**: Improved coverage but computationally expensive and still has model mismatch
-- **Joint model**: Best overall performance with proper uncertainty propagation and consistent generative process
-
-The joint model typically shows:
-- Lower CRPS (better probabilistic accuracy) 
-- Better calibrated prediction intervals
-- More stable performance across forecast horizons
-- Addresses the fundamental issue of using consistent generative models throughout
+The pipeline approach performs better here potentially because the reporting delay is relatively short and the central nowcast estimate was accurate.
+In this case, having less uncertainty was beneficial.
+However, this is not guaranteed - the higher dispersion in the joint approach reflects more realistic uncertainty quantification.
+If the nowcast had been less accurate or reporting delays longer, the joint approach might have performed better.
 
 :::
 
@@ -788,7 +788,7 @@ Several packages implement these concepts:
 - [`EpiNow2`](https://epiforecasts.io/EpiNow2/): Pipeline nowcasting and forecasting
 - [`epinowcast`](https://package.epinowcast.org/): Joint nowcasting and forecasting in an efficient framework
 
-Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lison2024].
+Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lison2024] when evaluating multiple nowcast dates.
 In practice, implementations often include hierarchical models for multiple locations, time-varying delays, and ensemble approaches for robustness.
 
 # Wrap up
