@@ -66,7 +66,7 @@
 #' Flusight ILI data for the USA starting with the 2003/2004 season through the
 #' of the 2017/2018 season.
 #'
-#' A dataset containing Flusight WILI (weighted Influenza-like Illness) data
+#' A dataset containing Flusight wILI (weighted Influenza-like Illness) data
 #' starting with the 2003/2004 season through the 2017/2018 season. Contains the
 #' WILI signal that is published by the CDC  which measures the percentage of
 #' all outpatient doctor's office visits due to ILI in a given epidemiological
