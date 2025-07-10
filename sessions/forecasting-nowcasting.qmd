@@ -747,11 +747,7 @@ ggplot(horizon_performance) +
 ::: {.callout-tip}
 ## Take 5 minutes
 
-Compare the four approaches across the evaluation metrics:
-1. Which performs best overall and why?
-2. How does performance vary by forecast horizon?
-3. What patterns do you see in interval coverage?
-4. How do the computational costs compare?
+Compare the four approaches across the evaluation metrics
 
 :::
 
