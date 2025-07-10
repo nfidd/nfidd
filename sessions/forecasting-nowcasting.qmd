@@ -116,7 +116,7 @@ plot(reporting_delay_pmf)
 
 ```{r simulate-reporting-triangle}
 reporting_triangle <- onset_df |>
-  filter(day < cutoff) |>
+  filter(day < cutoff + forecast_horizon) |>
   mutate(
     reporting_delay = list(
       tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
@@ -154,7 +154,7 @@ For our analysis, we need two additional datasets:
 ```{r create-evaluation-datasets}
 # Dataset 1: What we observe after waiting 2 weeks (for evaluation)
 complete_at_horizon <- reporting_triangle |>
-  filter(reported_day <= cutoff + forecast_horizon) |>
+  filter(day <= cutoff + forecast_horizon) |>
   summarise(complete_onsets = sum(reported_onsets), .by = day)
 
 # Dataset 2: "Complete" data for naive approach (e.g., >14 days old)
@@ -164,28 +164,35 @@ naive_data <- available_onsets |>
 
 # Visualise the different datasets
 ggplot() +
-  geom_line(data = onset_df |> filter(day < cutoff), 
-            aes(x = day, y = onsets), 
-            color = "black", linetype = "dashed") +
   geom_line(data = complete_at_horizon, 
-            aes(x = day, y = complete_onsets), 
-            color = "blue") +
+            aes(x = day, y = complete_onsets, colour = "As of two weeks time"), 
+            linewidth = 1) +
   geom_line(data = available_onsets, 
-            aes(x = day, y = available_onsets), 
-            color = "red") +
+            aes(x = day, y = available_onsets, colour = "Available now"), 
+            linewidth = 1) +
   geom_line(data = naive_data, 
-            aes(x = day, y = available_onsets), 
-            color = "green", linewidth = 1.2) +
+            aes(x = day, y = available_onsets, colour = "Complete as of now"), 
+            linewidth = 1.2) +
   geom_vline(xintercept = cutoff, linetype = "dotted") +
   geom_vline(xintercept = cutoff - naive_complete_threshold, 
-             linetype = "dotted", color = "green") +
+             linetype = "dotted", alpha = 0.5) +
+  scale_colour_manual(
+    values = c(
+      "As of two weeks time" = "black",
+      "Available now" = "red", 
+      "Complete as of now" = "green"
+    )
+  ) +
   labs(
     x = "Day",
     y = "Onsets",
     title = "Different views of the data",
-    subtitle = "Black dashed: true, Blue: complete at horizon, Red: available now, Green: 'complete' for naive"
+    colour = "Data type"
   ) +
-  theme_minimal()
+  guides(
+    colour = guide_legend(nrow = 2)) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 # Approach 1: Complete data approach
@@ -207,6 +214,20 @@ complete_data_model <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 complete_data_model
 ```
 
+::: {.callout-tip}
+## Take 2 minutes
+
+How does this model differ from the one we used in the [Rt estimation session](sessions/R-estimation-and-the-renewal-equation)?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- The model is the same as the one we used in the [Rt estimation session](sessions/R-estimation-and-the-renewal-equation), but with an additional block where we generate the forecast for additional days beyond the observation period. To do this we need to regenerate the Rt samples for the additional days, and then use these to generate infections and onsets.
+
+:::
+
 Now we fit the model to estimate Rt and forecast:
 
 ```{r complete-data-fit}
@@ -225,7 +246,7 @@ complete_data_fit <- nfidd_sample(
 )
 ```
 
-Finally, we extract forecast samples for analysis:
+and extract forecast samples for analysis:
 
 ```{r complete-data-extract}
 complete_data_forecasts <- complete_data_fit |>
@@ -233,7 +254,7 @@ complete_data_forecasts <- complete_data_fit |>
   ungroup() |>
   filter(.draw %in% sample(.draw, 100)) |>
   mutate(
-    actual_day = day + min(complete_data_forecast_data$day) - 1,
+    actual_day = day + max(complete_data_forecast_data$day),
     approach = "Complete data"
   )
 
@@ -261,12 +282,13 @@ ggplot() +
   # Mark cutoff date (when we actually want forecasts from)
   geom_vline(xintercept = cutoff, 
              linetype = "dashed", color = "blue", linewidth = 1) +
+  scale_y_continuous(trans = "log") +
   xlim(forecast_start_day, evaluation_end_day) +
   labs(
     x = "Day",
     y = "Onsets",
     title = "Complete data approach: Long forecast horizon",
-    subtitle = "Blue line: cutoff (when we want forecasts from)"
+    subtitle = "Blue line: Forecast date"
   ) +
   theme_minimal()
 ```
