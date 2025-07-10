@@ -58,10 +58,10 @@ generated quantities {
   array[h] real forecast;
   if (h > 0) {
     array[h + n] real f_rw_noise;
-    for (i in 1:n) {
+    for (i in 1:n-1) {
       f_rw_noise[i] = rw_noise[i];
     }
-    for (i in (n + 1):(h + n)) {
+    for (i in (n + 1):(h + n - 1)) {
       f_rw_noise[i] = normal_rng(0, 1);
     }
     array[h + n] real f_R = geometric_random_walk(init_R, f_rw_noise, rw_sd);

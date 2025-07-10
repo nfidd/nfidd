@@ -73,7 +73,7 @@ As we've seen, forecasts degrade quickly with longer forecast horizons, so even 
 
 ## The nowcasting-forecasting continuum
 
-As we discussed in the renewal equation session, even nowcasting $R_t$ in real-time is partly a forecast for recent time points due to delays from infection to the reporting of data.
+As we discussed in the [renewal equation session](R-estimation-and-the-renewal-equation), even nowcasting $R_t$ in real-time is partly a forecast for recent time points due to delays from infection to the reporting of data.
 Nowcasting and forecasting aren't distinct activities - they exist on a continuum:
 
 - **Nowcasting**: We have *some* data from the dates we're predicting
@@ -135,6 +135,15 @@ filtered_reporting_triangle <- reporting_triangle |>
 tail(filtered_reporting_triangle)
 ```
 
+Now we create the available onsets by summing reported onsets by day - this represents what we observe at the cutoff:
+
+```{r counts-observed}
+available_onsets <- filtered_reporting_triangle |>
+  summarise(available_onsets = sum(reported_onsets), .by = day)
+
+tail(available_onsets)
+```
+
 ## Create forecast evaluation datasets
 
 For our analysis, we need two additional datasets:
@@ -181,27 +190,44 @@ ggplot() +
 
 # Approach 1: Complete data approach
 
-The simplest approach is to filter to only "complete" data and forecast from there using the renewal model from the reproduction number session.
+The simplest approach is to filter to only "complete" data and forecast from there using the renewal model from the [reproduction number session](R-estimation-and-the-renewal-equation).
 This throws away recent information but avoids the bias from right truncation.
 
-```{r complete-data-approach}
-# Filter to "complete" data only (>14 days old)
-complete_data_forecast_data <- naive_data
+We start by filtering to "complete" data only (more than 14 days old):
 
-# Use the renewal model to estimate Rt and forecast
-# This is the same model from the reproduction number session
+```{r complete-data-filter}
+complete_data_forecast_data <- naive_data
+head(complete_data_forecast_data)
+```
+
+Next, we load the renewal forecasting model:
+
+```{r complete-data-model}
 complete_data_model <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
+complete_data_model
+```
+
+Now we fit the model to estimate Rt and forecast:
+
+```{r complete-data-fit}
 complete_data_fit <- nfidd_sample(
   complete_data_model,
   data = list(
-    T = nrow(complete_data_forecast_data),
-    inc = complete_data_forecast_data$available_onsets,
-    gen_time = gen_time_pmf,
+    n = nrow(complete_data_forecast_data),
+    I0 = 10,  # Initial number infected
+    obs = complete_data_forecast_data$available_onsets,
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
     h = forecast_horizon + naive_complete_threshold  # Forecast to beyond cutoff
   )
 )
+```
 
-# Extract forecast samples
+Finally, we extract forecast samples for analysis:
+
+```{r complete-data-extract}
 complete_data_forecasts <- complete_data_fit |>
   gather_draws(forecast[day]) |>
   ungroup() |>
@@ -210,9 +236,11 @@ complete_data_forecasts <- complete_data_fit |>
     actual_day = day + min(complete_data_forecast_data$day) - 1,
     approach = "Complete data"
   )
+
+head(complete_data_forecasts)
 ```
 
-
+Now let's visualise how this approach performs:
 
 ```{r plot-complete-data-forecast}
 # Plot forecast from forecast date onwards
@@ -268,11 +296,18 @@ Examine the naive approach:
 
 This approach combines two separate models: first nowcast using a geometric random walk, then forecast using the renewal equation.
 
-We start by fitting the geometric random walk nowcast to the reporting triangle data, as we did in the joint nowcasting session.
+We start by fitting the geometric random walk nowcast to the reporting triangle data, as we did in the [joint nowcasting session](joint-nowcasting).
 
-```{r simple-correction-step1}
-# Fit geometric random walk nowcast (as in joint nowcasting session)
+First, we load the joint nowcasting model:
+
+```{r pipeline-nowcast-model}
 geometric_nowcast_model <- nfidd_cmdstan_model("joint-nowcast-with-r")
+geometric_nowcast_model
+```
+
+Now we fit the geometric nowcast to the reporting triangle:
+
+```{r pipeline-nowcast-fit}
 geometric_nowcast_fit <- nfidd_sample(
   geometric_nowcast_model,
   data = list(
@@ -284,7 +319,12 @@ geometric_nowcast_fit <- nfidd_sample(
      mutate(d = d + 1) |>
      pull(d),
     obs = filtered_reporting_triangle$reported_onsets,
-    d = 16
+    d = 16,
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
+    h = 0  # No forecasting in this step, just nowcasting
   )
 )
 ```
@@ -307,7 +347,7 @@ We create a complete time series by combining the older "complete" data with our
 # Combine with older "complete" data  
 pipeline_data <- bind_rows(
   naive_data |> select(day, onsets = available_onsets),
-  nowcast_estimates |> filter(day > max(naive_data$day))
+  nowcast_estimates |> filter(day > max(naive_data$day)) |> select(day, onsets = nowcast)
 ) |>
   arrange(day)
 
@@ -316,20 +356,34 @@ tail(pipeline_data)
 
 Now we use the renewal model to forecast from this combined dataset.
 
-```{r simple-correction-step4}
-# Forecast using renewal model
+First, we load the renewal forecasting model:
+
+```{r pipeline-forecast-model}
 pipeline_forecast_model <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
+pipeline_forecast_model
+```
+
+Next, we fit the renewal model to our combined dataset:
+
+```{r pipeline-forecast-fit}
 pipeline_forecast_fit <- nfidd_sample(
   pipeline_forecast_model,
   data = list(
-    T = nrow(pipeline_data),
-    inc = pipeline_data$onsets,
-    gen_time = gen_time_pmf,
+    n = nrow(pipeline_data),
+    I0 = 10,  # Initial number infected
+    obs = round(pipeline_data$onsets),
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
     h = forecast_horizon
   )
 )
+```
 
-# Extract forecast samples
+Finally, we extract the forecast samples:
+
+```{r pipeline-forecast-extract}
 pipeline_forecasts <- pipeline_forecast_fit |>
   gather_draws(forecast[day]) |>
   ungroup() |>
@@ -338,6 +392,8 @@ pipeline_forecasts <- pipeline_forecast_fit |>
     actual_day = day + min(pipeline_data$day) - 1,
     approach = "Pipeline"
   )
+
+head(pipeline_forecasts)
 ```
 
 We can now visualise the pipeline forecast results:
@@ -423,9 +479,16 @@ Consider this approach compared to Approaches 1 and 2:
 
 This approach extends the joint nowcasting model to include forecasting, using a consistent renewal process throughout.
 
-```{r joint-nowcast-forecast}
-# Assuming the joint model now supports forecasting (to be implemented)
+We start by loading the joint model (note: this assumes the model supports forecasting parameters):
+
+```{r joint-model}
 joint_forecast_model <- nfidd_cmdstan_model("joint-nowcast-with-r")
+joint_forecast_model
+```
+
+Now we fit the joint model with forecasting parameters:
+
+```{r joint-fit}
 joint_forecast_fit <- nfidd_sample(
   joint_forecast_model,
   data = list(
@@ -438,24 +501,29 @@ joint_forecast_fit <- nfidd_sample(
      pull(d),
     obs = filtered_reporting_triangle$reported_onsets,
     d = 16,
-    forecast_days = forecast_horizon,  # New parameter for forecasting
-    gen_time = gen_time_pmf            # Generation time for renewal process
+    gen_time_max = length(gen_time_pmf),
+    gen_time_pmf = gen_time_pmf,
+    ip_max = length(ip_pmf) - 1,
+    ip_pmf = ip_pmf,
+    h = forecast_horizon
   )
 )
+```
 
-# Extract both nowcast and forecast
-joint_results <- joint_forecast_fit |>
+We extract the joint results for forecasting:
+
+```{r joint-forecast-extract}
+joint_forecasts <- joint_forecast_fit |>
   gather_draws(forecast[day]) |>  # This would include both nowcast and forecast
   ungroup()
 
-# Extract nowcast specifically for plotting
-joint_nowcast_onsets <- joint_forecast_fit |>
-  gather_draws(nowcast[day]) |>
-  ungroup() |>
-  filter(.draw %in% sample(.draw, 100))
+head(joint_results)
+```
 
-# Plot the joint nowcast
-ggplot(joint_nowcast_onsets, aes(x = day)) +
+Finally, let's visualise the joint nowcast results:
+
+```{r plot-joint-nowcast}
+ggplot(joint_forecasts, aes(x = day)) +
   geom_col(
     data = complete_at_horizon, mapping = aes(y = complete_onsets), alpha = 0.6
   ) +
@@ -662,9 +730,8 @@ Which methods are more robust to such changes?
 
 Several packages implement these concepts:
 
-- [`EpiNow2`](https://epiforecasts.io/EpiNow2/): Production-ready joint nowcasting and forecasting 
-- [`epinowcast`](https://package.epinowcast.org/): Next-generation framework with flexible model specification
-- [`scoringutils`](https://epiforecasts.io/scoringutils/): Comprehensive forecast evaluation tools
+- [`EpiNow2`](https://epiforecasts.io/EpiNow2/): Pipeline nowcasting and forecasting
+- [`epinowcast`](https://package.epinowcast.org/): Joint nowcasting and forecasting in an efficient framework
 
 Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lison2024].
 In practice, implementations often include hierarchical models for multiple locations, time-varying delays, and ensemble approaches for robustness.
