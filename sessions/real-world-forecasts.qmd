@@ -127,8 +127,7 @@ But let's start by just getting a sense of how many unique values we have for `l
 unique_per_column <- covid_forecasts  |> 
   select(-value) |> 
   purrr::map(~ sort(unique(.x)))
-
-print(unique_per_column)
+unique_per_column
 ```
 
 From the above, we can see that
@@ -140,10 +139,10 @@ From the above, we can see that
 -   there are 17 models,
 -   the location codes are numbers.
 
-Before we go any further, let's fix the location codes to be state abbreviations.
+Before we go any further, let's fix the location codes to be state abbreviations in both the forecast and time-series data.
+
 ```{r state-abbrs}
 data(covid_locations)
-
 covid_forecasts <- covid_forecasts |> 
   left_join(covid_locations)
 covid_time_series <- covid_time_series |> 
@@ -151,7 +150,7 @@ covid_time_series <- covid_time_series |>
 ```
 
 
-Let's just do a quick visualization of forecasts from one week to make sure we understand the structure of the forecasts.
+Let's just do a quick visualization of forecasts from one week to make sure we understand the structure of what one date and location's worth of forecasts look like.
 
 ```{r forecast-viz-sanity-check}
 covid_forecasts |> 
@@ -168,6 +167,7 @@ covid_forecasts |>
 ```
 
 
+One thing that can foul up evaluation and ensembles of models is when not all models submit at the same times.
 Do all models have the same number of predictions? 
 Let's look at this a few different ways.
 
@@ -181,10 +181,11 @@ covid_forecasts |>
     n_horizons = n_distinct(horizon),
     n_locations = n_distinct(location)
   ) |> 
-  arrange(-n_submissions)
+  arrange(-n_submissions) |> 
+  knitr::kable()
 ```
 
-And here is a visual showing more details about submissions each week by model:
+And here is a visual showing more details about submissions each week by model, sorted with the models with the most forecasts at the top:
 
 ```{r model-submission-viz}
 covid_forecasts |> 
@@ -221,44 +222,290 @@ Here are some real examples of why models have not been submitted in a given wee
 
 ## What are the models?
 
+You can read about each of the models in [the model-metadata folder of the forecast hub](https://github.com/CDCgov/covid19-forecast-hub/tree/main/model-metadata).
+Model metadata can also be programmatically accessed using `hubData::load_model_metadata()`.
+There are a wide variety of models submitted to this hub.
+
+::: callout-tip
+Here are a few models that we will highlight with their provided descriptions before going further:
+
+This is the hub-generated ensemble forecast:
+
+- **CovidHub-ensemble**: "Median-based ensemble of quantile forecasts submissions."
+
+Here are two models that have been explicitly designed as "baselines" or benchmarks:
+
+- **CovidHub-baseline**: Flat baseline model. The most observed value from the target dataset is the median forward projection. Prospective uncertainty is based on the preceding timeseries." (This is kind of like the `rw` model from previous sessions.)
+- **CMU-climate_baseline**: "Using data from 2022 onwards, the climatological model uses samples from the 7 weeks centered around the target week and reference week to form the quantiles for the target week, as one might use climate information to form a meteorological forecast. To get more variation at some potential issue of generalization, one can form quantiles after aggregating across geographic values as well as years (after converting to a rate based case count). This model uses a simple average of the geo-specific quantiles and the geo-aggregated quantiles." (This is kind of like our `fourier` model from previous sessions.)
+
+Here are two models built by InsightNet-funded teams:
+
+- **UMass-ar6_pooled**: "AR(6) model after fourth root data transform. AR coefficients are shared across all locations. A separate variance parameter is estimated for each location."
+- **MOBS-GLEAM_COVID**: "Metapopulation, age structured SLIR model. ... The GLEAM framework is based on a metapopulation approach in which the US is divided into geographical subpopulations. Human mobility between subpopulations is represented on a network. ... Superimposed on the US population and mobility layers is an compartmental epidemic model that defines the infection and population dynamics."
+:::
+
+::: callout-tip
+## Take 2 minutes
+
+Browse through some of the other model descriptions. Which ones look interesting to you and why? Discuss with your neighbor.
+:::
+
 
 # Evaluating forecasts
 
+To quantitatively evaluate the forecasts, we will need the "oracle output" data. Here is code to build it from the time-series target data.
+
+```{r build-oracle-output-data}
+covid_oracle_output <- covid_time_series |> 
+  filter(as_of == as.Date("2025-07-09")) |> 
+  select(target,
+         location,
+         target_end_date = date,
+         oracle_value = observation) 
+```
+
+
+## Visual evaluation
+
+
+
 ## Overall model comparison
 
-Look at number of forecasts, consider filtering...
+We will start with an overall evaluation of the models, using, as we did in earlier sessions, `hubEvals`.
 
-## Additional metrics
+```{r overall-eval}
+scores <- score_model_out(
+  covid_forecasts, 
+  covid_oracle_output
+  )
+scores |> 
+  arrange(wis) |> 
+  knitr::kable()
+```
 
-### Prediction interval coverage
-
-
-### Relative scores
-
-
-### Log-scale scores
-
-
-### Revisit overall comparison
 
 ::: callout-tip
-### Take 5 minutes: revisit overall model comparison
+## Take 2 minutes
 
-Revisit overall model comparison, looking in particular at the metrics above.
+Should we trust the results in this table to give us a reliable ranking for all of the forecasts? Why or why not?
 :::
 
 ::: {.callout-note collapse="true"}
-### Solution
+## Solution
 
-Once again, there isn't an exact correct answer here, but here are a few observations...
+Because there are so many missing forecasts, this single summary is not reliable. We will need a more careful comparison to determine relative rankings of models.
 
 :::
 
-## Model comparison by horizon
+In real-world forecasting hubs, it is very common to have missing forecasts, and it probably isn't safe to assume that these forecasts are "missing at random".
+For example, some teams might not submit forecasts when their model's algorithm doesn't converge, indicating a challenging moment to predict in the outbreak, when other teams get low scores but are either consciously or not making different decisions about when to submit.
+
+## Additional metrics
+
+Before we dig further into the evaluation, let's introduce a few additional evaluation metrics and ideas.
+
+### Relative scores
+
+Relative skill scores are a way to create "head-to-head" comparisons of models that to some extent are able to adjust for the difficulty of the predictions made by each model. 
+Here is a figure showing how the relative scores are calculated, based on aggregated pairwise comparisons between each pair of models.
+
+![Schematic of relative skill score computation.](slides/figures/relative-skill-scores.png)
+
+The interpretation of the relative skill metric is the factor by which the score for a given model is more or less accurate than the average model, adjusting for the difficulty of the forecasts made by that particular model. 
+Relative skill scores that are lower than 1 indicate that the model is more accurate on the whole than the average model evaluated.
+For example, a 0.9 relative WIS skill for model A suggests that model A was 10% more accurate on average than other models, adjusting for the difficulty level of forecasts made by model A.
+
+This metric (or a version of it) has been used in practice in a number of large-scale forecast evaluation research papers.[@cramer_evaluation_2022;@meakin_comparative_2022;@sherrattPredictivePerformanceMultimodel2023;@wolfframCollaborativeNowcastingCOVID192023]
+The general rule of thumb is that it does a reasonable job comparing models where there is never less than, say, 50% overlap in the targets predicted by any pair of models.
+
+Here is a table of relative skill scores for WIS. 
+```{r relative-skill}
+score_model_out(
+  covid_forecasts, 
+  covid_oracle_output,
+  metrics = "wis",
+  relative_metrics = "wis"
+  ) |> 
+  arrange(wis_relative_skill)
+```
+
+Note that the ordering of the `wis` column does not align perfectly with the `wis_relative_skill` column. 
+This is due to the "adjustment" of the relative skill based on which forecasts were made by each model.
+
+To make a more fair comparison, let's subset to only include models that have submitted at least 60% of the maximum possible number of predictions for the season. 
+
+```{r relative-skill-on-subset}
+## 33 dates, 5 horizons, 53 locations, 60%
+threshold_60pct <- 33 * 5 * 53 * 0.6
+model_subset <- covid_forecasts |> 
+  filter(output_type_id == 0.5) |> 
+  group_by(model_id) |> 
+  summarize(targets = n()) |> 
+  filter(targets > threshold_60pct) |> 
+  pull(model_id)
+
+covid_forecasts |> 
+  filter(model_id %in% model_subset) |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = "wis",
+    relative_metrics = "wis"
+  ) |> 
+  arrange(wis_relative_skill)
+```
+
+::: callout-tip
+## Take 5 minutes
+
+Looking at the relative and absolute WIS scores from the table above, and the number of total forecasts for each model, what are some of your take-aways from the analysis above?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+- The ensemble forecast is the most accurate model overall, by kind of large margin, close to 20% in terms of absolute WIS and 10% in terms of relative skill.
+- The CovidHub-baseline has basically "average" performance, with a relative WIS score of 0.96. 
+- Four individual models have better performance than the baseline and four have worse performance than the baseline.
+- The worst-performing model is the `CMU-climate_baseline`. This is designed to be a "seasonal average" model, and covid isn't that seasonal at the moment, so it's not super surprising that this is a bad model.
+- Tying back to approaches from the earlier Nowcasting sessions:
+  - The `CEPH-Rtrend_covid` model is "A renewal equation method based on Bayesian estimation of Rt from hospitalization data." It wasn't as good as pure statistical and ML approaches, but was better than the baseline.
+  - The `MOBS-GLEAM_COVID` model is a mechanistic model (see description above) and was worse than the baseline.
+
+:::
+
+Since the counts at the national level are likely to dominate the absolute scale of average WIS scores, you could make an argument to subset to only the states and evaluate based on that. 
+Here is the analysis above, on that subset:
+
+```{r}
+covid_forecasts |> 
+  filter(model_id %in% model_subset,
+         location != "US") |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = "wis",
+    relative_metrics = "wis"
+  ) |> 
+  arrange(wis_relative_skill)
+```
+The results above haven't changed much, although the `CMU-TimeSeries` and `OHT_JHU-nbxd` swapped places in the final rankings.
+
+### Log-scale scores
+
+We can also score on the logarithmic scale. 
+This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model’s performance at capturing the exponential growth phase of the epidemic.[@bosse2023scorin] 
+In some sense scoring in this way can be an approximation of scoring the effective reproduction number estimates. 
+Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
+
+To implement the log-scale scoring, we can simply log-transform the observations and forecasted values (with an offset, to account for zeroes in the data).
+```{r log-scale scoring}
+covid_forecasts |> 
+  filter(model_id %in% model_subset) |> 
+  mutate(value = log(value+1)) |> 
+  score_model_out(
+    covid_oracle_output |> 
+      mutate(oracle_value = log(oracle_value+1)),
+    metrics = "wis",
+    relative_metrics = "wis"
+  ) |> 
+  arrange(wis_relative_skill)
+```
+
+Note that this rescaling of the data prior to scoring results in a more substantial change in the evaluation. 
+While the ensemble remains the most accurate model, now five models are better than the baseline, and the `CMU-TimeSeries` model is the most accurate individual model (just barely edging out the `UMass-gbqr` model.)
+
+### Prediction interval coverage
+
+The above comparisons focus on WIS and relative WIS, but in our collaborations with federal, state, and local epidemiologists, we have often found that the metric of prediction interval coverage rates is a useful tool for communicating the reliability of a set of forecasts.
+Prediction interval coverage measures the fraction of prediction intervals at a given levels that cover the truth.
+For example, if a model is well-calibrated, 50% PIs should cover the truth around 50% of the time, 90% PIs should cover the truth 90% of the time, etc...
+
+::: callout-tip
+Prediction interval coverage is not a proper score.
+For example, to get perfect 90% PI coverage, you could always make 9 out of every 10 of your intervals infinitely wide and the last one infinitely small. 
+Et voila!
+90% PI coverage achieved.
+:::
+
+But, assuming that modelers aren't trying to game the scores, it can generally be a useful and interpretable metric in practice. 
+Let's add some PI coverage metrics to our (unscaled) results from before.
+
+```{r}
+covid_forecasts |> 
+  filter(model_id %in% model_subset) |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = c("wis", "interval_coverage_50", "interval_coverage_90")
+  ) |> 
+  arrange(interval_coverage_90)
+```
+
+These results are sorted by the 90% PI coverage, but note that lower is not necessarily "better" here.
+What is good is having `interval_coverage_90` scores that are close to 0.90.
+A few models (`CovidHub-ensemble`, `CMU-TimeSeries` and `CMU-climate_baseline`) all have coverage rates within 5% of the nominal level for both 50% and 90% PIs.
+
+::: callout-tip
+Note, this is a nice example of a model (`CMU-climate_baseline`) being well calibrated but not having good accuracy.
+:::
 
 
-## Model comparison by forecast date
+## Model comparison by horizon and forecast date
 
+As we discussed in the [session on evaluating forecasts](forecast-evaluation), overall comparisons can miss details about ways that models perform across different forecast dimensions.
+Let's run an analysis looking at the performance of model by horizon and then by forecast date.
+For now, we will keep the focus on the 10 models that made at least 60% of possible predictions, and we will only evaluate state-level forecasts.
+
+```{r eval-by-horizon}
+scores_by_horizon <- covid_forecasts |> 
+  filter(model_id %in% model_subset,
+         location != "US") |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = "wis",
+    relative_metrics = "wis",
+    by = c("model_id", "horizon")
+  ) 
+
+p <- ggplot(scores_by_horizon)+
+  geom_line(aes(x = horizon, y = wis, color = model_id))
+plotly::ggplotly(p)
+```
+
+For looking by `reference_date`, we will also plot the relative WIS.
+
+```{r eval-by-reference_date}
+scores_by_reference_date <- covid_forecasts |> 
+  filter(model_id %in% model_subset,
+         location != "US") |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = "wis",
+    relative_metrics = "wis",
+    by = c("model_id", "reference_date")
+  ) |> 
+  tidyr::pivot_longer(cols = c(wis, wis_relative_skill), 
+                      names_to = "metric",
+                      values_to = "score")
+
+p <- ggplot(scores_by_reference_date)+
+  geom_line(aes(x = reference_date, y = score, color = model_id)) +
+  facet_grid(metric~., scales = "free_y")
+plotly::ggplotly(p)
+```
+
+::: callout-tip
+## Take 5 minutes
+
+By horizon and reference date, how variable are the models in their accuracy?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+In general, the models seem fairly consistent in their performance. 
+There are few "crossings" in the by horizon plot, suggesting that by and large models that are accurate at short-term horizons are also accurate at the longer horizons.
+There is much more variability by date, although it still seems that with a few exceptions, models aren't jumping around too dramatically in their relative (or absolute level) WIS. 
+:::
 
 # Ensembling forecasts
 
@@ -300,7 +547,9 @@ In this session, we'll mostly be using "proper" scoring rules: these are scoring
 -   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). 
 Using the code above, try to replicate some of the analyses in this session for a different hub. 
 What challenges and obstacles do you run into?
--   
+-   In the evaluation of the real-world models, we subset to only models that had submitted a large fraction of forecasts. 
+But this omits some interesting models, including the model from Metaculus, a human-judgment forecast aggretation company, and some models from the CDC Center for Forecasting and Outbreak Analytics (CFA).
+Adapt the code above to conduct a targeted and fair evaluation of the forecasts made by those models.
 
 ## Methods in practice
 

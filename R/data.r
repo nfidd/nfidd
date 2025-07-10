@@ -104,9 +104,9 @@
 #' Forecast data for COVID-19 hospitalizations in the US
 #'
 #' A dataset containing forecasts of hospital admission counts in the US from
-#' November 2024 through June 2025.
+#' November 2024 through early July 2025.
 #'
-#' @format A [tibble::tibble()] with a 9 columns and 2,179,756 rows.
+#' @format A [tibble::tibble()] with a 9 columns and 2,242,316 rows.
 #' \describe{
 #'   \item{reference_date}{the date of the Saturday following the Wednesday
 #'   forecast submission date each week}
