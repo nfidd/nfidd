@@ -43,7 +43,7 @@ Quantiles are also better than a bin-based representation when the range of poss
 
 The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the earlier sessions.
 
-:::: {.callout-note collapse="true"}
+::: {.callout-note collapse="true"}
 # Setup
 
 ## Source file
@@ -57,6 +57,7 @@ In this session we will use the `fable` package for fitting simple forecasting m
 Additionally, we will use some [hubverse](https://hubverse.io/) packages such as `hubData` , `hubEvals`, `hubUtils`, `hubEnsembles` packages for building ensembles.
 
 ```{r libraries, message = FALSE}
+library('nfidd')
 library("fable")
 library("dplyr")
 library("ggplot2")
@@ -79,7 +80,7 @@ Setting this ensures that you should get exactly the same results on your comput
 ```{r}
 set.seed(42) ## for Douglas Adams!
 ```
-::::
+:::
 
 # Loading data
 
@@ -90,6 +91,10 @@ flu_data <- epidatr::pub_fluview(regions = c("nat"),
                                  epiweeks = epirange(200335, 201831)) |> 
   select(region, epiweek, wili) |> 
   as_tsibble(index = epiweek, key = region)
+```
+
+```{r}
+data(flu_data)
 ```
 
 and define a fourth-root transformation for our forecast models
@@ -186,7 +191,6 @@ We will migrate our existing forecasts from `fable` models into samples, as this
 We will note that by turning a closed-form distribution into a set of samples, we lose some information, or add some noise, to the resulting output.
 If we were worried about this (and not so worried about eating up the RAM on our computer), we could extract many thousands of samples to reduce variability in the output.
 To learn more about the pros and cons of other model output type formats, check out the [hubverse website](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
-
 :::
 
 To start with, we will use the `generate()` function to create 100 sampled trajectories (at 1 to 8 weeks ahead) from each of the fitted models above.
@@ -648,7 +652,7 @@ How and when are they different from each other?
 ::: {.callout-note collapse="true"}
 ### Solution
 
-The LOP ensemble tends to be a bit wider than the `other ensemble forecasts`median_ensemble_filtered` forecast, especially at times when the individual component forecasts disagree more.
+The LOP ensemble tends to be a bit wider than the `median_ensemble_filtered` forecast, especially at times when the individual component forecasts disagree more.
 :::
 
 ### Evaluate sample-based forecasts
@@ -679,10 +683,8 @@ In epidemiological forecasting, the track record is mixed.
 In settings where a long track record (multiple seasons) of performance can be measured and where the accuracy of individual models doesn't vary too much, then weighting has been shown to help with influenza[@reich_accuracy_2019], dengue fever[@colon-gonzalez_probabilistic_2021], and some COVID-19[@ray_comparing_2023] forecasts.
 However, in forecasting COVID-19 cases and hospitalizations, where model performance fluctuated over time, it was harder to see improvements in weighted ensembles.[@ray_comparing_2023]
 
-However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989;@claeskens_forecast_2016]
+However, estimating weights for a model adds parameters and uncertainty to the ensemble, and there are theoretical reasons to prefer a simple ensemble approach.[@clemen_combining_1989; @claeskens_forecast_2016]
 :::
-
-
 
 # Going further
 
