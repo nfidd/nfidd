@@ -509,51 +509,205 @@ There is much more variability by date, although it still seems that with a few 
 
 # Ensembling forecasts
 
-## Which models were available each week?
+In this section, we will build several new ensemble forecasts and compare these to the `CovidHub-ensemble` model.
+Based on the last results from the section above, we saw that there was some fairly consistent performance from a few of the models. 
+This is one precondition for weighted ensembles to have a chance at performing well.
+Here are the different approaches we will use:
+ - `LOP-unweighted-all`: an unweighted linear opinion pool (LOP) of all available forecasts each week.
+ - `LOP-unweighted-select`: an unweighted LOP of the most commonly submitted forecasts.
+ - `LOP-weighted-select`: a weighted LOP of the most commonly submitted forecasts.
+ - `median-weighted-select`: a weighted median ensemble of the most commonly submitted forecasts.
+ 
+Note that the exisiting `CovidHub-ensemble` forecast is basically `median-unweighted-all` in the above nomenclature. 
+It would be hard to do any `weighted-all` ensembles since when models are missing a lot of forecasts it is hard to estimate an accurate weight for them.
+
+## Build unweighted LOP ensembles
+
+Let's start with the "easy" part, building the unweighted ensembles.
+
+::: {.callout-tip collapse="true"}
+### Gory LOP details
+Note that when we build LOPs with quantile based forecasts, the algorithm needs to approximate a full distribution (the tails are not well-defined in a quantile representation).
+There are some assumptions made under the hood about how this is approximated. 
+For the really gory details, you can check out [the `hubEnsembles` documentation](https://hubverse-org.github.io/hubEnsembles/dev/articles/hubEnsembles.html?q=weight#creating-ensembles-with-linear_pool)
+:::
+
+Note that trying to build all of the forecasts in one call to `linear_pool()` exceeded the memory on your instructors laptop, so we will do a `map_dfr()` "loop" to do this one reference_date at a time.
+
+```{r build-unweighted-ensembles}
+# Get a list of unique reference dates
+reference_dates <- unique(covid_forecasts$reference_date)
+
+# Map over each date and apply linear_pool separately
+lop_unweighted_all <- purrr::map_dfr(
+  reference_dates, 
+  function(date) {
+    covid_forecasts |> 
+      filter(model_id != "CovidHub-ensemble", 
+             reference_date == date) |> 
+      hubEnsembles::linear_pool(model_id = "lop_unweighted_all")
+})
 
 
-## Rebuild LOP and median ensembles
-
-Assumptions needed for LOP with quantiles.
+lop_unweighted_select <- purrr::map_dfr(
+  reference_dates, 
+  function(date) {
+    covid_forecasts |> 
+      filter(model_id %in% model_subset,
+             model_id != "CovidHub-ensemble", 
+             reference_date == date) |> 
+      hubEnsembles::linear_pool(model_id = "lop_unweighted_select")
+})
+```
 
 ## Build weighted ensemble
 
+Inverse WIS weighting is a simple method that weights the forecasts by the inverse of their WIS over some period.
+Note that identifying what this period should be in order to produce the best forecasts is not straightforward as predictive performance may vary over time if, say, some models are better at making predictions during different parts of an outbreak.
+For example, some models might be good at predicting exponential growth at the beginning of an outbreak but not as good at seeing the slowdown.
 
-## Compare all ensembles over time
+The main benefit of WIS weighting over other methods is that it is simple to understand and implement.
+However, it does not optimise the weights directly to produce the best forecasts.
+It relies on the hope that giving more weight to better performing models yields a better ensemble.
+
+We will use the WIS scores that we have computed above to generate weights for our ensembles.
+The weights for one `reference_date` will be based on the inverse of the cumulative average WIS achieved by the model up to the week prior to the current `reference_date`.
+Note that since our scores are computed based on data available at the end of the season, this is kind of "cheating", since we're using information that would not have been available to us in real time. 
+If we were to do this entirely correctly, we would, for each week, compute the scores based on the available data at that time. 
+
+```{r}
+## compute the weights
+weights_per_model <- scores_by_reference_date |>
+  filter(metric == "wis",
+         model_id != "CovidHub-ensemble") |> 
+  arrange(model_id, reference_date) |> 
+  group_by(model_id) |> 
+  mutate(
+    cumulative_mean_wis = cummean(score), ## cumulative mean WIS including current week
+    cumulative_mean_wis_lag1 = lag(cumulative_mean_wis)
+    ) |> 
+  ungroup() |> 
+  mutate(inv_wis = 1 / cumulative_mean_wis_lag1) |>
+  group_by(reference_date) |> 
+  mutate(inv_wis_total_by_date = sum(inv_wis, na.rm = TRUE)) |>
+  ungroup() |> 
+  mutate(weight = inv_wis / inv_wis_total_by_date) |> ## normalise
+  select(model_id, reference_date, weight)
+
+## assign equal weights for the first week
+first_week_idx <- weights_per_model$reference_date == as.Date("2024-11-23")
+weights_per_model[first_week_idx, "weight"] <- 1/sum(first_week_idx)
+
+## assign MOBS a zero weight for a week where it had been missing the week prior
+mobs_idx <- which(weights_per_model$model_id == "MOBS-GLEAM_COVID" & 
+                    weights_per_model$reference_date == as.Date("2024-11-30"))
+weights_per_model[mobs_idx, "weight"] <- 0
+
+## build the weighted ensemble
+median_weighted_select <- covid_forecasts |> 
+  filter(model_id %in% model_subset,
+         model_id != "CovidHub-ensemble") |> 
+  simple_ensemble(weights = weights_per_model, 
+                  agg_fun = median,
+                  model_id = "median_weighted_select")
+
+## build unweighted select median ensemble
+median_unweighted_select <- covid_forecasts |> 
+  filter(model_id %in% model_subset,
+         model_id != "CovidHub-ensemble") |> 
+  simple_ensemble(agg_fun = median,
+                  model_id = "median_unweighted_select")
+
+```
 
 
-::: callout-tip
-## Take 5 minutes
+```{r lop-weighted}
+lop_weighted_select <- purrr::map_dfr(
+  reference_dates, 
+  function(date) {
+    covid_forecasts |> 
+      filter(model_id %in% model_subset,
+             model_id != "CovidHub-ensemble", 
+             reference_date == date) |> 
+      linear_pool(model_id = "lop_weighted_select",
+                  weights = weights_per_model)
+})
+```
 
-What mean value do you think the forecast would settle at if we predicted out for a hundred weeks or more?
-:::
 
-::: {.callout-note collapse="true"}
-## Solution
+## Compare all ensembles
 
-Once again, there isn't an exact correct answer here, but here are a few observations...
+We will compare the performance of all ensembles just at the state level, since the scores by reference date were only computed at the state level.
 
-:::
+```{r}
+covid_forecasts_w_ensembles <- bind_rows(
+  covid_forecasts,
+  lop_unweighted_all,
+  lop_unweighted_select,
+  lop_weighted_select,
+  median_weighted_select,
+  median_unweighted_select
+)
+
+model_subset_ens <- c("CovidHub-ensemble", 
+                      "lop_unweighted_all",
+                      "lop_unweighted_select",
+                      "median_weighted_select",
+                      "median_unweighted_select",
+                      "lop_weighted_select")
+
+covid_forecasts_w_ensembles |> 
+  filter(model_id %in% model_subset_ens,
+         location != "US") |> 
+  score_model_out(
+    covid_oracle_output
+  ) |> 
+  arrange(wis)
+```
+
+Remember, in the above table, the `CovidHub-ensemble` is kind of like `median-unweighted-all` because it uses a median ensemble of all models available in every week without weights.
+Overall, the ensembles have fairly similar average WIS values across all dates and states. 
+Using a median ensemble of frequently submitting models (both unweighted and weighted) very marginally outperformed the actual `CovidHub-ensemble` forecasts.
+It does not seem like weighting adds a lot of value to these forecasts, although perhaps with additional data on model performance the weights could be improved.
 
 
-::: callout-tip
-In this session, we'll mostly be using "proper" scoring rules: these are scoring rules for probabilistic forecasts that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
-:::
+We can also look at how the ensemble performance varied over time.
+```{r}
+ensemble_scores_by_reference_date <- covid_forecasts_w_ensembles |> 
+  filter(model_id %in% model_subset_ens,
+         location != "US") |> 
+  score_model_out(
+    covid_oracle_output,
+    metrics = "wis",
+    by = c("model_id", "reference_date")
+  )
+
+p <- ggplot(ensemble_scores_by_reference_date) +
+  geom_line(aes(x = reference_date, y = wis, color = model_id))
+plotly::ggplotly(p)
+```
+
+It is interesting to note how while the LOP ensembles did slightly worse overall, they actually had slightly more accurate forecasts near the peak of the season, especially in the weeks where the scores were the highest. 
 
 # Going further
 
 ## Challenge
 
--   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). 
-Using the code above, try to replicate some of the analyses in this session for a different hub. 
-What challenges and obstacles do you run into?
+-   Once you start looking at lots of plots of forecast scores, it is easy to fall into the trap of not looking at the actual forecasts. 
+Looking at the scores of the ensemble forecasts by date, it looks like there was one week when the `CovidHub-ensemble` did much worse than other forecasts. 
+Investigate this week in particular. 
+What did the forecasts look like that week and what was anomalous about it?
 -   In the evaluation of the real-world models, we subset to only models that had submitted a large fraction of forecasts. 
 But this omits some interesting models, including the model from Metaculus, a human-judgment forecast aggretation company, and some models from the CDC Center for Forecasting and Outbreak Analytics (CFA).
 Adapt the code above to conduct a targeted and fair evaluation of the forecasts made by those models.
+-   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). 
+Using the code above, try to replicate some of the analyses in this session for a different hub. 
+What challenges and obstacles do you run into?
 
 ## Methods in practice
 
--   
+-   @ray_comparing_2023 evaluates the performance of ensemble forecasts (including some weighted ensembles) in predicting COVID-19 cases, hospitalization and deaths, both with weighted and unweighted ensembles.
+
 
 # Wrap up
 
