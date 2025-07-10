@@ -28,7 +28,7 @@ The source file of this session is located at `sessions/R-estimation-and-the-ren
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference, and the `purrr` package for functional programming.
+In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference, and the `purrr` package for [functional programming](https://adv-r.hadley.nz/fp.html).
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -220,7 +220,6 @@ ggplot(
        subtitle = "Model 1: renewal equation from infections")
 ```
 
-
 ```{r plot_infections}
 inf_posterior <- r_fit |>
   gather_draws(infections[infection_day]) |>
@@ -241,7 +240,9 @@ ggplot(inf_posterior, mapping = aes(x = infection_day)) +
 ::: callout-tip
 ## Take 2 minutes
 
-What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other?
+What do you think of these estimates?
+In particular, what do you think of the estimates at the beginning and end of the outbreak?
+Are they consistent with the true Rt trajectory and with each other?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -251,9 +252,7 @@ The estimates are quite noisy, especially in the early days of the outbreak and 
 It looks like the precision of the estimates is related to the number of infections observed on each day.
 The model fits the observed infections very well.
 Rt crosses 1 at the peak of the outbreak which is consistent with the true Rt trajectory.
- 
 :::
-
 
 # Estimating $R_t$ from a time series of symptom onsets
 
@@ -283,7 +282,7 @@ Familiarise yourself with the model above.
 Compare it to the model used earlier in this session, and the one used in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections).
 Does this model have more parameters?
 How do the assumptions about the infections time series differ between the models?
-::: 
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -311,7 +310,7 @@ r_inf_fit <- nfidd_sample(
 )
 ```
 
-::: .{callout-note}
+::: {callout-note}
 Generally, one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
 When testing this model, we noticed that sometimes the model failed to fit the data at all.
 Because of this, we added an argument to start sampling with `init_R` set to 1.
@@ -333,6 +332,7 @@ r_inf_posteriors <- r_inf_fit |>
 ```
 
 We can visualise infections compared to the data used to generate the time series of onsets
+
 ```{r plot_inf_infections}
 inf_posterior <- r_inf_posteriors |>
   filter(.variable == "infections")
@@ -359,9 +359,9 @@ ggplot(
 ::: callout-tip
 ## Take 2 minutes
 
-What do you think of these estimates? 
-In particular, what do you think of the estimates at the beginning and end of the outbreak? 
-Are they consistent with the true Rt trajectory and with each other? 
+What do you think of these estimates?
+In particular, what do you think of the estimates at the beginning and end of the outbreak?
+Are they consistent with the true Rt trajectory and with each other?
 Are they consistent with the estimates from the previous model?
 :::
 
@@ -386,18 +386,16 @@ As we just saw, it also results in real-time estimates (i.e. towards the date of
 In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points.
 We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$.
 This can be described as a random walk model for the reproduction number.
-In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk. 
+In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk.
 Tas this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive.
 Otherwise, the same absolute change in the reproduction number would have a larger effect when the reproduction number is small, which likely doesn't match your intuition for how outbreaks evolve over time.
 We can write this model as
 
 $$
 \sigma \sim HalfNormal(0, 0.05) \\
-$$ 
-$$
+$$ $$
 \log(R_0) \sim \mathcal{Lognormal}(-0.1, 0.5)
-$$ 
-$$
+$$ $$
 \log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
 $$
 
@@ -446,7 +444,6 @@ ggplot(data, aes(x = t, y = R)) +
 ## Take 2 minutes
 
 Repeat this multiple times, either with the same parameters or changing some to get a feeling for what this does compared to the normal(1,1) prior.
-
 :::
 
 ## Estimating $R_t$ with a geometric random walk prior
@@ -482,7 +479,7 @@ r_rw_inf_fit <- nfidd_sample(
 r_rw_inf_fit
 ```
 
-::: .{callout-note}
+::: {callout-note}
 As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space.
 This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
 :::
@@ -527,9 +524,9 @@ ggplot(
 ::: callout-tip
 ## Take 2 minutes
 
-What do you think of these estimates? 
-In particular, what do you think of the estimates at the beginning and end of the outbreak? 
-Are they consistent with the true Rt trajectory and with each other? 
+What do you think of these estimates?
+In particular, what do you think of the estimates at the beginning and end of the outbreak?
+Are they consistent with the true Rt trajectory and with each other?
 Are they consistent with the estimates from the previous model?
 :::
 
@@ -581,7 +578,7 @@ ggplot(
 ::: callout-tip
 ## Take 2 minutes
 
-Revisit your answers to the previous questions in this session. 
+Revisit your answers to the previous questions in this session.
 What are the key differences between the Rt estimates from the models?
 Which model do you think is the best fit for the data?
 Which model is the most realistic?
@@ -617,7 +614,7 @@ Of course, this is helped by the fact that the data was generated by a model sim
 ## Challenge
 
 -   We have used symptom onsets under the assumption that every infected person develops symptoms. Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. How would you change the model in this case? What are the implications for inference?
-- If you have time you could try re-running the experiment with different $R_t$ trajectories (using the `renewal()` function to simulate data) and delay distributions to see whether results change.
+-   If you have time you could try re-running the experiment with different $R_t$ trajectories (using the `renewal()` function to simulate data) and delay distributions to see whether results change.
 
 ## Methods in practice
 
