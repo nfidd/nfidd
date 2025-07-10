@@ -652,7 +652,7 @@ How and when are they different from each other?
 ::: {.callout-note collapse="true"}
 ### Solution
 
-The LOP ensemble tends to be a bit wider than the `other ensemble forecasts`median_ensemble_filtered\` forecast, especially at times when the individual component forecasts disagree more.
+The LOP ensemble tends to be a bit wider than the `median_ensemble_filtered` forecast, especially at times when the individual component forecasts disagree more.
 :::
 
 ### Evaluate sample-based forecasts
