@@ -190,8 +190,9 @@ complete_data_forecast_data <- naive_data
 
 # Use the renewal model to estimate Rt and forecast
 # This is the same model from the reproduction number session
+complete_data_model <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 complete_data_fit <- nfidd_sample(
-  "estimate-inf-and-r-rw-forecast", 
+  complete_data_model,
   data = list(
     T = nrow(complete_data_forecast_data),
     inc = complete_data_forecast_data$available_onsets,
@@ -267,14 +268,13 @@ Examine the naive approach:
 
 This approach combines two separate models: first nowcast using a geometric random walk, then forecast using the renewal equation.
 
-## Step 1: Fit geometric random walk nowcast
-
 We start by fitting the geometric random walk nowcast to the reporting triangle data, as we did in the joint nowcasting session.
 
 ```{r simple-correction-step1}
 # Fit geometric random walk nowcast (as in joint nowcasting session)
+geometric_nowcast_model <- nfidd_cmdstan_model("joint-nowcast-with-r")
 geometric_nowcast_fit <- nfidd_sample(
-  "joint-nowcast-with-r", 
+  geometric_nowcast_model,
   data = list(
     n = length(unique(filtered_reporting_triangle$day)),
     m = nrow(filtered_reporting_triangle),
@@ -289,8 +289,6 @@ geometric_nowcast_fit <- nfidd_sample(
 )
 ```
 
-## Step 2: Extract nowcast point estimates
-
 From the nowcast posterior, we extract point estimates (medians) to use in the forecasting step. This loses uncertainty information.
 
 ```{r simple-correction-step2}
@@ -302,8 +300,6 @@ nowcast_estimates <- geometric_nowcast_fit |>
 
 head(nowcast_estimates)
 ```
-
-## Step 3: Combine with older "complete" data
 
 We create a complete time series by combining the older "complete" data with our nowcast estimates for recent days.
 
@@ -318,14 +314,13 @@ pipeline_data <- bind_rows(
 tail(pipeline_data)
 ```
 
-## Step 4: Forecast using renewal model
-
 Now we use the renewal model to forecast from this combined dataset.
 
 ```{r simple-correction-step4}
 # Forecast using renewal model
+pipeline_forecast_model <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 pipeline_forecast_fit <- nfidd_sample(
-  "estimate-inf-and-r-rw-forecast",
+  pipeline_forecast_model,
   data = list(
     T = nrow(pipeline_data),
     inc = pipeline_data$onsets,
@@ -345,7 +340,7 @@ pipeline_forecasts <- pipeline_forecast_fit |>
   )
 ```
 
-## Visualise the pipeline forecast
+We can now visualise the pipeline forecast results:
 
 ```{r plot-pipeline-forecast}
 # Plot pipeline forecast from cutoff onwards
@@ -430,8 +425,9 @@ This approach extends the joint nowcasting model to include forecasting, using a
 
 ```{r joint-nowcast-forecast}
 # Assuming the joint model now supports forecasting (to be implemented)
+joint_forecast_model <- nfidd_cmdstan_model("joint-nowcast-with-r")
 joint_forecast_fit <- nfidd_sample(
-  "joint-nowcast-with-r", 
+  joint_forecast_model,
   data = list(
     n = length(unique(filtered_reporting_triangle$day)),
     m = nrow(filtered_reporting_triangle),
@@ -451,6 +447,27 @@ joint_forecast_fit <- nfidd_sample(
 joint_results <- joint_forecast_fit |>
   gather_draws(forecast[day]) |>  # This would include both nowcast and forecast
   ungroup()
+
+# Extract nowcast specifically for plotting
+joint_nowcast_onsets <- joint_forecast_fit |>
+  gather_draws(nowcast[day]) |>
+  ungroup() |>
+  filter(.draw %in% sample(.draw, 100))
+
+# Plot the joint nowcast
+ggplot(joint_nowcast_onsets, aes(x = day)) +
+  geom_col(
+    data = complete_at_horizon, mapping = aes(y = complete_onsets), alpha = 0.6
+  ) +
+  geom_line(mapping = aes(y = .value, group = .draw), alpha = 0.1) +
+  geom_point(data = available_onsets, mapping = aes(y = available_onsets)) +
+  labs(
+    x = "Day",
+    y = "Onsets",
+    title = "Joint nowcast results",
+    subtitle = "Bars: complete data, Points: available data, Lines: nowcast samples"
+  ) +
+  theme_minimal()
 ```
 
 ::: {.callout-tip}
@@ -473,21 +490,25 @@ What are the advantages of the joint model approach?
 
 :::
 
-## Model extensions needed:
+::: {.callout-tip}
+## Take 5 minutes
 
-The joint model would need to extend the current nowcasting model with:
+What parts of the joint model allow for forecasting? The joint model would need to extend the current nowcasting model with:
 
 1. **Forecast horizon parameters** - extend time indices beyond the observation period
 2. **$R_t$ projection** - continue the random walk for $R_t$ into the future  
 3. **Generated quantities** - predict future infections and observable outcomes
+
+:::
+
+
 
 :::{.callout-note}
 ## Computational considerations
 
 The joint model is more complex and slower to fit than the simpler approaches.
 In practice, we might:
-- Use efficient Stan implementations
-- Pre-compile models
+- Use efficient Stan implementations from software packages like `epinowcast`
 - Consider approximate methods for real-time use
 :::
 
@@ -512,59 +533,89 @@ head(evaluation_data)
 
 ## Quantitative evaluation using scoringutils
 
-```{r forecast-evaluation}
-# Combine all forecast results (this would come from implementing the approaches above)
-# For now, we'll create placeholder forecast results
+We combine forecast results from both approaches that we implemented and compare them against our evaluation data:
 
-# Example structure for forecast results:
-# forecast_results <- bind_rows(
-#   # Approach 1: Naive
-#   naive_forecasts |> mutate(model = "Naive"),
-#   # Approach 2: Simple correction  
-#   simple_forecasts |> mutate(model = "Simple correction"),
-#   # Approach 3: Correction with uncertainty
-#   uncertainty_forecasts |> mutate(model = "Simple + uncertainty"),
-#   # Approach 4: Joint model
-#   joint_forecasts |> mutate(model = "Joint model")
-# )
+```{r forecast-evaluation}
+# Combine forecast results from the two approaches we implemented
+forecast_results <- bind_rows(
+  # Approach 1: Complete data (naive)
+  complete_data_forecasts |> 
+    filter(actual_day > cutoff, actual_day <= cutoff + forecast_horizon) |>
+    mutate(
+      model = "Complete data",
+      forecast_horizon = actual_day - cutoff,
+      forecast_date = cutoff
+    ) |>
+    select(model, forecast_date, forecast_horizon, actual_day, .value, .draw),
+  
+  # Approach 2: Pipeline
+  pipeline_forecasts |> 
+    filter(actual_day > cutoff, actual_day <= cutoff + forecast_horizon) |>
+    mutate(
+      model = "Pipeline",
+      forecast_horizon = actual_day - cutoff,
+      forecast_date = cutoff
+    ) |>
+    select(model, forecast_date, forecast_horizon, actual_day, .value, .draw)
+) |>
+  # Add observed values for scoring
+  left_join(
+    evaluation_data |> select(day, observed), 
+    by = c("actual_day" = "day")
+  ) |>
+  filter(!is.na(observed))
 
 # Calculate scores using scoringutils
-# scores <- forecast_results |>
-#   score()
+scores <- forecast_results |>
+  as_forecast_sample(
+    forecast_unit = c("model", "forecast_date", "forecast_horizon"),
+    observed = "observed",
+    predicted = ".value",
+    sample_id = ".draw"
+  ) |>
+  score()
+
+head(scores)
 ```
 
 ## Overall performance table
 
+We summarise the performance across all forecast horizons:
+
 ```{r performance-table}
 # Create summary table showing overall performance
-# overall_performance <- scores |>
-#   filter(forecast_horizon <= 14) |>
-#   summarise_scores(by = "model") |>
-#   select(model, crps, interval_score, coverage_50, coverage_90) |>
-#   arrange(crps)
+overall_performance <- scores |>
+  filter(forecast_horizon <= 14) |>
+  summarise_scores(by = "model") |>
+  select(model, crps, interval_score, coverage_50, coverage_90) |>
+  arrange(crps)
 
-# knitr::kable(overall_performance, 
-#              caption = "Overall forecast performance by approach")
+knitr::kable(overall_performance, 
+             caption = "Overall forecast performance by approach",
+             digits = 3)
 ```
 
 ## Performance by forecast horizon
 
+We examine how performance varies with forecast horizon:
+
 ```{r performance-by-horizon}
+# Calculate performance by horizon
+horizon_performance <- scores |>
+  summarise_scores(by = c("model", "forecast_horizon"))
+
 # Plot showing how performance varies by forecast horizon
-# horizon_performance <- scores |>
-#   summarise_scores(by = c("model", "forecast_horizon"))
-#
-# ggplot(horizon_performance, aes(x = forecast_horizon, y = crps, color = model)) +
-#   geom_line(size = 1) +
-#   geom_point() +
-#   labs(
-#     x = "Forecast horizon (days)",
-#     y = "CRPS (lower is better)",
-#     title = "Forecast performance by horizon",
-#     color = "Approach"
-#   ) +
-#   theme_minimal() +
-#   theme(legend.position = "bottom")
+ggplot(horizon_performance, aes(x = forecast_horizon, y = crps, color = model)) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  labs(
+    x = "Forecast horizon (days)",
+    y = "CRPS (lower is better)",
+    title = "Forecast performance by horizon",
+    color = "Approach"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ::: {.callout-tip}
@@ -598,61 +649,32 @@ The joint model typically shows:
 
 # Going further
 
-## Software implementations
+## Challenge
 
-For production use, several packages implement these concepts:
+- Try implementing the pipeline approach with uncertainty propagation by sampling multiple nowcast trajectories and fitting the renewal model to each.
+How does this compare computationally and in terms of forecast accuracy to the other approaches?
+- Experiment with different forecast horizons (7 days, 21 days, 28 days).
+How does the relative performance of each approach change with longer forecast horizons?
+- Compare the approaches when there are changes in transmission (e.g., at different cut off dates) near the forecast date.
+Which methods are more robust to such changes?
 
-- **EpiNow2**: Production-ready joint nowcasting and forecasting
-- **epinowcast**: Next-generation framework with flexible model specification  
-- **covidcast**: Real-time analysis tools developed during COVID-19
+## Methods in practice
 
-## Key extensions
+Several packages implement these concepts:
 
-- **Hierarchical models**: Multiple locations with shared parameters
-- **Time-varying delays**: Account for changing reporting patterns
-- **External predictors**: Mobility, weather, policy changes
-- **Ensemble approaches**: Combine multiple models for robustness
+- [`EpiNow2`](https://epiforecasts.io/EpiNow2/): Production-ready joint nowcasting and forecasting 
+- [`epinowcast`](https://package.epinowcast.org/): Next-generation framework with flexible model specification
+- [`scoringutils`](https://epiforecasts.io/scoringutils/): Comprehensive forecast evaluation tools
+
+Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lison2024].
+In practice, implementations often include hierarchical models for multiple locations, time-varying delays, and ensemble approaches for robustness.
 
 # Wrap up
 
-## Key takeaways
+- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Share your [questions and thoughts](../reference/help)
 
-1. **Truncation bias is real**: Ignoring recent incomplete data biases forecasts
-2. **Model consistency matters**: Using the same generative process for nowcast and forecast avoids mismatch issues [@lison2024]  
-3. **Uncertainty propagation**: Joint models properly account for all sources of uncertainty
-4. **Trade-offs**: Balance computational cost, accuracy, and interpretability
+## References
 
-## Connecting to course themes
-
-This session brings together:
-- Proper uncertainty quantification (Sessions 1-2)
-- Understanding generative processes (Session 7) 
-- Forecast evaluation (Session 9)
-- Real-world epidemic analysis challenges
-
-# References
-
-## Key papers:
-
-- @abbott2020: EpiNow2 methodology
-- @bastos2019: Joint nowcasting and forecasting framework
-- @bosse2022: Forecast evaluation in epidemics
-- @bracher2021: COVID-19 forecast hub methodology
-- @funk2019: Real-time forecasting challenges
-- @gneiting2007: Probabilistic forecasting theory
-- @hawryluk2021: Gaussian process nowcasting
-- @lison2024: Benefits of joint modeling
-- @mcgough2020: Nowcasting by Bayesian smoothing
-
-## R packages:
-
-- [EpiNow2](https://epiforecasts.io/EpiNow2/)
-- [epinowcast](https://package.epinowcast.org/)
-- [scoringutils](https://epiforecasts.io/scoringutils/)
-- [covidcast](https://cmu-delphi.github.io/covidcast/covidcastR/)
-
-## Additional resources:
-
-- [Epiforecasts blog posts](https://epiforecasts.io/posts/)
-- [COVID-19 Forecast Hub](https://covid19forecasthub.org/)
-- [Real-time analysis course materials](https://github.com/epiforecasts/nowcasting-course)
+::: {#refs}
+:::
