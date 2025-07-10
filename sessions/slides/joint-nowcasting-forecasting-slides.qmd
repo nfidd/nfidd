@@ -1,346 +1,95 @@
 ---
-title: "Combining nowcasting and forecasting"
-subtitle: "Advanced methods for real-time epidemic analysis"
-author: "NFIDD Course Team"
+title: "Joint nowcasting and forecasting"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
 format: 
   revealjs:
-    theme: default
-    slide-number: true
-    show-slide-number: speaker
-    footer: "NFIDD Nowcasting and Forecasting Course"
+    output: slides/joint-nowcasting-forecasting-slides.html
+    footer: "Joint nowcasting and forecasting"
+    chalkboard: true
+    slide-level: 3
 ---
 
-## Session overview
+### Motivating example {.smaller}
 
-**Duration**: 10 minutes of slides + 50 minutes practice
+Often we want to forecast from data like this
 
-**Goals for this session**:
+![](figures/monkeypox_delayed.png)
 
-- Understand the nowcasting-forecasting continuum
-- Learn three approaches to handle right truncation
-- Compare performance using proper evaluation
+Data after the dashed line are marked as uncertain. How can we use them for forecasting?
 
-**Prerequisites**: Sessions 2, 7, 9
+### The problem: Forecasting with incomplete data {.smaller}
 
-::: {.notes}
-- Emphasise this is an advanced integration session
-- Builds on multiple previous concepts
-- Practical focus with real-world applications
-:::
+**Traditional approach**: Wait for "complete" data
 
-## The problem: Forecasting with incomplete data {.smaller}
+- Might mean forecasting from 2+ weeks ago
+- But as we've seen, forecasts after 2 weeks can be difficult
+- Even our forecasts of "what is happening now" end up quite uncertain
 
-:::: {.columns}
+**The challenge**:
+- Reporting delays mean recent data are incomplete
+- But we need forecasts based on the most recent information
+- How do we bridge this gap?
 
-::: {.column width="50%"}
-**Traditional approach**:
-- Wait for "complete" data
-- Ignore recent observations
-- Forecast from old information
-:::
+### Nowcasting reminder
 
-::: {.column width="50%"}
-**Better approach**:
-- Account for reporting delays
-- Use all available information
-- Propagate uncertainty properly
-:::
+Predict what an epidemiological time series will look like *after all delayed reports* are in.
 
-::::
+![](figures/nowcasting.png)
 
-[Add figure: Data availability timeline showing truncation]
+(slide courtesy of Johannes Bracher)
 
-::: {.notes}
-- Use COVID-19 or flu example
-- Show how much data we lose by waiting
-- Highlight real-time decision needs
-:::
+### The nowcasting-forecasting continuum {.smaller}
 
-## Why joint modelling matters
+**Key insight**: Nowcasting and forecasting aren't distinct
 
-```{r}
-#| echo: false
-#| eval: false
-# TODO: Create conceptual diagram showing:
-# - Information flow in joint vs separate models
-# - Uncertainty propagation
-# - Feedback between nowcast and forecast
-```
+- As we saw in the renewal session, even nowcasting $R_t$ in real-time is partly a forecast
+- Really we have a continuum of more or less information
+- Some methods (e.g., Bayesian generative models) make this connection clear
+- Others require more thought about how to link them
 
-**Key insight**: Nowcasting and forecasting share the same generative process
+### Approach 1: Naive approach
 
-- Reporting delays affect both historical estimates and future predictions
-- Uncertainty compounds when treated separately
-- Joint inference leverages all available information
-
-::: {.notes}
-- Reference the joint nowcasting session
-- Explain why separation loses information
-- Connect to Bayesian principles
-:::
-
-## Three approaches we'll compare
-
-### 1. Naive approach
 - Filter to "complete" data only
 - Standard forecast from truncated series
 - **Problem**: Throws away recent information
 
-### 2. Simple correction
+### Approach 2: Simple correction
+
 - Point estimate correction for truncation
 - Forecast from "adjusted" data  
 - **Problem**: No uncertainty propagation
 
-### 3. Joint model
+### Approach 3: Simple correction with uncertainty
+
+- Sample from nowcast posterior
+- Forecast from multiple trajectories
+- **Better**: Some uncertainty propagation
+- **But**: Still treating nowcast and forecast as separate steps
+
+### Approach 4: Joint model
+
 - Simultaneous nowcast and forecast
 - Full Bayesian inference
 - **Advantage**: Proper uncertainty quantification
+- **Trade-off**: More complex to implement
 
-## The truncation triangle {.smaller}
+### Questions to consider {.smaller}
 
-```{r}
-#| echo: false
-#| eval: false
-# TODO: Create visualisation showing:
-# - Reporting triangle with color gradient
-# - "Now" line
-# - Forecast horizon
-# - Different starting points for each approach
-```
+For each approach:
 
-[Add figure: Truncation triangle with approach starting points marked]
-
-**Questions to consider**:
-- How much data does each approach use?
+- How much data does it use?
 - Where does uncertainty come from?
 - What assumptions are we making?
+- When might it work well or poorly?
 
-::: {.notes}
-- Walk through what each approach "sees"
-- Emphasise information loss in naive approach
-- Show uncertainty regions
-:::
-
-## Mathematical framework
-
-:::: {.columns}
-
-::: {.column width="50%"}
-**Nowcasting component**:
-$$C_{t,d} \sim \text{NegBinom}(\lambda_{t,d}, \phi)$$
-$$\lambda_{t,d} = \sum_{\tau=0}^{d} I_{t-\tau} \times p_\tau$$
-
-Where:
-- $C_{t,d}$: Cases reported by day $d$ for onset $t$
-- $p_\tau$: Reporting delay distribution
-- $I_t$: True infections on day $t$
-:::
-
-::: {.column width="50%"}
-**Forecasting extension**:
-$$I_t = \sum_{\tau=1}^{t} I_{t-\tau} R_t g_\tau$$
-$$R_t \sim \text{Normal}(R_{t-1}, \sigma_R)$$
-
-For $t > t_{\text{now}}$:
-- Extend $R_t$ via random walk
-- Generate future infections
-- Apply delays for observables
-:::
-
-::::
-
-::: {.notes}
-- Connect to renewal equation from Session 2
-- Highlight how nowcast feeds into forecast
-- Explain random walk for Rt projection
-:::
-
-## Forecast evaluation framework
-
-### Visual assessment
-- Forecast ribbons with observations
-- Coverage of prediction intervals
-- Comparison across methods
-
-### Quantitative metrics
-1. **CRPS**: Continuous Ranked Probability Score
-2. **Interval Score**: Weighted interval width + penalties
-3. **Calibration**: Do 90% intervals contain truth 90% of the time?
-
-### Key principle
-> Proper scoring rules incentivise honest forecasts
-
-::: {.notes}
-- Reference forecast evaluation session
-- Explain why we need proper scores
-- Mention computational considerations
-:::
-
-## Results preview: Method comparison
-
-```{r}
-#| echo: false
-#| eval: false
-# TODO: Create comparison plot showing:
-# - Three methods with prediction intervals
-# - True values and observations
-# - Highlight where methods diverge
-```
-
-[Add figure: Side-by-side forecast comparison]
-
-**Key findings**:
-- Naive approach underestimates during growth phases
-- Simple correction has unrealistic certainty
-- Joint model balances accuracy and honesty
-
-::: {.notes}
-- Point out specific differences
-- Explain why joint model performs better
-- Mention computational trade-offs
-:::
-
-## Real-world applications
-
-:::: {.columns}
-
-::: {.column width="50%"}
-**COVID-19 forecasting**
-- Hospital admissions
-- Case trends
-- Policy decisions
-
-**Challenges faced**:
-- Changing reporting
-- Holiday effects
-- Testing capacity
-:::
-
-::: {.column width="50%"}
-**Lessons learned**:
-- Real-time data is always incomplete
-- Joint models improved accuracy
-- Uncertainty communication crucial
-
-[Add logos: COVID-19 Forecast Hub, ECDC, CDC]
-:::
-
-::::
-
-::: {.notes}
-- Share specific examples from pandemic
-- Mention forecast hub experiences
-- Connect to participant contexts
-:::
-
-## Software ecosystem
-
-### Available tools:
-- **EpiNow2**: Production-ready nowcasting + forecasting
-- **epinowcast**: Next-generation framework
-- **scoringutils**: Forecast evaluation
-- **covidcast**: Real-time data and forecasting
-
-### Today's session:
-- Simplified versions for learning
-- Focus on concepts over implementation
-- Links to full packages provided
-
-::: {.notes}
-- Mention package maintainers present
-- Encourage exploration after course
-- Note computational requirements
-:::
-
-## Extensions and advanced topics
-
-### Methodological extensions:
-- Hierarchical models for multiple locations
-- Time-varying delay distributions  
-- External predictors (mobility, weather)
-- Ensemble approaches
-
-### Research frontiers:
-- Adaptive nowcasting
-- Non-parametric delay estimation
-- Real-time model selection
-- Forecast combination
-
-::: {.notes}
-- Connect to participants' interests
-- Mention relevant papers
-- Suggest collaboration opportunities
-:::
-
-## Key takeaways
-
-1. **Right truncation biases forecasts** - ignoring it is not neutral
-
-2. **Joint inference propagates uncertainty** - separate steps compound errors
-
-3. **Proper evaluation essential** - use scoring rules, not just visual inspection
-
-4. **Context matters** - choose approach based on needs and constraints
-
-5. **Tools exist** - don't reinvent, build on existing work
-
-## Let's get started!
-
-### In the practical session:
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Generate example data with realistic truncation
-2. Implement three forecasting approaches
+2. Implement 4 forecasting approaches
 3. Compare performance quantitatively
 4. Discuss trade-offs and applications
 
-### Resources:
-- Session materials: `sessions/joint-nowcasting-forecasting.qmd`
-- Stan models: Pre-compiled and ready
-- Help available: Raise your hand or check help page
+#
 
-::: {.notes}
-- Transition to practical
-- Remind about time management
-- Encourage questions
-:::
-
-## References {.smaller}
-
-Key papers for this session:
-
-- Abbott et al. (2020). *Estimating the time-varying reproduction number of SARS-CoV-2*
-- Bastos et al. (2019). *A modelling approach for correcting reporting delays*
-- Bracher et al. (2021). *Evaluating epidemic forecasts in an interval format*
-- Funk et al. (2019). *Assessing the performance of real-time epidemic forecasts*
-
-Software:
-
-- [github.com/epiforecasts/EpiNow2](https://github.com/epiforecasts/EpiNow2)
-- [github.com/epiforecasts/epinowcast](https://github.com/epiforecasts/epinowcast)
-
-## Backup slides
-
-## Detailed model comparison
-
-[Add table comparing:]
-- Computational time
-- Number of parameters  
-- Assumptions required
-- Data requirements
-- Output types
-
-## Debugging common issues
-
-**Convergence problems**:
-- Reduce forecast horizon
-- Simplify Rt model
-- Check data quality
-
-**Computational limits**:
-- Use fewer iterations
-- Try variational inference
-- Pre-compile models
-
-## Additional visualisations
-
-[Space for extra plots if needed during discussion]
+[Return to the session](../joint-nowcasting-forecasting)
