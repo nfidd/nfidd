@@ -36,10 +36,12 @@ The source file of this session is located at `sessions/forecast-concepts.qmd`.
 In this session we will use the `fable` package for fitting simple forecasting models, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `epidatr` package for accessing and downloading versions of epidemiological surveillance data from the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/).
 
 ```{r libraries, message = FALSE}
-library("fable")
+library("nfidd")
 library("dplyr")
 library("ggplot2")
 library("epidatr")
+library("feasts")
+library("fable")
 theme_set(theme_bw())
 ```
 
@@ -92,7 +94,7 @@ However, to ensure reproducibility (since this is a live dataset), we have downl
 Further, we filter the data to the *start* of the 2017/2018 season for this session.
 This way we have some "unseen" data left for evaluation later.
 
-```{r}
+```{r load_data_locally}
 data(flu_data)
 flu_data <- flu_data |>
   filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
