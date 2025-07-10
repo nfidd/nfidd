@@ -63,7 +63,7 @@
 #' }
 "stat_forecasts"
 
-#' Flusight ILI data for the USA starting with the 2003/2004 season through the
+#' Flusight ILI data for the US starting with the 2003/2004 season through the
 #' of the 2017/2018 season.
 #'
 #' A dataset containing Flusight wILI (weighted Influenza-like Illness) data
