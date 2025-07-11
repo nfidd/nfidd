@@ -28,6 +28,7 @@ Suggests:
     epidatr,
     fpp3,
     ggplot2,
+    gridExtra,
     lintr,
     lubridate,
     posterior,
