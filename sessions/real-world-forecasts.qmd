@@ -27,7 +27,7 @@ The source file of this session is located at `sessions/real-world-forecasts.qmd
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to access some stored datasets, the `dplyr` package for data wrangling, the `ggplot2` library for plotting, and the following [hubverse](https://hubverse.io/) packages: `hubData`, hubUtils`, `hubEvals` and `hubEnsembles`.
+In this session we will use the `nfidd` package to access some stored datasets, the `dplyr` package for data wrangling, the `ggplot2` library for plotting, and the following [hubverse](https://hubverse.io/) packages: `hubData`, `hubUtils`, `hubEvals` and `hubEnsembles`.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
@@ -57,25 +57,34 @@ set.seed(5050) # for Shohei Ohtani!
 
 # Introduction to the US COVID-19 Forecast Hub
 
-The US COVID-19 Forecast Hub ran from 
+The US COVID-19 Forecast Hub is a collaborative epidemiological forecasting project that started in April 2020. 
+From 2020 through summer 2024, [the project](https://covid19forecasthub.org/) was hosted by [the Reich Lab at UMass-Amherst](https://reichlab.io/).
+The short-term forecasts were published on the US CDC website as the official forecasts of record from the federal government.
 
-::: callout-tip
-## Some detail about the hub research
+During this time, the project collected over 9,000 forecast submissions from 130 models. 
+The project collected nearly 1 billion rows of model output data, and has led to multiple research papers on epidemiological forecasting.[@ray_comparing_2023;@cramer_evaluation_2022;@fox_optimizing_2024]
 
-:::
+The project paused forecasting during the 2024 summer, and restarted in late fall 2024 under the purview of the US CDC Centers for Forecasting and Outbreak Analytics (CFA). 
+When it re-started, the hub was launched using hubverse-style forecast guidelines.
+[The public dashboard for the COVID-19 Forecast Hub](https://reichlab.io/covidhub-dashboard/) has an up-to-date record of the forecasts submitted.
+
+In this session, we will access and analyse forecasts from the CFA-run COVID-19 Forecast Hub.
+
 
 ## Forecast dimensions
 
- - weeks
- - locations
- - output-types
- - targets
-
+Here are some details about the structure of the COVID-19 Forecast Hub project. 
+Forecasts are collected every week, with submissions due on Wednesdays.
+Teams make predictions of -1 through 3 week ahead counts of new hospital admissions due to COVID-19. 
+The ground truth data ("target data" in hubverse lingo) is taken from [the Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset](https://data.cdc.gov/Public-Health-Surveillance/Weekly-Hospital-Respiratory-Data-HRD-Metrics-by-Ju/mpgq-jmmr/about_data).
+Teams may forecast for up to 53 locations, including the US national level, all 50 states, plus Puerto Rico and Washington DC.
+Forecasts are solicited in a quantile format.
+Further details about the hub are available at its [GitHub README page](https://github.com/CDCgov/covid19-forecast-hub/blob/main/README.md).
 
 # The forecasts
 
 We will start by accessing forecast data from the COVID-19 Forecast Hub. 
-Both the forecast and target data are stored in an S3 bucket that can be accessed using `hubData`.
+Because the hub takes advantage of hubverse cloud data storage architecture, both the forecast and target data are stored in an S3 bucket that can be accessed using the `hubData` R package.
 
 ::: callout-tip
 For a complete list of hubs (many of which have public data available) check out the hubverse [list of hubs](https://hubverse.io/community/hubs.html).
@@ -83,6 +92,10 @@ For a complete list of hubs (many of which have public data available) check out
 
 
 ## Accessing forecast data from the cloud
+
+The following code can be used to retrieve covid forecasts from the cloud. 
+However, there are over 2 million rows of data, and it can take some bandwidth to download.
+To make these results more reproducible and to provide a snapshot of the data, we also provide the forecasts as a data object that can be loaded directly from the `nfidd` package.
 
 ```{r load-forecasts, eval=FALSE}
 hub_path_cloud <- hubData::s3_bucket("s3://covid19-forecast-hub")
@@ -96,7 +109,8 @@ covid_forecasts <- hub_con_cloud |>
   dplyr::collect()
 ```
 
-```{r}
+This line of code will load all the forecasts saved in the packge into your R session.
+```{r load-saved-forecasts}
 data(covid_forecasts)
 ```
 
@@ -120,7 +134,7 @@ data(covid_time_series)
 ## Exploratory data analysis and visualization
 
 Now that we've downloaded the forecast and target data, let's just do a few basic explorations to make sure we understand the dimensions of our data.
-Ideally, the hubverse should ensure that the data is relatively "clean", no typos in targets, no missing quantile levels, no negative predictions, etc...
+Ideally, storing data in the hubverse ensures that the data is "clean", no typos in targets or locations, no missing quantile levels, no negative predictions, etc...
 But let's start by just getting a sense of how many unique values we have for `location`, `horizon`, `target_end_date`, etc...
 
 ```{r eda-unique-vals}
@@ -140,6 +154,8 @@ From the above, we can see that
 -   the location codes are numbers.
 
 Before we go any further, let's fix the location codes to be state abbreviations in both the forecast and time-series data.
+The `covid_locations` data object stored in this package was downloaded and stored from the metadata of the COVID-19 Forecast Hub.
+The following code merges state abbreviations into both the forecasts and time-series datasets.
 
 ```{r state-abbrs}
 data(covid_locations)
@@ -148,6 +164,7 @@ covid_forecasts <- covid_forecasts |>
 covid_time_series <- covid_time_series |> 
   left_join(covid_locations)
 ```
+
 
 
 Let's just do a quick visualization of forecasts from one week to make sure we understand the structure of what one date and location's worth of forecasts look like.
@@ -166,9 +183,16 @@ covid_forecasts |>
   )
 ```
 
+::: callout-tip
+Take a moment to explore the forecasts interactively in the above plot. 
+:::
+
+
+## Who submitted when?
 
 One thing that can foul up evaluation and ensembles of models is when not all models submit at the same times.
-Do all models have the same number of predictions? 
+
+Do all models in our dataset of forecasts have the same number of predictions? 
 Let's look at this a few different ways.
 
 Here is a tabular summary showing some summary stats about how often and how much each model submitted:
@@ -185,7 +209,7 @@ covid_forecasts |>
   knitr::kable()
 ```
 
-And here is a visual showing more details about submissions each week by model, sorted with the models with the most forecasts at the top:
+And here is a visual showing more details about submissions each week by model, sorted with the models with the most forecasts at the top. Each tile represents a week, with lighter blue colors in a given model-week indicating a higher number of locations being submitted for.
 
 ```{r model-submission-viz}
 covid_forecasts |> 
@@ -253,7 +277,9 @@ Browse through some of the other model descriptions. Which ones look interesting
 
 # Evaluating forecasts
 
-To quantitatively evaluate the forecasts, we will need the "oracle output" data. Here is code to build it from the time-series target data.
+To quantitatively evaluate the forecasts, we will need the ["oracle output" data](https://docs.hubverse.io/en/latest/user-guide/target-data.html#oracle-output). 
+Recall that this is the "ground truth" (or target) data, formatted like it were being predicted by a future-seeing model.
+Here is code to build oracle-output data from the time-series target data.
 
 ```{r build-oracle-output-data}
 covid_oracle_output <- covid_time_series |> 
@@ -267,11 +293,55 @@ covid_oracle_output <- covid_time_series |>
 
 ## Visual evaluation
 
+Even though we have probabilistic forecasts, sometimes it is just easier to look at the point forecasts when trying to look at a lot of forecasts.
+Here is a plot showing all the point forecasts (the median from the quantile forecasts) for one state.
+The forecasts are in red and the black line shows the observed data.
 
+```{r}
+covid_forecasts |> 
+  filter(output_type_id == 0.5,
+         abbreviation == "GA") |> 
+  ggplot() +
+  geom_line(aes(x = target_end_date, 
+                y = value, 
+                group = interaction(reference_date, model_id)),
+            alpha = 0.5, 
+            color = "red") +
+  geom_line(data = filter(covid_time_series, 
+                          abbreviation == "GA",
+                          as_of == "2025-07-09"), 
+            aes(x = date,
+                y = observation))+
+  ggtitle("Forecasts and data for Georgia") +
+  ylab("incident hospital admissions") +
+  xlab(NULL)
+```
+
+```{r}
+covid_forecasts |> 
+  filter(output_type_id == 0.5,
+         abbreviation == "VA") |> 
+  ggplot() +
+  geom_line(aes(x = target_end_date, 
+                y = value, 
+                group = interaction(reference_date, model_id)),
+            alpha = 0.5, 
+            color = "red") +
+  geom_line(data = filter(covid_time_series, 
+                          abbreviation == "VA",
+                          as_of == "2025-07-09"), 
+            aes(x = date,
+                y = observation))+
+  ggtitle("Forecasts and data for Virginia") +
+  ylab("incident hospital admissions") +
+  xlab(NULL)
+```
+
+The forecasts can be interactively explored at the [COVID-19 Forecast Hub Dashboard](https://reichlab.io/covidhub-dashboard/forecast.html).
 
 ## Overall model comparison
 
-We will start with an overall evaluation of the models, using, as we did in earlier sessions, `hubEvals`.
+We will start our quantitative analysis with an overall evaluation of the models, using, as we did in earlier sessions, `hubEvals`.
 
 ```{r overall-eval}
 scores <- score_model_out(
@@ -444,7 +514,7 @@ What is good is having `interval_coverage_90` scores that are close to 0.90.
 A few models (`CovidHub-ensemble`, `CMU-TimeSeries` and `CMU-climate_baseline`) all have coverage rates within 5% of the nominal level for both 50% and 90% PIs.
 
 ::: callout-tip
-Note, this is a nice example of a model (`CMU-climate_baseline`) being well calibrated but not having good accuracy.
+Note, this is a nice example of a model (`CMU-climate_baseline`) being well calibrated (near-nominal PI coverage) but not having good accuracy (bad/high WIS on average).
 :::
 
 
@@ -513,6 +583,7 @@ In this section, we will build several new ensemble forecasts and compare these 
 Based on the last results from the section above, we saw that there was some fairly consistent performance from a few of the models. 
 This is one precondition for weighted ensembles to have a chance at performing well.
 Here are the different approaches we will use:
+
  - `LOP-unweighted-all`: an unweighted linear opinion pool (LOP) of all available forecasts each week.
  - `LOP-unweighted-select`: an unweighted LOP of the most commonly submitted forecasts.
  - `LOP-weighted-select`: a weighted LOP of the most commonly submitted forecasts.
@@ -526,17 +597,21 @@ It would be hard to do any `weighted-all` ensembles since when models are missin
 Let's start with the "easy" part, building the unweighted ensembles.
 
 ::: {.callout-tip collapse="true"}
-### Gory LOP details
+### LOP details
 Note that when we build LOPs with quantile based forecasts, the algorithm needs to approximate a full distribution (the tails are not well-defined in a quantile representation).
 There are some assumptions made under the hood about how this is approximated. 
 For the really gory details, you can check out [the `hubEnsembles` documentation](https://hubverse-org.github.io/hubEnsembles/dev/articles/hubEnsembles.html?q=weight#creating-ensembles-with-linear_pool)
 :::
 
 Note that trying to build all of the forecasts in one call to `linear_pool()` exceeded the memory on your instructors laptop, so we will do a `map_dfr()` "loop" to do this one reference_date at a time.
+(This code takes a few minutes to run.)
 
 ```{r build-unweighted-ensembles}
-# Get a list of unique reference dates
-reference_dates <- unique(covid_forecasts$reference_date)
+# Get a list of unique reference dates, removing the last one
+reference_dates <- covid_forecasts |> 
+  filter(reference_date != as.Date("2025-07-12")) |> 
+  pull(reference_date) |> 
+  unique()
 
 # Map over each date and apply linear_pool separately
 lop_unweighted_all <- purrr::map_dfr(
@@ -572,10 +647,13 @@ It relies on the hope that giving more weight to better performing models yields
 
 We will use the WIS scores that we have computed above to generate weights for our ensembles.
 The weights for one `reference_date` will be based on the inverse of the cumulative average WIS achieved by the model up to the week prior to the current `reference_date`.
+
+::: callout-caution
 Note that since our scores are computed based on data available at the end of the season, this is kind of "cheating", since we're using information that would not have been available to us in real time. 
 If we were to do this entirely correctly, we would, for each week, compute the scores based on the available data at that time. 
+:::
 
-```{r}
+```{r compute-weights}
 ## compute the weights
 weights_per_model <- scores_by_reference_date |>
   filter(metric == "wis",
@@ -617,7 +695,6 @@ median_unweighted_select <- covid_forecasts |>
          model_id != "CovidHub-ensemble") |> 
   simple_ensemble(agg_fun = median,
                   model_id = "median_unweighted_select")
-
 ```
 
 
@@ -662,7 +739,8 @@ covid_forecasts_w_ensembles |>
   score_model_out(
     covid_oracle_output
   ) |> 
-  arrange(wis)
+  arrange(wis) |> 
+  knitr::kable(digits = 2)
 ```
 
 Remember, in the above table, the `CovidHub-ensemble` is kind of like `median-unweighted-all` because it uses a median ensemble of all models available in every week without weights.
