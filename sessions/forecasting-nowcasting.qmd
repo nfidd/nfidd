@@ -150,7 +150,7 @@ tail(available_onsets)
 For our analysis, we need two additional datasets:
 
 1. **Complete data at forecast horizon**: What we would observe up to the forecast horizon
-2. **Filtered data for complete data approach**: Data that is "complete" at the time of forecast
+2. **Filtered data for complete data approach**: Data that is "complete" (i.e. expected to be fully reported) at the time of forecast
 
 ```{r create-evaluation-datasets}
 # Dataset 1: What we observe over the forecast horizon
