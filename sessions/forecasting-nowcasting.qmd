@@ -434,6 +434,7 @@ ggplot() +
 ## Take 5 minutes
 
 Compare this pipeline approach to the complete data approach:
+
 - What additional information does it use?
 - What are the limitations of using point estimates from the nowcast?
 - How does this approach differ from the complete data approach?
@@ -444,17 +445,21 @@ Compare this pipeline approach to the complete data approach:
 ::: {.callout-note collapse="true"}
 ## Solution
 **What additional information does it use?**
+
 - This approach uses all available data, including the recent truncated observations that were ignored in the complete data approach.
 
 **What are the limitations of using point estimates from the nowcast?**
+
 - It doesn't include the uncertainty from the nowcast, leading to overconfident predictions.
 - Point estimates ignore the full posterior distribution from the nowcasting step.
 
 **How does this approach differ from the complete data approach?**
+
 - It has lower variance than the complete data approach due to using more information.
 - It appears slightly more biased towards under-predicting than the complete data approach.
 
 **How might model mismatch between the geometric and renewal models affect results?**
+
 - The geometric random walk and renewal equation represent different generative processes [@lisonGenerativeBayesianModeling2024], which can lead to inconsistencies as we saw in the [joint nowcasting session](sessions/joint-nowcasting).
 - This mismatch can create systematic biases and unrealistic uncertainty quantification.
 
@@ -477,6 +482,7 @@ The approach works as follows:
 ## Take 3 minutes
 
 Consider this approach compared to Approaches 1 and 2:
+
 - What advantage does it have over the simple pipeline approach?
 - Why is it computationally expensive compared to a joint model?
 - What problem does it still have regarding model consistency?
@@ -598,6 +604,7 @@ ggplot() +
 ## Take 5 minutes
 
 What are the advantages of the joint model approach?
+
 - How does it address the model mismatch problem?
 - What uncertainties does it properly account for?
 - Why might it perform better than the pipeline and complete data approaches?
