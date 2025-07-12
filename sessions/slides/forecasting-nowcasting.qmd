@@ -27,6 +27,7 @@ Data after the dashed line are marked as uncertain. How can we use them for fore
 - Even our forecasts of "what is happening now" end up quite uncertain
 
 **The challenge**:
+
 - Reporting delays mean recent data are incomplete
 - But we need forecasts based on the most recent information
 - How do we bridge this gap?
