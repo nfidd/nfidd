@@ -305,7 +305,7 @@ ggplot() +
 
 Examine the complete data approach:
 - How far back does the forecast have to start from?
-- What happens to forecast uncertainty over the forecasthorizon?
+- What happens to forecast uncertainty over the forecast horizon?
 - Why might this approach miss recent changes in transmission?
 - What key assumption does this make about data completeness?
 
