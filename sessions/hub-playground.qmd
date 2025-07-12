@@ -1,0 +1,105 @@
+---
+title: "Local hub playground"
+order: 13
+bibliography: ../nfidd.bib
+---
+
+```{r echo=FALSE}
+options(width=100)
+```
+
+# Introduction
+
+
+
+## Slides
+
+-   [Why use a local hub?](slides/hub-playground)
+
+## Objectives
+
+The aims of this session are 
+
+1. to introduce the use of modeling hubs and hubverse-style tools for local model development and collaborative modeling projects, and
+2. to practice building forecasting models using real data.
+
+::: {.callout-note collapse="true"}
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/hub-playground.qmd`.
+
+## Libraries used
+
+In this session we will use the `dplyr` package for data wrangling, and the `ggplot2` library for plotting.
+
+Additionally, we will use some [hubverse](https://hubverse.io/) packages such as `hubEvals`, `hubUtils`, `hubEnsembles` packages for building ensembles.
+
+
+```{r libraries, message = FALSE}
+library("dplyr")
+library("ggplot2")
+library("hubUtils")
+library("hubEvals")
+library("hubEnsembles")
+theme_set(theme_bw())
+```
+
+::: callout-tip
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility.
+Setting this ensures that you should get exactly the same results on your computer as we do.
+This is not strictly necessary but will help us talk about the models.
+
+```{r}
+set.seed(406) # for Ted Williams
+```
+:::
+
+# A flu forecasting hub for model dev
+
+## Introduce ILI Forecasting at HHS Region level
+
+## Introduce details of this hub
+
+
+# Building and working with local forecasts
+
+## Building a simple forecast 
+
+### Fitting and generating foreccasts
+
+All locations, all times
+
+
+### Local hub evaluation
+
+
+
+## Building a more complex model
+
+
+# Submitting forecasts an online hub
+
+## What is your best local model?
+
+Consider models individually, or ensemble
+
+## Process of submitting to an online hub
+
+### GitHub account
+
+### Drag and drop
+
+### Cloning repo, submitting via PR
+
+
+# References
+
+::: {#refs}
+:::
