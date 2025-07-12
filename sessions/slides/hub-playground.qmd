@@ -1,0 +1,27 @@
+---
+title: "Forecasting practice and local hubs"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/forecast-evaluation.html
+    footer: "Forecast evaluation"
+    slide-level: 3
+---
+
+
+### Model development practices and pipelines
+
+- General modeling workflow
+  - EDA of the data
+  - model design
+  - model training and validation
+  - out-of-sample testing
+  - EDA of forecasts and scores
+  - pick a model and submit it
+
+- Some key concepts to highlight:
+ - time-series cross-validation
+ - trying to mask data from the analysts to avoid unconscious bias
+
+[Return to the session](../hub-playground)
