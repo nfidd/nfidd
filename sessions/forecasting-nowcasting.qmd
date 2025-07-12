@@ -30,7 +30,7 @@ The source file of this session is located at `sessions/forecasting-nowcasting.q
 
 ## Libraries used
 
-In this session we will use the `nfidd` package to load a data set of infection times and access stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference, and `scoringutils` for forecast evaluation.
+In this session we will use the `nfidd` package to load a data set of infection times and access Stan models and helper functions, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, the `tidybayes` package for extracting results of the inference, and `scoringutils` for forecast evaluation.
 
 ```{r libraries, message = FALSE}
 library("nfidd")
