@@ -146,12 +146,12 @@ Friday: 12.00-13.00
 
 -   Lunch
 
-## Session 14: Forecasting and Nowcasting integration
+## Session 14: Combining nowcasting and forecasting
 
 Friday: 13.00-14.00
 
 -   [Introduction](../sessions/slides/forecasting-nowcasting): Why combine approaches? (10 mins)
--   [Practice](../sessions/forecasting-nowcasting): connecting nowcasting and forecasting using ARIMA models (45 mins)
+-   [Practice](../sessions/forecasting-nowcasting): connecting nowcasting and forecasting (45 mins)
 -   Wrap up (5 mins)
 
 ## Session 15: Advanced topics

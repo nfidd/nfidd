@@ -16,6 +16,7 @@ data {
   array[gen_time_max] real gen_time_pmf;  // pmf of generation time distribution
   int<lower = 1> ip_max; // max incubation period
   array[ip_max + 1] real ip_pmf;
+  int h;                // number of days to forecast
 }
 
 transformed data{
@@ -52,5 +53,23 @@ model {
 generated quantities {
   array[d*n] real complete_onsets_by_report = observe_onsets_with_delay(onsets, reporting_delay, D, rep_array(d, n));
   array[n] int nowcast = combine_obs_with_predicted_obs_rng(obs, complete_onsets_by_report, P, p, d, D);
+
+  // Forecast the underlying onsets
+  array[h] real forecast;
+  if (h > 0) {
+    array[h + n - 1] real f_rw_noise;
+    for (i in 1:n-1) {
+      f_rw_noise[i] = rw_noise[i];
+    }
+    for (i in n:(h + n - 1)) {
+      f_rw_noise[i] = normal_rng(0, 1);
+    }
+    array[h + n] real f_R = geometric_random_walk(init_R, f_rw_noise, rw_sd);
+    array[h + n] real f_infections = renewal(init_I, f_R, gen_time_pmf);
+    array[h + n] real f_onsets = convolve_with_delay(f_infections, ip_pmf);
+    for (i in 1:h) {
+      forecast[i] = poisson_rng(f_onsets[n + i]);
+    }
+  }
 }
 
