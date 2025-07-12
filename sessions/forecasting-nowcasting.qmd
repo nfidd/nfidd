@@ -454,7 +454,7 @@ Compare this pipeline approach to the complete data approach:
 - It appears slightly more biased towards under-predicting than the complete data approach.
 
 **How might model mismatch between the geometric and renewal models affect results?**
-- The geometric random walk and renewal equation represent different generative processes [@lison2024], which can lead to inconsistencies as we saw in the [joint nowcasting session](sessions/joint-nowcasting).
+- The geometric random walk and renewal equation represent different generative processes [@lisonGenerativeBayesianModeling2024], which can lead to inconsistencies as we saw in the [joint nowcasting session](sessions/joint-nowcasting).
 - This mismatch can create systematic biases and unrealistic uncertainty quantification.
 
 :::
