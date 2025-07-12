@@ -19,7 +19,7 @@ Another approach involves summarising performance quantitatively.
 
 The aim of this session is to introduce the concept of forecast evaluation from a qualitative and quantitative perspective.
 
-:::: {.callout-note collapse="true"}
+::: {.callout-note collapse="true"}
 # Setup
 
 ## Source file
@@ -31,6 +31,7 @@ The source file of this session is located at `sessions/forecasting-evaluation.q
 In this session we will use the `fable` package for fitting and evaluating simple forecasting models, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `epidatr` package for accessing and downloading versions of epidemiological surveillance data from the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/).
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("fable")
 library("dplyr")
 library("ggplot2")
@@ -51,7 +52,7 @@ This is not strictly necessary but will help us talk about the models.
 ```{r}
 set.seed(42) # for Jackie Robinson!
 ```
-::::
+:::
 
 # Introduction to forecast evaluation
 
@@ -98,11 +99,15 @@ And raises challenges about doing statistically rigorous "testing" when trying t
 We will now generate some forecasts from one of the models we used earlier and evaluate them.
 However, to set us up for a more multi-dimensional experiment later in this session, we will start by loading in a bit more data than we did before.
 
-```{r load_data}
+```{r load_data, eval=FALSE}
 flu_data <- epidatr::pub_fluview(regions = c("nat"),
                                  epiweeks = epirange(200335, 201831)) |> 
   select(region, epiweek, wili) |> 
   as_tsibble(index = epiweek, key = region)
+```
+
+```{r load_data_locally}
+data(flu_data)
 ```
 
 In the above code, we've pulled data for the 2017/2018 season (previously we had only pulled data up to the start of the 2017/2018 season).
@@ -136,8 +141,7 @@ forecast_fourier_ar2 |>
 ```
 
 For the first time in the forecasting part of this course, we have confronted a model with the eventually observed data.
-And...
-well, what do you think?
+And... well, what do you think?
 
 ## Take 5 minutes
 

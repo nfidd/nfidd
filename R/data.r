@@ -62,3 +62,22 @@
 #'   \item{model}{the name of the model}
 #' }
 "stat_forecasts"
+
+#' Flusight ILI data for the US starting with the 2003/2004 season through the
+#' of the 2017/2018 season.
+#'
+#' A dataset containing Flusight wILI (weighted Influenza-like Illness) data
+#' starting with the 2003/2004 season through the 2017/2018 season. Contains the
+#' wILI signal that is published by the CDC  which measures the percentage of
+#' all outpatient doctor's office visits due to ILI in a given epidemiological
+#' week.
+#'
+#' @format A [tibble::tibble()] with a 3 columns and 780 rows
+#' \describe{
+#'   \item{region}{the region for which `wili` is represented, all "nat" for
+#'   national here.}
+#'   \item{epiweek}{The beginning of the (MMWR) epiweek, which starts on a
+#'   Sunday and ends on a Saturday}
+#'   \item{wili}{the weighted ILI (Influenza-like Illness) variable}
+#' }
+"flu_data"

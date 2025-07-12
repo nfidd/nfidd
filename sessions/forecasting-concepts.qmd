@@ -36,10 +36,12 @@ The source file of this session is located at `sessions/forecast-concepts.qmd`.
 In this session we will use the `fable` package for fitting simple forecasting models, the `dplyr` package for data wrangling, the `ggplot2` library for plotting and the `epidatr` package for accessing and downloading versions of epidemiological surveillance data from the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/).
 
 ```{r libraries, message = FALSE}
-library("fable")
+library("nfidd")
 library("dplyr")
 library("ggplot2")
 library("epidatr")
+library("feasts")
+library("fable")
 theme_set(theme_bw())
 ```
 
@@ -78,12 +80,24 @@ These data, including versions available at specific times, are available throug
 The following code downloads ILI data for the USA for all weeks starting with the 2003/2004 season through the start of the 2017/2018 season.
 Specifically, we use the weighted ILI variable (`wili`) which uses population-based weights estimate to try to generate a representative estimate of ILI for a specific population.
 We filter to only include columns that we need and convert the resulting object into a `tsibble` which is [a special kind of time-series data frame](https://tsibble.tidyverts.org/).
+Here is code to query the time-series data from the cloud-based hub.Here is code to query the time-series data from the cloud-based hub.
+Here is code to query the data from the Delphi EpiData API.
 
-```{r load_data}
+```{r load_data, eval=FALSE}
 flu_data <- epidatr::pub_fluview(regions = "nat", 
                                  epiweeks = epirange(200335, 201735)) |> 
   select(region, epiweek, wili) |> 
   as_tsibble(index = epiweek, key = region)
+```
+
+However, to ensure reproducibility (since this is a live dataset), we have downloaded this object for you already as of July 10, 2025, and it is available to load from the course R package directly.
+Further, we filter the data to the *start* of the 2017/2018 season for this session.
+This way we have some "unseen" data left for evaluation later.
+
+```{r load_data_locally}
+data(flu_data)
+flu_data <- flu_data |>
+  filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
 ```
 
 ::: callout-tip
