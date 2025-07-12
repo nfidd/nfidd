@@ -92,4 +92,4 @@ For each approach:
 
 #
 
-[Return to the session](../forecasting-nowcasting)
+[Return to the session](../forecasting-nowcasting.html)
