@@ -40,8 +40,7 @@ add_delays <- function(infection_times,
                        onset_params = list(shape = 5, rate = 1),
                        hosp_fun = rlnorm,
                        hosp_params = list(meanlog = 1.75, sdlog = 0.5),
-                       hosp_prob = 0.3,
-                       hosp_prob_onset = 0.3) {
+                       hosp_prob = 0.3) {
 
   n_obs <- nrow(infection_times)
 

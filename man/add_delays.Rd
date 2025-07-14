@@ -20,11 +20,14 @@ add_delays(
 
 \item{onset_params}{List of parameters for onset distribution}
 
-\item{hosp_fun}{Function for hospitalization delay distribution (default rlnorm)}
+\item{hosp_fun}{Function for hospitalization delay distribution
+(default rlnorm)}
 
 \item{hosp_params}{List of parameters for hospitalization distribution}
 
 \item{hosp_prob}{Probability of hospitalization (default 0.3)}
+
+\item{hosp_prob_onset}{Probability of hospitalization at onset (default 0.3)}
 }
 \value{
 A data frame with columns for infection time, onset time, and
@@ -40,7 +43,7 @@ head(delayed_infections)
 
 # Change delay parameters
 delayed_infections_long <- add_delays(
-  infection_times, 
+  infection_times,
   hosp_params = list(meanlog = 2.0, sdlog = 0.5)
 )
 
