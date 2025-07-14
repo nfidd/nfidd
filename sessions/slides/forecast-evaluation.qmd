@@ -33,27 +33,29 @@ format:
 
 1. *Vibes*: Do the forecasts look reasonable based on recent data?
 2. *Scores*: Measure the forecast accuracy. Different scores will measure important different facets of performance.
-3. *Validation*: Look at forecasts made at different times, without "data leakage".
+3. *Testing and validation*: Design an experiment that evaluates forecasts made at different times, without "data leakage".
 
 ### Don't let the model cheat: cross-validation {.smaller}
 
-**Cross-validation** ensures that your model only sees data in the past. It means that any predictions are made "out-of-sample".
+**Cross-validation** ensures that your model only sees data in the past. 
+It means that any predictions are made "out-of-sample".
 
 ![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
 
 ### Don't let yourself cheat: prospective validation {.smaller}
 
 **Prospective validation** is when you "register" one (or a small number) of forecasts as your "best" prediction of the future, before the eventual data are observed.
-This is the best way to evaluate model performance, as it ensures that . ensures that your model only sees data in the past. It means that any predictions are made "out-of-sample".
+If you know what the held-out data looks like, you might make subconscious decisions about which model to choose, biasing the final results.
 
-![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
-
+![Figure credit: [Lauer et al, 2020](https://arxiv.org/abs/2006.00073)](figures/test-train.jpg)
 
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1. Load forecasts from the model we have visualised previously.
-2. Evaluate the forecasts using proper scoring rules
+1. Build and visualize forecasts from multiple simple models.
+2. Evaluate the forecasts using proper scoring rules.
+3. Design and run an experiment to compare forecasts made from multiple models.
+4. Evaluate forecasts across forecast dates, horizons, and other dimensions.
 
 #
 
