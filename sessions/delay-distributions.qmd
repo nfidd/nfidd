@@ -101,7 +101,7 @@ ggplot(infection_times, aes(x = infection_time)) +
        title = "Infections during an outbreak")
 ```
 
-::: callout-note
+::: {.callout-tip}
 In reality, data from infectious disease surveillance will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
 :::
@@ -120,7 +120,8 @@ We will start with our data on infection times, and work forwards to symptom ons
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
-::: {.callout-note}
+::: {.callout-tip}
+## Take a few minutes
 Throughout the course, we repeatedly use some small chunks of code.
 Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
 To see exactly what the function does, just type the function name, e.g. `add_delays` for the function below.
@@ -134,6 +135,15 @@ df <- add_delays(infection_times)
 ## Take 2 minutes
 Have a look at the `add_delays()`  function and try to understand its inner workings.
 You can also access a help file for this function, just like any other R function, using `?add_delays`.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+The `add_delays()` function takes a dataframe with `infection_time` and creates a complete simulated dataset:
+- Adds `onset_time` by sampling gamma-distributed incubation delays (`rgamma(n(), shape = 5, rate = 1)`)
+- Adds `hosp_time` by sampling lognormal-distributed delays from onset (`rlnorm(n(), meanlog = 1.75, sdlog = 0.5)`)
+- Sets `hosp_time` to `NA` for 70% of cases (only 30% are hospitalised) using `rbinom()`
+- Returns a dataframe with all three time columns
 :::
 
 Now we can plot infections, hospitalisations and onsets.
@@ -168,7 +178,8 @@ This might be an important delay to know about, for example when modelling and f
 
 To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
 
-::: {.callout-note}
+::: {.callout-tip}
+## Take a few minutes
 This is where we apply the Bayesian inference concepts from the slides. 
 We're using Stan to estimate the parameters of a lognormal distribution (meanlog and sdlog) from our observed delay data. 
 The `nfidd_cmdstan_model()` function loads a pre-written Stan model for this purpose.
@@ -187,7 +198,7 @@ What priors are being used?
 :::
 
 ::: {.callout-note collapse="true"}
-## Stan model structure
+## Solution
 
 The lognormal Stan model has three main blocks:
 
@@ -200,7 +211,7 @@ The lognormal Stan model has three main blocks:
 
 :::
 
-::: {.callout-note, collapse="true"}
+::: {.callout-note collapse="true"}
 ## Stan reference materials
 
 For more information on the Stan based tools used in this session:
@@ -254,7 +265,7 @@ How do they compare to the true values we used in simulation (meanlog = 1.75, sd
 :::
 
 ::: {.callout-note collapse="true"}
-## Understanding the summary output
+## Solution
 
 The summary shows key statistics for each parameter:
 
@@ -334,35 +345,39 @@ This visualisation captures both our estimate of the delay distribution and our 
 - In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
 With real data, of course, we don't have this information available. 
 
-- **Impact of sample size**: Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. For example:
+- **Impact of sample size**: Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. 
+  
+  Subsample to 100 observations and refit the model to compare results:
   ```{r, eval = FALSE}
-  # Subsample to 100 observations
   df_small <- df_onset_to_hosp |> slice_sample(n = 100)
-  # Refit the model and compare results
   ```
 
-- **Different delay lengths**: The updated `add_delays()` function now allows you to change the delay parameters. Try:
+- **Different delay lengths**: The updated `add_delays()` function now allows you to change the delay parameters. 
+  
+  Try longer delays and see how this affects your parameter recovery:
   ```{r, eval = FALSE}
-  # Longer delays
   df_long <- add_delays(infection_times, 
                        hosp_params = list(meanlog = 2.5, sdlog = 0.5))
-  # How does this affect your parameter recovery?
   ```
 
-- **Different variability of the delay**: Try changing the variability of the delay:
+- **Different variability of the delay**: Try changing the variability of the delay to see how it affects uncertainty in estimates.
+  
+  More variable delays (higher sdlog):
   ```{r, eval = FALSE}
-  # More variable delays (higher sdlog)
   df_variable <- add_delays(infection_times,
                            hosp_params = list(meanlog = 1.75, sdlog = 1.0))
+  ```
   
-  # Less variable delays (lower sdlog)
+  Less variable delays (lower sdlog):
+  ```{r, eval = FALSE}
   df_precise <- add_delays(infection_times,
                           hosp_params = list(meanlog = 1.75, sdlog = 0.2))
   ```
 
-- **Different type of distribution**: Try using a completely different distribution:
+- **Different type of distribution**: Try using a completely different distribution for the delays.
+  
+  Use gamma distribution instead of lognormal:
   ```{r, eval = FALSE}
-  # Use gamma distribution instead of lognormal
   df_gamma <- add_delays(infection_times,
                         hosp_fun = rgamma,
                         hosp_params = list(shape = 2, rate = 0.3))
