@@ -79,4 +79,4 @@ Let's get started!
 
 -   If you haven't already, start with [getting set up for the course](../reference/getting-set-up)
 
--   Once you're all set up, let's introduce some concepts and methods we'll rely heavily in this course in the session on [probability distributions and parameter estimation](probability-distributions-and-parameter-estimation).
+-   Once you're all set up, let's start with the first session on [delay distributions](delay-distributions).

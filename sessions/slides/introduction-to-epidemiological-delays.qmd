@@ -112,17 +112,21 @@ hospital *admission* to *discharge*
 ## Why do we want to know these?
 
 - Key elements of infectious disease epidemiology
+
 - Intricate relationship with nowcasting/forecasting
 
 ## Quantifying delays
 
 - Epidemiological delays are *variable* between individuals
+
 - We can capture their variability using probability distributions
 
 ## What is a probability distribution?
 
 - Mathematical way to describe variability in delays
+
 - Shows how likely different delay values are
+
 - Common examples for delays:
   - **Log-normal**: right-skewed, good for incubation periods
   - **Gamma**: flexible shape, alternative for delays
@@ -172,13 +176,17 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 ## Statistical inference for delays
 
 - We observe delay data but don't know true distribution parameters
+
 - Need to estimate parameters from incomplete, noisy data
+
 - **Bayesian approach**: prior knowledge + observed data → posterior estimates
 
 ## Stan for delay estimation
 
 - Statistical software for Bayesian inference
+
 - We specify: data structure, parameters to estimate, model relationships
+
 - Stan returns parameter estimates with proper uncertainty quantification
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
