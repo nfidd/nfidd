@@ -78,9 +78,6 @@ Write down three observations that are interesting or surprising to you.
 Share them with your neighbor(s) and listen to their observations.
 :::
 
-
-
-
 ## Forecast dimensions
 
 Here are some details about the structure of the COVID-19 Forecast Hub project. 
