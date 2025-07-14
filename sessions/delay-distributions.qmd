@@ -140,6 +140,7 @@ You can also access a help file for this function, just like any other R functio
 ::: {.callout-note collapse="true"}
 ## Solution
 The `add_delays()` function takes a dataframe with `infection_time` and creates a complete simulated dataset:
+
 - Adds `onset_time` by sampling gamma-distributed incubation delays (`rgamma(n(), shape = 5, rate = 1)`)
 - Adds `hosp_time` by sampling lognormal-distributed delays from onset (`rlnorm(n(), meanlog = 1.75, sdlog = 0.5)`)
 - Sets `hosp_time` to `NA` for 70% of cases (only 30% are hospitalised) using `rbinom()`
