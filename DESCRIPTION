@@ -31,6 +31,7 @@ Suggests:
     gridExtra,
     lintr,
     lubridate,
+    plotly,
     posterior,
     purrr,
     rmarkdown,
@@ -39,15 +40,18 @@ Suggests:
     hubUtils,
     hubEnsembles,
     hubEvals,
+    hubData,
     hubVis
 Remotes:
     stan-dev/cmdstanr,
     hubverse-org/hubEvals,
+    hubverse-org/hubData,
     hubverse-org/hubVis
 Encoding: UTF-8
 Language: en-GB
 RoxygenNote: 7.3.2
 LazyData: true
+LazyDataCompression: xz
 Roxygen: list(roclets = c("collate", "namespace", "rd",
     "roxyglobals::global_roclet"))
 Config/roxyglobals/filename: globals.R
