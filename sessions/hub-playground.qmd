@@ -97,7 +97,7 @@ Clone this repository by clicking on the green "`<> Code`" button on the main pa
 Note that you can clone the repo using HTTPS, but if you are going to be using and pushing to GitHub a lot, then [setting up SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) and cloning via SSH is usually worth it. 
 :::
 
-The code below will work more easily if the sandbox hub is downloaded and lives in the same directory as the repository for this course.
+The code below will work more easily if the sandbox hub is downloaded and lives inside the repository for this course.
 
 
 ## Introduce ILI Forecasting at HHS Region level
@@ -120,7 +120,7 @@ There are two models that already have made forecasts that live in the hub: `his
 We will assume that you have the hub repository downloaded to your local machine.
 
 ```{r hub-config}
-hub_path <- "../sismid-ili-forecasting-sandbox/"
+hub_path <- "sismid-ili-forecasting-sandbox/"
 hub_con <- connect_hub(hub_path)
 ```
 
