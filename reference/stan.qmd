@@ -82,6 +82,7 @@ Markov-chain Monte Carlo (MCMC) is a method to generate samples of $\theta$ that
 This is our target of inference.
 
 Many flavours of MCMC exist:
+
 - Metropolis-Hastings
 - Hamiltonian Monte Carlo (what Stan uses)
 - Gibbs sampling
@@ -96,7 +97,7 @@ It's main limitation is that it doesn't support discrete latent parameters.
 
 Every Stan model has three essential blocks:
 
-```{stan empty_model, output.var = "empty", eval = FALSE, echo = TRUE
+```{stan empty_model, output.var = "empty", eval = FALSE, echo = TRUE}
 data {
   // What we observe
   int<lower=0> N;  // number of observations
@@ -146,9 +147,9 @@ summarise_draws(fit)
 
 ### Check Your Priors
 
-Do your priors make sense?
-What range of predictions do they lead to?
-Does this make sense for the data you're modelling?
+- Do your priors make sense?
+- What range of predictions do they lead to?
+- Does this make sense for the data you're modelling?
 
 Before fitting your model, simulate from your priors to check they make sense:
 
@@ -171,20 +172,20 @@ quantile(prior_delays, c(0.025, 0.5, 0.975))
 
 ### Check your model
 
-Does your model make sense?
-Does it have the parameters you expect?
-Does it have the data you expect?
+- Does your model make sense?
+- Does it have the parameters you expect?
+- Does it have the data you expect?
 
 ### Check your data
 
-Does your data make sense?
-Does it have the variables you expect?
-Does it have the right number of observations?
+- Does your data make sense?
+- Does it have the variables you expect?
+- Does it have the right number of observations?
 
 ### Check your results
 
-Does your model fit the data?
-Do the parameter estimates make sense?
+- Does your model fit the data?
+- Do the parameter estimates make sense?
 
 Use posterior predictive checks to see if your model can reproduce data similar to what you observed:
 - Does it capture the central tendency of the data?
