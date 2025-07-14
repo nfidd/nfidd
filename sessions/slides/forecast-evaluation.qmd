@@ -11,7 +11,8 @@ format:
 
 ### Importance of evaluation {.smaller}
 
-- Because forecasts are unconditional (what will happen) we can compare them to data and see how well they did
+- Because forecasts are unconditional quantitative statements about the future 
+("what *will* happen") we can compare them to data and see how well they did
 - Doing this allows us to answer question like
   - Are our forecasts any good?
   - How far ahead can we trust forecasts?
@@ -25,6 +26,29 @@ format:
 
 - Statements about the future should be **correct** ("calibration")
 - Statements about the future should aim to have **narrow uncertainty** ("sharpness")
+
+![Figure credit: Evan Ray](figures/sharpness-calibration.png)
+
+### Evaluating forecasts {.smaller}
+
+1. *Vibes*: Do the forecasts look reasonable based on recent data?
+2. *Scores*: Measure the forecast accuracy. Different scores will measure important different facets of performance.
+3. *Validation*: Look at forecasts made at different times, without "data leakage".
+
+### Don't let the model cheat: cross-validation {.smaller}
+
+**Cross-validation** ensures that your model only sees data in the past. It means that any predictions are made "out-of-sample".
+
+![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
+
+### Don't let yourself cheat: prospective validation {.smaller}
+
+**Prospective validation** is when you "register" one (or a small number) of forecasts as your "best" prediction of the future, before the eventual data are observed.
+This is the best way to evaluate model performance, as it ensures that . ensures that your model only sees data in the past. It means that any predictions are made "out-of-sample".
+
+![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
+
+
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
