@@ -70,6 +70,7 @@ The skills and methods taught in this course apply broadly across infectious dis
 - familiarity with scoring metrics: Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and Continuous Ranked Probability Score (CRPS)
 - understanding of time-series cross-validation for forecast evaluation
 - familiarity with visual assessment of forecasts and nowcasts
+- understanding the challenges with, and possible solutions for, evaluating datasets with incomplete or missing forecast data
 
 ## Ensemble models
 
