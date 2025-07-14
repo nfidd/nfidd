@@ -124,7 +124,7 @@ Friday: 09.00-09.15
 
 -   Day 2 review (15 mins)
 
-## Session 12: Forecast hubs
+## Session 12: Evaluating real-world outbreak forecasts
 
 Friday: 09.15-10.30
 
