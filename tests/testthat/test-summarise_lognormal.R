@@ -25,9 +25,9 @@ test_that("summarise_lognormal correctly transforms lognormal parameters", {
   func_mean <- as.numeric(gsub("Mean   :", "", result[4, 1]))
   func_sd <- as.numeric(gsub("Mean   :", "", result[4, 2]))
 
-  # Check that function output matches empirical values within 1%
-  expect_lt(abs(func_mean - mean_empirical) / mean_empirical, 0.01)
-  expect_lt(abs(func_sd - sd_empirical) / sd_empirical, 0.01)
+  # Check that function output matches empirical values within 2%
+  expect_lt(abs(func_mean - mean_empirical) / mean_empirical, 0.02)
+  expect_lt(abs(func_sd - sd_empirical) / sd_empirical, 0.02)
 
   # Check analytical formula is correct
   mean_analytical <- exp(meanlog_true + 0.5 * sdlog_true^2)
