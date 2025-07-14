@@ -97,6 +97,9 @@
 #'   \item{as_of}{date corresponding to the date (typically a Wednesday) the
 #'   data were archived}
 #'   \item{target}{the name of the prediction target: "wk inc covid hosp"}
+#'   \item{abbreviation}{two letter abbreviation for the location}
+#'   \item{location_name}{full name of the location}
+#'   \item{population}{population size of the location}
 #' }
 "covid_time_series"
 
@@ -105,17 +108,17 @@
 #' A dataset containing forecasts of hospital admission counts in the US from
 #' November 2024 through early July 2025.
 #'
-#' @format A [tibble::tibble()] with a 9 columns and 2,242,316 rows.
+#' @format A [tibble::tibble()] with a 9 columns and 2,002,633 rows.
 #' \describe{
 #'   \item{reference_date}{the date of the Saturday following the Wednesday
 #'   forecast submission date each week}
-#'   \item{target}{"wk inc covid hosp", the name of the forecast target,
-#'   corresponding to weekly incident covid hospitalizations}
-#'   \item{horizon}{an integer between -1 and 3, corresponding to the
-#'   prediction horizon}
 #'   \item{location}{a two-letter FIPS code for identifying the jurisdiction}
+#'   \item{horizon}{an integer between 0 and 3, corresponding to the
+#'   prediction horizon}
 #'   \item{target_end_date}{date corresponding to the Saturday ending the
 #'   epiweek being forecasted}
+#'   \item{target}{"wk inc covid hosp", the name of the forecast target,
+#'   corresponding to weekly incident covid hospitalizations}
 #'   \item{output_type}{string denoting the forecast format, here, all "quantile"}
 #'   \item{output_type_id}{number between 0 and 1 indicating the quantile level
 #'   corresponding to the prediction}
@@ -123,6 +126,9 @@
 #'   level}
 #'   \item{model_id}{the unique character string identifying the model that
 #'   made the prediction}
+#'   \item{abbreviation}{two letter abbreviation for the location}
+#'   \item{location_name}{full name of the location}
+#'   \item{population}{population size of the location}
 #' }
 "covid_forecasts"
 
