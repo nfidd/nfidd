@@ -54,6 +54,24 @@ We are trying to estimate an incubation period. For person A we know exposure ha
 
 The *true* incubation period of A could be anywhere between 1 and 3 days (but not all equally likely).
 
+## Understanding double censoring components
+
+Double interval censoring can be decomposed into:
+
+. . .
+
+**Primary event censoring**: Uncertainty about when the first event occurred within its reported day
+
+. . .
+
+**Secondary event censoring**: Uncertainty about when the second event occurred within its reported day
+
+. . .
+
+::: {.callout-warning}
+A common mistake is to only account for secondary event censoring while ignoring primary event censoring. This is often incorrect for epidemiological data.
+:::
+
 ## Issue #2: right truncation
 
 - reporting of events can be triggered by the **secondary** event
