@@ -45,7 +45,18 @@ ggplot(flu_data) +
   ggtitle("wILI to 2017/2018 Season")
 ```
 
+### Seasonality
 
+A seasonal pattern may suggest autocorrelation in the time series data.
+
+```{r}
+flu_data |> feasts::gg_season(wili, 
+                              period = "year",
+                              labels = "right",
+                              labels_right_nudge = 5,
+                              labels_repel = T) +
+  ggtitle("Seasonality in ILI")
+```
 
 ### Time-series Regression Models
 
