@@ -1,0 +1,52 @@
+---
+title: "Improving Forecasting Models"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/improving-forecasting-models.html
+    footer: "Improving Forecasting Models"
+    slide-level: 3
+---
+
+### Which Model to Use?
+
+There are *many* types of models available to us, (you've already seen a lot now):
+
+-   A range of choices from mechanistic to purely statistical.
+
+-   Bayesian, frequentist, machine learning.
+
+-   Stochastic vs. Deterministic
+
+How should we decide which model(s) to incorporate for nowcasting and forecasting? 
+
+What outputs and features do we require of these models?
+
+
+### Using Data the Data to Help Inform your Modeling Choices
+
+Often, what motivates one's modeling choices is the *data* and *patterns* observed in the data.
+
+
+![](figures/wili_timeseries.png){fig-align="center"}
+
+### Time-series Regression Models
+
+For now, we'll focus on **time-series regression models**.
+
+One widely applicable model type are the ARIMA models. ARIMA or autoregressive integrated moving average models capture patterns such as trends and autocorrelation:
+
+- AR (Autoregressive): Uses past values to predict current ones.
+- I (Integrated): Applies differencing to make the series stationary.
+- MA (Moving Average): Uses past forecast errors to refine predictions.
+
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+1.  Explore the influenza dataset some more focusing on assessing observed patterns qualitatively and quantitatively.
+2.  Explore different ways of improving modeling forecasts by incorporating patterns observed in data into our models.
+
+# 
+
+[Return to the session](../improving-forecasting-models)
