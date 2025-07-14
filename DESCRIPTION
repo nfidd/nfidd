@@ -31,7 +31,6 @@ Suggests:
     gridExtra,
     lintr,
     lubridate,
-    patchwork,
     posterior,
     purrr,
     rmarkdown,
