@@ -41,13 +41,13 @@ head(delayed_infections)
 # Change delay parameters
 delayed_infections_long <- add_delays(
   infection_times, 
-  hosp_params = list(n = nrow(infection_times), meanlog = 2.0, sdlog = 0.5)
+  hosp_params = list(meanlog = 2.0, sdlog = 0.5)
 )
 
 # Use different distributions
 delayed_infections_gamma <- add_delays(
   infection_times,
   hosp_fun = rgamma,
-  hosp_params = list(n = nrow(infection_times), shape = 2, rate = 0.5)
+  hosp_params = list(shape = 2, rate = 0.5)
 )
 }
