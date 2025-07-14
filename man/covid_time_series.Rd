@@ -16,6 +16,9 @@ A [tibble::tibble()] with a 6 columns and 52,778 rows.
   \item{as_of}{date corresponding to the date (typically a Wednesday) the
   data were archived}
   \item{target}{the name of the prediction target: "wk inc covid hosp"}
+  \item{abbreviation}{two letter abbreviation for the location}
+  \item{location_name}{full name of the location}
+  \item{population}{population size of the location}
 }
 }
 \usage{
