@@ -79,3 +79,11 @@ The skills and methods taught in this course apply broadly across infectious dis
 - understanding of linear opinion pools and Vincent averaging for ensemble methods
 - familiarity with hubverse data standards for collaborative forecasting
 
+## Collaborative modeling
+
+- understanding of modeling hubs and hubverse-style tools
+- developing and evaluating forecasting models using real epidemiological data
+- implementing time-series cross-validation for model assessment
+- generating and formatting forecasts for submission to a hub
+- submitting forecasts to a local and/or online hub, generating and interpreting evaluation metrics
+
