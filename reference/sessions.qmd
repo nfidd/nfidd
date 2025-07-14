@@ -26,21 +26,14 @@ Wednesday: 13.30-14.15
 
 ## Session 2: Biases in delay distributions
 
-Wednesday: 14.15-15.00
+Wednesday: 14.15-15.00 and 15.30-16.15
 
--   [Introduction](../sessions/slides/introduction-to-biases-in-epidemiological-delays): biases in delay distributions (10 mins)
--   [Practice](../sessions/biases-in-delay-distributions): simulating biases in delay distributions and estimating delays without adjustment on these data (30 mins)
+-   [Introduction](../sessions/slides/introduction-to-biases-in-epidemiological-delays): biases in delay distributions (15 mins)
+-   [Practice](../sessions/biases-in-delay-distributions): interval censoring - estimating delays from discrete dates (30 mins)
+-   [Practice](../sessions/biases-in-delay-distributions): right truncation - estimating delays in real-time with incomplete data (30 mins)
 -   Wrap up (5 mins)
 
-## Session 3: Adjusting for biases in delay distributions
-
-Wednesday: 15.30-16.15
-
--   [Introduction](../sessions/slides/adjusting-for-biases-in-delay-distributions): fitting models that adjust for biases (10 mins)
--   [Practice](../sessions/biases-in-delay-distributions): estimating delay distributions with adjustments for bias (30 mins)
--   Wrap up (5 mins)
-
-## Session 4: Using delay distributions to model the data generating process of an epidemic
+## Session 3: Using delay distributions to model the data generating process of an epidemic
 
 Wednesday: 16.15-17.00
 
@@ -56,7 +49,7 @@ Thursday: 09.00-09.15
 
 -   Day 1 review (15 mins)
 
-## Session 5: $R_t$ estimation and the renewal equation
+## Session 4: $R_t$ estimation and the renewal equation
 
 Thursday: 09.15-10.00
 
@@ -64,14 +57,14 @@ Thursday: 09.15-10.00
 -   [Practice](../sessions/R-estimation-and-the-renewal-equation): using the renewal equation to estimate R (30 mins)
 -   Wrap up (5 mins)
 
-## Session 6: Nowcasting concepts
+## Session 5: Nowcasting concepts
 
 Thursday: 10.00-10.30
 
 -   [Introduction](../sessions/slides/introduction-to-nowcasting): nowcasting as a right-truncation problem (10 mins)
 -   [Practice](../sessions/nowcasting): simulating and basic nowcasting (20 mins)
 
-## Session 7: Nowcasting with an unknown reporting delay
+## Session 6: Nowcasting with an unknown reporting delay
 
 Thursday: 11.00-12.00
 
@@ -85,14 +78,14 @@ Thursday: 12.00-13.00
 
 -   Lunch
 
-## Session 8: Forecasting concepts
+## Session 7: Forecasting concepts
 
 Thursday: 13.00-13.30
 
 -   [Introduction](../sessions/slides/introduction-to-forecasting): forecasting as an epidemiological problem (10 mins)
 -   [Practice](../sessions/forecasting-concepts): basic forecasting with ARIMA models (20 mins)
 
-## Session 9: Improving forecasting models
+## Session 8: Improving forecasting models
 
 Thursday: 13.30-14.15
 
@@ -100,7 +93,7 @@ Thursday: 13.30-14.15
 -   [Practice](../sessions/improving-forecasting-models): ACF plots, transformations, and seasonality (30 mins)
 -   Wrap up (5 mins)
 
-## Session 10: Forecast evaluation
+## Session 9: Forecast evaluation
 
 Thursday: 14.15-15.00
 
@@ -108,7 +101,7 @@ Thursday: 14.15-15.00
 -   [Practice](../sessions/forecast-evaluation): evaluating forecasts with various metrics (30 mins)
 -   Wrap up (5 mins)
 
-## Session 11: Forecasting with ensembles
+## Session 10: Forecasting with ensembles
 
 Thursday: 15.30-17.00
 
@@ -124,7 +117,7 @@ Friday: 09.00-09.15
 
 -   Day 2 review (15 mins)
 
-## Session 12: Forecast hubs
+## Session 11: Forecast hubs
 
 Friday: 09.15-10.30
 
@@ -134,7 +127,7 @@ Friday: 09.15-10.30
     - ensembles with existing hub (30 mins)
 -   Wrap up (5 mins)
 
-## Session 13: Local hub playground
+## Session 12: Local hub playground
 
 Friday: 11.00-12.00
 
@@ -146,7 +139,7 @@ Friday: 12.00-13.00
 
 -   Lunch
 
-## Session 14: Combining nowcasting and forecasting
+## Session 13: Combining nowcasting and forecasting
 
 Friday: 13.00-14.00
 
@@ -154,7 +147,7 @@ Friday: 13.00-14.00
 -   [Practice](../sessions/forecasting-nowcasting): connecting nowcasting and forecasting (45 mins)
 -   Wrap up (5 mins)
 
-## Session 15: Advanced topics
+## Session 14: Advanced topics
 
 Friday: 14.00-15.00
 
@@ -162,7 +155,7 @@ Friday: 14.00-15.00
 -   [Practice](../sessions/advanced-forecasting): hierarchical ARIMA or forecast reconciliation (45 mins)
 -   Wrap up (5 mins)
 
-## Session 16: Research talks and wrap-up
+## Session 15: Research talks and wrap-up
 
 Friday: 15.30-17.00
 
