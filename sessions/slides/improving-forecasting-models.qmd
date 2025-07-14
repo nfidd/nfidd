@@ -29,7 +29,23 @@ What outputs and features do we require of these models?
 Often, what motivates one's modeling choices is the *data* and *patterns* observed in the data.
 
 
-![](figures/wili_timeseries.png){fig-align="center"}
+```{r, echo=FALSE}
+#![](figures/wili_timeseries.png){fig-align="center"}
+library("nfidd")
+library("fable")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("epidatr")
+data(flu_data)
+flu_data <- flu_data |>
+  filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
+ggplot(flu_data) +
+  geom_path(aes(x=epiweek, y=wili)) + 
+  ggtitle("wILI to 2017/2018 Season")
+```
+
+
 
 ### Time-series Regression Models
 
@@ -39,7 +55,7 @@ One widely applicable model type are the ARIMA models. ARIMA or autoregressive i
 
 - AR (Autoregressive): Uses past values to predict current ones.
 - I (Integrated): Applies differencing to make the series stationary.
-- MA (Moving Average): Uses past forecast errors to refine predictions.
+- MA (Moving Average): Uses recent forecast errors to refine predictions.
 
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
