@@ -41,7 +41,7 @@ Suggests:
     hubEvals,
     hubVis
 Remotes:
-    mc-stan/cmdstanr,
+    stan-dev/cmdstanr,
     hubverse-org/hubEvals,
     hubverse-org/hubVis
 Encoding: UTF-8
