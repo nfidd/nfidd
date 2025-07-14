@@ -1,7 +1,7 @@
 Package: nfidd
 Title: Material to support course on nowcasting and forecasting of infectious
     disease dynamics
-Version: 1.1.2.9000
+Version: 1.2.0.9000
 Authors@R: c(
     person(
       given = "NFIDD SISMID course contributors",
@@ -42,11 +42,8 @@ Suggests:
     hubEvals,
     hubData,
     hubVis
-Additional_repositories:
-    https://hubverse-org.r-universe.dev,
-    https://stan-dev.r-universe.dev,
-    https://epiforecasts.r-universe.dev
 Remotes:
+    stan-dev/cmdstanr,
     hubverse-org/hubEvals,
     hubverse-org/hubData,
     hubverse-org/hubVis

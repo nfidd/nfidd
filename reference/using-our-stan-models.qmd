@@ -1,0 +1,295 @@
+---
+title: "Using our Stan models"
+subtitle: "Using NFIDD's Stan tools for package models and custom code"
+order: 11
+---
+
+```{r, include = FALSE}
+library(nfidd)
+```
+
+This guide covers how to use NFIDD's Stan tools for working with both package models and custom Stan code.
+
+## Using Stan Models
+
+### Basic Package Models
+
+Use models included in the NFIDD package:
+
+```{r}
+nfidd_stan_models()
+```
+
+Create a model using a package model:
+
+```{r, eval = FALSE}
+model <- nfidd_cmdstan_model("simple-nowcast")
+```
+
+Sample with course defaults (faster):
+
+```{r, eval = FALSE}
+fit <- nfidd_sample(model, data = your_data)
+```
+
+### Custom Stan Files
+
+Use a custom Stan file:
+
+```{r, eval = FALSE}
+model <- nfidd_cmdstan_model(model_file = "path/to/your/model.stan")
+```
+
+You still get access to NFIDD Stan functions:
+
+```{r, eval = FALSE}
+fit <- nfidd_sample(model, data = your_data)
+```
+
+### Custom Include Paths
+
+Set globally using R options:
+
+```{r, eval = FALSE}
+options(nfidd.stan_path = "/path/to/your/stan")
+model <- nfidd_cmdstan_model("simple-nowcast")
+```
+
+Or override per-model:
+
+```{r, eval = FALSE}
+model <- nfidd_cmdstan_model(
+  model_file = "custom.stan",
+  include_paths = c("/custom/path1", "/custom/path2")
+)
+```
+
+## Working with Stan Functions
+
+### Discover Available Functions
+
+Get all function names from NFIDD:
+
+```{r}
+functions <- nfidd_stan_functions()
+functions
+```
+
+Find which files contain specific functions:
+
+```{r}
+files <- nfidd_stan_function_files(functions = c("renewal", "delay_pmf"))
+files
+```
+
+### Extract Functions for Local Use
+
+Load specific functions as a string:
+
+```{r}
+renewal_code <- nfidd_load_stan_functions(
+  functions = c("renewal", "delay_pmf")
+)
+```
+
+Show first few lines:
+
+```{r}
+cat(substr(renewal_code, 1, 200), "...")
+```
+
+Write functions to a temporary file for demonstration:
+
+```{r}
+temp_file <- file.path(tempdir(), "my_functions.stan")
+nfidd_load_stan_functions(
+  functions = c("renewal", "delay_pmf"),
+  write_to_file = TRUE,
+  output_file = temp_file,
+  wrap_in_block = TRUE
+)
+```
+
+Verify file was created:
+
+```{r}
+cat("File created at:", temp_file)
+cat("\nFile exists:", file.exists(temp_file))
+```
+
+### Load All Functions
+
+Get all NFIDD functions:
+
+```{r, eval = FALSE}
+all_functions <- nfidd_load_stan_functions()
+```
+
+Write all functions to file:
+
+```{r, eval = FALSE}
+nfidd_load_stan_functions(
+  write_to_file = TRUE,
+  output_file = "nfidd_functions.stan",
+  wrap_in_block = TRUE
+)
+```
+
+## Writing Package Models Locally
+
+Sometimes you want to copy a package model to modify it locally rather than modifying the package source.
+
+Load a package model:
+
+```{r, eval = FALSE}
+model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
+```
+
+Get the Stan code from the model:
+
+```{r, eval = FALSE}
+stan_code <- model$code()
+```
+
+Write it to a local file:
+
+```{r, eval = FALSE}
+writeLines(stan_code, "local-simple-nowcast.stan")
+```
+
+Create functions directory:
+
+```{r, eval = FALSE}
+dir.create("functions", showWarnings = FALSE)
+```
+
+Copy all function files individually:
+
+```{r, eval = FALSE}
+stan_functions_path <- file.path(nfidd_stan_path(), "functions")
+function_files <- list.files(stan_functions_path, pattern = "\\.stan$", full.names = TRUE)
+
+for (file in function_files) {
+  file.copy(file, "functions/", overwrite = TRUE)
+}
+```
+
+Set options to use local functions:
+
+```{r, eval = FALSE}
+options(nfidd.stan_path = ".")
+```
+
+Now you can modify the local model and it will use local functions:
+
+```{r, eval = FALSE}
+modified_model <- nfidd_cmdstan_model(model_file = "local-simple-nowcast.stan")
+```
+
+## Practical Workflows
+
+### Building Custom Models with NFIDD Functions
+
+**Extract the functions you need:**
+
+```{r, eval = FALSE}
+nfidd_load_stan_functions(
+  functions = c("renewal", "delay_pmf", "convolve_with_delay"),
+  write_to_file = TRUE,
+  output_file = "my_functions.stan"
+)
+```
+
+**Create your custom model file:**
+
+```{stan, eval = FALSE, output.var = "custom_model"}
+#include my_functions.stan
+
+data {
+  // Your data block
+}
+
+parameters {
+  // Your parameters
+}
+
+model {
+  // Use NFIDD functions like renewal(), delay_pmf(), etc.
+}
+```
+
+**Compile and use:**
+
+```{r, eval = FALSE}
+model <- nfidd_cmdstan_model(
+  model_file = "my_custom_model.stan",
+  include_paths = "."
+)
+```
+
+### Development Workflow
+
+**Explore existing models:**
+
+See what models are available:
+
+```{r}
+nfidd_stan_models()
+```
+
+Look at model locations:
+
+```{r}
+nfidd_stan_path()
+```
+
+**Understand function dependencies:**
+
+See all available functions:
+
+```{r, eval = FALSE}
+nfidd_stan_functions()
+```
+
+Find which files contain functions you need:
+
+```{r, eval = FALSE}
+nfidd_stan_function_files(functions = c("function_name"))
+```
+
+**Build incrementally:**
+
+Start with package model:
+
+```{r, eval = FALSE}
+base_model <- nfidd_cmdstan_model("simple-nowcast")
+```
+
+Extend with custom functions:
+
+```{r, eval = FALSE}
+custom_model <- nfidd_cmdstan_model(
+  model_file = "extended_model.stan"
+)
+```
+
+## File Organisation
+
+For projects using custom Stan code:
+
+```
+your_project/
+├── models/
+│   ├── my_model.stan
+│   └── functions/
+│       └── my_functions.stan
+```
+
+In your R code:
+
+```{r, eval = FALSE}
+options(nfidd.stan_path = c("models/functions", nfidd_stan_path()))
+model <- nfidd_cmdstan_model(model_file = "models/my_model.stan")
+```
+
+This setup gives you access to both your custom functions and all NFIDD functions.

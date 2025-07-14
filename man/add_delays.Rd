@@ -4,19 +4,50 @@
 \alias{add_delays}
 \title{Simulate symptom onset and hospitalization times from infection times}
 \usage{
-add_delays(infection_times)
+add_delays(
+  infection_times,
+  onset_fun = rgamma,
+  onset_params = list(shape = 5, rate = 1),
+  hosp_fun = rlnorm,
+  hosp_params = list(meanlog = 1.75, sdlog = 0.5),
+  hosp_prob = 0.3
+)
 }
 \arguments{
 \item{infection_times}{A data frame containing a column of infection times}
+
+\item{onset_fun}{Function for onset delay distribution (default rgamma)}
+
+\item{onset_params}{List of parameters for onset distribution}
+
+\item{hosp_fun}{Function for hospitalization delay distribution (default rlnorm)}
+
+\item{hosp_params}{List of parameters for hospitalization distribution}
+
+\item{hosp_prob}{Probability of hospitalization (default 0.3)}
 }
 \value{
 A data frame with columns for infection time, onset time, and
-  hospitalization time (with 70% of hospitalizations set to NA)
+  hospitalization time (with (1-hosp_prob) of hospitalizations set to NA)
 }
 \description{
 Simulate symptom onset and hospitalization times from infection times
 }
 \examples{
+# Default parameters
 delayed_infections <- add_delays(infection_times)
 head(delayed_infections)
+
+# Change delay parameters
+delayed_infections_long <- add_delays(
+  infection_times, 
+  hosp_params = list(meanlog = 2.0, sdlog = 0.5)
+)
+
+# Use different distributions
+delayed_infections_gamma <- add_delays(
+  infection_times,
+  hosp_fun = rgamma,
+  hosp_params = list(shape = 2, rate = 0.5)
+)
 }

@@ -5,59 +5,85 @@ comments: false
 ---
 
 The skills and methods taught in this course apply broadly across infectious disease epidemiology, from outbreak response to routine surveillance of endemic diseases. 
-While examples often use outbreak scenarios for clarity, participants should consider how these approaches apply to their epidemiological contexts.
-
-## R and statistical concepts used
-
-- understanding of common probability distributions used for epidemiological delays
-- familiarity with using stan to estimate parameters of a probability distribution
 
 ## Delay distributions
 
-- ability to estimate parameters of epidemiological delay distributions
+- understanding of common probability distributions used for epidemiological delays
+- familiarity with using Stan to estimate parameters of a probability distribution
 - understanding of the ubiquity of delays in epidemiological data
+- familiarity with interpreting posterior distributions and quantifying parameter uncertainty
 
 ## Biases in delay distributions
 
-- understanding of how censoring affects the estimation and interpretation of epidemiological delay distributions
-- ability to estimate parameters of probability distributions from observed delays, taking into account censoring, using R
-- understanding of right truncation in epidemiolgical data
-- ability to estimate parameters of probability distributions from observed delays, taking into account truncation, in R
+- understanding of how interval censoring affects the estimation and interpretation of epidemiological delay distributions
+- understanding of right truncation in epidemiological data and its impact on real-time analysis
+- familiarity with statistical methods for adjusting delay estimates for censoring and truncation
+- understanding of how biases compound during exponential growth phases of epidemics
 
 ## Using delay distributions to model the data generating process
+
 - understanding of using delay distributions to model population-level data generating processes
-- ability to use convolutions to combine count data with a distribution of individual probabilities, adjusting continuous probability distributions with discretisation
+- familiarity with convolutions to combine count data with individual probability distributions
+- understanding of double interval censoring and discretisation for population-level data
 - understanding of the need to introduce additional uncertainty to account for the observation process at a population level
 
 ## $R_t$ estimation and the renewal equation
 
 - understanding of the reproduction number and challenges in its estimation
-- awareness of broad categories of methods for estimating the reproduction number, including estimation from population-level data
-- understanding of the renewal equation as an epidemiological model
-- familiarity with the generation time as a particular type of delay distributions
-- ability to estimate static and time-varying reproduction numbers from time-series data in R
+- understanding of the renewal equation as an epidemiological model for infection generation
+- familiarity with the generation time as a particular type of delay distribution
+- understanding of the role of the generative model in the estimation of $R_t$
+- familiarity with geometric random walk models for smoothing $R_t$ estimates
 
 ## Nowcasting
 
 - understanding of nowcasting as a particular right truncation problem
-- Ability to perform a simple nowcast in R
-- awareness of the breadth of methods to perform nowcasting
-- $R_t$ estimation as a nowcasting problem
+- understanding of the difference between report date and event dates
+- familiarity with simple nowcasting using known delay distributions
+- familiarity with improving the model of the data generating process with geometric random walk models to improve nowcast performance in some circumstances
+
+## Joint nowcasting with unknown delays
+
+- understanding of the reporting triangle structure for epidemiological surveillance data
+- understanding of the benefits of joint estimation of delay distributions and nowcasts
+- understanding of population-level modelling with observation error
+- understanding of the link between Rt estimation and nowcasting
 
 ## Forecasting
 
-- understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation
-- ability to use a forecasting model on an epidemiological time series in R
+- understanding of forecasting as an epidemiological problem
+- familiarity with ARIMA models for forecasting epidemiological time series
+- understanding of autocorrelation and partial autocorrelation functions for time series analysis
+- understanding of stationarity and data transformations for forecasting
+
+## Combining nowcasting and forecasting
+
+- understanding of the challenges of forecasting with incomplete data due to reporting delays
+- understanding of the link between nowcasting and forecasting
+- understanding of pipeline approaches for combining nowcasting and forecasting
+- understanding of joint approaches for simultaneous nowcasting and forecasting
+- understanding of the trade-offs between timeliness and completeness in real-time analysis
 
 ## Evaluating forecasts (and nowcasts)
 
-- ability to visually assess forecasts and nowcasts
-- familiarity with metrics for evaluating probabilistic forecasts and their properties
-- ability to score probabilistic forecasts in R
-- ability to compare different models by their forecast scores
+- understanding of the four principles of good probabilistic forecasts: calibration, unbiasedness, accuracy, and sharpness
+- familiarity with scoring metrics: Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and Continuous Ranked Probability Score (CRPS)
+- understanding of time-series cross-validation for forecast evaluation
+- familiarity with visual assessment of forecasts and nowcasts
+- understanding the challenges with, and possible solutions for, evaluating datasets with incomplete or missing forecast data
 
 ## Ensemble models
 
 - understanding of predictive ensembles and their properties
-- ability to create a predictive ensemble of forecasts in R
+- familiarity with different forecast representation formats (samples, quantiles, bins)
+- understanding of linear opinion pools and Vincent averaging for ensemble methods
+- familiarity with hubverse data standards for collaborative forecasting
+
+## Collaborative modeling
+
+- understanding of modeling hubs and hubverse-style tools
+- developing and evaluating forecasting models using real epidemiological data
+- implementing time-series cross-validation for model assessment
+- generating and formatting forecasts for submission to a hub
+- submitting forecasts to a local and/or online hub, generating and interpreting evaluation metrics
 
