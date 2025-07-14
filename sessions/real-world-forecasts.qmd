@@ -736,16 +736,19 @@ And we will put in place a few small fixes to the weights:
 - assign equal weights for the first two weeks. 
 (There are missing forecasts here, and we haven't learned much about the model performance yet anyways.)
 - change `target_end_date` to `reference_date` because now we want the weights computed up to that `target_end_date` to be applied on that `reference_date`.
+- set to 0 a missing weight for the `NEU_ISI-AdaptiveEnsemble`.
 
 ```{r fix-weights}
 ## assign equal weights for the first week
-first_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-16")
+first_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-23")
 weights_per_model[first_week_idx, "weight"] <- 1/sum(first_week_idx)
 
-second_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-23")
+second_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-30")
 weights_per_model[second_week_idx, "weight"] <- 1/sum(second_week_idx)
 
 weights_per_model <- rename(weights_per_model, reference_date = target_end_date)
+
+weights_per_model$weight[is.na(weights_per_model$weight)] <- 0
 ```
 
 As always, it is good to plot your data as a sanity check. Here are the model weights plotted over time.
@@ -775,7 +778,7 @@ In general, the weights did not change much after the first few weeks (except in
 
 Now that we have the weights and we've checked them, let's start building some ensembles! 
 First, we will build the median ensembles, both weighted and unweighted..
-```{r build ensemble}
+```{r build-ensemble}
 ## build the weighted ensemble
 median_inv_wis_weighted_select <- covid_forecasts |> 
   filter(model_id %in% model_subset,
@@ -816,7 +819,7 @@ lop_inv_wis_weighted_select <- purrr::map_dfr(
 
 We will compare the performance of all ensembles just at the state level, since the scores by reference date were only computed at the state level.
 
-```{r}
+```{r compare-ensemble-scores}
 covid_forecasts_w_ensembles <- bind_rows(
   covid_forecasts,
   lop_unweighted_all,
