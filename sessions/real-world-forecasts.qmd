@@ -108,12 +108,16 @@ To make these results more reproducible and to provide a snapshot of the data, w
 hub_path_cloud <- hubData::s3_bucket("s3://covid19-forecast-hub")
 hub_con_cloud <- hubData::connect_hub(hub_path_cloud, skip_checks = TRUE)
 
+data(covid_locations)
+
 covid_forecasts <- hub_con_cloud |> 
   filter(
     output_type == "quantile",
-    target == "wk inc covid hosp"
+    target == "wk inc covid hosp",
+    horizon >= 0
     ) |> 
-  collect()
+  collect() |> 
+  left_join(covid_locations)
 ```
 
 This line of code will load all the forecasts saved in the package into your R session.
@@ -128,7 +132,8 @@ Here is code to query the time-series data from the cloud-based hub.
 ```{r load-ts-target-data, eval = FALSE}
 covid_time_series <- connect_target_timeseries(hub_path_cloud) |> 
   filter(target == "wk inc covid hosp") |> 
-  collect()
+  collect() |> 
+  left_join(covid_locations)
 ```
 
 However, to ensure reproducibility (since this is a live dataset), we have downloaded this object for you already as of July 9, 2025, and it is available to load in from the course R package directly.
@@ -153,24 +158,9 @@ From the above, we can see that
 
 -   the forecasts were made every week from `r min(unique_per_column$reference_date)` until `r max(unique_per_column$reference_date)`,
 -   there is just one target, the weekly counts of hospital admissions due to COVID-19, and we only have quantile values for it,
--   we have forecasts for horizons -1 to 3 weeks, 
+-   we have forecasts for horizons 0 to 3 weeks, 
 -   there are 23 quantile levels present in the data,
--   there are 17 models,
--   the location codes are numbers.
-
-Before we go any further, let's fix the location codes to be state abbreviations in both the forecast and time-series data.
-The `covid_locations` data object stored in this package was downloaded and stored from the metadata of the COVID-19 Forecast Hub.
-The following code merges state abbreviations into both the forecasts and time-series datasets.
-
-```{r state-abbrs}
-data(covid_locations)
-covid_forecasts <- covid_forecasts |> 
-  left_join(covid_locations)
-covid_time_series <- covid_time_series |> 
-  left_join(covid_locations)
-```
-
-
+-   there are 17 models.
 
 Let's just do a quick visualization of forecasts from one week to make sure we understand the structure of what one date and location's worth of forecasts look like.
 
@@ -442,8 +432,8 @@ This is due to the "adjustment" of the relative skill based on which forecasts w
 To make a more fair comparison, let's subset to only include models that have submitted at least 60% of the maximum possible number of predictions for the season. 
 
 ```{r relative-skill-on-subset}
-## 33 dates, 5 horizons, 53 locations, 60%
-threshold_60pct <- 33 * 5 * 53 * 0.6
+## 33 dates, 4 horizons, 53 locations, 60%
+threshold_60pct <- 33 * 4 * 53 * 0.6
 model_subset <- covid_forecasts |> 
   filter(output_type_id == 0.5) |> 
   group_by(model_id) |> 
@@ -746,16 +736,19 @@ And we will put in place a few small fixes to the weights:
 - assign equal weights for the first two weeks. 
 (There are missing forecasts here, and we haven't learned much about the model performance yet anyways.)
 - change `target_end_date` to `reference_date` because now we want the weights computed up to that `target_end_date` to be applied on that `reference_date`.
+- set to 0 a missing weight for the `NEU_ISI-AdaptiveEnsemble`.
 
 ```{r fix-weights}
 ## assign equal weights for the first week
-first_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-16")
+first_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-23")
 weights_per_model[first_week_idx, "weight"] <- 1/sum(first_week_idx)
 
-second_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-23")
+second_week_idx <- weights_per_model$target_end_date == as.Date("2024-11-30")
 weights_per_model[second_week_idx, "weight"] <- 1/sum(second_week_idx)
 
 weights_per_model <- rename(weights_per_model, reference_date = target_end_date)
+
+weights_per_model$weight[is.na(weights_per_model$weight)] <- 0
 ```
 
 As always, it is good to plot your data as a sanity check. Here are the model weights plotted over time.
@@ -785,7 +778,7 @@ In general, the weights did not change much after the first few weeks (except in
 
 Now that we have the weights and we've checked them, let's start building some ensembles! 
 First, we will build the median ensembles, both weighted and unweighted..
-```{r build ensemble}
+```{r build-ensemble}
 ## build the weighted ensemble
 median_inv_wis_weighted_select <- covid_forecasts |> 
   filter(model_id %in% model_subset,
@@ -826,7 +819,7 @@ lop_inv_wis_weighted_select <- purrr::map_dfr(
 
 We will compare the performance of all ensembles just at the state level, since the scores by reference date were only computed at the state level.
 
-```{r}
+```{r compare-ensemble-scores}
 covid_forecasts_w_ensembles <- bind_rows(
   covid_forecasts,
   lop_unweighted_all,

@@ -206,7 +206,7 @@ Look carefully at the forecast and pick out a few things that don't look right t
 ::: {.callout-note collapse="true"}
 ## Solution
 
-There is not exactly a "right" answer here, but a few things that you jump out to us are:
+There is not exactly a "right" answer here, but a few things that jump out to us are:
 
 -   The fact that some of the prediction intervals have negative values. The percent of outpatient visits due to ILI cannot be negative! That doesn't pass the sniff test.
 -   The mean predictions go up and then level off. There is no notion of a "seasonal peak" in the forecast.
