@@ -59,6 +59,24 @@ flu_data |> feasts::gg_season(wili,
   ggtitle("Seasonality in ILI")
 ```
 
+### Autocorrelation
+
+Autocorrelation and Partial Autocorrelation (ACF/PACF) plots measure the linear 
+relationship between *lagged values* of a time series. 
+
+```{r}
+feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+```
+
+### Describing our Autocorrelations
+
+- There are periodic correlations: 
+  - strong positive correlations close time points and those ~52 weeks/ 1 year apart.
+  - negative correlations peaking around ~6 months.
+- The PACF estimates the correlation between values after adjusting for the effects of the previous lags.
+  - There's a significant PACF at 1 week ahead and ~52 weeks/1 year.
+- These plots suggest seasonality should be incorporated into our forecast models.
+
 ### Transformations and Adjustments
 
 We often desire variance-stablizing transformations to make the variance more 
@@ -98,9 +116,6 @@ p4 <- flu_data |>
 
 p1 + p2 + p3 + p4
 ```
-
-
-
 
 ### Time-series Regression Models
 
