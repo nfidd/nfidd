@@ -143,11 +143,13 @@ forecast_fourier_ar2 |>
 For the first time in the forecasting part of this course, we have confronted a model with the eventually observed data.
 And... well, what do you think?
 
+::: callout-tip
 ## Take 5 minutes
 
 Look at the plot of data and forecasts carefully.
 Write down at least two observations about the forecasts and how well they seem to match the observed data.
 Share notes with your neighbor.
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -202,11 +204,13 @@ For example, typing the standard `?accuracy` does not get you to a useful page.
 Instead, you need to type `?accuracy.fbl_ts`, since the `forecast_fourier_ar2` is a an object with class `"fbl_ts"`.
 :::
 
+::: callout-tip
 ## Take 5 minutes
 
 Do the "Training" results show more or less accuracy than the "Test" results?
 Why?
 (Hint: You could use the "tip" above to figure out exactly what the "Training" results are measuring.)
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -323,11 +327,13 @@ metrics_fourier_ar2 |>
   
 ```
 
+::: callout-tip
 ## Take 5 minutes
 
 How do the scores change with forecast horizon?
 How similar to or different from each other are the metrics?
 Which of the additional dimensions mentioned at the top of the lesson would you like to examine more closely for forecast accuracy?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -507,10 +513,12 @@ cv_forecasts |>
        y="% of visits")
 ```
 
+::: callout-tip
 ## Take 5 minutes
 
 Based on the above plots (and you could make a few more at different splits if you wanted to), which forecast model(s) do you expect to have the best forecast accuracy metrics?
 Why?
+:::
 
 ## Evaluating the experimental forecasts
 
@@ -564,11 +572,13 @@ p2 <- flu_data |>
 gridExtra::grid.arrange(p1, p2)
 ```
 
+::: callout-tip
 ## Take 5 minutes
 
 How do the CRPS scores change based on horizon?
 How do the CRPS scores change based on forecast date?
 What do these results this tell you about the models?
+:::
 
 ::: {.callout-note collapse="true"}
 ## Solution
