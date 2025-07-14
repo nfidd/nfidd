@@ -37,7 +37,7 @@ library("dplyr")
 library("tidyr")
 library("ggplot2")
 library("epidatr")
-library(patchwork)
+library("gridExtra")
 data(flu_data)
 flu_data <- flu_data |>
   filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
@@ -114,7 +114,8 @@ p4 <- flu_data |>
   geom_point() + 
   ggtitle("Square Root Scale")
 
-p1 + p2 + p3 + p4
+# Arrange plots in a 2x2 grid
+grid.arrange(p1, p2, p3, p4, nrow = 2, ncol = 2)
 ```
 
 ### Time-series Regression Models
