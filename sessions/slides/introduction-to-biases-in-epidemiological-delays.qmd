@@ -69,7 +69,7 @@ Double interval censoring can be decomposed into:
 . . .
 
 ::: {.callout-warning}
-A common mistake is to only account for secondary event censoring while ignoring primary event censoring. This is often incorrect for epidemiological data.
+A common mistake is to only account for secondary event censoring while ignoring primary event censoring.
 :::
 
 ## Issue #2: right truncation
