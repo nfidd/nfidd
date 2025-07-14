@@ -26,8 +26,6 @@ add_delays(
 \item{hosp_params}{List of parameters for hospitalization distribution}
 
 \item{hosp_prob}{Probability of hospitalization (default 0.3)}
-
-\item{hosp_prob_onset}{Probability of hospitalization at onset (default 0.3)}
 }
 \value{
 A data frame with columns for infection time, onset time, and

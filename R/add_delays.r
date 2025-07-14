@@ -7,7 +7,6 @@
 #'   (default rlnorm)
 #' @param hosp_params List of parameters for hospitalization distribution
 #' @param hosp_prob Probability of hospitalization (default 0.3)
-#' @param hosp_prob_onset Probability of hospitalization at onset (default 0.3)
 #'
 #' @return A data frame with columns for infection time, onset time, and
 #'   hospitalization time (with (1-hosp_prob) of hospitalizations set to NA)
