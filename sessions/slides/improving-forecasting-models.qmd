@@ -37,6 +37,7 @@ library("dplyr")
 library("tidyr")
 library("ggplot2")
 library("epidatr")
+library(patchwork)
 data(flu_data)
 flu_data <- flu_data |>
   filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
@@ -49,7 +50,7 @@ ggplot(flu_data) +
 
 A seasonal pattern may suggest autocorrelation in the time series data.
 
-```{r}
+```{r, echo = FALSE}
 flu_data |> feasts::gg_season(wili, 
                               period = "year",
                               labels = "right",
@@ -57,6 +58,49 @@ flu_data |> feasts::gg_season(wili,
                               labels_repel = T) +
   ggtitle("Seasonality in ILI")
 ```
+
+### Transformations and Adjustments
+
+We often desire variance-stablizing transformations to make the variance more 
+constant across different mean values. 
+
+```{r, echo=FALSE}
+p1 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  ggplot(aes(x=epiweek, y=wili)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Original Scale")
+
+p2 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  ggplot(aes(x=epiweek, y=wili)) +
+  geom_path() + 
+  geom_point() +
+  scale_y_log10() + 
+  ggtitle("Log 10 Scale")
+  
+p3 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  mutate(fourth_root = wili**(1/4)) |>
+  ggplot(aes(x=epiweek, y=fourth_root)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Fourth Root Scale")
+
+p4 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  mutate(square_root = wili**(1/2)) |>
+  ggplot(aes(x=epiweek, y=square_root)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Square Root Scale")
+
+p1 + p2 + p3 + p4
+```
+
+
+
 
 ### Time-series Regression Models
 
