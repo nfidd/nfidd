@@ -123,7 +123,7 @@ The notebooks are then directly reproduced on the course website (for example, t
 ::: callout-tip
 ## Using RStudio's Visual Editor (Recommended for Notebooks)
 
-1.  **Open a session notebook**: Each session is saved as a `.qmd` file in `nfidd/sessions/`.
+1.  **Open a session notebook**: Each session is saved as a `.qmd` file in `/sessions/`.
 2.  **Switch to Visual mode**: Look for the "Visual" button in the top-left of the editor pane (next to "Source").
 3.  **Execute code**: Use the green "play" button at the top-right corner of each code chunk, or `Ctrl/Cmd + Enter` for line-by-line execution.
 4.  **Visual mode benefits**: Easier to read formatted text and equations, better experience with code chunks and outputs
