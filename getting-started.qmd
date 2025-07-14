@@ -54,7 +54,7 @@ To install the packages needed in the course, including the `nfidd` package that
 if (!require("pak")) {
     install.packages("pak")
 }
-pak::pak("nfidd/sismid")
+pak::pak("nfidd/sismid", dependencies = TRUE)
 ```
 
 Then you can check that the installation completed successfully by loading the package into your **R** session:
@@ -151,7 +151,7 @@ If you're returning to the course after some time or joining a live session, you
 1.  **Update the nfidd package** (this is quick and ensures you have the latest functions):
 
     ```{r update_package, eval=FALSE}
-    pak::pak("nfidd/sismid")
+    pak::pak("nfidd/sismid", dependencies = TRUE)
     ```
 2.  **Download fresh course materials** if using local files:
 
