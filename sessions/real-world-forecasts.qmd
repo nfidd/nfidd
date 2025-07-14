@@ -253,6 +253,18 @@ Here are some real examples of why models have not been submitted in a given wee
 
 ## What are the models?
 
+::: callout-tip
+### What is a baseline model?
+
+Baseline models generate forecasts that are created to serve as benchmarks.
+They are designed to be naive, not overly "optimized" approaches that make forecasts.
+In evaluation, baseline models may occasionally do well by chance (for example, a flat line model may do well when dynamics are, well, flat). 
+But in general, their forecasts should be "beatable" by models that are able to learn and make predictions based on dynamics in the data.
+The Random Walk (`rw`) model from [the Forecast Evaluation session](forecast-evaluation.html#comparing-three-models-at-multiple-time-points) is a good example of a baseline model.
+Other models that might serve as slightly more sophisticated forecast baselines could be a simple ARIMA model, or a model that smooths the recent data and predicts the a continuation of a recent trend in the data.
+:::
+
+
 You can read about each of the models in [the model-metadata folder of the forecast hub](https://github.com/CDCgov/covid19-forecast-hub/tree/main/model-metadata).
 Model metadata can also be programmatically accessed using `hubData::load_model_metadata()`.
 There are a wide variety of models submitted to this hub.
@@ -269,16 +281,6 @@ Here are two models that have been explicitly designed as "baselines" or benchma
 - **CovidHub-baseline**: Flat baseline model. The most observed value from the target dataset is the median forward projection. Prospective uncertainty is based on the preceding timeseries." (This is kind of like the `rw` model from previous sessions.)
 - **CMU-climate_baseline**: "Using data from 2022 onwards, the climatological model uses samples from the 7 weeks centered around the target week and reference week to form the quantiles for the target week, as one might use climate information to form a meteorological forecast. To get more variation at some potential issue of generalization, one can form quantiles after aggregating across geographic values as well as years (after converting to a rate based case count). This model uses a simple average of the geo-specific quantiles and the geo-aggregated quantiles." (This is kind of like our `fourier` model from previous sessions.)
 
-::: callout-tip
-### What is a baseline model?
-
-Baseline models generate forecasts that are created to serve as benchmarks.
-They are designed to be naive, not overly "optimized" approaches that make forecasts.
-In evaluation, baseline models may occasionally do well by chance (for example, a flat line model may do well when dynamics are, well, flat). 
-But in general, their forecasts should be "beatable" by models that are able to learn and make predictions based on dynamics in the data.
-The Random Walk (`rw`) model from [the Forecast Evaluation session](forecast-evaluation.html#comparing-three-models-at-multiple-time-points) is a good example of a baseline model.
-Other models that might serve as slightly more sophisticated forecast baselines could be a simple ARIMA model, or a model that smooths the recent data and predicts the a continuation of a recent trend in the data.
-:::
 
 
 Here are two models built by InsightNet-funded teams:
@@ -370,7 +372,7 @@ scores <- score_model_out(
   )
 scores |> 
   arrange(wis) |> 
-  knitr::kable()
+  knitr::kable(digits = 3)
 ```
 
 
@@ -417,7 +419,7 @@ Here is a figure showing how the relative scores are calculated, based on aggreg
 ![Schematic of relative skill score computation.[@bosse_evaluating_2024]](slides/figures/relative-skill-scores.png)
 
 The interpretation of the relative skill metric is the factor by which the score for a given model is more or less accurate than the average model, adjusting for the difficulty of the forecasts made by that particular model. 
-Relative skill scores that are lower than 1 indicate that the model is more accurate on the whole than the average model evaluated.
+**Relative skill scores that are lower than 1 indicate that the model is more accurate on the whole than the average model evaluated.**
 For example, a 0.9 relative WIS skill for model A suggests that model A was 10% more accurate on average than other models, adjusting for the difficulty level of forecasts made by model A.
 
 This metric (or a version of it) has been used in practice in a number of large-scale forecast evaluation research papers.[@cramer_evaluation_2022;@meakin_comparative_2022;@sherrattPredictivePerformanceMultimodel2023;@wolfframCollaborativeNowcastingCOVID192023]
@@ -722,7 +724,7 @@ cum_wis
 
 ::: callout-tip
 Note that we also compute a `cumulative_mean_wis_lag1`, which is the mean up through the previous week. 
-This is the inject a bit of realism: how could we know in real-time how our forecast did for the current week?
+This is to inject a bit of realism: how could we know in real-time how our forecast did for the current week?
 
 So the `cumulative_mean_wis_lag1` is the cumulative mean WIS that we could have observed at the `target_end_date`.
 (This all still assumes that whatever data we observed at the `target_end_date` was complete and never revised.)
@@ -766,7 +768,7 @@ plotly::ggplotly(plot_weights)
 
 ::: callout-tip
 ### Take 5 minutes
-Looking at the above plot, what is the "story" that the weights over time tell? 
+Looking at the above plot, what is the "story" that the weights tell when plotted over time? 
 Which models did the ensemble like and dislike over time and how did it change?
 (Remember, in the first two weeks, all models received equal weight.)
 
@@ -775,7 +777,6 @@ Which models did the ensemble like and dislike over time and how did it change?
 ::: {.callout-note collapse="true"}
 ### Solution
 
-#### General observations
 Starting in the third week, three models were assigned less weight than others: `CMU-climate-baseline`, `CMU-TimeSeries` and `COVIDHub-baseline`. 
 Over time, `CMU-TimeSeries` and `COVIDHub-baseline` earned back some "trust" with higher weights, but `CMU-climate-baseline` stayed with a low weight.
 
@@ -804,7 +805,7 @@ median_unweighted_select <- covid_forecasts |>
 And then we will build the inverse WIS weighted LOP ensemble.
 
 ::: callout-caution
-It takes several minutes for the LOP ensembles to be built, if you are running the code on your machine.
+It takes several minutes for the LOP ensembles to be built if you are running the code on your machine.
 :::
 
 ```{r lop-weighted}
