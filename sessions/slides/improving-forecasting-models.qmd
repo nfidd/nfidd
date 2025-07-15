@@ -32,6 +32,7 @@ Often, what motivates one's modeling choices is the *data* and *patterns* observ
 ```{r, echo=FALSE}
 #![](figures/wili_timeseries.png){fig-align="center"}
 library("nfidd")
+library("feasts")
 library("fable")
 library("dplyr")
 library("tidyr")
