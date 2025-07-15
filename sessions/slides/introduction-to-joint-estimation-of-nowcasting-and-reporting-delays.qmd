@@ -54,7 +54,7 @@ The joint model has three key components:
 3. Understand the limitations of the data generating process
 4. Perform a joint estimation of the delay, nowcast, and reproduction number
 
-###
+#
 
 [Return to the session](../joint-nowcasting)
 
