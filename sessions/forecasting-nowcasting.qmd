@@ -851,13 +851,8 @@ Compare the four approaches across the evaluation metrics
 From this evaluation, we can see:
 
 - **Complete data approach**: Performs much worse overall. Performance degrades rapidly with longer forecast horizons.
-- **Pipeline approach**: Shows the best overall performance but has some systematic underprediction bias.
-- **Joint approach**: Slightly worse overall performancewith some overprediction bias and higher dispersion, indicating greater uncertainty.
-
-The pipeline approach performs better here potentially because the reporting delay is relatively short and the central nowcast estimate was accurate.
-In this case, having less uncertainty was beneficial.
-However, this is not guaranteed - the higher dispersion in the joint approach reflects more realistic uncertainty quantification.
-If the nowcast had been less accurate or reporting delays longer, the joint approach might have performed better.
+- **Joint approach**:  Shows the best overall performance with some overprediction bias and higher dispersion, indicating greater uncertainty.
+- **Pipeline approach**: Slightly worse overall performance and has some systematic underprediction bias.
 
 :::
 
