@@ -1,0 +1,86 @@
+---
+title: "Evaluating real-world forecasts"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/introduction-to-real-world-forecasts.html
+    footer: "Forecast evaluation"
+    slide-level: 3
+---
+
+### Hubs accelerate scientific discovery {.smaller}
+
+"Comparing the accuracy of forecasting applications is difficult because forecasting methods, forecast outcomes, and reported validation metrics varied widely."
+
+-- Chretien et al., PLOS ONE, 2014
+
+::: {.fragment}
+![[Scenario Modeling Hub](https://covid19scenariomodelinghub.org/)](figures/history-of-hubs-2023.png){width=75%}
+:::
+
+### [The US COVID-19 Forecast Hub](https://covid19forecasthub.org/) {.smaller}
+
+Launched April 2020 by the [Reich Lab](https://reichlab.io) in collaboration with CDC. Goals were to:
+
+- Provide decision-makers and general public with reliable information about where the pandemic is headed in the next month.
+- Assess reliability of forecasts and gain insight into which modeling approaches do well.
+- Create a community of infectious disease modelers underpinned by an open-science ethos.
+
+![](figures/forecast-hub-logo.png)
+
+### ...provided CDC with weekly forecasts
+
+![](figures/cdc-screenshot.png)
+
+### ...had prominent uses
+
+![](figures/biden-forecasts.png)
+
+### Hubverse is the tool we wish we had {.smaller}
+
+![[Hubverse](https://hubverse.io/)](figures/hub-modeler-flow.png)
+
+### Who works with a hub? {.smaller}
+
+![[Hubverse](https://hubverse.io/)](figures/hubverse-roles.png)
+
+### What does hubverse data look like? {.smaller}
+
+![](figures/hubverse-data.png)
+
+### Some columns define a prediction task {.smaller}
+
+![](figures/hubverse-data-taskids.png)
+
+### Others are always present {.smaller}
+
+![](figures/hubverse-data-special-cols.png)
+
+### Why is standardization important?
+
+You will learn by doing in this session.
+
+From a practical standpoint, standards facilitate
+
+- visualization
+- evaluation
+- ensembling
+
+### COVID Hub reboot (2024-present)
+
+In 2024, CDC rebooted the hub, using hubverse standards.
+
+These are the data that you will use in this session.
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+Use COVID-19 Forecast Hub forecasts to ...
+
+1. create forecast visualizations.
+2. evaluate multiple forecast models.
+3. create weighted ensembles.
+
+#
+
+[Return to the session](../real-world-forecasts)
