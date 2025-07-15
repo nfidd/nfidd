@@ -401,7 +401,7 @@ $$
 
 Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05.
 This is a so-called *weakly informative prior* that allows for some variation in the reproduction number over time but not an unrealistic amount.
-We have also placed a prior on the initial reproduction number, which we have assumed to be normally distributed with a mean of 1 and a standard deviation of 0.25.
+We have also placed a prior on the initial reproduction number, which we have assumed to be normally distributed with a mean of 1 and a standard deviation of 0.5.
 This is a weakly informative prior that allows for a range of initial reproduction numbers but has a mean of 1.
 The last line is the geometric random walk.
 

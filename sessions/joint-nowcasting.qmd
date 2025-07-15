@@ -405,6 +405,7 @@ joint_rt_data <- c(joint_data,
 joint_rt_fit <- nfidd_sample(
   joint_rt_mod, data = joint_rt_data,
   adapt_delta = 0.95,
+  max_treedepth = 12,
   init = \() list(init_R = 1, rw_sd = 0.01)
 )
 ```

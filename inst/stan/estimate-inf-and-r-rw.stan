@@ -28,7 +28,7 @@ transformed parameters {
 
 model {
   // priors
-  init_R ~ normal(1, 0.25) T[0, ];
+  init_R ~ normal(1, 0.5) T[0, ];
   rw_noise ~ std_normal();
   rw_sd ~ normal(0, 0.05) T[0, ];
   obs ~ poisson(onsets);
