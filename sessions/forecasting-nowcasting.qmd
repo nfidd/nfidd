@@ -302,7 +302,7 @@ To do this we need to regenerate the Rt samples for the additional days, and the
 
 Now we fit the model to estimate Rt and forecast:
 
-```{r complete-data-fit}
+```{r complete-data-fit, results = 'hide', message = FALSE}
 complete_data_fit <- nfidd_sample(
   renewal_model,
   data = list(
@@ -325,9 +325,8 @@ and extract forecast samples for analysis:
 
 ```{r complete-data-extract}
 complete_data_forecasts <- complete_data_fit |>
-  gather_draws(forecast[day]) |>
+  gather_draws(forecast[day], ndraws = 100) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(complete_data$day),
     approach = "Complete data"
@@ -420,7 +419,7 @@ geometric_nowcast_model
 
 Now we fit the geometric nowcast to the reporting triangle:
 
-```{r pipeline-nowcast-fit}
+```{r pipeline-nowcast-fit, results = 'hide', message = FALSE}
 geometric_nowcast_fit <- nfidd_sample(
   geometric_nowcast_model,
   data = list(
@@ -453,7 +452,7 @@ Now we use the renewal model to forecast from this point estimate.
 
 Next, we fit the renewal model to our combined dataset:
 
-```{r pipeline-forecast-fit}
+```{r pipeline-forecast-fit, results = 'hide', message = FALSE}
 pipeline_forecast_fit <- nfidd_sample(
   renewal_model,
   data = list(
@@ -476,9 +475,8 @@ Finally, we extract the forecast samples:
 
 ```{r pipeline-forecast-extract}
 pipeline_forecasts <- pipeline_forecast_fit |>
-  gather_draws(forecast[day]) |>
+  gather_draws(forecast[day], ndraws = 100) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(nowcast_estimates$day),
     approach = "Pipeline"
@@ -615,7 +613,7 @@ What parts of the joint model allow for forecasting?
 
 Now we fit the joint model with forecasting parameters:
 
-```{r joint-fit}
+```{r joint-fit, results = 'hide', message = FALSE}
 joint_forecast_fit <- nfidd_sample(
   joint_model,
   data = list(
@@ -644,9 +642,8 @@ We extract the joint results for forecasting:
 
 ```{r joint-forecast-extract}
 joint_forecasts <- joint_forecast_fit |>
-  gather_draws(forecast[day]) |>
+  gather_draws(forecast[day], ndraws = 100) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(filtered_reporting_triangle$day),
     approach = "Joint"
@@ -757,12 +754,6 @@ forecast_results <- bind_rows(
   joint_forecasts
 )
 
-# Validate consistent number of draws per approach
-forecast_results |>
-  count(approach, name = "n_rows") |>
-  mutate(expected_rows = 100 * 14) |>
-  print()
-
 forecast_results |>
   ggplot(aes(x = actual_day, y = .value, group = .draw, color = approach)) +
   geom_line(alpha = 0.1) +
@@ -855,11 +846,13 @@ Compare the four approaches across the evaluation metrics
 
 ::: {.callout-note collapse="true"}
 ## Solution
+*Note these results are stochastic. Why is this?*
+
 From this evaluation, we can see:
 
-- **Complete data approach**: Performs much worse overall, with CRPS of 182 compared to ~19-20 for the other approaches. Performance degrades rapidly with longer forecast horizons.
-- **Pipeline approach**: Shows the best overall performance (CRPS = 18.8) but has some systematic underprediction bias (-0.67).
-- **Joint approach**: Slightly worse overall performance (CRPS = 20.5) with some overprediction bias (0.69) and higher dispersion, indicating greater uncertainty.
+- **Complete data approach**: Performs much worse overall. Performance degrades rapidly with longer forecast horizons.
+- **Pipeline approach**: Shows the best overall performance but has some systematic underprediction bias.
+- **Joint approach**: Slightly worse overall performancewith some overprediction bias and higher dispersion, indicating greater uncertainty.
 
 The pipeline approach performs better here potentially because the reporting delay is relatively short and the central nowcast estimate was accurate.
 In this case, having less uncertainty was beneficial.
