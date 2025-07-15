@@ -26,7 +26,7 @@ What outputs and features do we require of these models?
 
 ### Using Data the Data to Help Inform your Modeling Choices
 
-Often, what motivates one's modeling choices is the *data* and *patterns* observed in the data.
+Often, what motivates one's modeling choices are the *trends* and *patterns* observed in the data.
 
 
 ```{r, echo=FALSE}
@@ -39,6 +39,7 @@ library("tidyr")
 library("ggplot2")
 library("epidatr")
 library("gridExtra")
+theme_set(theme_bw())
 data(flu_data)
 flu_data <- flu_data |>
   filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
@@ -47,18 +48,14 @@ ggplot(flu_data) +
   ggtitle("wILI to 2017/2018 Season")
 ```
 
-### Seasonality
+### Features we cover in this session
 
-A seasonal pattern may suggest autocorrelation in the time series data.
+- Auto correlation
+- Partial auto-correlation
+- Stationarity
+- Seasonality
+- Constant variance
 
-```{r, echo = FALSE}
-flu_data |> feasts::gg_season(wili, 
-                              period = "year",
-                              labels = "right",
-                              labels_right_nudge = 5,
-                              labels_repel = T) +
-  ggtitle("Seasonality in ILI")
-```
 
 ### Autocorrelation
 
@@ -66,22 +63,55 @@ Autocorrelation and Partial Autocorrelation (ACF/PACF) plots measure the linear
 relationship between *lagged values* of a time series. 
 
 ```{r}
-feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+pacf_plot <- gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+pacf_plot
 ```
 
-### Describing our Autocorrelations
+### Describing autocorrelation
 
-- There are periodic correlations: 
-  - strong positive correlations close time points and those ~52 weeks/ 1 year apart.
-  - negative correlations peaking around ~6 months.
-- The PACF estimates the correlation between values after adjusting for the effects of the previous lags.
-  - There's a significant PACF at 1 week ahead and ~52 weeks/1 year.
-- These plots suggest seasonality should be incorporated into our forecast models.
+ACF plots correlation of $y_t$ and $y_{t-k}$ as a function of k.
 
-### Transformations and Adjustments
+*Correlations show periodicity of ~52 weeks.*
 
-We often desire variance-stablizing transformations to make the variance more 
-constant across different mean values. 
+```{r}
+pacf_plot <- feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+pacf_plot
+```
+
+### Describing partial correlation
+
+PACF plots correlation of $y_t$ and $y_{t-k}$ as a function of k, **adjusted for shorter lags**.
+
+*Only a few partial correlations are significant.*
+
+```{r}
+pacf_plot
+```
+
+### Stationarity
+
+A time series is stationary if the mean and variance of the data do not change over time.
+
+Stationarity means that there are *no long-term predictable patterns* in a time-series, but there can still be predictability in the short term.
+
+### Seasonality
+
+Seasonal patterns are common with many (but not all) endemic diseases.
+Seasonality can make a disease more *predictable*, but also means it's not *stationary*.
+
+
+```{r, echo = FALSE}
+flu_data |> 
+  gg_season(wili, 
+            period = "year",
+            labels = "none") +
+  ggtitle("Seasonality in ILI")
+```
+
+### Constant variance
+
+A key assumption of many models is *constant variance over time*.
+Transformations often help.
 
 ```{r, echo=FALSE}
 p1 <- flu_data |>
@@ -116,23 +146,29 @@ p4 <- flu_data |>
   ggtitle("Square Root Scale")
 
 # Arrange plots in a 2x2 grid
-grid.arrange(p1, p2, p3, p4, nrow = 2, ncol = 2)
+grid.arrange(p1, p4, p3, p2, nrow = 2, ncol = 2)
 ```
 
-### Time-series Regression Models
+### Time-series Regression Models: ARIMA
 
-For now, we'll focus on **time-series regression models**.
+Widely used for decades!
 
-One widely applicable model type are the ARIMA models. ARIMA or autoregressive integrated moving average models capture patterns such as trends and autocorrelation:
+Notation is $ARIMA(p, d, q).$
 
-- AR (Autoregressive): Uses past values to predict current ones.
-- I (Integrated): Applies differencing to make the series stationary.
-- MA (Moving Average): Uses recent forecast errors to refine predictions.
+- AR (Auto-Regressive order $p$)
+    - Uses past values to predict current ones.
+    - Useful when there is auto-correlation.
+- I (Integrated order $d$)
+    - Differences ($y_t - y_{t-1}$) help make the series stationary.
+    - Useful when there is non-stationarity.
+- MA (Moving Average order $q$)
+    - Uses recent model residuals as predictors.
 
+Figuring out which $(p,d,q)$ to use is tricky!
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1.  Explore the influenza dataset some more focusing on assessing observed patterns qualitatively and quantitatively.
+1.  Explore the influenza dataset, focusing on assessing observed patterns qualitatively and quantitatively.
 2.  Explore different ways of improving modeling forecasts by incorporating patterns observed in data into our models.
 
 # 
