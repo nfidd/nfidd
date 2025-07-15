@@ -10,28 +10,24 @@ format:
 
 ## Ensembles
 
-- Combine many different models' forecasts into a single prediction
+- Combine many different forecasts into a single prediction
+
+![Figure credit: Evan Ray and Nick Reich](ensemble.png)
 
 ## Why ensemble?
 
 ::: {.fragment .fade-in}
-Many uncertainties, many approaches: many models
-
-   - Layers of uncertainty
-  
-      - Model parameters
-        - e.g. parameterising delay distributions
-        
-      - Model structure
-        - e.g. more mechanistic or more statistical approaches
-   - Want to use all available information
+- Models are specialists: you want all the perspectives
+    - different data sources
+    - different philosophies, e.g. more mechanistic or more statistical approaches
+    - different methodologies and parameterizations
 :::
 
 ## Why ensemble?
 
 "Whole is greater than sum of parts"
 
-   - Average of multiple predictions is often more performant than any individual model
+   - Average of multiple predictions is often (not always) more performant than any individual model
    
       - History in weather & economic forecasting
       
@@ -39,28 +35,19 @@ Many uncertainties, many approaches: many models
 
         - "Forecast challenges": Ebola, dengue, flu, COVID-19...
 
-## Ensemble methods
+## Ensemble methods: how to average?
 
-::: {.fragment .fade-in}
+![Figure credit: Howerton et al](figures/lop-vs-vincent.jpg)
 
-- Summarising across models to create single (probabilistic) prediction
-
-  - e.g. average at each models' probabilistic quantiles
-
-     - Mean
-
-     - Median - trims the outliers, so narrows the uncertainty
-:::
-
-## Ensemble methods
-
-- Equal or weighted combination
+## Ensemble methods: to weight or not?
 
    - Weight models by past forecast performance
    
       - e.g. using forecast scores
       
    - Rarely better than equal average
+   
+      - lots of uncertainty in weight estimation!
 
 ## Collaborative modelling
 
@@ -80,9 +67,8 @@ Many uncertainties, many approaches: many models
 
 Infectious disease forecasting hubs have grown in popularity over the last decade
 
-![](figures/history-of-hubs.png)
+![@Reich2022-jo](figures/history-of-hubs-2023.png)
 
-[@Reich2022-jo]
 
 ## ... for example, the European [Respicast](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)
