@@ -70,8 +70,8 @@ Thursday: 11.00-12.00
 
 -   [Introduction](../sessions/slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays): joint estimation of delays and nowcasts (10 mins)
 -   [Practice](../sessions/joint-nowcasting):
-    - joint estimation of delays and nowcasts (20 mins)
-    - joint estimation of delays, nowcasts and reproduction numbers (20 mins)
+    -   joint estimation of delays and nowcasts (20 mins)
+    -   joint estimation of delays, nowcasts and reproduction numbers (20 mins)
 -   Wrap up (10 mins)
 
 Thursday: 12.00-13.00
@@ -122,9 +122,9 @@ Friday: 09.00-09.15
 Friday: 09.15-10.30
 
 -   [Introduction](../sessions/slides/forecast-hubs): hub concepts and data structures (10 mins)
--   [Practice](../sessions/forecast-hubs): 
-    - evaluation example with existing hub (30 mins)
-    - ensembles with existing hub (30 mins)
+-   [Practice](../sessions/forecast-hubs):
+    -   evaluation example with existing hub (30 mins)
+    -   ensembles with existing hub (30 mins)
 -   Wrap up (5 mins)
 
 ## Session 12: Local hub playground
@@ -151,8 +151,7 @@ Friday: 13.00-14.00
 
 Friday: 14.00-15.00
 
--   [Introduction](../sessions/slides/advanced-forecasting): hierarchical ARIMA or forecast reconciliation (10 mins)
--   [Practice](../sessions/advanced-forecasting): hierarchical ARIMA or forecast reconciliation (45 mins)
+-   Catch-up and deeper exploration
 -   Wrap up (5 mins)
 
 ## Session 15: Research talks and wrap-up
@@ -165,4 +164,4 @@ Friday: 15.30-17.00
 -   Research talk 4: Sam (15 mins)
 -   [Summary](../sessions/slides/closing) of the course (10 mins)
 -   Final discussion and closing (20 mins)
-    - [Further reading](../sessions/end-of-course-summary-and-discussion)
+    -   [Further reading](../sessions/end-of-course-summary-and-discussion)
