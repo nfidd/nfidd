@@ -90,7 +90,7 @@ This builds on the approach from the [joint nowcasting session](sessions/joint-n
 ::: {.callout-note}
 ## Connecting to ILI forecasting
 
-While we use linelist-based data (individual symptom onsets with reporting delays) for clarity in this session, the forecasting sessions focus on ILI percentage data.
+While we use the linelist data (individual symptom onsets with reporting delays) for clarity in this session, the forecasting sessions focus on ILI percentage data.
 These data types differ substantially:
 
 **Our simulated data:**
@@ -187,6 +187,7 @@ complete_at_horizon <- reporting_triangle |>
 complete_threshold <- 14
 complete_data <- available_onsets |>
   filter(day <= cutoff - complete_threshold)
+```
 
 ::: {.callout-tip collapse="true"}
 ## Choosing the "complete data" threshold
@@ -226,7 +227,9 @@ Using a 14-day threshold means we're losing 7-9 days of potentially useful data.
 Try experimenting with different thresholds (e.g., `complete_threshold <- 7`) to see how it affects the forecasts!
 :::
 
-# Visualise the different datasets
+Now lets visualise the different datasets
+
+```{r}
 ggplot() +
   geom_line(data = complete_at_horizon, 
             aes(x = day, y = complete_onsets, colour = "Complete data"), 
@@ -258,24 +261,6 @@ ggplot() +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
-
-::: {.callout-note}
-## Pipeline approaches vs joint models
-
-In this session, we'll explore different ways to combine nowcasting and forecasting.
-Building on methods from our earlier sessions, you could construct pipeline approaches using:
-
-- **Delay distribution estimation**: Methods from the [biases in delay distributions session](sessions/biases-in-delay-distributions) to estimate reporting delays from individual-level data
-- **Simple nowcasting**: The geometric random walk nowcasting model from the [nowcasting concepts session](sessions/nowcasting) 
-- **Multiplicative baseline methods**: Simple CDF-based scaling approaches using tools like [`baselinenowcast`](https://baselinenowcast.epinowcast.org)
-- **Reproduction number estimation**: Methods from the [R estimation session](sessions/R-estimation-and-the-renewal-equation) applied to the nowcasted data
-
-Each component can be developed and validated independently, making pipeline approaches more modular and sometimes easier to debug.
-The trade-off is that uncertainty may not propagate correctly between components, and the assumptions of each component may not be consistent with each other.
-
-As we'll see, joint models that estimate nowcasts and forecasts together can address these limitations, but come with their own challenges in terms of complexity and computational requirements.
-:::
-
 # Approach 1: Complete data approach
 
 The simplest approach is to filter to only "complete" data and forecast from there using the renewal model from the [reproduction number session](R-estimation-and-the-renewal-equation).
@@ -404,7 +389,24 @@ Examine the complete data approach:
 
 # Approach 2: Pipeline approach (point estimates)
 
-We start by fitting the a geometric random walk nowcast to the reporting triangle data, as we did in the [joint nowcasting session](sessions/joint-nowcasting).
+::: {.callout-note}
+## Pipeline approaches vs joint models
+
+In this session, we'll explore different ways to combine nowcasting and forecasting.
+Building on methods from our earlier sessions, you could construct pipeline approaches using:
+
+- **Delay distribution estimation**: Methods from the [biases in delay distributions session](sessions/biases-in-delay-distributions) to estimate reporting delays from individual-level data
+- **Simple nowcasting**: The geometric random walk nowcasting model from the [nowcasting concepts session](sessions/nowcasting) 
+- **Multiplicative baseline methods**: Simple CDF-based scaling approaches using tools like [`baselinenowcast`](https://baselinenowcast.epinowcast.org)
+- **Reproduction number estimation**: Methods from the [R estimation session](sessions/R-estimation-and-the-renewal-equation) applied to the nowcasted data
+
+Each component can be developed and validated independently, making pipeline approaches more modular and sometimes easier to debug.
+The trade-off is that uncertainty may not propagate correctly between components, and the assumptions of each component may not be consistent with each other.
+
+As we'll see, joint models that estimate nowcasts and forecasts together can address these limitations, but come with their own challenges in terms of complexity and computational requirements.
+:::
+
+We start by fitting a geometric random walk nowcast to the reporting triangle data, as we did in the [joint nowcasting session](sessions/joint-nowcasting).
 
 First, we load the joint nowcasting model:
 
