@@ -144,7 +144,7 @@ plot(reporting_delay_pmf)
 
 ```{r simulate-reporting-triangle}
 reporting_triangle <- onset_df |>
-  filter(day < cutoff + forecast_horizon) |>
+  filter(day <= cutoff + forecast_horizon) |>
   mutate(
     reporting_delay = list(
       tibble(d = 0:15, reporting_delay = reporting_delay_pmf)
@@ -851,8 +851,10 @@ Compare the four approaches across the evaluation metrics
 From this evaluation, we can see:
 
 - **Complete data approach**: Performs much worse overall. Performance degrades rapidly with longer forecast horizons.
-- **Joint approach**:  Shows the best overall performance with some overprediction bias and higher dispersion, indicating greater uncertainty.
-- **Pipeline approach**: Slightly worse overall performance and has some systematic underprediction bias.
+- **Joint approach**:  Has comparable performance to the pipeline approach with some overprediction bias and higher dispersion, indicating greater uncertainty.
+- **Pipeline approach**: Has some systematic underprediction bias, performs best at early and late forecast horizons, and performs worse at medium forecast horizons
+
+To really understand the performance difference we would need to evaluate across multiple forecast dates.
 
 :::
 
