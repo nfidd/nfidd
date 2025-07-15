@@ -2,98 +2,99 @@
 title: "Multi-model ensembles"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 bibliography: ../../nfidd.bib
+engine: knitr
 format:
   revealjs:
-    output: slides/forecasting-as-an-epidemiological-problem.html
+    output: slides/introduction-to-ensembles.html
     footer: "Multi-model ensembles"
+    slide-level: 3
+
 ---
 
-## Ensembles
+### Ensembles: many forecasts into one
 
-- Combine many different models' forecasts into a single prediction
+![Figure credit: Evan Ray and Nick Reich](figures/ensemble.jpg)
 
-## Why ensemble?
-
-::: {.fragment .fade-in}
-Many uncertainties, many approaches: many models
-
-   - Layers of uncertainty
-  
-      - Model parameters
-        - e.g. parameterising delay distributions
-        
-      - Model structure
-        - e.g. more mechanistic or more statistical approaches
-   - Want to use all available information
-:::
-
-## Why ensemble?
-
-"Whole is greater than sum of parts"
-
-   - Average of multiple predictions is often more performant than any individual model
-   
-      - History in weather & economic forecasting
-      
-      - Seen this in infectious disease forecasting
-
-        - "Forecast challenges": Ebola, dengue, flu, COVID-19...
-
-## Ensemble methods
+### Why ensemble?
 
 ::: {.fragment .fade-in}
-
-- Summarising across models to create single (probabilistic) prediction
-
-  - e.g. average at each models' probabilistic quantiles
-
-     - Mean
-
-     - Median - trims the outliers, so narrows the uncertainty
+1. Models are specialists and you want all the perspectives
+    - different data sources
+    - different philosophies, e.g. more mechanistic or more statistical approaches
+    - different methodologies and parameterizations
 :::
 
-## Ensemble methods
+::: {.fragment .fade-in}
+2. A single "consensus forecast" is easier for decision-makers to digest 
+:::
 
-- Equal or weighted combination
+### "Whole is greater than sum of parts"
+
+Average of multiple predictions is often (not always) more performant than any individual model
+
+- Strong evidence in weather & economic forecasting
+
+- Recent evidence in infectious disease forecasting
+    - Ebola[@funkAssessingPerformanceRealtime2019]
+    - dengue[@colon-gonzalez_probabilistic_2021]
+    - flu[@reich_accuracy_2019]
+    - COVID-19[@cramer_evaluation_2022]
+
+### Ensemble methods: how to average?
+
+![Figure credit: @howertonContextdependentRepresentationBetweenmodel2023](figures/lop-vs-vincent.jpg)
+
+### Ensemble methods: to weight or not?
 
    - Weight models by past forecast performance
    
       - e.g. using forecast scores
       
    - Rarely better than equal average
-
-## Collaborative modelling
-
-### "Forecast hubs"
-
-- Crowdsourcing forecasts
-
-   - Open source collaborative projects 
-
-   - Anyone able to contribute a forecast
    
-- Forecasts ensembled into a single projection
+      - lots of uncertainty in weight estimation!
+      - put a "strong prior" on equal weights, both in your mental and statistical models
+
+### Collaborative modelling "hubs"
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- Projects run by research groups, public health agencies
+
+- Participation generally open
    
-- Also enables consistent evaluation
+- Standard format enables 
+  - data validation
+  - ensemble-building
+  - model evaluation
+  - visualization
+::: 
 
-## 
+::: {.column width="50%"}
 
-Infectious disease forecasting hubs have grown in popularity over the last decade
+![[Hubverse](https://hubverse.io/)](figures/hub-modeler-flow.png)
 
-![](figures/history-of-hubs.png)
+:::
 
-[@Reich2022-jo]
+::::
 
-## ... for example, the European [Respicast](https://respicast.ecdc.europa.eu/) {.smaller}
+   
+### Hubs increasingly used in epi
+
+![@Reich2022-jo](figures/history-of-hubs-2023.png)
+
+
+### ... e.g., the European [Respicast Hub](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)
 
-## Single model {.smaller}
+### Single model {.smaller}
 ![](figures/respicast-single.png)
 
-## ... Multiple models {.smaller}
+### ... Multiple models {.smaller}
 ![](figures/respicast-multi.png)
 
-## ... ... Multi-model ensemble {.smaller}
+### ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
@@ -105,7 +106,7 @@ Infectious disease forecasting hubs have grown in popularity over the last decad
 
 [Return to the session](../forecast-ensembles)
 
-## References
+### References
 
 ::: {#refs}
 :::
