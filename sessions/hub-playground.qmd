@@ -262,7 +262,7 @@ For now, I'm going to use `sismid` as the team abbreviation.
 :::
 
 
-The above table has `r nrow(cv_forecasts)`, which makes sense because there are
+The above table has `r nrow(cv_forecasts)` rows, which makes sense because there are
 
 - 30 origin dates
 - 11 locations
