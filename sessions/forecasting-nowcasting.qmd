@@ -196,6 +196,23 @@ ggplot() +
   theme(legend.position = "bottom")
 ```
 
+::: {.callout-note}
+## Pipeline approaches vs joint models
+
+In this session, we'll explore different ways to combine nowcasting and forecasting.
+Building on methods from our earlier sessions, you could construct pipeline approaches using:
+
+- **Delay distribution estimation**: Methods from the [biases in delay distributions session](sessions/biases-in-delay-distributions) to estimate reporting delays from individual-level data
+- **Simple nowcasting**: The geometric random walk nowcasting model from the [nowcasting concepts session](sessions/nowcasting) 
+- **Multiplicative baseline methods**: Simple CDF-based scaling approaches using tools like [`baselinenowcast`](https://baselinenowcast.epinowcast.org)
+- **Reproduction number estimation**: Methods from the [R estimation session](sessions/R-estimation-and-the-renewal-equation) applied to the nowcasted data
+
+Each component can be developed and validated independently, making pipeline approaches more modular and sometimes easier to debug.
+The trade-off is that uncertainty may not propagate correctly between components, and the assumptions of each component may not be consistent with each other.
+
+As we'll see, joint models that estimate nowcasts and forecasts together can address these limitations, but come with their own challenges in terms of complexity and computational requirements.
+:::
+
 # Approach 1: Complete data approach
 
 The simplest approach is to filter to only "complete" data and forecast from there using the renewal model from the [reproduction number session](R-estimation-and-the-renewal-equation).

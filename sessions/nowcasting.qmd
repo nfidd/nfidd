@@ -282,6 +282,23 @@ The points in this plot represent the data available when the nowcast was made (
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
+::: {.callout-important}
+## Simple multiplicative nowcasting methods
+
+Before moving to more complex models, it's worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 
+This approach is often called "multiplicative" or "scaling" nowcasting.
+
+While this method appears simple, it still embodies a model with specific assumptions that can be difficult to define precisely. 
+Key challenges include:
+- The method struggles with noisy data, particularly when counts are low
+- Sparse data (e.g., zero counts) can lead to unstable estimates
+- Generating uncertainty
+- The implicit assumptions about the data generating process are not always clear
+
+The [`baselinenowcast`](https://baselinenowcast.epinowcast.org) R package provides a set of tools for these types of methods, including approaches to handle both noise and sparsity in the data. 
+These baseline methods can serve as useful benchmarks when developing more complex nowcasting models.
+:::
+
 ## Adding in a geometric random walk to the nowcasting model
 
 As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-equation), a geometric random walk is a simple way to model multiplicative growth. Adding this into our simple nowcasting model may help us to better capture the generative process of the data and so produce a better nowcast.
@@ -407,6 +424,7 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 ## Methods in practice
 
 - Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394) compares the performance of a range of methods that were used in a nowcasting hub and investigates what might explain performance differences.
+- The [`{baselinenowcast}`](https://baselinenowcast.epinowcast.org) R package provides implementations of simple multiplicative nowcasting methods that can serve as baselines for comparison with more complex approaches.
 
 # Wrap up
 
