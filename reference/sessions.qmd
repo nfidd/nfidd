@@ -147,7 +147,7 @@ Friday: 13.00-14.00
 -   [Practice](../sessions/forecasting-nowcasting): connecting nowcasting and forecasting (45 mins)
 -   Wrap up (5 mins)
 
-## Session 14: Advanced topics
+## Session 14: Catch-Up and Deeper Exploration
 
 Friday: 14.00-15.00
 
