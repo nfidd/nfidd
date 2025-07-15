@@ -14,7 +14,6 @@ For example, the incubation period might be used to determine the appropriate le
 We also need to have some estimate for these delays when interpreting new data, in order to understand what is happening now ^[Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!] and predict what might happen in the future.
 However, the length of time between any of these events might be highly variable (between individuals) and fundamentally uncertain (across the population as a whole). We capture this variability using probability distributions, which is the focus of this session.
 
-TEST CHANGE - do not merge
 ## Slides
 
 - [Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays)
