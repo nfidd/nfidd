@@ -37,8 +37,7 @@ format:
 
 ### Don't let the model cheat: cross-validation {.smaller}
 
-**Cross-validation** ensures that your model only sees data in the past. 
-It means that any predictions are made "out-of-sample".
+Picking a **cross-validation scheme that is specific to time-series data** ensures that your model only sees data in the past. 
 
 ![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
 
@@ -48,6 +47,14 @@ It means that any predictions are made "out-of-sample".
 If you know what the held-out data looks like, you might make subconscious decisions about which model to choose, biasing the final results.
 
 ![Figure credit: [Lauer et al, 2020](https://arxiv.org/abs/2006.00073)](figures/test-train.jpg)
+
+### Validation with epi data 
+
+It can be really hard to keep track of what version of epi surveillance data was released when.
+
+This makes prospective evaluation even more important. 
+
+For any retrospective experiment, you should always look for evidence that an analyst didn't let the model cheat! 
 
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
