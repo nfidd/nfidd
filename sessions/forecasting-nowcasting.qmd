@@ -87,6 +87,31 @@ Some methods (particularly Bayesian generative models) make this connection expl
 We'll start by generating synthetic data that mimics the challenges we face in real-time epidemic analysis.
 This builds on the approach from the [joint nowcasting session](sessions/joint-nowcasting), but now we'll also create a dataset filtered at a two-week forecast horizon for evaluation (i.e. the data that we would ultimately observe for the two weeks after the forecast date).
 
+::: {.callout-note}
+## Connecting to ILI forecasting
+
+While we use linelist-based data (individual symptom onsets with reporting delays) for clarity in this session, the forecasting sessions focus on ILI percentage data.
+These data types differ substantially:
+
+**Our simulated data:**
+- Individual events with systematic reporting delays
+- Delays cause under-reporting that resolves over time
+- Clear temporal progression: infection → onset → report
+
+**ILI surveillance data (from forecasting sessions):**
+- Compound measure: % of visits for influenza-like illness
+- Can be revised up OR down as reports arrive
+- Combines multiple diseases and reporting locations
+
+**Adapting these methods for ILI:**
+- The joint modelling framework can handle bidirectional revisions by modelling the full revision process with minor modifications
+- Pipeline approaches may need separate models for upward and downward revisions
+- Understanding the data generation process (how individual reports → ILI %) helps identify biases
+- Performance may be limited by the complexity of the compound measure
+
+The key insight is that whether dealing with simple delays or complex revisions, combining nowcasting and forecasting in a coherent framework improves predictions.
+:::
+
 ## Generate the underlying epidemic
 
 First, let's generate our simulated onset dataset as we did in previous sessions:
