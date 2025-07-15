@@ -4,24 +4,50 @@ author: "Nowcasting and forecasting of infectious disease dynamics"
 engine: knitr
 format:
   revealjs:
-    output: slides/forecast-evaluation.html
+    output: slides/hub-playground.html
     footer: "Forecast evaluation"
     slide-level: 3
 ---
 
 
-### Model development practices and pipelines
+### Turned loose!
 
-- General modeling workflow
-  - EDA of the data
-  - model design
-  - model training and validation
-  - out-of-sample testing
-  - EDA of forecasts and scores
-  - pick a model and submit it
+We've covered a ton of material on creating, visualizing, evaluating and ensembling forecasts.
 
-- Some key concepts to highlight:
- - time-series cross-validation
- - trying to mask data from the analysts to avoid unconscious bias
+Now it's your turn to work more independently on these tasks in our "Sandbox Hub".
+
+### Sandbox hub
+
+Similar to our earlier ILI examples, but with data from multiple locations.
+
+The [SISMID ILI Forecasting Sandbox](https://github.com/reichlab/sismid-ili-forecasting-sandbox/) is an actual, live hub.
+
+### Model development workflow {.smaller}
+
+Here is a summary of the forecasting workflow that we have covered in previous sessions:
+
+<!-- - **EDA of the data**: what are important trends and features? -->
+<!-- - **Model design**: what models do you want to build? -->
+<!-- - **Model training and validation**: how will you validate your models on out-of-sample data? -->
+<!-- - **Model testing**: will you do any prospective testing of your model? -->
+<!-- - **EDA of forecasts and scores**:  -->
+<!-- - **Pick a model and submit it** -->
+
+![](figures/forecast-workflow.png)
+
+<!-- - Some key concepts to highlight: -->
+<!--  - time-series cross-validation -->
+<!--  - trying to mask data from the analysts to avoid unconscious bias -->
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+1. Clone the Sandbox Hub.
+2. Build and visualize forecasts from models that you are interested in.
+3. Validate and test forecasts.
+4. Submit forecasts to the Sandbox Hub.
+
+# 
 
 [Return to the session](../hub-playground)
+
+
