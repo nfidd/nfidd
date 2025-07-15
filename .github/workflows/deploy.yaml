@@ -33,6 +33,16 @@ jobs:
         with:
           use-public-rspm: true
 
+      # Cache Quarto freeze directory for computational results
+      # This prevents re-running expensive computations (Stan models, simulations)
+      - name: Cache Quarto freeze
+        uses: actions/cache@v4
+        with:
+          path: _freeze
+          key: quarto-freeze-${{ runner.os }}-${{ hashFiles('sessions/**/*.qmd', 'sessions/**/*.Rmd') }}
+          restore-keys: |
+            quarto-freeze-${{ runner.os }}-
+
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:

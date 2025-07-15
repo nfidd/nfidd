@@ -105,7 +105,7 @@ The code below will work more easily if the sandbox hub is downloaded and lives 
 We have done some modeling on ILI data in the earlier sessions. 
 Our sandbox hub is set up to accept forecasts for the US level and the 10 Health and Human Services (HHS) Regions. 
 
-![A map showing the 10 HHS Regions.](sessions/slides/figures/hhs-regions.png)
+![A map showing the 10 HHS Regions.](figures/hhs-regions.png)
 
 We are going to intentionally not look at all of the seasons of data right now, so as not to introduce too much unconsious bias by giving ourselves information about which seasons are big/small.
 

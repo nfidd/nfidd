@@ -31,6 +31,9 @@ website:
       style: "docked"
       contents: "sessions/*.qmd"
 
+execute:
+  freeze: auto
+
 format:
   html:
     theme:

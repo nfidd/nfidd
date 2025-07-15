@@ -17,3 +17,7 @@ inst/stan/*
 CLAUDE.md
 sismid-ili-forecasting-sandbox/
 site_libs
+
+# Quarto freeze directory
+_freeze/
+
