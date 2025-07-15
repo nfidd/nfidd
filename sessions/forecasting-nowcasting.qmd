@@ -163,6 +163,44 @@ complete_threshold <- 14
 complete_data <- available_onsets |>
   filter(day <= cutoff - complete_threshold)
 
+::: {.callout-tip collapse="true"}
+## Choosing the "complete data" threshold
+
+We've chosen 14 days as our threshold for "complete" data, but this is quite conservative. 
+Let's examine what proportion of reports we expect to have received by different delays:
+
+```{r show-reporting-cdf}
+# Calculate cumulative reporting proportions
+reporting_cdf <- cumsum(reporting_delay_pmf)
+tibble(
+  delay = 0:15,
+  pmf = reporting_delay_pmf,
+  cdf = reporting_cdf
+) |>
+  filter(delay %in% c(1, 3, 5, 7, 10, 14)) |>
+  mutate(
+    `Proportion reported` = round(cdf, 3),
+    `Proportion missing` = round(1 - cdf, 3)
+  ) |>
+  select(
+    `Days since onset` = delay,
+    `Proportion reported`,
+    `Proportion missing`
+  ) |>
+  knitr::kable(caption = "Expected reporting completeness by delay")
+```
+
+As we can see, after 5 days we expect to have received ~`r round(reporting_cdf[6]*100)`% of reports, and after 7 days ~`r round(reporting_cdf[8]*100)`%.
+Using a 14-day threshold means we're losing 7-9 days of potentially useful data.
+
+**Trade-offs to consider:**
+- **Less conservative thresholds** (e.g., 5-7 days): Use more recent data but need to account for 5-15% missing reports
+- **More conservative thresholds** (e.g., 14 days): Very complete data but lose recent epidemic trends
+- **Nowcasting approaches**: Use all available data and explicitly model the reporting process
+
+Try experimenting with different thresholds (e.g., `complete_threshold <- 7`) to see how it affects the forecasts!
+:::
+
 # Visualise the different datasets
 ggplot() +
   geom_line(data = complete_at_horizon, 
