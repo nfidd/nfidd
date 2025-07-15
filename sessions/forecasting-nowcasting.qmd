@@ -494,7 +494,7 @@ Consider this approach compared to Approaches 1 and 2:
 
 - **Advantage**: Unlike Approach 2, it propagates some uncertainty from the nowcast into the forecast, giving more realistic prediction intervals
 - **Computational cost**: Requires fitting the renewal model many times (once per nowcast sample), making it slow compared to a single joint model fit
-- **Model mismatch remains**: Still uses different generative processes (geometric for nowcast, renewal for forecast), creating inconsistencies [@lison2024]
+- **Model mismatch remains**: Still uses different generative processes (geometric for nowcast, renewal for forecast), creating inconsistencies [@lisonGenerativeBayesianModeling2024]
 
 :::
 
@@ -792,7 +792,7 @@ Several packages implement these concepts:
 - [`EpiNow2`](https://epiforecasts.io/EpiNow2/): Pipeline nowcasting and forecasting
 - [`epinowcast`](https://package.epinowcast.org/): Joint nowcasting and forecasting in an efficient framework
 
-Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lison2024] when evaluating multiple nowcast dates.
+Research has demonstrated that joint modelling of data sources provides significant advantages over combining estimates from separate models [@lisonGenerativeBayesianModeling2024] when evaluating multiple nowcast dates.
 In practice, implementations often include hierarchical models for multiple locations, time-varying delays, and ensemble approaches for robustness.
 
 # Wrap up
