@@ -324,7 +324,7 @@ and extract forecast samples for analysis:
 complete_data_forecasts <- complete_data_fit |>
   gather_draws(forecast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |>
+  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(complete_data$day),
     approach = "Complete data"
@@ -474,7 +474,7 @@ Finally, we extract the forecast samples:
 pipeline_forecasts <- pipeline_forecast_fit |>
   gather_draws(forecast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |>
+  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(nowcast_estimates$day),
     approach = "Pipeline"
@@ -641,7 +641,7 @@ We extract the joint results for forecasting:
 joint_forecasts <- joint_forecast_fit |>
   gather_draws(forecast[day]) |>
   ungroup() |>
-  filter(.draw %in% sample(.draw, 100)) |>
+  filter(.draw %in% sample(.draw, 100, replace = FALSE)) |>
   mutate(
     actual_day = day + max(filtered_reporting_triangle$day),
     approach = "Joint"
@@ -679,7 +679,8 @@ ggplot() +
     title = "Joint approach: Forecasting from joint nowcast and forecast",
     subtitle = "Blue line: cutoff (forecast start)"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  facet_wrap(nrow = 1)
 ```
 
 ::: {.callout-tip}
@@ -752,6 +753,12 @@ forecast_results <- bind_rows(
   joint_forecasts
 )
 
+# Validate consistent number of draws per approach
+forecast_results |>
+  count(approach, name = "n_rows") |>
+  mutate(expected_rows = 100 * 14) |>
+  print()
+
 forecast_results |>
   ggplot(aes(x = actual_day, y = .value, group = .draw, color = approach)) +
   geom_line(alpha = 0.1) +
@@ -762,7 +769,8 @@ forecast_results |>
   guides(color = guide_legend(
     title = "Approach", override.aes = list(alpha = 1, linewidth = 1))
   ) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  facet_wrap(vars(approach), nrow = 1)
 ```
 
 ## Quantitative evaluation using scoringutils
