@@ -394,7 +394,7 @@ We can write this model as
 $$
 \sigma \sim HalfNormal(0, 0.05) \\
 $$ $$
-R_0 \sim \mathcal{Lognormal}(1, 0.25)
+R_0 \sim \mathcal{Lognormal}(1, 0.5)
 $$ $$
 \log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
 $$
