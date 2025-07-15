@@ -1,0 +1,176 @@
+---
+title: "Improving Forecasting Models"
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    output: slides/improving-forecasting-models.html
+    footer: "Improving Forecasting Models"
+    slide-level: 3
+---
+
+### Which Model to Use?
+
+There are *many* types of models available to us, (you've already seen a lot now):
+
+-   A range of choices from mechanistic to purely statistical.
+
+-   Bayesian, frequentist, machine learning.
+
+-   Stochastic vs. Deterministic
+
+How should we decide which model(s) to incorporate for nowcasting and forecasting? 
+
+What outputs and features do we require of these models?
+
+
+### Using Data the Data to Help Inform your Modeling Choices
+
+Often, what motivates one's modeling choices are the *trends* and *patterns* observed in the data.
+
+
+```{r, echo=FALSE}
+#![](figures/wili_timeseries.png){fig-align="center"}
+library("nfidd")
+library("feasts")
+library("fable")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("epidatr")
+library("gridExtra")
+theme_set(theme_bw())
+data(flu_data)
+flu_data <- flu_data |>
+  filter(epiweek <= "2017-08-27") # Filter to start of 2017/2018 season
+ggplot(flu_data) +
+  geom_path(aes(x=epiweek, y=wili)) + 
+  ggtitle("wILI to 2017/2018 Season")
+```
+
+### Features we cover in this session
+
+- Auto correlation
+- Partial auto-correlation
+- Stationarity
+- Seasonality
+- Constant variance
+
+
+### Autocorrelation
+
+Autocorrelation and Partial Autocorrelation (ACF/PACF) plots measure the linear 
+relationship between *lagged values* of a time series. 
+
+```{r}
+pacf_plot <- gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+pacf_plot
+```
+
+### Describing autocorrelation
+
+ACF plots correlation of $y_t$ and $y_{t-k}$ as a function of k.
+
+*Correlations show periodicity of ~52 weeks.*
+
+```{r}
+pacf_plot <- feasts::gg_tsdisplay(flu_data, y = wili, plot_type='partial', lag_max = 104)
+pacf_plot
+```
+
+### Describing partial correlation
+
+PACF plots correlation of $y_t$ and $y_{t-k}$ as a function of k, **adjusted for shorter lags**.
+
+*Only a few partial correlations are significant.*
+
+```{r}
+pacf_plot
+```
+
+### Stationarity
+
+A time series is stationary if the mean and variance of the data do not change over time.
+
+Stationarity means that there are *no long-term predictable patterns* in a time-series, but there can still be predictability in the short term.
+
+### Seasonality
+
+Seasonal patterns are common with many (but not all) endemic diseases.
+Seasonality can make a disease more *predictable*, but also means it's not *stationary*.
+
+
+```{r, echo = FALSE}
+flu_data |> 
+  gg_season(wili, 
+            period = "year",
+            labels = "none") +
+  ggtitle("Seasonality in ILI")
+```
+
+### Constant variance
+
+A key assumption of many models is *constant variance over time*.
+Transformations often help.
+
+```{r, echo=FALSE}
+p1 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  ggplot(aes(x=epiweek, y=wili)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Original Scale")
+
+p2 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  ggplot(aes(x=epiweek, y=wili)) +
+  geom_path() + 
+  geom_point() +
+  scale_y_log10() + 
+  ggtitle("Log 10 Scale")
+  
+p3 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  mutate(fourth_root = wili**(1/4)) |>
+  ggplot(aes(x=epiweek, y=fourth_root)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Fourth Root Scale")
+
+p4 <- flu_data |>
+  filter(epiweek >= "2005-10-01", epiweek <= "2010-06-01") |>
+  mutate(square_root = wili**(1/2)) |>
+  ggplot(aes(x=epiweek, y=square_root)) +
+  geom_path() + 
+  geom_point() + 
+  ggtitle("Square Root Scale")
+
+# Arrange plots in a 2x2 grid
+grid.arrange(p1, p4, p3, p2, nrow = 2, ncol = 2)
+```
+
+### Time-series Regression Models: ARIMA
+
+Widely used for decades!
+
+Notation is $ARIMA(p, d, q).$
+
+- AR (Auto-Regressive order $p$)
+    - Uses past values to predict current ones.
+    - Useful when there is auto-correlation.
+- I (Integrated order $d$)
+    - Differences ($y_t - y_{t-1}$) help make the series stationary.
+    - Useful when there is non-stationarity.
+- MA (Moving Average order $q$)
+    - Uses recent model residuals as predictors.
+
+Figuring out which $(p,d,q)$ to use is tricky!
+
+## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+
+1.  Explore the influenza dataset, focusing on assessing observed patterns qualitatively and quantitatively.
+2.  Explore different ways of improving modeling forecasts by incorporating patterns observed in data into our models.
+
+# 
+
+[Return to the session](../improving-forecasting-models)
