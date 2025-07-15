@@ -2,44 +2,49 @@
 title: "Multi-model ensembles"
 author: "Nowcasting and forecasting of infectious disease dynamics"
 bibliography: ../../nfidd.bib
+engine: knitr
 format:
   revealjs:
-    output: slides/forecasting-as-an-epidemiological-problem.html
+    output: slides/introduction-to-ensembles.html
     footer: "Multi-model ensembles"
+    slide-level: 3
+
 ---
 
-## Ensembles
+### Ensembles: many forecasts into one
 
-- Combine many different forecasts into a single prediction
+![Figure credit: Evan Ray and Nick Reich](figures/ensemble.jpg)
 
-![Figure credit: Evan Ray and Nick Reich](ensemble.png)
-
-## Why ensemble?
+### Why ensemble?
 
 ::: {.fragment .fade-in}
-- Models are specialists: you want all the perspectives
+1. Models are specialists and you want all the perspectives
     - different data sources
     - different philosophies, e.g. more mechanistic or more statistical approaches
     - different methodologies and parameterizations
 :::
 
-## Why ensemble?
+::: {.fragment .fade-in}
+2. A single "consensus forecast" is easier for decision-makers to digest 
+:::
 
-"Whole is greater than sum of parts"
+### "Whole is greater than sum of parts"
 
-   - Average of multiple predictions is often (not always) more performant than any individual model
-   
-      - History in weather & economic forecasting
-      
-      - Seen this in infectious disease forecasting
+Average of multiple predictions is often (not always) more performant than any individual model
 
-        - "Forecast challenges": Ebola, dengue, flu, COVID-19...
+- Strong evidence in weather & economic forecasting
 
-## Ensemble methods: how to average?
+- Recent evidence in infectious disease forecasting
+    - Ebola[@funkAssessingPerformanceRealtime2019]
+    - dengue[@colon-gonzalez_probabilistic_2021]
+    - flu[@reich_accuracy_2019]
+    - COVID-19[@cramer_evaluation_2022]
 
-![Figure credit: Howerton et al](figures/lop-vs-vincent.jpg)
+### Ensemble methods: how to average?
 
-## Ensemble methods: to weight or not?
+![Figure credit: @howertonContextdependentRepresentationBetweenmodel2023](figures/lop-vs-vincent.jpg)
+
+### Ensemble methods: to weight or not?
 
    - Weight models by past forecast performance
    
@@ -48,38 +53,48 @@ format:
    - Rarely better than equal average
    
       - lots of uncertainty in weight estimation!
+      - put a "strong prior" on equal weights, both in your mental and statistical models
 
-## Collaborative modelling
+### Collaborative modelling "hubs"
 
-### "Forecast hubs"
+:::: {.columns}
 
-- Crowdsourcing forecasts
+::: {.column width="50%"}
+- Projects run by research groups, public health agencies
 
-   - Open source collaborative projects 
-
-   - Anyone able to contribute a forecast
+- Participation generally open
    
-- Forecasts ensembled into a single projection
+- Standard format enables 
+  - data validation
+  - ensemble-building
+  - model evaluation
+  - visualization
+::: 
+
+::: {.column width="50%"}
+
+![[Hubverse](https://hubverse.io/)](figures/hub-modeler-flow.png)
+
+:::
+
+::::
+
    
-- Also enables consistent evaluation
-
-## 
-
-Infectious disease forecasting hubs have grown in popularity over the last decade
+### Hubs increasingly used in epi
 
 ![@Reich2022-jo](figures/history-of-hubs-2023.png)
 
 
-## ... for example, the European [Respicast](https://respicast.ecdc.europa.eu/) {.smaller}
+### ... e.g., the European [Respicast Hub](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)
 
-## Single model {.smaller}
+### Single model {.smaller}
 ![](figures/respicast-single.png)
 
-## ... Multiple models {.smaller}
+### ... Multiple models {.smaller}
 ![](figures/respicast-multi.png)
 
-## ... ... Multi-model ensemble {.smaller}
+### ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
@@ -91,7 +106,7 @@ Infectious disease forecasting hubs have grown in popularity over the last decad
 
 [Return to the session](../forecast-ensembles)
 
-## References
+### References
 
 ::: {#refs}
 :::
