@@ -70,9 +70,15 @@ However:
 
 ![](figures/weather_forecast.png)
 
-### A philosophical debate {.smaller}
+###
 
-Different camps for approaching epidemiological forecasting problems:
+![Figure credit: Evan Ray](figures/probabilistic-structure.png)
+
+### The epi forecasting philosophical debate {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"}
 
 #### Camp A 
 
@@ -82,7 +88,22 @@ Different camps for approaching epidemiological forecasting problems:
 
 "We have clear theory that explains transmission of pathogens in a networked population. I don't need to confront my model's statements with data."
 
-#### What camp are you in?
+
+
+<span style="color:blue;">
+**What camp are you in?**
+</span>
+
+:::
+
+::: {.column width="50%"}
+
+![[xkcd](https://xkcd.com/1838/)](figures/machine_learning.png)
+
+:::
+
+::::
+
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
