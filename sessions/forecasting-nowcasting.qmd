@@ -51,10 +51,12 @@ We set a random seed for reproducibility.
 Setting this ensures that you should get exactly the same results on your computer as we do.
 We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
+Finally, we set an option to not warn about the partial definition of initial conditions.
 
 ```{r}
 set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
+options(cmdstanr_warn_inits = FALSE)
 ```
 
 :::
@@ -314,7 +316,8 @@ complete_data_fit <- nfidd_sample(
     h = forecast_horizon + complete_threshold  # Forecast to beyond cutoff
   ),
   adapt_delta = 0.95,
-  max_treedepth = 12
+  max_treedepth = 12,
+  init = \() list(init_R = 1, rw_sd = 0.01)  
 )
 ```
 
@@ -464,7 +467,8 @@ pipeline_forecast_fit <- nfidd_sample(
     h = forecast_horizon
   ),
   adapt_delta = 0.95,
-  max_treedepth = 12
+  max_treedepth = 12,
+  init = \() list(init_R = 1, rw_sd = 0.01) 
 )
 ```
 
@@ -631,7 +635,8 @@ joint_forecast_fit <- nfidd_sample(
     h = forecast_horizon
   ),
   adapt_delta = 0.99,
-  max_treedepth = 12
+  max_treedepth = 12,
+  init = \() list(init_R = 1, rw_sd = 0.01) 
 )
 ```
 
@@ -679,8 +684,7 @@ ggplot() +
     title = "Joint approach: Forecasting from joint nowcast and forecast",
     subtitle = "Blue line: cutoff (forecast start)"
   ) +
-  theme_minimal() +
-  facet_wrap(nrow = 1)
+  theme_minimal()
 ```
 
 ::: {.callout-tip}
@@ -770,7 +774,7 @@ forecast_results |>
     title = "Approach", override.aes = list(alpha = 1, linewidth = 1))
   ) +
   theme(legend.position = "bottom") +
-  facet_wrap(vars(approach), nrow = 1)
+  facet_wrap(vars(approach), ncol = 1)
 ```
 
 ## Quantitative evaluation using scoringutils

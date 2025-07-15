@@ -53,10 +53,12 @@ We set a random seed for reproducibility.
 Setting this ensures that you should get exactly the same results on your computer as we do.
 We also set an option that makes `cmdstanr` show line numbers when printing model code.
 This is not strictly necessary but will help us talk about the models.
+Finally, we set an option to not warn about the partial definition of initial conditions.
 
 ```{r}
 set.seed(123)
 options(cmdstanr_print_line_numbers = TRUE)
+options(cmdstanr_warn_inits = FALSE)
 ```
 
 :::
