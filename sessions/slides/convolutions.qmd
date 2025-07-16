@@ -9,7 +9,7 @@ format:
     chalkboard: true
 ---
 
-## Individual delay distributions
+## Individual delay distributions {.smaller}
 
 Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
