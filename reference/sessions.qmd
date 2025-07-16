@@ -13,7 +13,7 @@ comments: false
 Wednesday: 13.30-14.00
 
 -   [Introduction](../sessions/slides/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
--   [Getting started](../sessions/slides/getting-started): getting started with the course (10 mins)
+-   [Getting started](../getting-started): getting started with the course (10 mins)
 -   [Motivating the course](../sessions/slides/from-line-list-to-decisions): from an epidemiological line list to informing decisions in real-time (10 mins)
 
 ## Session 1: Delay distributions
