@@ -290,6 +290,7 @@ This approach is often called "multiplicative" or "scaling" nowcasting.
 
 While this method appears simple, it still embodies a model with specific assumptions that can be difficult to define precisely. 
 Key challenges include:
+
 - The method struggles with noisy data, particularly when counts are low
 - Sparse data (e.g., zero counts) can lead to unstable estimates
 - Generating uncertainty
