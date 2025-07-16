@@ -168,12 +168,15 @@ In this section, we will start using hubverse-style data for forecast output for
 
 The [hubverse](https://hubverse.io/) is a project designed to improve public health outcomes through collaborative modeling.
 Hubverse data standards and software support collaborative modeling "hubs" around the world, including in Europe, Paraguay, Australia, the US and Canada.
-The standards were developed for and by folks doing epidemiological forecasting and projections, but they are general and could be used by practitioners in other fields as well.
+Modeling hubs collect forecasts in standardized formats from many models.
+Hubs enable us to obtain a more informed prediction of the future, often by creating a consensus of the models by building an ensemble.
+The hubverse data standards were developed for and by folks doing epidemiological forecasting and projections, but they are general and could be used by practitioners in other fields as well.
 
-Two key hubverse terms to keep in mind are:
+Several key hubverse terms to keep in mind are:
 
 -   A **modeling task** is a specific thing that is being predicted. It is represented by a specific set of variables that the hubverse calls "task-id variables". In the example that we have been working with, the modeling task is defined by the date the forecast is made (`"forecast_date"`) and the horizon being predicted (`"h"`). Note that we have also been predicting for a given location (`"region"`), although we've only been predicting for one location so far. Also, each prediction refers to a specific epiweek (`"target_epiweek"`) although this is entirely defined by `"forecast_date"` and `"h"`, so in this way we can think of it as a "derived" variable.
 -   A **output type** refers to the way that a specific prediction is represented in data. Common output types are mean, median, quantile and sample. The hubverse documentation site has [more detail on these and other output types](https://docs.hubverse.io/en/latest/user-guide/model-output.html#details-about-model-output-column-specifications).
+-   **Model output** is a tabular dataset providing a representation of the output from a model. It collects predictions for different modeling tasks in the requested output type formats.
 :::
 
 A strength of the hubverse data standards is that it facilitates comparison and synthesis of models that are made with a wide variety of different modeling tools.
@@ -437,7 +440,7 @@ What other scoring breakdowns might you want to look at?
 A simple method that is often used to improve ensemble performance is to prune out models that perform very poorly.
 Balancing this can be tricky however as it can be hard to know how much to prune.
 The key tradeoff to consider is how much to optimise for which models have performed well in the past (and what your definition of the past is, for example all time or only the last few weeks) versus how much you want to allow for the possibility that these models may not perform well in the future.
-There is strong evidence from multiple forecasting challenges that forecast accuracy from a given model can vary widely over time.\[ray_comparing_2023\]
+There is strong evidence from multiple forecasting challenges that forecast accuracy from a given model can vary widely over time.[@ray_comparing_2023]
 
 #### Construction
 

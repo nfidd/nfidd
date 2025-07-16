@@ -110,7 +110,8 @@ flu_data <- epidatr::pub_fluview(regions = c("nat"),
 data(flu_data)
 ```
 
-In the above code, we've pulled data for the 2017/2018 season (previously we had only pulled data up to the start of the 2017/2018 season).
+In the above code, we've pulled data from the 2003/2004 season through the entire 2017/2018 season (through week 31 of 2018, or `201831`). 
+Previously we had only pulled data up to the start of the 2017/2018 season.
 
 Below, we will fit and forecast from the ARIMA model plus Fourier terms that we used in the last session.
 Note that we filter the data to start at the beginning of the season!
@@ -339,6 +340,7 @@ Which of the additional dimensions mentioned at the top of the lesson would you 
 ## Solution
 
 -   All of the metrics increase for horizons where true incidence is higher.
+-   All of the metrics follow nearly the same patterns, indicating that they are measuring very similar things about the forecasts.
 -   The forecast errors are strongly associated with the seasonality of the data.
 :::
 
@@ -553,20 +555,24 @@ cv_forecasts |>
 And here we compute the error based on the week the forecast was made and compare it to the observed data.
 
 ```{r}
-p1 <- cv_forecasts |> 
+scores_to_plot <- cv_forecasts |> 
   mutate(forecast_date = epiweek - h*7L) |> 
   accuracy(
     flu_data, 
     by = c("forecast_date", ".model"), 
     measures = list(mae = MAE, rmse = RMSE, crps=CRPS)
-  ) |> 
+  ) 
+
+p1 <- scores_to_plot |> 
   ggplot(aes(x = forecast_date, y = crps, color = .model)) +
   geom_point() +
   geom_line() +
   theme(legend.position = "bottom")
 
+date_range <- range(scores_to_plot$forecast_date)
 p2 <- flu_data |> 
-  filter(epiweek >= as.Date("2017-09-01")) |> 
+  filter(epiweek >= date_range[1],
+         epiweek <= date_range[2]) |> 
   autoplot(wili)
 
 gridExtra::grid.arrange(p1, p2)
