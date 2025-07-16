@@ -27,17 +27,22 @@ nfidd_stan_path <- function() {
 #' @param content Character vector containing Stan code
 #'
 #' @param names_only Logical, if TRUE extract function names, otherwise
-#' extract function content.
+#'  extract function content.
 #'
 #' @param functions Optional, character vector of function names to extract
-#' content for.
+#'   content for.
+#'
 #' @return Character vector of function names or content
+#'
 #' @keywords internal
 .extract_stan_functions <- function(
-    content, names_only = FALSE, functions = NULL) {
-  def_pattern <- "^(real|vector|matrix|void|int|array\\s*<\\s*(real|vector|matrix|int)\\s*>|tuple\\s*<\\s*.*\\s*>)\\s+" # nolint
+    content,
+    names_only = FALSE,
+    functions = NULL) {
+  def_pattern <- "^(array\\[\\]\\s*(real|int|vector|matrix)|real|vector|matrix|void|int|array\\s*<\\s*(real|vector|matrix|int)\\s*>|tuple\\s*<\\s*.*\\s*>)\\s+" # nolint
   func_pattern <- paste0(
-    def_pattern, "(\\w+)\\s*\\("
+    def_pattern,
+    "(\\w+)\\s*\\("
   )
   func_lines <- grep(func_pattern, content, value = TRUE)
   # remove the func_pattern
@@ -52,26 +57,28 @@ nfidd_stan_path <- function() {
   } else {
     func_content <- character(0)
     for (func_name in func_names) {
-      start_line <- grep(paste0(def_pattern, func_name, "\\("), content)
+      start_line <- grep(paste0(def_pattern, func_name, "\\s*\\("), content)
       if (length(start_line) == 0) next
       end_line <- start_line
       brace_count <- 0
       # Ensure we find the first opening brace
+      # Find first opening brace
       repeat {
-        line <- content[end_line]
-        brace_count <- brace_count + .unmatched_braces(line)
+        brace_count <- brace_count + .unmatched_braces(content[end_line])
         end_line <- end_line + 1
         if (brace_count > 0) break
       }
+
       # Continue until all braces are closed
       repeat {
-        line <- content[end_line]
-        brace_count <- brace_count + .unmatched_braces(line)
+        brace_count <- brace_count + .unmatched_braces(content[end_line])
         if (brace_count == 0) break
         end_line <- end_line + 1
       }
+
       func_content <- c(
-        func_content, paste(content[start_line:end_line], collapse = "\n")
+        func_content,
+        paste(content[start_line:end_line], collapse = "\n")
       )
     }
     return(func_content)

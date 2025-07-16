@@ -78,7 +78,7 @@ functions
 Find which files contain specific functions:
 
 ```{r}
-files <- nfidd_stan_function_files(functions = c("renewal", "delay_pmf"))
+files <- nfidd_stan_function_files(functions = c("renewal"))
 files
 ```
 
@@ -88,7 +88,7 @@ Load specific functions as a string:
 
 ```{r}
 renewal_code <- nfidd_load_stan_functions(
-  functions = c("renewal", "delay_pmf")
+  functions = c("renewal")
 )
 ```
 
@@ -103,7 +103,7 @@ Write functions to a temporary file for demonstration:
 ```{r}
 temp_file <- file.path(tempdir(), "my_functions.stan")
 nfidd_load_stan_functions(
-  functions = c("renewal", "delay_pmf"),
+  functions = c("renewal"),
   write_to_file = TRUE,
   output_file = temp_file,
   wrap_in_block = TRUE
@@ -194,7 +194,7 @@ modified_model <- nfidd_cmdstan_model(model_file = "local-simple-nowcast.stan")
 
 ```{r, eval = FALSE}
 nfidd_load_stan_functions(
-  functions = c("renewal", "delay_pmf", "convolve_with_delay"),
+  functions = c("renewal", "convolve_with_delay"),
   write_to_file = TRUE,
   output_file = "my_functions.stan"
 )
