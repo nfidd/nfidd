@@ -46,6 +46,10 @@ If you use materials from this course in your work, please cite:
 }
 ```
 
+## Funding
+
+These training materials have been developed with support by the National Institutes of General Medical Sciences (R35GM119582), the US Centers for Disease Control and Prevention (NU38FT000008), and the Wellcome Trust (210758/Z/18/Z). The content is solely the responsibility of the authors and does not necessarily represent the official views of NIGMS, the National Institutes of Health, the CDC, or the Wellcome Trust.
+
 ## License
 
 All course materials are provided under the [MIT License](https://opensource.org/licenses/MIT), making them freely available for teaching, learning, and adaptation.
