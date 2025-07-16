@@ -13,9 +13,7 @@ format:
 
 Let us consider an epidemiological process that is characterised by a discrete distribution $f_d$.
 
-. . .
-
-**Example:**
+## Individual delay distributions: A simple example {.smaller}
 
 $f_d$: Probability of having incubation period of $d$ days.
 
