@@ -155,8 +155,8 @@ Before fitting your model, simulate from your priors to check they make sense:
 
 ```{r, eval = TRUE}
 # Example: checking delay priors
-prior_mean_delay <- abs(rnorm(1000, mean = 5, sd = 2))
-prior_sd_delay <- abs(rnorm(1000, mean = 2, sd = 1))
+prior_mean_delay <- abs(rnorm(1000, mean = 1.5, sd = 0.5))
+prior_sd_delay <- abs(rnorm(1000, mean = 0.5, sd = 0.1))
 
 # Simulate delays from these priors
 prior_delays <- rlnorm(
