@@ -271,6 +271,12 @@ mean(flu_data$wili)
 ARIMA models that meet certain regularity conditions will have forecasts that converge to the mean of the dataset.
 :::
 
+# Wrap up
+
+-   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+-   Share your [questions and thoughts](../reference/help)
+
+
 # References
 
 ::: {#refs}

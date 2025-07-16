@@ -389,6 +389,12 @@ Whilst Bayesian approaches work forward from domain knowledge to specify data-ge
 Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives.
 Something to think about!
 
+# Going further
+
+- Read about [ARIMA models in the FPP3 textbook](https://otexts.com/fpp3/arima.html). 
+Try to develop a better understanding of how $p$, $d$, and $q$ impact the behavior of a time-series.
+
+
 # Wrap up
 
 -   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
