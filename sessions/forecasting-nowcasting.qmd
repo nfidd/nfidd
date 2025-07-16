@@ -96,16 +96,19 @@ While we use the linelist data (individual symptom onsets with reporting delays)
 These data types differ substantially:
 
 **Our simulated data:**
+
 - Individual events with systematic reporting delays
 - Delays cause under-reporting that resolves over time
 - Clear temporal progression: infection → onset → report
 
 **ILI surveillance data (from forecasting sessions):**
+
 - Compound measure: % of visits for influenza-like illness
 - Can be revised up OR down as reports arrive
 - Combines multiple diseases and reporting locations
 
 **Adapting these methods for ILI:**
+
 - The joint modelling framework can handle bidirectional revisions by modelling the full revision process with minor modifications
 - Pipeline approaches may need separate models for upward and downward revisions
 - Understanding the data generation process (how individual reports → ILI %) helps identify biases
@@ -225,6 +228,7 @@ As we can see, after 5 days we expect to have received ~`r round(reporting_cdf[6
 Using a 14-day threshold means we're losing 7-9 days of potentially useful data.
 
 **Trade-offs to consider:**
+
 - **Less conservative thresholds** (e.g., 5-7 days): Use more recent data but need to account for 5-15% missing reports
 - **More conservative thresholds** (e.g., 14 days): Very complete data but lose recent epidemic trends
 - **Nowcasting approaches**: Use all available data and explicitly model the reporting process
@@ -749,7 +753,7 @@ head(evaluation_data)
 
 As in all other sessions, we first visualise the forecasts together.
 
-```{r plot-all-forecasts}
+```{r plot-all-forecasts, fig.height=10}
 forecast_results <- bind_rows(
   complete_data_forecasts |>
     filter(actual_day > cutoff),
