@@ -44,49 +44,61 @@ Time between two epidemiological events
 
 ## Some delays have names
 
+
 *infection* to *symptom onset*
 
 . . .
+
 
 **Incubation period**
 
 ## Some delays have names
 
+
 *infection* to *becoming infectious*
 
 . . .
+
 
 **Latent period**
 
 ## Some delays have names
 
+
 *becoming infectious* to *end of infectiousness*
 
 . . .
+
 
 **Infectious period**
 
 ## Some delays have names
 
+
 hospital *admission* to *discharge*
 
 . . .
+
 
 **Length of stay**
 
 ## Some delays have names
 
+
 *symptom onset* (person A) to *symptom onset* (person B, infected by A)
 
 . . .
+
 
 **Serial interval**
 
 ## Some delays have names
 
+
 *infection* (person A) to *infection* (person B, infected by A)
 
 . . .
+
 
 **Generation interval**
 
