@@ -6,11 +6,11 @@ comments: false
 
 # Day 1: Epidemiological delays
 
-**Wednesday - Half day starting at 1pm**
+**Wednesday - Half day starting at 1:30pm**
 
 ## Session 0: Introduction and course overview
 
-Wednesday: 13.00-13.30
+Wednesday: 13.30-14.00
 
 -   [Introduction](../sessions/slides/introduction-to-the-course-and-the-instructors): the course and the instructors (10 mins)
 -   [Getting started](../sessions/slides/getting-started): getting started with the course (10 mins)
@@ -18,7 +18,7 @@ Wednesday: 13.00-13.30
 
 ## Session 1: Delay distributions
 
-Wednesday: 13.30-14.15
+Wednesday: 14.00-14.45
 
 -   [Introduction](../sessions/slides/introduction-to-epidemiological-delays): epidemiological delays and how to represent them with probability distributions (10 mins)
 -   [Practice](../sessions/delay-distributions): simulate and estimate epidemiological delays (30 mins)
@@ -26,7 +26,7 @@ Wednesday: 13.30-14.15
 
 ## Session 2: Biases in delay distributions
 
-Wednesday: 14.15-15.00 and 15.30-16.15
+Wednesday: 14.45-15.30 and 16.00-16.45
 
 -   [Introduction](../sessions/slides/introduction-to-biases-in-epidemiological-delays): biases in delay distributions (15 mins)
 -   [Practice](../sessions/biases-in-delay-distributions): interval censoring - estimating delays from discrete dates (30 mins)
@@ -35,7 +35,7 @@ Wednesday: 14.15-15.00 and 15.30-16.15
 
 ## Session 3: Using delay distributions to model the data generating process of an epidemic
 
-Wednesday: 16.15-17.00
+Wednesday: 16.45-17.30
 
 -   [Introduction](../sessions/slides/convolutions): Using delay distributions to model the data generating process of an epidemic (10 mins)
 -   [Practice](../sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic): implementing a convolution model and identifying potential problems (30 mins)
