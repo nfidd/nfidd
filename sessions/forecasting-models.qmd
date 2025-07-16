@@ -35,9 +35,10 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
+In this session we will use `nfidd` package for some flu data, the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("fable")
 library("dplyr")
 library("tidyr")
