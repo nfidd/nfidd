@@ -57,6 +57,17 @@ if (!require("pak")) {
 pak::pak("nfidd/sismid", dependencies = TRUE)
 ```
 
+::: callout-note
+If `pak` fails to install, you can try using `remotes` as an alternative:
+
+```{r install-alternative, eval=FALSE}
+if (!require("remotes")) {
+    install.packages("remotes")
+}
+remotes::install_github("nfidd/sismid", dependencies = TRUE)
+```
+:::
+
 Then you can check that the installation completed successfully by loading the package into your **R** session:
 
 ```{r load, eval=FALSE}
