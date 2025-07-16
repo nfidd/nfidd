@@ -1,6 +1,6 @@
 ---
 title: "Combining nowcasting and forecasting"
-order: 14
+order: 13
 bibliography: ../nfidd.bib
 ---
 
@@ -112,6 +112,9 @@ These data types differ substantially:
 - Performance may be limited by the complexity of the compound measure
 
 The key insight is that whether dealing with simple delays or complex revisions, combining nowcasting and forecasting in a coherent framework improves predictions.
+
+One approach that has been taken in previous work is to use the number of hospitals that have reported in order to estimate how much reporting revisions to expect. 
+These data are actually available in the data we downloaded from `epidatar` earlier in the course.
 :::
 
 ## Generate the underlying epidemic
