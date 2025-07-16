@@ -95,7 +95,13 @@ Throughout the course we will
 
 Throughout the course we will
 
-3. In the second half we will shift to a **tools-focused approach** to demonstrate data driven forecasting and real-world applications
+3. shift, in the second half, to demonstrations of **data-driven forecasting** and real-world applications
+
+### Approach
+
+Throughout the course we will
+
+4. work through all steps of a forecasting pipeline of data exploration, model and experimental design, forecast evaluation and combination.
 
 ### Timeline
 
