@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/introduction-to-biases-in-epidemiological-delays.html
     footer: "Delay distributions at the population level"
+    chalkboard: true
 ---
 
 ## Individual delay distributions
@@ -18,7 +19,7 @@ Let us consider an epidemiological process that is characterised by a discrete d
 
 $f_d$: Probability of having incubation period of $d$ days.
 
-```{r echo = FALSE, include = TRUE}
+```{r echo = FALSE, include = TRUE, fig.width = 6, fig.height = 4}
 library(ggplot2)
 library(nfidd)
 ip_pmf <- make_ip_pmf()

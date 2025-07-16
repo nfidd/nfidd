@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/introduction-to-biases-in-epidemiological-delays.html
     footer: "Introduction to biases in epidemiological delays"
+    chalkboard: true
 ---
 
 ```{r seed}

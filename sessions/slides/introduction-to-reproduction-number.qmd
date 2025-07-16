@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/introduction-to-reproduction-number.html
     footer: "Introduction to the time-varying reproduction number"
+    chalkboard: true
 execute:
   echo: true
 ---

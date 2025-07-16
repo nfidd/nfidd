@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/from-line-list-to-decisions.html
     footer: "From an epidemiological line list to informing decisions in real-time"
+    chalkboard: true
     slide-level: 3
 ---
 

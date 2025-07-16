@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/introduction-to-real-world-forecasts.html
     footer: "Forecast evaluation"
+    chalkboard: true
     slide-level: 3
 ---
 

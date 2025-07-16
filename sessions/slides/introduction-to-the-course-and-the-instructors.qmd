@@ -5,6 +5,7 @@ format:
   revealjs:
     output: slides/introduction-to-the-course-and-the-instructors.html
     footer: "Introduction to the course and the instructors"
+    chalkboard: true
 ---
 
 ```{r instructors}

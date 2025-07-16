@@ -6,6 +6,7 @@ format:
   revealjs:
     output: slides/introduction-to-epidemiological-delay-distributions.html
     footer: "Introduction to epidemiological delays"
+    chalkboard: true
 ---
 
 ```{r seed}
@@ -125,11 +126,13 @@ hospital *admission* to *discharge*
 
 - Key elements of infectious disease epidemiology
 
+
 - Intricate relationship with nowcasting/forecasting
 
 ## Quantifying delays
 
 - Epidemiological delays are *variable* between individuals
+
 
 - We can capture their variability using probability distributions
 
