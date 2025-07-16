@@ -33,7 +33,7 @@ A probability distribution describes how likely different outcomes are for a ran
 
 **Discrete distributions** (for countable outcomes):
 - Example: Number of horse kick deaths per year (0, 1, 2, 3, ...)
-- Poisson distribution with $\lamba$ = 0.61 kicks per year
+- Poisson distribution with $\lambda$ = 0.61 kicks per year
 - Probability of exactly 2 deaths: `dpois(2, lambda = 0.61)` = 0.11
 
 **Continuous distributions** (for measurable quantities):
