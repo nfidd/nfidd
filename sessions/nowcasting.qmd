@@ -425,7 +425,7 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 ## Methods in practice
 
 - Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394) compares the performance of a range of methods that were used in a nowcasting hub and investigates what might explain performance differences.
-- The [`{baselinenowcast}`](https://baselinenowcast.epinowcast.org) R package provides implementations of simple multiplicative nowcasting methods that can serve as baselines for comparison with more complex approaches.
+- The [`baselinenowcast`](https://baselinenowcast.epinowcast.org) R package provides implementations of simple multiplicative nowcasting methods that can serve as baselines for comparison with more complex approaches.
 
 # Wrap up
 
