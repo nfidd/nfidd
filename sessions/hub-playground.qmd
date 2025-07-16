@@ -120,7 +120,7 @@ There are two models that already have made forecasts that live in the hub: `his
 We will assume that you have the hub repository downloaded to your local machine.
 
 ```{r hub-config}
-hub_path <- "../sismid-ili-forecasting-sandbox/"
+hub_path <- here::here("sismid-ili-forecasting-sandbox")
 hub_con <- connect_hub(hub_path)
 ```
 
@@ -303,8 +303,7 @@ Here is some simple code to write out a minimal model metadata file.
 this_model_id <- "sismid-arima210"
 
 metadata_filepath <- file.path(
-  "..",
-  "sismid-ili-forecasting-sandbox",
+  hub_path,
   "model-metadata", 
   paste0(this_model_id, ".yml"))
 
@@ -334,8 +333,7 @@ for (i in seq_along(groups)) {
   
   ## path to the file from the working directory of the instructional repo
   model_folder <- file.path(
-    "..",
-    "sismid-ili-forecasting-sandbox",
+    hub_path,
     "model-output", 
     this_model_id)
 
