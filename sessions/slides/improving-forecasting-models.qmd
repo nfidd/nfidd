@@ -25,7 +25,7 @@ How should we decide which model(s) to incorporate for nowcasting and forecastin
 What outputs and features do we require of these models?
 
 
-### Using Data the Data to Help Inform your Modeling Choices
+### Using Data to Help Inform your Modeling Choices
 
 Often, what motivates one's modeling choices are the *trends* and *patterns* observed in the data.
 
