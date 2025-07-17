@@ -365,13 +365,19 @@ for (i in seq_along(groups)) {
 
 Now that you have your model's forecasts in the local hub, you should be able to run an evaluation to compare the model's forecasts to the model in the hub. 
 
+We first collect the forecasts from the hub (including our new model)
+
 ```{r}
 season_one_origin_dates <- origin_dates[which(as.Date(origin_dates) <= as.Date("2016-05-07"))]
 
 season_one_forecasts <- hub_con |> 
   filter(origin_date %in% season_one_origin_dates) |> 
   collect_hub()
+```
 
+and then compare them to the oracle output.
+
+```{r}
 oracle_output <- connect_target_oracle_output(hub_path) |> 
   collect()
 
