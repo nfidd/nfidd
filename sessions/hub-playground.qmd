@@ -121,6 +121,17 @@ We will assume that you have the hub repository downloaded to your local machine
 
 ```{r hub-config}
 hub_path <- here::here("sismid-ili-forecasting-sandbox")
+
+# Debug: Check what here::here resolves to
+cat("Current working directory:", getwd(), "\n")
+cat("hub_path resolved to:", hub_path, "\n")
+cat("Does hub directory exist?", dir.exists(hub_path), "\n")
+
+if (dir.exists(hub_path)) {
+  cat("Contents of hub directory:\n")
+  print(list.dirs(hub_path, recursive = FALSE, full.names = FALSE))
+}
+
 hub_con <- connect_hub(hub_path)
 ```
 
@@ -312,6 +323,14 @@ my_text <- c("team_abbr: \"sismid\"",
              "designated_model: true")
 
 writeLines(my_text, metadata_filepath)
+
+# Debug: Check if metadata file was written
+cat("\nMetadata file path:", metadata_filepath, "\n")
+cat("Metadata file exists?", file.exists(metadata_filepath), "\n")
+if (file.exists(metadata_filepath)) {
+  cat("Metadata file contents:\n")
+  cat(readLines(metadata_filepath), sep = "\n")
+}
 ```
 
 And now we can write the files out, one for each `origin_date`.
@@ -358,6 +377,26 @@ for (i in seq_along(groups)) {
   #   file_path = file.path(this_model_id, filename)
   # )
 }
+
+# Debug: Check what was written
+cat("\nFinished writing", length(groups), "forecast files\n")
+cat("Checking model output directory:\n")
+model_output_dir <- file.path(hub_path, "model-output", "sismid-arima210")
+if (dir.exists(model_output_dir)) {
+  files_written <- list.files(model_output_dir, pattern = "\\.csv$")
+  cat("Number of CSV files in", model_output_dir, ":", length(files_written), "\n")
+  if (length(files_written) > 0) {
+    cat("First few files:", head(files_written, 3), "\n")
+  }
+} else {
+  cat("Model output directory does not exist:", model_output_dir, "\n")
+}
+
+# List all models in the hub
+cat("\nAll models in hub model-output directory:\n")
+all_models <- list.dirs(file.path(hub_path, "model-output"), 
+                       recursive = FALSE, full.names = FALSE)
+print(all_models)
 ```
 
 
@@ -368,9 +407,24 @@ Now that you have your model's forecasts in the local hub, you should be able to
 ```{r}
 season_one_origin_dates <- origin_dates[which(as.Date(origin_dates) <= as.Date("2016-05-07"))]
 
-season_one_forecasts <- hub_con |> 
+# Debug: Check hub connection before collecting
+cat("\nBefore collecting forecasts:\n")
+cat("Hub path:", hub_path, "\n")
+cat("Hub directory exists?", dir.exists(hub_path), "\n")
+
+# Try reconnecting to hub to ensure fresh connection
+hub_con_fresh <- connect_hub(hub_path)
+
+season_one_forecasts <- hub_con_fresh |> 
   filter(origin_date %in% season_one_origin_dates) |> 
   collect_hub()
+
+# Debug: What models were found?
+cat("\nModels found in season_one_forecasts:\n")
+models_found <- unique(season_one_forecasts$model_id)
+print(models_found)
+cat("Number of rows for each model:\n")
+print(table(season_one_forecasts$model_id))
 
 oracle_output <- connect_target_oracle_output(hub_path) |> 
   collect()
