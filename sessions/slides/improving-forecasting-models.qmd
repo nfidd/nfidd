@@ -92,8 +92,10 @@ pacf_plot
 ### Stationarity
 
 A time series is stationary if the mean and variance of the data do not change over time.
-
+<br>
 Stationarity means that there are *no long-term predictable patterns* in a time-series, but there can still be predictability in the short term.
+<br>
+ARIMA (and other models) assume data are stationary (won't work as well if data are not).
 
 ### Seasonality
 
@@ -150,7 +152,7 @@ p4 <- flu_data |>
 grid.arrange(p1, p4, p3, p2, nrow = 2, ncol = 2)
 ```
 
-### Time-series Regression Models: ARIMA
+### Time-series Regression Models: ARIMA {.smaller}
 
 Widely used for decades!
 
