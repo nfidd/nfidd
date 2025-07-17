@@ -91,7 +91,7 @@ Thursday: 13.00-13.30
 Thursday: 13.30-14.15
 
 -   [Introduction](../sessions/slides/improving-forecasting-models): ARIMA concepts and transformations (10 mins)
--   [Practice](../sessions/improving-forecasting-models): ACF plots, transformations, and seasonality (30 mins)
+-   [Practice](../sessions/forecasting-models): ACF plots, transformations, and seasonality (30 mins)
 -   Wrap up (5 mins)
 
 ## Session 9: Forecast evaluation
