@@ -694,6 +694,7 @@ However, estimating weights for a model adds parameters and uncertainty to the e
 ## Challenge
 
 -   Given the performance by forecast date shown by the different models, would you expect a weighted ensemble to perform better than the unweighted ensemble?
+-   Re-run the time-series cross-validation using a `.step = 1` instead of 4. This increases the number of forecasts you can evaluate. Do the results change?
 
 ## Methods in the real world
 
