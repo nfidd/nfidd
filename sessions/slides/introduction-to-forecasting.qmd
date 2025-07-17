@@ -16,18 +16,39 @@ format:
 
 [Metcalf & Lessler, *Science*, 2017](https://doi.org/10.1126/science.aam8335)
 
-### Using models for statements about the future {.smaller}
+### Modelling the future can help with ... {.smaller}
 
-Modelling the future can help decision making:
+<br>
+
+:::: {.columns}
+
+::: {.column width="50%"}
+#### ... decision making
 
 -   how many beds do we need?
 -   where should we allocate vaccines?
 -   where should we trial vaccines?
+:::
 
-However:
+::: {.column width="50%"}
+#### ...situational awareness
+
+-   nowcast: where are we now?
+-   forecast: where are we heading?
+
+:::
+
+::::
+
+<br>
+
+::: callout-warning
+But... 
 
 -   not all modelling is prediction
 -   not all modelling of the future is forecasting
+:::
+
 
 ### Different ways of modelling the future {.smaller}
 
@@ -39,11 +60,6 @@ However:
 
 ![Figure credit: [Scenario Modeling Hub](https://covid19scenariomodelinghub.org/)](figures/nowcast-forecast-project.png)
 
-### Why nowcast/forecast? {.smaller}
-
--   to create **situational awareness**
-    -   nowcast: where are we now?
-    -   forecast: where are we heading?
 
 ### CDC use of influenza forecasts
 
@@ -61,17 +77,17 @@ However:
 ### Forecasting: relationship with nowcasting {.smaller}
 
 -   Nowcast: we have **some** data from the dates we're predicting
--   Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
+-   Forecast: we have **no** data from the dates we're predicting (usually b/c they're in the future)
 
 ![Figure credit: [Scenario Modeling Hub](https://covid19scenariomodelinghub.org/)](figures/nowcast-forecast-project.png)
 
-### Forecasts are usually *probabilistic* {.smaller}
+### Forecasts are often *probabilistic* {.smaller}
 
 -   Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
 
 ![](figures/weather_forecast.png)
 
-###
+### Probabilistic epi forecasts {.smaller}
 
 ![Figure credit: Evan Ray](figures/probabilistic-structure.png)
 
@@ -85,11 +101,13 @@ However:
 
 "It's a machine learning problem! We can gather enough data to make good predictions, and we don't really have to understand the underlying processes that well."
 
+<br> 
+
 #### Camp B
 
 "We have clear theory that explains transmission of pathogens in a networked population. I don't need to confront my model's statements with data."
 
-
+<br> 
 
 <span style="color:blue;">
 **What camp are you in?**
@@ -98,6 +116,8 @@ However:
 :::
 
 ::: {.column width="50%"}
+
+Exhibit from Camp A: 
 
 ![[xkcd](https://xkcd.com/1838/)](figures/machine_learning.png)
 

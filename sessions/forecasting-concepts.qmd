@@ -77,10 +77,9 @@ Influenza-like illness (ILI) is a commonly used epidemiological surveillance mea
 An individual is classified as having ILI if they have a fever AND an additional "flu-like" symptom, such as a cough, headache, sore throat, etc... In the US, ILI data has been collected in a more or less consistent way for over 20 years at the national and state level.
 These data, including versions available at specific times, are available through the [Delphi EpiData API](https://cmu-delphi.github.io/delphi-epidata/). Specifically, the ILI signal that is published by the CDC measures the percentage of all outpatient doctor's office visits due to ILI in a given epidemiological week.
 
-The following code downloads ILI data for the USA for all weeks starting with the 2003/2004 season through the start of the 2017/2018 season.
+The following code downloads ILI data for the USA for all weeks starting with the 2003/2004 season through the start of the 2017/2018 season (epiweek 35 of 2017).
 Specifically, we use the weighted ILI variable (`wili`) which uses population-based weights estimate to try to generate a representative estimate of ILI for a specific population.
 We filter to only include columns that we need and convert the resulting object into a `tsibble` which is [a special kind of time-series data frame](https://tsibble.tidyverts.org/).
-Here is code to query the time-series data from the cloud-based hub.Here is code to query the time-series data from the cloud-based hub.
 Here is code to query the data from the Delphi EpiData API.
 
 ```{r load_data, eval=FALSE}
@@ -109,6 +108,8 @@ Also referred to as [MMWR weeks](https://ibis.doh.nm.gov/resource/MMWRWeekCalend
 Most years have 52 epiweeks.
 Some have 53.
 Week 1 of a specific year is the first week of the calendar year that has at least four days in it.
+
+In this particular dataset, `epidatr` labels a week with the date of the first Sunday in that week. 
 :::
 
 ## Look at the data
@@ -163,18 +164,27 @@ In this session we're just going to try one without thinking too much about what
 We're going to start with an Auto-Regressive Integrated Moving Average (ARIMA) model.
 Some of the core ideas of ARIMA models have been in use for 100 years, although they have been around in their current form for the last 50.[@tsay2000time] We recommend [the FPP3 ARIMA Chapter](https://otexts.com/fpp3/arima.html) as a good applied introduction to ARIMA modeling.
 
-Here is the code to fit an ARIMA model that models the an observation $y_t$ as a function of its previous two observations.
-As with other regression models in R, you can inspect some details about the fit.
+We will talk more about ARIMA models in the next session.
+For now, think about it as, a linear regression model where the predictor variables are just the last $p$ values of the time-series, where in this case $p=2$:
+$$ y_t = \mu_t + \phi_1 y_{t-1} + \phi_2 y_{t-2} + \varepsilon_t.$$ 
+Also, $\mu_t$ is a constant (like an intercept term in the regression), $\phi_1$ and $\phi_2$ are coefficients for the predictors, and $\varepsilon_t$ is a random error term with mean zero and constant variance.
+
+Here is code that fits models parameters based on all of the data that is passed to it, that is, all of the observations in `flu_data`.
 
 ```{r fit-first-model}
 fit <- flu_data |>
   model( arima200 = ARIMA(wili ~ pdq(2,0,0)) )
+```
+
+As with other regression models in R, you can inspect some details about the fit, like what the coefficients are estimated to be:
+```{r}
 report(fit)
 ```
 
 And now that we've fitted a model, we can use it to make a forecast.
 We'll start by making a forecast for `h=25` weeks into the future.
 (Although usually for epidemiological forecasts, this would be a bit further than most models could make accurate or well-calibrated forecasts.)
+The following call to `forecast()` makes a prediction that starts from the end of the observed `flu_data` time-series.
 
 ```{r make-a-forecast}
 first_forecast <- forecast(fit, h = 25) 
@@ -193,7 +203,7 @@ Note that the predictions are probabilistic in that they show a predicted mean (
 Note that in general for predictive models you want to make sure that your model gives you a **prediction** interval and not a confidence interval.
 A prediction interval should (if your model is well "calibrated" -- more on that later) cover the eventual observation with a long-run frequency equal to that of the nominal coverage rate.
 E.g.
-If you made prediction intervals for 100 points, the prediction intervals should cover around 80 of the observations.
+If you made 80% prediction intervals for 100 points, the prediction intervals should cover around 80 of the observations.
 A confidence interval is instead providing you with uncertainty about the *mean* of the distribution of eventual observations, it is not making a statement about the specific future observation.
 :::
 
@@ -260,6 +270,12 @@ mean(flu_data$wili)
 
 ARIMA models that meet certain regularity conditions will have forecasts that converge to the mean of the dataset.
 :::
+
+# Wrap up
+
+-   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+-   Share your [questions and thoughts](../reference/help)
+
 
 # References
 

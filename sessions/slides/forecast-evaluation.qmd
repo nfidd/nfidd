@@ -30,6 +30,10 @@ format:
 
 ![Figure credit: Evan Ray](figures/sharpness-calibration.png)
 
+### Forecast workflow {.smaller}
+
+![](figures/forecast-workflow.png)
+
 ### Evaluating forecasts {.smaller}
 
 1. *Vibes*: Do the forecasts look reasonable based on recent data?

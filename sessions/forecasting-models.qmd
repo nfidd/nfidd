@@ -35,9 +35,10 @@ The source file of this session is located at `sessions/forecasting-models.qmd`.
 
 ## Libraries used
 
-In this session we will use the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
+In this session we will use `nfidd` package for some flu data, the `fable` package to fit and forecast ARIMA models, the `dplyr` and `tidyr` packages for data wrangling, `ggplot2` library for plotting, and the `epidatr` package for loading epidemiological data.
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("fable")
 library("dplyr")
 library("tidyr")
@@ -61,24 +62,30 @@ set.seed(123)
 
 # Looking carefully at the data
 
-Let's introduce some mathematical notation that we will continue to use throughout the forecasting sessions in this class.
+Let's define some mathematical notation that we will continue to use throughout the forecasting sessions in this class.
 We define $y_t$ as the observed signal of interest at time $t$.
 For the example we have looked at this is the weighted ILI proportion for the US in week $t$.
+
+::: callout-tip
+### What are "lags" in time-series data?
+
+In forecasting, since we are using prior observations to predict future ones, having some notation and terminology for and functions to refer to the previous observations will be useful.
+
 We sometimes talk about the "lagged" values of a time-series.
 This is a short-hand way to refer to values of the time-series some steps back in time from the current value.
 So the value $y_{t-3}$ is referred to as the "lag-three" value of $y_t$.
+
 In R, you can access these values of a vector using the `dplyr::lag()` function.
-(Note: there is also a `stats::lag()` function that handles lags a little bit differently.) In forecasting, since we are using prior observations to predict future ones, having some notation and terminology for and functions to refer to the previous observations will be useful.
+(Note: there is also a `stats::lag()` function that handles lags a little bit differently.) 
+:::
 
 We start by loading in the same dataset that we looked at in the previous session.
 
-```{r}
-flu_data <- pub_fluview(regions = "nat", 
-                        epiweeks = epirange(200335, 201735)) |> 
-  select(region, epiweek, wili) |> 
-  as_tsibble(index = epiweek, key = region)
+```{r load-data}
+data(flu_data)
 ```
 
+## ACF plots
 We will now use the function `gg_tsdisplay()` from [the `feasts` R package](https://feasts.tidyverts.org/) to give a unique view into our dataset.
 
 ```{r}
@@ -99,8 +106,10 @@ cor(flu_data$wili, dplyr::lag(flu_data$wili, 12), use = "complete.obs")
 
 By comparing these values computed directly here to the ACF plot above at lags of 1 and 12, you can see that the values are the same.
 
-The lower right hand panel shows the partial correlation function (PCF).
-The partial correlation at lag $k$ estimates the correlation between $y_t$ and $y_{t-k}$ after adjusting for the effects of lags 1, ..., k-1.
+## PACF plots
+
+The lower right hand panel shows the partial auto-correlation function (PACF).
+The partial auto-correlation at lag $k$ estimates the correlation between $y_t$ and $y_{t-k}$ after adjusting for the effects of lags 1, ..., k-1.
 There are a lot of additional examples and explanation about interpreting ACF and PCF plots in [FPP3, Chapter 9.5](https://otexts.com/fpp3/non-seasonal-arima.html).
 
 ::: callout-tip
@@ -162,9 +171,12 @@ We are going to fit a few overly simple ARIMA models below just to give examples
 
 ### ARIMA(1,0,0)
 
-Here is the equation for an ARIMA(1,0,0) model: $$ y_t = \mu_t + \phi_1 y_{t-1} + \varepsilon_t $$ where $\mu_t$ is a constant (like an intercept term in the regression), $\phi_1$ is a coefficient for the auto-regressive term, and $\varepsilon_t$ is a random error term with mean zero and constant variance.
-Note the constant variance assumption!
+Here is the equation for an ARIMA(1,0,0) model: 
+$$ y_t = \mu_t + \phi_1 y_{t-1} + \varepsilon_t $$ 
+where $\mu_t$ is a constant (like an intercept term in the regression), $\phi_1$ is a coefficient for the auto-regressive term, and $\varepsilon_t$ is a random error term with mean zero and constant variance.
+**Note the constant variance assumption!**
 This is one of the places where the stationarity assumption is comes into play: if the time-series is stationary then constant variance is a reasonable assumption.
+
 Here is code to fit and forecast from an ARIMA(1,0,0) model (this is sometimes also referred to as an AR(1) model):
 
 ```{r}
@@ -222,6 +234,23 @@ forecast(fit_arima001, h=40) |>
   labs(title = "WILI, US level",
        y="% of visits")
 ```
+
+::: callout-tip
+## Take 5 minutes
+
+Using the partial auto-correlation function plots as a guide, which lags might you consider including in the AR part of an ARIMA model?
+
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Recall that the interpretation of the height of the line at $x = k$ in the PACF plot is the correlation between $y_t$ and $y_{t-k}$ after adjusting for all other lags less than $k$.
+This interpretation is similar to that of a multiple regression model, where a coefficient in a model captures the relationship between it and the outcome *adjusting for other predictor variables*.
+Therefore, the PACF plots can help identify which auto-regressive terms that might be appropriate for a model.
+In particular, we see strong PACF values for lags 1 and 2, a slightly "significant" but much smaller PACF value at lag 3 and then also some significant lags at around 52 weeks (exactly one year later).
+We will talk about adjusting for seasonalily later, but for now, it looks like including 2-3 auto-regressive lags in the model might be appropriate.
+:::
 
 # Fit a few targeted ARIMA models
 
@@ -307,7 +336,7 @@ But which of these models do you think is doing the most reasonable (or least un
 Once again, there is not exactly a "right" answer here, but here are a few things to consider:
 
 -   The fact that both of the `_trans` forecasts (the ones with the fourth-root transformation) stay positive seems pretty critical. The other forecasts routinely predict impossible values!
--   The `arima210_trans` model has quite high uncertainty at longer horizons in a way that seems reasonable.
+-   The `arima110_trans` model has quite high uncertainty at longer horizons in a way that seems reasonable.
 
 Again, all of these forecasts are not very good, but they are progress.
 :::
@@ -327,7 +356,12 @@ Here are two relatively straight-forward ways that you could address this:
 We're going to try approach 2 because it's a bit easier to get up and running in `fable`.
 You can read more about this approach in [FPP3 Chapter 12.1](https://otexts.com/fpp3/complexseasonality.html#dynamic-harmonic-regression-with-multiple-seasonal-periods).
 The model we will fit below will be an AR(2) model plus some harmonic terms.
-We can define it mathematically like this: $$ y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + \sum_{k=1}^{3} \left[ \alpha_k \cos\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) + \beta_k \sin\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) \right] + \varepsilon_t $$ where $\alpha_k$ and $\beta_k$ are the Fourier coefficients for the sine and cosine terms, and $d(t)$ is a function that returns the integer day of the year representing the first day of week $t$.
+We can define it mathematically like this: 
+$$ y_t = \phi_1 y_{t-1} + \phi_2 y_{t-2} + \sum_{k=1}^{3} \left[ \alpha_k \cos\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) + \beta_k \sin\left( \frac{2\pi \cdot k \cdot d(t)}{365} \right) \right] + \varepsilon_t $$ 
+where $\alpha_k$ and $\beta_k$ are the Fourier coefficients for the sine and cosine terms, and $d(t)$ is a function that returns the integer day of the year representing the first day of week $t$.
+The coefficients scale up and down the sine and cosine waves.
+Different linear combinations of sine and cosine waves of these varying frequencies can be constructed to make many smooth shapes.
+The number of sine and cosine terms chosen here ($k=3$) is arbitrary, and this could be adjusted or other values tried out.
 
 Note that you can just add a `fourier()` term to your model equation and this will add the Fourier Series terms shown in the equation above to the model predictors.
 Here is the new fitted set of models, using just the transformed data, and only using the Fourier Series on the undifferenced data, since we are assuming that this periodic function will model the stationarity directly.
@@ -356,7 +390,16 @@ Whilst Bayesian approaches work forward from domain knowledge to specify data-ge
 Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives.
 Something to think about!
 
+# Going further
+
+- Read about [ARIMA models in the FPP3 textbook](https://otexts.com/fpp3/arima.html). 
+Try to develop a better understanding of how $p$, $d$, and $q$ impact the behavior of a time-series.
+
+
 # Wrap up
+
+-   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+-   Share your [questions and thoughts](../reference/help)
 
 ## References
 
