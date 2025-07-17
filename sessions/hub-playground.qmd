@@ -370,7 +370,9 @@ We first collect the forecasts from the hub (including our new model)
 ```{r}
 season_one_origin_dates <- origin_dates[which(as.Date(origin_dates) <= as.Date("2016-05-07"))]
 
-season_one_forecasts <- hub_con |> 
+new_hub_con <- connect_hub(hub_path)
+
+season_one_forecasts <- new_hub_con |> 
   filter(origin_date %in% season_one_origin_dates) |> 
   collect_hub()
 ```
