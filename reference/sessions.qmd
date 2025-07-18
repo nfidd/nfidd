@@ -160,9 +160,9 @@ Friday: 14.00-15.00
 Friday: 15.30-17.00
 
 -   Research talk 1: Nick (15 mins)
--   Research talk 2: Sam (15 mins)
+-   Research talk: [Why am I so late?](../sessions/slides/why-am-i-so-late.pdf)
 -   Research talk 3: Nick (15 mins)
--   Research talk 4: Sam (15 mins)
+-   Research talk 4: Nick (15 mins)
 -   [Summary](../sessions/slides/closing) of the course (10 mins)
 -   Final discussion and closing (20 mins)
     -   [Further reading](../sessions/end-of-course-summary-and-discussion)
