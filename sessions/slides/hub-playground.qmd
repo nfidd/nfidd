@@ -20,8 +20,10 @@ Now it's your turn to work more independently on these tasks in our "Sandbox Hub
 ### Sandbox hub
 
 Similar to our earlier ILI examples, but with data from multiple locations.
-
+<br>
 The [SISMID ILI Forecasting Sandbox](https://github.com/reichlab/sismid-ili-forecasting-sandbox/) is an actual, live hub.
+<br>
+Check out [the interactive dashboard](https://reichlab.io/sismid-ili-forecasting-dashboard/)!
 
 ### Model development workflow {.smaller}
 
