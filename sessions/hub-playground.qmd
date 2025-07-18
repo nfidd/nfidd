@@ -39,6 +39,7 @@ Additionally, we will use some [hubverse](https://hubverse.io/) packages such as
 
 
 ```{r libraries, message = FALSE}
+library("nfidd")
 library("dplyr")
 library("ggplot2")
 library("epidatr")
@@ -80,8 +81,9 @@ We will also use the term **local hub** in this session.
 By this we mean any modeling hub that you set up on your local filesystem to do a modeling project.
 We're going to set up a hub in the style of [the hubverse](https://hubverse.io/), because you get a lot of added benefits from working with data in that format. 
 But you could build a local hub however you want for your own modeling experiments.
-
 :::
+
+If you can get through this session, the reward will be seeing your forecasts alongside the other forecasts at [the online dashboard for this hub](https://reichlab.io/sismid-ili-forecasting-dashboard/forecast.html).
 
 
 You should download this hub to your local laptop before continuing this session. 
@@ -89,35 +91,36 @@ Here are the two ways you can download this hub:
 
 1. Download the hub as a fixed dataset using the link to [this zip file](https://github.com/reichlab/sismid-ili-forecasting-sandbox/archive/refs/heads/main.zip).
 
-2. If you are familiar with using GitHub (or want to get more familiar with it), then this is your opportunity! 
-Login to [GitHub](https://github.com/) using your existing GitHub account (or create one!).
-Clone this repository by clicking on the green "`<> Code`" button on the main page of [the Sandbox Hub repo](https://github.com/reichlab/sismid-ili-forecasting-sandbox/).
+2. If you are familiar with using GitHub (or want to get more familiar with it), then we recommend cloning the repo directly to your laptop. 
+    - Login to [GitHub](https://github.com/) using your existing GitHub account (or create one!).
+    - Clone this repository by clicking on the green "`<> Code`" button on the main page of [the Sandbox Hub repo](https://github.com/reichlab/sismid-ili-forecasting-sandbox/).
+    - **For the rest of the code in this session to work smoothly, this repository should live inside the `sismid/` directory that stores the material for this course.**
 
 ::: callout-tip
+Whether you use method 1 or 2 listed above, you should end up with a directory called `sismid/sismid-ili-forecasting-sandbox/` on your local machine.
+:::
+
+
+::: callout-caution
 Note that you can clone the repo using HTTPS, but if you are going to be using and pushing to GitHub a lot, then [setting up SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account) and cloning via SSH is usually worth it. 
 :::
 
-The code below will work more easily if the sandbox hub is downloaded and lives inside the repository for this course.
-
-
-## Introduce ILI Forecasting at HHS Region level
+## ILI Forecasting at HHS Region level
 
 We have done some modeling on ILI data in the earlier sessions. 
 Our sandbox hub is set up to accept forecasts for the US level and the 10 Health and Human Services (HHS) Regions. 
 
-![A map showing the 10 HHS Regions.](figures/hhs-regions.png)
-
-We are going to intentionally not look at all of the seasons of data right now, so as not to introduce too much unconsious bias by giving ourselves information about which seasons are big/small.
+![A map showing the 10 HHS Regions.](slides/figures/hhs-regions.png)
 
 A forecast will produce quantile predictions of *1- through 4-week ahead* forecasts of the estimated percentage of outpatient doctors office visits that are for IL.
 This target is given the label "ili perc" in the hub.
 Forecasts can be submitted for any week during the 2015/2016, 2016/2017, 2018/2019 or 2019/2020 influenza seasons.
 
-## Introduce details of this hub
+## Details of this hub
 
-There are two models that already have made forecasts that live in the hub: `hist-avg` and `delphi-epicast`.
+There are six models that already have made forecasts that live in the hub: `hist-avg`, `delphi-epicast`, `protea-cheetah`, `lanl-dbmplus`, `kot-kot`, and `neu-gleam`.
 
-We will assume that you have the hub repository downloaded to your local machine.
+We will assume that you have the hub repository downloaded to your local machine as described in the section above.
 
 ```{r hub-config}
 hub_path <- here::here("sismid-ili-forecasting-sandbox")
@@ -134,30 +137,42 @@ hub_con |>
 ```
 
 
-# Building and working with local forecasts
+# Building forecasts for multiple locations
 
 Let's start as we did in other sessions by downloading the data that we want to work with.
 
-```{r}
+First, we define some location information:
+```{r location-info}
 locs <-  c("nat", 
            "hhs1", "hhs2", "hhs3", "hhs4", "hhs5", 
            "hhs6", "hhs7", "hhs8", "hhs9", "hhs10")
+location_formal_names <- c("US National", paste("HHS Region", 1:10))
+loc_df <- data.frame(region = locs, location = location_formal_names)
+```
 
-flu_data <- pub_fluview(regions = locs, 
-                        epiweeks = epirange(200335, 201735)) |> 
+
+The following code will download data from `epidatr`, but we have also downloaded these data as a static data object for reproducibility.
+```{r, eval=FALSE}
+flu_data_hhs <- pub_fluview(regions = locs, 
+                        epiweeks = epirange(200335, 202035)) |> 
   ## aligning with the notation and dates for the hub
   ## in epidatr, weeks are labeled with the first day of the epiweek
   ## in the hub, weeks are labeled with the last day of the epiweek
   mutate(origin_date = epiweek + 6) |> 
-  select(region, origin_date, wili) |>
-  as_tsibble(index = origin_date, key = region)
-flu_data
+  left_join(loc_df) |> 
+  select(location, origin_date, wili) |>
+  as_tsibble(index = origin_date, key = location)
+```
+
+The following code will load the saved data into the session:
+```{r}
+data(flu_data_hhs)
 ```
 
 ## Building a simple forecast for multiple locations
 
 We're going to start by building a simple auto-regressive forecast without putting too much thought into which exact model specification we choose. 
-Let's try, for starters, an ARIMA(2,1,0).
+Let's try, for starters, an ARIMA(2,1,0) with a fourth-root transformation.
 Recall, that this means we are using two auto-regressive terms with one set of differencing of the data.
 
 ```{r}
@@ -165,74 +180,99 @@ fourth_root <- function(x) x^0.25
 inv_fourth_root <- function(x) x^4
 my_fourth_root <- new_transformation(fourth_root, inv_fourth_root)
 
-fit_arima210 <- flu_data |>
+fit_arima210 <- flu_data_hhs |>
   filter(origin_date <= "2015-10-24") |> 
   model(ARIMA(my_fourth_root(wili) ~ pdq(2,1,0)))
 forecast(fit_arima210, h=4) |>
-  autoplot(flu_data |> 
+  autoplot(flu_data_hhs |> 
              filter(
                origin_date <= "2015-10-24",
                origin_date >= "2014-09-01"
              )) +
-  facet_wrap(.~region, scales = "free_y") +
+  facet_wrap(.~location, scales = "free_y") +
   labs(y = "% of visits due to ILI",
        x = NULL)
 ```
 
-Note that if you set up your `tsibble` object correctly, with the `"region"` column as a `key` variable, then `fable` will fit and forecast multiple separate versions of the ARIMA(2,1,0) model for you directly.
+Note that if you set up your `tsibble` object correctly, with the `"location"` column as a `key` variable, then `fable` will fit and forecast 11 separate versions of the ARIMA(2,1,0) model for you directly, one for each of the locations in the dataset.
 
 Each model can be inspected as before
 ```{r}
 fit_arima210 |> 
-  filter(region == "hhs1") |> 
+  filter(location == "HHS Region 1") |> 
   report(model)
 fit_arima210 |> 
-  filter(region == "hhs9") |> 
+  filter(location == "HHS Region 9") |> 
   report(model)
 ```
 
-### Making one season's worth of forecasts
+## Ideas for more complex models
+
+Below, you will be encouraged to try fitting your own models.
+Here are some ideas of other models you could try:
+
+- use the `fable::VAR()` model to build a multivariate vector auto-regressive model.
+- use the `fable::NNETAR()` model to build a neural network model.
+- add forecasts from the renewal model (this may take some time to run, but it would be interesting!)
+- add forecasts from other variants of the `fable::ARIMA()` models
+- try out other specifications of transformations (e.g. a log transformation instead of a fourth-root) or the number of fourier terms.
+- incorporate another model of your choice.
+- build some ensembles of all (or a subset) of the models you created.
+
+# Designing forecast validation and testing 
+
+There are five seasons worth of weeks that we can make forecasts for in our sandbox hub.
+We will design an validation and testing experiment where we will use the first two seasons (2015/2016 and 2016/2017) as our "validation set". 
+We can fit as many models as we want to on the weeks during these two seasons. 
+However, to show that we have a modeling process that can create a reliable forecasting model, we want to pass only 1-2 models on to the test phase to measure their performance.
+We want to pass along only models that we think will perform well in the test phase. 
+
+
+## Validation-phase forecasts
+
+We'll follow the same [time-series cross-validation recipe that we used in the session on forecast evaluation](forecast-evaluation.html#time-series-cross-validation) to run multiple forecasts at once for our validation phase.
+
+You could adapt the code below to run validation-phase forecasts.
 
 Here are all the valid `origin_dates` that we could submit forecasts for, read directly from the hub:
-```{r}
+```{r origin_dates}
 origin_dates <- hub_path |> 
   read_config("tasks") |> 
   get_round_ids()
 origin_dates
 ```
 
-We'll follow the same [time-series cross-validation recipe that we used in the session on forecast evaluation](forecast-evaluation.html#time-series-cross-validation) to run multiple forecasts at once.
+We will define time-series cross-validation datasets for each season separately, as we want to make sure that we start and end each season at the correct time.
 
-```{r}
-flu_data_tscv <- flu_data |> 
+### Make season 1 forecasts
+Here, we define a time-series cross-validation dataset for the first season
+```{r make-season1-tscv}
+flu_data_hhs_tscv_season1 <- flu_data_hhs |> 
   filter(
     origin_date <= "2016-05-07"  ## last 2015/2016 date
     ) |> 
   tsibble::stretch_tsibble(
-    .init = 634, ## flu_data |> filter(region == "hhs1", origin_date <= "2015-10-17") |> nrow()
+    .init = 634, ## flu_data_hhs |> filter(location == "HHS Region 1", origin_date <= "2015-10-17") |> nrow()
     .step = 1,
     .id = ".split"
     )
-flu_data_tscv
+flu_data_hhs_tscv_season1
 ```
 
 And now we will run all of the forecasts and make 1 through 4 week forecasts, including the `generate()` function to generate predictive samples and then extracting the quantiles.
 This code also reformats the `fable`-style forecasts into the required hubverse structure for this hub.
 
-```{r}
+```{r generate-season1-forecasts}
 quantile_levels <- c(0.01, 0.025, seq(0.05, 0.95, 0.05), 0.975, 0.99)
 
-location_formal_names <- c("US National", paste("HHS Region", 1:10))
-loc_df <- data.frame(region = locs, location = location_formal_names)
-
-cv_forecasts <- 
-  flu_data_tscv |> 
+cv_forecasts_season1 <- 
+  flu_data_hhs_tscv_season1 |> 
   model(
     arima210 = ARIMA(my_fourth_root(wili) ~ pdq(2,1,0))
   ) |> 
   generate(h = 4, times = 100, bootstrap = TRUE) |> 
   ## the following 3 lines of code ensure that there is a horizon variable in the forecast data
-  group_by(.split, .rep, region, .model) |> 
+  group_by(.split, .rep, location, .model) |> 
   mutate(horizon = row_number()) |> 
   ungroup() |> 
   as_tibble() |> 
@@ -257,12 +297,12 @@ cv_forecasts <-
 Note that you need to choose a `model_id` for your model. 
 It is required by our hub to have the format of `[team abbreviation]-[model abbreviation]`.
 When you are making a local hub, you should pick a team abbreviation that is something short and specific to you. 
-For now, I'm going to use `sismid` as the team abbreviation. 
+For now, we're going to use `sismid` as the team abbreviation. 
 (See last line of code above for where I create the name.)
 :::
 
 
-The above table has `r nrow(cv_forecasts)` rows, which makes sense because there are
+The above table has `r nrow(cv_forecasts_season1)` rows, which makes sense because there are
 
 - 30 origin dates
 - 11 locations
@@ -274,13 +314,13 @@ And $30 \cdot 11 \cdot 4 \cdot 23 = 30,360$.
 Let's plot one set of forecasts as a visual sanity check to make sure our reformatting has worked.
 
 ```{r plot-one-forecast}
-cv_forecasts |> 
+cv_forecasts_season1 |> 
   filter(origin_date == "2015-12-19") |> 
   plot_step_ahead_model_output(
-    flu_data |> 
+    flu_data_hhs |> 
       filter(origin_date >= "2015-10-01", 
              origin_date <= "2015-12-19") |> 
-      rename(location = region, observation = wili),
+      rename(observation = wili),
     x_target_col_name = "origin_date",
     x_col_name = "target_end_date",
     use_median_as_point = TRUE,
@@ -290,16 +330,64 @@ cv_forecasts |>
   )
 ```
 
+### Make season 2 forecasts
 
-### Saving the forecasts locally
+Here, we define a time-series cross-validation dataset for the second season.
+```{r make-season2-tscv}
+first_idx_season2 <- flu_data_hhs |> 
+  filter(location == "HHS Region 1", 
+         origin_date <= "2016-10-22") |> ## first 2016/2017 date
+  nrow()
+flu_data_hhs_tscv_season2 <- flu_data_hhs |> 
+  filter(
+    origin_date <= "2017-05-06"  ## last 2016/2017 date
+    ) |> 
+  tsibble::stretch_tsibble(
+    .init = first_idx_season2,
+    .step = 1,
+    .id = ".split"
+    )
+```
 
-Now let's save the forecasts locally so that we can incorporate these forecasts with the existing forecasts in the hub. 
+Generate and reformat season 2 forecasts:
+```{r generate-season2-forecasts}
+cv_forecasts_season2 <- 
+  flu_data_hhs_tscv_season2 |> 
+  model(
+    arima210 = ARIMA(my_fourth_root(wili) ~ pdq(2,1,0))
+  ) |> 
+  generate(h = 4, times = 100, bootstrap = TRUE) |> 
+  ## the following 3 lines of code ensure that there is a horizon variable in the forecast data
+  group_by(.split, .rep, location, .model) |> 
+  mutate(horizon = row_number()) |> 
+  ungroup() |> 
+  as_tibble() |> 
+  ## make hubverse-friendly names
+  rename(
+    target_end_date = origin_date,
+    value = .sim,
+    model_id = .model
+  ) |> 
+  left_join(loc_df) |> 
+  mutate(origin_date = target_end_date - horizon * 7L) |> 
+  ## compute the quantiles
+  group_by(model_id, location, origin_date, horizon, target_end_date) |> 
+  reframe(tibble::enframe(quantile(value, quantile_levels), "quantile", "value")) |> 
+  mutate(output_type_id = as.numeric(stringr::str_remove(quantile, "%"))/100, .keep = "unused",
+         target = "ili perc",
+         output_type = "quantile",
+         model_id = "sismid-arima210")
+```
+
+### Save the forecasts locally
+
+Now let's save the validation forecasts locally so that we can incorporate these forecasts with the existing forecasts in the hub. 
 
 First, we need to create a model metadata file (formatted as [a YAML file](https://www.redhat.com/en/topics/automation/what-is-yaml)) and store it in the hub. 
 This can be something very minimal, but there are a few required pieces.
 Here is some simple code to write out a minimal model metadata file.
 
-```{r}
+```{r write-model-metadata}
 this_model_id <- "sismid-arima210"
 
 metadata_filepath <- file.path(
@@ -316,9 +404,9 @@ writeLines(my_text, metadata_filepath)
 
 And now we can write the files out, one for each `origin_date`.
 
-```{r}
+```{r write-out-files}
 # Group the forecasts by task id variables
-groups <- cv_forecasts |> 
+groups <- bind_rows(cv_forecasts_season1, cv_forecasts_season2) |> 
   group_by(model_id, target, location, origin_date, horizon, target_end_date) |> 
   group_split()
 
@@ -360,7 +448,6 @@ for (i in seq_along(groups)) {
 }
 ```
 
-
 ### Local hub evaluation
 
 Now that you have your model's forecasts in the local hub, you should be able to run an evaluation to compare the model's forecasts to the model in the hub. 
@@ -368,12 +455,12 @@ Now that you have your model's forecasts in the local hub, you should be able to
 We first collect the forecasts from the hub (including our new model)
 
 ```{r}
-season_one_origin_dates <- origin_dates[which(as.Date(origin_dates) <= as.Date("2016-05-07"))]
+validation_origin_dates <- origin_dates[which(as.Date(origin_dates) <= as.Date("2017-05-06"))]
 
 new_hub_con <- connect_hub(hub_path)
 
-season_one_forecasts <- new_hub_con |> 
-  filter(origin_date %in% season_one_origin_dates) |> 
+validation_forecasts <- new_hub_con |> 
+  filter(origin_date %in% validation_origin_dates) |> 
   collect_hub()
 ```
 
@@ -384,7 +471,7 @@ oracle_output <- connect_target_oracle_output(hub_path) |>
   collect()
 
 hubEvals::score_model_out(
-  season_one_forecasts,
+  validation_forecasts,
   oracle_output
 ) |> 
   arrange(wis) |> 
@@ -393,23 +480,12 @@ hubEvals::score_model_out(
 
 Here we can see that our new `sismid-arima210` model has a bit lower probabilistic accuracy (higher WIS) than the `delphi-epicast` model, and has better accuracy than the `hist-avg` model.
 Also, it shows less bias than either of the other models, although a bit more dispersion (it is less sharp) than the `delphi-epicast` model.
-(This can also be seen in it's 97% PI coverage rate for the 90% intervals. 
-The intervals are too conservative/wide and therefore cover more than the nominal rate)
 
 ::: callout-caution
 Note that the forecasts that we make are using the finalized version of the data, whereas the pre-existing models that are in the hub were generated using data that was available in real-time.
 This is potentially a considerable disadvantage, if data ended up being substantially revised, therefore these evaluations against the "real" models should be interpreted with caution.
 :::
 
-## Building more complex models
-
-Here are some ideas of other models you could try:
-
-- use the `fable::VAR()` model to build a multivariate vector auto-regressive model.
-- use the `fable::NNETAR()` model to build a neural network model.
-- any of the models that we used earlier in the course (either in the forecasting or nowcasting portion).
-- incorporate another model of your choice.
-- build some ensembles of all (or a subset) of the models you created.
 
 # Selecting models for the "testing phase"
 
@@ -436,7 +512,7 @@ Once you've selected the models, you can generate and submit forecasts for the t
 
 # Submitting test-phase forecasts to an online hub
 
-If you've gotten this far, congratulations! :tada:
+If you've gotten this far, congratulations!
 
 As a last test of your forecasting prowess, we invite you to submit the forecasts for your test-phase models to our [online `sismid-ili-forecasting-sandbox` hub](https://github.com/reichlab/sismid-ili-forecasting-sandbox).
 
@@ -463,7 +539,7 @@ The following assumes that you have a GitHub account and some basic working know
 
 1. Fork the [`sismid-ili-forecasting-sandbox` hub](https://github.com/reichlab/sismid-ili-forecasting-sandbox) so you have a copy of this repository owned by your GitHub user account.
 
-2. Clone your fork of the repo to your laptop.
+2. Clone your fork of the repo to your laptop (ideally, it should live at the top level within the `sismid` directory with these course materials).
 
 3. Put whatever model-metadata and forecasts you want to submit into the correct locations in the hub.
 

@@ -150,3 +150,22 @@
 #'   \item{wili}{the weighted ILI (Influenza-like Illness) variable}
 #' }
 "flu_data"
+
+#' Flusight ILI data for the US starting with the 2003/2004 season through the
+#' end of the 2019/2020 season.
+#'
+#' A dataset containing Flusight wILI (weighted Influenza-like Illness) data
+#' starting with the 2003/2004 season through the 2019/2020 season. Contains the
+#' wILI signal that is published by the CDC  which measures the percentage of
+#' all outpatient doctor's office visits due to ILI in a given epidemiological
+#' week.
+#'
+#' @format A [tibble::tibble()] with a 3 columns and 780 rows
+#' \describe{
+#'   \item{location}{the region for which `wili` is represented: "US National" for
+#'   national, and "HHS Region X" for 1 through 10 for HHS regions of the US.}
+#'   \item{origin_date}{The date of the Saturday that is the end of the epiweek
+#'   to which the wILI measurement corresponds.}
+#'   \item{wili}{the weighted ILI (Influenza-like Illness) variable}
+#' }
+"flu_data_hhs"
