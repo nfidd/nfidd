@@ -12,13 +12,13 @@ This will expose many of the challenges involved with real-time forecasting, as 
 
 ## Slides
 
--   [Real-world forecasts](slides/real-world-forecasts)
+-   [Real-world forecasts](slides/introduction-to-real-world-forecasts)
 
 ## Objectives
 
 The aim of this session is to develop advanced skills in working with real forecasts and an appreciation for the challenges of real-time forecasting.
 
-:::: {.callout-note collapse="true"}
+::: {.callout-note collapse="true"}
 # Setup
 
 ## Source file
@@ -53,18 +53,18 @@ This is not strictly necessary but will help us talk about the models.
 ```{r}
 set.seed(5050) # for Shohei Ohtani!
 ```
-::::
+:::
 
 # Introduction to the US COVID-19 Forecast Hub
 
-The US COVID-19 Forecast Hub is a collaborative epidemiological forecasting project that started in April 2020. 
+The US COVID-19 Forecast Hub is a collaborative epidemiological forecasting project that started in April 2020.
 From 2020 through summer 2024, [the project](https://covid19forecasthub.org/) was hosted by [the Reich Lab at UMass-Amherst](https://reichlab.io/).
 The short-term forecasts were published on the US CDC website as the official forecasts of record from the federal government.
 
-During this time, the project collected over 9,000 forecast submissions from 130 models. 
-The project collected nearly 1 billion rows of model output data, and has led to multiple research papers on epidemiological forecasting.[@ray_comparing_2023;@cramer_evaluation_2022;@fox_optimizing_2024;@kim_beyond_2024]
+During this time, the project collected over 9,000 forecast submissions from 130 models.
+The project collected nearly 1 billion rows of model output data, and has led to multiple research papers on epidemiological forecasting.[@ray_comparing_2023; @cramer_evaluation_2022; @fox_optimizing_2024; @kim_beyond_2024]
 
-The project paused forecasting during the 2024 summer, and restarted in late fall 2024 under the purview of the US CDC Centers for Forecasting and Outbreak Analytics (CFA). 
+The project paused forecasting during the 2024 summer, and restarted in late fall 2024 under the purview of the US CDC Centers for Forecasting and Outbreak Analytics (CFA).
 When it re-started, the hub was launched using hubverse-style forecast guidelines.
 [The public dashboard for the COVID-19 Forecast Hub](https://reichlab.io/covidhub-dashboard/) has an up-to-date record of the forecasts submitted.
 
@@ -73,36 +73,35 @@ In this session, we will access and analyse forecasts from the CFA-run US COVID-
 ::: callout-tip
 ## Take 5 minutes
 
-Browse the current US COVID-19 Forecast Hub Dashboard. 
+Browse the current US COVID-19 Forecast Hub Dashboard.
 Write down three observations that are interesting or surprising to you.
 Share them with your neighbor(s) and listen to their observations.
 :::
 
 ## Forecast dimensions
 
-Here are some details about the structure of the COVID-19 Forecast Hub project. 
+Here are some details about the structure of the COVID-19 Forecast Hub project.
 
-- Forecasts are collected every week, with submissions due on Wednesdays.
-- Teams make predictions of -1 through 3 week ahead counts of new hospital admissions due to COVID-19. 
-- The ground truth data ("target data" in hubverse lingo) is taken from [the Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset](https://data.cdc.gov/Public-Health-Surveillance/Weekly-Hospital-Respiratory-Data-HRD-Metrics-by-Ju/mpgq-jmmr/about_data).
-- Teams may forecast for up to 53 locations, including the US national level, all 50 states, plus Puerto Rico and Washington DC.
-- Forecasts are solicited in a quantile format.
+-   Forecasts are collected every week, with submissions due on Wednesdays.
+-   Teams make predictions of -1 through 3 week ahead counts of new hospital admissions due to COVID-19.
+-   The ground truth data ("target data" in hubverse lingo) is taken from [the Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset](https://data.cdc.gov/Public-Health-Surveillance/Weekly-Hospital-Respiratory-Data-HRD-Metrics-by-Ju/mpgq-jmmr/about_data).
+-   Teams may forecast for up to 53 locations, including the US national level, all 50 states, plus Puerto Rico and Washington DC.
+-   Forecasts are solicited in a quantile format.
 
 Further details about the hub are available at its [GitHub README page](https://github.com/CDCgov/covid19-forecast-hub/blob/main/README.md).
 
 # The forecasts
 
-We will start by accessing forecast data from the COVID-19 Forecast Hub. 
+We will start by accessing forecast data from the COVID-19 Forecast Hub.
 Because the hub takes advantage of hubverse cloud data storage architecture, both the forecast and target data are stored in an S3 bucket that can be accessed using the `hubData` R package.
 
 ::: callout-tip
 For a complete list of hubs (many of which have public data available) check out the hubverse [list of hubs](https://hubverse.io/community/hubs.html).
 :::
 
-
 ## Accessing forecast data from the cloud
 
-The following code can be used to retrieve covid forecasts from the cloud. 
+The following code can be used to retrieve covid forecasts from the cloud.
 However, there are over 2 million rows of data, and it can take some bandwidth to download.
 To make these results more reproducible and to provide a snapshot of the data, we also provide the forecasts as a data object that can be loaded directly from the `nfidd` package.
 
@@ -123,14 +122,15 @@ covid_forecasts <- hub_con_cloud |>
 ```
 
 This line of code will load all the forecasts saved in the package into your R session.
+
 ```{r load-saved-forecasts}
 data(covid_forecasts)
 ```
 
-
 ## Accessing target data from the cloud
 
 Here is code to query the time-series data from the cloud-based hub.
+
 ```{r load-ts-target-data, eval = FALSE}
 covid_time_series <- connect_target_timeseries(hub_path_cloud) |> 
   filter(target == "wk inc covid hosp") |> 
@@ -139,6 +139,7 @@ covid_time_series <- connect_target_timeseries(hub_path_cloud) |>
 ```
 
 However, to ensure reproducibility (since this is a live dataset), we have downloaded this object for you already as of July 9, 2025, and it is available to load in from the course R package directly.
+
 ```{r load-ts-target-data-archived}
 data(covid_time_series)
 ```
@@ -146,8 +147,7 @@ data(covid_time_series)
 ## Exploratory data analysis and visualization
 
 Now that we've downloaded the forecast and target data, let's just do a few basic explorations to make sure we understand the dimensions of our data.
-Ideally, storing data in the hubverse ensures that the data is "clean", no typos in targets or locations, no missing quantile levels, no negative predictions, etc...
-But let's start by just getting a sense of how many unique values we have for `location`, `horizon`, `target_end_date`, etc...
+Ideally, storing data in the hubverse ensures that the data is "clean", no typos in targets or locations, no missing quantile levels, no negative predictions, etc... But let's start by just getting a sense of how many unique values we have for `location`, `horizon`, `target_end_date`, etc...
 
 ```{r eda-unique-vals}
 unique_per_column <- covid_forecasts  |> 
@@ -160,7 +160,7 @@ From the above, we can see that
 
 -   the forecasts were made every week from `r min(unique_per_column$reference_date)` until `r max(unique_per_column$reference_date)`,
 -   there is just one target, the weekly counts of hospital admissions due to COVID-19, and we only have quantile values for it,
--   we have forecasts for horizons 0 to 3 weeks, 
+-   we have forecasts for horizons 0 to 3 weeks,
 -   there are 23 quantile levels present in the data,
 -   there are 19 models.
 
@@ -182,21 +182,21 @@ covid_forecasts |>
 ```
 
 ::: callout-tip
-Take a moment to explore the forecasts interactively in the above plot. 
+Take a moment to explore the forecasts interactively in the above plot.
 We suggest starting by double-clicking on the "target" line in the legend.
 This will remove all models from the plot.
 Then add the models one at a time to compare them.
 :::
 
-
 ## Who submitted when?
 
 One thing that can foul up evaluation and ensembles of models is when not all models submit at the same times.
 
-Do all models in our dataset of forecasts have the same number of predictions? 
+Do all models in our dataset of forecasts have the same number of predictions?
 Let's look at this a few different ways.
 
 Here is a tabular summary showing some summary stats about how often and how much each model submitted:
+
 ```{r model-submission-summary}
 covid_forecasts |> 
   group_by(model_id) |> 
@@ -210,7 +210,7 @@ covid_forecasts |>
   knitr::kable()
 ```
 
-And here is a visual showing more details about submissions each week by model, sorted with the models with the most forecasts at the top. 
+And here is a visual showing more details about submissions each week by model, sorted with the models with the most forecasts at the top.
 Each tile represents a week, with lighter blue colors in a given model-week indicating a higher number of locations being submitted for.
 
 ```{r model-submission-viz}
@@ -225,7 +225,6 @@ covid_forecasts |>
   ggplot() +
   geom_tile(aes(x = reference_date, y = model_id, fill = n_locations))
 ```
-
 
 ::: callout-tip
 ### Take 2 minutes
@@ -242,7 +241,7 @@ Here are some real examples of why models have not been submitted in a given wee
 -   The modeler who runs the model every week is sick or on vacation.
 -   A model may have joined mid-season because it was still in development.
 -   A model have have gone offline because a team stopped participating.
-- The modeling team may be unhappy with their forecast and decide not to submit (for evaluation of the model vs the modeling team this can be a big problem).
+-   The modeling team may be unhappy with their forecast and decide not to submit (for evaluation of the model vs the modeling team this can be a big problem).
 -   ... (there are likely other reasons too)
 :::
 
@@ -253,12 +252,11 @@ Here are some real examples of why models have not been submitted in a given wee
 
 Baseline models generate forecasts that are created to serve as benchmarks.
 They are designed to be naive, not overly "optimized" approaches that make forecasts.
-In evaluation, baseline models may occasionally do well by chance (for example, a flat line model may do well when dynamics are, well, flat). 
+In evaluation, baseline models may occasionally do well by chance (for example, a flat line model may do well when dynamics are, well, flat).
 But in general, their forecasts should be "beatable" by models that are able to learn and make predictions based on dynamics in the data.
 The Random Walk (`rw`) model from [the Forecast Evaluation session](forecast-evaluation.html#comparing-three-models-at-multiple-time-points) is a good example of a baseline model.
 Other models that might serve as slightly more sophisticated forecast baselines could be a simple ARIMA model, or a model that smooths the recent data and predicts the a continuation of a recent trend in the data.
 :::
-
 
 You can read about each of the models in [the model-metadata folder of the forecast hub](https://github.com/CDCgov/covid19-forecast-hub/tree/main/model-metadata).
 Model metadata can also be programmatically accessed using `hubData::load_model_metadata()`.
@@ -269,31 +267,30 @@ Here are a few models that we will highlight with their provided descriptions be
 
 This is the hub-generated ensemble forecast:
 
-- **CovidHub-ensemble**: "Median-based ensemble of quantile forecasts submissions." Note this is similar to the ensembles we introduced in [the ensembles session](forecast-ensembles.html#quantile-based-ensembles).
+-   **CovidHub-ensemble**: "Median-based ensemble of quantile forecasts submissions." Note this is similar to the ensembles we introduced in [the ensembles session](forecast-ensembles.html#quantile-based-ensembles).
 
 Here are two models that have been explicitly designed as "baselines" or benchmarks:
 
-- **CovidHub-baseline**: Flat baseline model. The most observed value from the target dataset is the median forward projection. Prospective uncertainty is based on the preceding timeseries." (This is kind of like the `rw` model from previous sessions.)
-- **CMU-climate_baseline**: "Using data from 2022 onwards, the climatological model uses samples from the 7 weeks centered around the target week and reference week to form the quantiles for the target week, as one might use climate information to form a meteorological forecast. To get more variation at some potential issue of generalization, one can form quantiles after aggregating across geographic values as well as years (after converting to a rate based case count). This model uses a simple average of the geo-specific quantiles and the geo-aggregated quantiles." *(This is kind of like our `fourier` model from previous sessions.)*
-
-
+-   **CovidHub-baseline**: Flat baseline model. The most observed value from the target dataset is the median forward projection. Prospective uncertainty is based on the preceding timeseries." (This is kind of like the `rw` model from previous sessions.)
+-   **CMU-climate_baseline**: "Using data from 2022 onwards, the climatological model uses samples from the 7 weeks centered around the target week and reference week to form the quantiles for the target week, as one might use climate information to form a meteorological forecast. To get more variation at some potential issue of generalization, one can form quantiles after aggregating across geographic values as well as years (after converting to a rate based case count). This model uses a simple average of the geo-specific quantiles and the geo-aggregated quantiles." *(This is kind of like our `fourier` model from previous sessions.)*
 
 Here are two models built by InsightNet-funded teams:
 
-- **UMass-ar6_pooled**: "AR(6) model after fourth root data transform. AR coefficients are shared across all locations. A separate variance parameter is estimated for each location."
-- **MOBS-GLEAM_COVID**: "Metapopulation, age structured SLIR model. ... The GLEAM framework is based on a metapopulation approach in which the US is divided into geographical subpopulations. Human mobility between subpopulations is represented on a network. ... Superimposed on the US population and mobility layers is an compartmental epidemic model that defines the infection and population dynamics."
+-   **UMass-ar6_pooled**: "AR(6) model after fourth root data transform. AR coefficients are shared across all locations. A separate variance parameter is estimated for each location."
+-   **MOBS-GLEAM_COVID**: "Metapopulation, age structured SLIR model. ... The GLEAM framework is based on a metapopulation approach in which the US is divided into geographical subpopulations. Human mobility between subpopulations is represented on a network. ... Superimposed on the US population and mobility layers is an compartmental epidemic model that defines the infection and population dynamics."
 :::
 
 ::: callout-tip
 ## Take 2 minutes
 
-Browse through some of the other model descriptions. Which ones look interesting to you and why? Discuss with your neighbor.
+Browse through some of the other model descriptions.
+Which ones look interesting to you and why?
+Discuss with your neighbor.
 :::
-
 
 # Evaluating forecasts
 
-To quantitatively evaluate the forecasts, we will need the ["oracle output" data](https://docs.hubverse.io/en/latest/user-guide/target-data.html#oracle-output). 
+To quantitatively evaluate the forecasts, we will need the ["oracle output" data](https://docs.hubverse.io/en/latest/user-guide/target-data.html#oracle-output).
 Recall that this is the "ground truth" (or target) data, formatted like it were being predicted by a future-seeing model.
 Here is code to build oracle-output data from the time-series target data.
 
@@ -305,7 +302,6 @@ covid_oracle_output <- covid_time_series |>
          target_end_date = date,
          oracle_value = observation) 
 ```
-
 
 ## Visual evaluation
 
@@ -370,19 +366,21 @@ scores |>
   knitr::kable(digits = 3)
 ```
 
-
 ::: callout-tip
 ## Take 2 minutes
 
-Should we trust the results in this table to give us a reliable ranking for all of the forecasts? Why or why not?
+Should we trust the results in this table to give us a reliable ranking for all of the forecasts?
+Why or why not?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
 
-Because there are so many missing forecasts, this single summary is not reliable. We will need a more careful comparison to determine relative rankings of models.
+Because there are so many missing forecasts, this single summary is not reliable.
+We will need a more careful comparison to determine relative rankings of models.
 
-Recall, here is the summary of which models submitted when. There is a lot of variation in how much each model submitted!
+Recall, here is the summary of which models submitted when.
+There is a lot of variation in how much each model submitted!
 
 ```{r}
 covid_forecasts |> 
@@ -398,9 +396,8 @@ covid_forecasts |>
 ```
 
 In real-world forecasting hubs, it is very common to have missing forecasts, and it probably isn't safe to assume that these forecasts are "missing at random".
-For example, some teams may choose not to submit forecasts when their model's algorithm fails to converge, signaling a particularly difficult phase of the outbreak to predict—while others, consciously or not, submit during these periods and receive lower scores.
+For example, some teams may choose not to submit forecasts when their model's algorithm fails to converge, signaling a particularly difficult phase of the outbreak to predict---while others, consciously or not, submit during these periods and receive lower scores.
 :::
-
 
 ## Additional metrics
 
@@ -408,7 +405,7 @@ Before we dig further into the evaluation, let's introduce a few additional eval
 
 ### Relative scores
 
-Relative skill scores are a way to create "head-to-head" comparisons of models that to some extent are able to adjust for the difficulty of the predictions made by each model. 
+Relative skill scores are a way to create "head-to-head" comparisons of models that to some extent are able to adjust for the difficulty of the predictions made by each model.
 Here is a figure showing how the relative scores are calculated, based on aggregated pairwise comparisons between each pair of models.
 
 ![Schematic of relative skill score computation.[@bosse_evaluating_2024]](slides/figures/relative-skill-scores.png)
@@ -416,18 +413,16 @@ Here is a figure showing how the relative scores are calculated, based on aggreg
 ::: callout-tip
 #### Interpreting relative skill
 
-The interpretation of the relative skill metric is the factor by which the score for a given model is more or less accurate than the average model, adjusting for the difficulty of the forecasts made by that particular model. 
-**Relative skill scores that are lower than 1 indicate that the model is more accurate on the whole than the average model evaluated.**
-For example, a 0.9 relative WIS skill for model A suggests that model A was 10% more accurate on average than other models, adjusting for the difficulty level of forecasts made by model A.
+The interpretation of the relative skill metric is the factor by which the score for a given model is more or less accurate than the average model, adjusting for the difficulty of the forecasts made by that particular model.
+**Relative skill scores that are lower than 1 indicate that the model is more accurate on the whole than the average model evaluated.** For example, a 0.9 relative WIS skill for model A suggests that model A was 10% more accurate on average than other models, adjusting for the difficulty level of forecasts made by model A.
 
 ![Example of relative skill.](slides/figures/relative-skill-example.png)
-
 :::
 
-This metric (or a version of it) has been used in practice in a number of large-scale forecast evaluation research papers.[@cramer_evaluation_2022;@meakin_comparative_2022;@sherrattPredictivePerformanceMultimodel2023;@wolfframCollaborativeNowcastingCOVID192023]
-The general rule of thumb is that it does a reasonable job comparing models where there is never less than, say, 50% overlap in the targets predicted by any pair of models.
+This metric (or a version of it) has been used in practice in a number of large-scale forecast evaluation research papers.[@cramer_evaluation_2022; @meakin_comparative_2022; @sherrattPredictivePerformanceMultimodel2023; @wolfframCollaborativeNowcastingCOVID192023] The general rule of thumb is that it does a reasonable job comparing models where there is never less than, say, 50% overlap in the targets predicted by any pair of models.
 
-Here is a table of relative skill scores for WIS. 
+Here is a table of relative skill scores for WIS.
+
 ```{r relative-skill}
 score_model_out(
   covid_forecasts, 
@@ -438,10 +433,10 @@ score_model_out(
   arrange(wis_relative_skill)
 ```
 
-Note that the ordering of the `wis` column does not align perfectly with the `wis_relative_skill` column. 
+Note that the ordering of the `wis` column does not align perfectly with the `wis_relative_skill` column.
 This is due to the "adjustment" of the relative skill based on which forecasts were made by each model.
 
-To make a more fair comparison, let's subset to only include models that have submitted at least 60% of the maximum possible number of predictions for the season. 
+To make a more fair comparison, let's subset to only include models that have submitted at least 60% of the maximum possible number of predictions for the season.
 
 ```{r relative-skill-on-subset}
 ## 33 dates, 4 horizons, 53 locations, 60%
@@ -472,17 +467,16 @@ Looking at the relative and absolute WIS scores from the table above, and the nu
 ::: {.callout-note collapse="true"}
 ## Solution
 
-- The ensemble forecast is the most accurate model overall, by fairly large margin, close to 20% in terms of absolute WIS and 10% in terms of relative skill.
-- The CovidHub-baseline has basically "average" performance, with a relative WIS score of 0.96. 
-- Five individual models have better performance than the baseline and four have worse performance than the baseline.
-- The worst-performing model is the `CMU-climate_baseline`. This is designed to be a "seasonal average" model, and covid isn't that seasonal at the moment, so it's not super surprising that this is a bad model.
-- Tying back to approaches from [the Renewal equation session](R-estimation-and-the-renewal-equation.html):
-  - The `CEPH-Rtrend_covid` model is "A renewal equation method based on Bayesian estimation of Rt from hospitalization data." It wasn't as good as pure statistical and ML approaches, but was better than the baseline.
-  - The `MOBS-GLEAM_COVID` model is a mechanistic model (see description above) and was worse than the baseline.
-
+-   The ensemble forecast is the most accurate model overall, by fairly large margin, close to 20% in terms of absolute WIS and 10% in terms of relative skill.
+-   The CovidHub-baseline has basically "average" performance, with a relative WIS score of 0.96.
+-   Five individual models have better performance than the baseline and four have worse performance than the baseline.
+-   The worst-performing model is the `CMU-climate_baseline`. This is designed to be a "seasonal average" model, and covid isn't that seasonal at the moment, so it's not super surprising that this is a bad model.
+-   Tying back to approaches from [the Renewal equation session](R-estimation-and-the-renewal-equation.html):
+    -   The `CEPH-Rtrend_covid` model is "A renewal equation method based on Bayesian estimation of Rt from hospitalization data." It wasn't as good as pure statistical and ML approaches, but was better than the baseline.
+    -   The `MOBS-GLEAM_COVID` model is a mechanistic model (see description above) and was worse than the baseline.
 :::
 
-Since the counts at the national level are likely to dominate the absolute scale of average WIS scores, you could make an argument to subset to only the states and evaluate based on that. 
+Since the counts at the national level are likely to dominate the absolute scale of average WIS scores, you could make an argument to subset to only the states and evaluate based on that.
 Here is the analysis above, on that subset:
 
 ```{r}
@@ -496,17 +490,18 @@ covid_forecasts |>
   ) |> 
   arrange(wis_relative_skill)
 ```
+
 The results above haven't changed much, although the `CMU-TimeSeries` and `OHT_JHU-nbxd` swapped places in the final rankings.
 
 ### Log-scale scores
 
-We can also score on the logarithmic scale. 
-This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model’s performance at capturing the exponential growth phase of the epidemic.[@bosse2023scorin] 
-In some sense, scoring in this way can be an approximation of scoring the effective reproduction number estimates. 
+We can also score on the logarithmic scale.
+This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.[@bosse2023scorin] In some sense, scoring in this way can be an approximation of scoring the effective reproduction number estimates.
 Doing this directly can be difficult as the effective reproduction number is a latent variable and so we cannot directly score it.
 Additionally, it can make sense to score a target (and make it easier to compare scores) when the variance of the scores is stabilized.
 
 To implement the log-scale scoring, we can simply log-transform the observations and forecasted values (with an offset, to account for zeroes in the data).
+
 ```{r log-scale scoring}
 covid_forecasts |> 
   filter(model_id %in% model_subset) |> 
@@ -520,26 +515,25 @@ covid_forecasts |>
   arrange(wis_relative_skill)
 ```
 
-Note that this rescaling of the data prior to scoring results in a more substantial change in the evaluation. 
-While the ensemble remains the most accurate model, now five models are better than the baseline, and the `UMass-gbqr` model is the most accurate individual model (just barely edging out the  `CMU-TimeSeries` model.)
+Note that this rescaling of the data prior to scoring results in a more substantial change in the evaluation.
+While the ensemble remains the most accurate model, now five models are better than the baseline, and the `UMass-gbqr` model is the most accurate individual model (just barely edging out the `CMU-TimeSeries` model.)
 
 ### Prediction interval coverage
 
 The above comparisons focus on WIS and relative WIS, but in our collaborations with federal, state, and local epidemiologists, we have often found that the metric of prediction interval coverage rates is a useful tool for communicating the reliability of a set of forecasts.
 Prediction interval coverage measures the fraction of prediction intervals at a given levels that cover the truth.
-For example, if a model is well-calibrated, 50% PIs should cover the truth around 50% of the time, 90% PIs should cover the truth 90% of the time, etc...
-This is a key part of [the forecasting paradigm](forecast-evaluation.html#the-forecasting-paradigm) mentioned in the Forecast Evaluation session is that we want to maximize sharpness subject to calibration.
-Prediction interval coverage rates help assess calibration. 
+For example, if a model is well-calibrated, 50% PIs should cover the truth around 50% of the time, 90% PIs should cover the truth 90% of the time, etc... This is a key part of [the forecasting paradigm](forecast-evaluation.html#the-forecasting-paradigm) mentioned in the Forecast Evaluation session is that we want to maximize sharpness subject to calibration.
+Prediction interval coverage rates help assess calibration.
 Prediction interval widths can help assess sharpness.
 
 ::: callout-tip
 Prediction interval coverage is not a proper score.
-For example, to get perfect 90% PI coverage, you could always make 9 out of every 10 of your intervals infinitely wide and the last one infinitely small. 
+For example, to get perfect 90% PI coverage, you could always make 9 out of every 10 of your intervals infinitely wide and the last one infinitely small.
 Et voila!
 90% PI coverage achieved.
 :::
 
-But, assuming that modelers aren't trying to game the scores, it can generally be a useful and interpretable metric in practice. 
+But, assuming that modelers aren't trying to game the scores, it can generally be a useful and interpretable metric in practice.
 Let's add some PI coverage metrics to our (unscaled) results from before.
 
 ```{r}
@@ -560,7 +554,6 @@ A few models (`CMU-TimeSeries` and `CMU-climate_baseline`) all have coverage rat
 ::: callout-tip
 Note, this is a nice example of a model (`CMU-climate_baseline`) being well calibrated (near-nominal PI coverage) but not having good accuracy (bad/high WIS on average).
 :::
-
 
 ## Model comparison by horizon and forecast date
 
@@ -610,30 +603,29 @@ plotly::ggplotly(p)
 ## Take 5 minutes
 
 By horizon and reference date, how variable are the models in their accuracy?
-
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
 
-In general, the models seem fairly consistent in their performance. 
+In general, the models seem fairly consistent in their performance.
 There are few "crossings" in the by horizon plot, suggesting that by and large models that are accurate at short-term horizons are also accurate at the longer horizons.
-There is much more variability by date, although it still seems that with a few exceptions, models aren't jumping around too dramatically in their relative (or absolute level) WIS. 
+There is much more variability by date, although it still seems that with a few exceptions, models aren't jumping around too dramatically in their relative (or absolute level) WIS.
 :::
 
 # Ensembling forecasts
 
 In this section, we will build several new ensemble forecasts and compare these to the `CovidHub-ensemble` model.
-Based on the last results from the section above, we saw that there was some fairly consistent performance from a few of the models. 
+Based on the last results from the section above, we saw that there was some fairly consistent performance from a few of the models.
 This is one precondition for weighted ensembles to have a chance at performing well.
 Here are the different approaches we will use:
 
- - `lop_unweighted_all`: an unweighted linear opinion pool (LOP) of all available forecasts each week.
- - `lop_unweighted_select`: an unweighted LOP of the most commonly submitted forecasts.
- - `lop_inv_wis_weighted_select`: a weighted LOP of the most commonly submitted forecasts.
- - `median_inv_wis_weighted_select`: a weighted median ensemble of the most commonly submitted forecasts.
- 
-Note that the existing `CovidHub-ensemble` forecast is basically `median-unweighted-all` in the above nomenclature. 
+-   `lop_unweighted_all`: an unweighted linear opinion pool (LOP) of all available forecasts each week.
+-   `lop_unweighted_select`: an unweighted LOP of the most commonly submitted forecasts.
+-   `lop_inv_wis_weighted_select`: a weighted LOP of the most commonly submitted forecasts.
+-   `median_inv_wis_weighted_select`: a weighted median ensemble of the most commonly submitted forecasts.
+
+Note that the existing `CovidHub-ensemble` forecast is basically `median-unweighted-all` in the above nomenclature.
 It would be hard to do any `weighted-all` ensembles since when models are missing a lot of forecasts it might be hard to estimate an accurate weight for them.
 
 ## Build unweighted LOP ensembles
@@ -642,8 +634,9 @@ Let's start with the "easy" part, building the unweighted ensembles.
 
 ::: {.callout-tip collapse="true"}
 ### LOP details
+
 Note that when we build LOPs with quantile based forecasts, the algorithm needs to approximate a full distribution (the tails are not well-defined in a quantile representation).
-There are some assumptions made under the hood about how this is approximated. 
+There are some assumptions made under the hood about how this is approximated.
 For the really gory details, you can check out [the `hubEnsembles` documentation](https://hubverse-org.github.io/hubEnsembles/dev/articles/hubEnsembles.html?q=weight#creating-ensembles-with-linear_pool)
 :::
 
@@ -693,12 +686,13 @@ We will use the WIS scores that we have computed above to generate weights for o
 The weights for one `reference_date` will be based on the inverse of the cumulative average WIS achieved by the model up to the week prior to the current `reference_date`.
 
 ::: callout-caution
-Note that since our scores are computed based on data available at the end of the season, this is kind of "cheating", since we're using information that would not have been available to us in real time. 
-If we were to do this entirely correctly, we would, for each week, compute the scores based on the available data at that time. 
+Note that since our scores are computed based on data available at the end of the season, this is kind of "cheating", since we're using information that would not have been available to us in real time.
+If we were to do this entirely correctly, we would, for each week, compute the scores based on the available data at that time.
 :::
 
 Let's start by calculating WIS values by model and `target_end_date`.
 This will allow us to see what scores are available for a model's forecasts that it had for dates prior to the current forecast date.
+
 ```{r scores-by-target-end-date}
 scores_by_target_date <- covid_forecasts |> 
   filter(model_id %in% model_subset,
@@ -712,6 +706,7 @@ scores_by_target_date
 ```
 
 Now, we will compute a cumulative average WIS up to a given date for all models except the ensemble, which we are not going to include in our ensemble.
+
 ```{r cumulate-wis}
 cum_wis <- scores_by_target_date |>
   filter(model_id != "CovidHub-ensemble") |> 
@@ -726,7 +721,7 @@ cum_wis
 ```
 
 ::: callout-tip
-Note that we also compute a `cumulative_mean_wis_lag1`, which is the mean up through the previous week. 
+Note that we also compute a `cumulative_mean_wis_lag1`, which is the mean up through the previous week.
 This is to inject a bit of realism: how could we know in real-time how our forecast did for the current week?
 
 So the `cumulative_mean_wis_lag1` is the cumulative mean WIS that we could have observed at the `target_end_date`.
@@ -734,6 +729,7 @@ So the `cumulative_mean_wis_lag1` is the cumulative mean WIS that we could have 
 :::
 
 We will proceed by computing the inverse mean wis and using those to derive the weights.
+
 ```{r compute-weights}
 weights_per_model <- cum_wis |> 
   mutate(inv_wis = 1 / cumulative_mean_wis_lag1) |>
@@ -746,10 +742,9 @@ weights_per_model <- cum_wis |>
 
 And we will put in place a few small fixes to the weights:
 
-- assign equal weights for the first two weeks. 
-(There are missing forecasts here, and we haven't learned much about the model performance yet anyways.)
-- change `target_end_date` to `reference_date` because now we want the weights computed up to that `target_end_date` to be applied on that `reference_date`.
-- set to 0 a missing weight for the `NEU_ISI-AdaptiveEnsemble`.
+-   assign equal weights for the first two weeks. (There are missing forecasts here, and we haven't learned much about the model performance yet anyways.)
+-   change `target_end_date` to `reference_date` because now we want the weights computed up to that `target_end_date` to be applied on that `reference_date`.
+-   set to 0 a missing weight for the `NEU_ISI-AdaptiveEnsemble`.
 
 ```{r fix-weights}
 ## assign equal weights for the first week
@@ -764,8 +759,10 @@ weights_per_model <- rename(weights_per_model, reference_date = target_end_date)
 weights_per_model$weight[is.na(weights_per_model$weight)] <- 0
 ```
 
-As always, it is good to plot your data as a sanity check. Here are the model weights plotted over time.
+As always, it is good to plot your data as a sanity check.
+Here are the model weights plotted over time.
 For each week (x-axis), the weights assigned to each model are shown in a stacked bar plot, with the height of the bar equal to the weight of the model.
+
 ```{r plot-weights}
 plot_weights <- ggplot(weights_per_model) +
   geom_col(aes(x = reference_date, y = weight, fill = model_id))
@@ -774,23 +771,24 @@ plotly::ggplotly(plot_weights)
 
 ::: callout-tip
 ### Take 5 minutes
-Looking at the above plot, what is the "story" that the weights tell when plotted over time? 
+
+Looking at the above plot, what is the "story" that the weights tell when plotted over time?
 Which models did the ensemble like and dislike over time and how did it change?
 (Remember, in the first two weeks, all models received equal weight.)
-
 :::
 
 ::: {.callout-note collapse="true"}
 ### Solution
 
-Starting in the third week, three models were assigned less weight than others: `CMU-climate-baseline`, `CMU-TimeSeries` and `COVIDHub-baseline`. 
+Starting in the third week, three models were assigned less weight than others: `CMU-climate-baseline`, `CMU-TimeSeries` and `COVIDHub-baseline`.
 Over time, `CMU-TimeSeries` and `COVIDHub-baseline` earned back some "trust" with higher weights, but `CMU-climate-baseline` stayed with a low weight.
 
 In general, the weights did not change much after the first few weeks (except in the last week when `UM-DeepOutbreak` wasn't submitted.)
 :::
 
-Now that we have the weights and we've checked them, let's start building some ensembles! 
+Now that we have the weights and we've checked them, let's start building some ensembles!
 First, we will build the median ensembles, both weighted and unweighted..
+
 ```{r build-ensemble}
 ## build the weighted ensemble
 median_inv_wis_weighted_select <- covid_forecasts |> 
@@ -827,7 +825,6 @@ lop_inv_wis_weighted_select <- purrr::map_dfr(
 })
 ```
 
-
 ## Compare all ensembles
 
 We will compare the performance of all ensembles just at the state level, since the scores by reference date were only computed at the state level.
@@ -860,7 +857,7 @@ covid_forecasts_w_ensembles |>
 ```
 
 Remember, in the above table, the `CovidHub-ensemble` is kind of like `median-unweighted-all` because it uses a median ensemble of all models available in every week without weights.
-Overall, the ensembles have fairly similar average WIS values across all dates and states. 
+Overall, the ensembles have fairly similar average WIS values across all dates and states.
 Using a median unweighted ensemble of frequently submitting models marginally outperformed the actual `CovidHub-ensemble`.
 
 ::: callout-tip
@@ -877,18 +874,21 @@ Write down your thoughts about these questions and compare answers with a neighb
 ### Solution
 
 #### Why aren't weighted ensembles better?
+
 When model performance varies a lot from one week to the next, it may be hard to estimate/anticipate/predict which model should get more weight in a given week.
 
-#### What might your consider changing about the weights? 
+#### What might your consider changing about the weights?
+
 There isn't one right answer here, but some things that you might consider to do differently are:
 
-1. Figuring out a way to encourage the model to stay closer to equal weights early on. The weights are being perhaps overly influenced by small sample sizes there.
-2. Thinking about using a rolling window of mean WIS to compute weights rather than overall cumulative. This could be good, but also assumes that recent performance will predict future performance, which is not always true!
+1.  Figuring out a way to encourage the model to stay closer to equal weights early on. The weights are being perhaps overly influenced by small sample sizes there.
+2.  Thinking about using a rolling window of mean WIS to compute weights rather than overall cumulative. This could be good, but also assumes that recent performance will predict future performance, which is not always true!
 :::
+
 It does not seem like weighting adds a lot of value to these forecasts, although perhaps with additional data on model performance the weights could be improved.
 
-
 We can also look at how the ensemble performance varied over time.
+
 ```{r}
 ensemble_scores_by_reference_date <- covid_forecasts_w_ensembles |> 
   filter(model_id %in% model_subset_ens,
@@ -904,34 +904,26 @@ p <- ggplot(ensemble_scores_by_reference_date) +
 plotly::ggplotly(p)
 ```
 
-It is interesting to note how while the LOP ensembles did slightly worse overall, they actually had slightly more accurate forecasts near the peak of the season, especially in the weeks where the scores were the highest. 
+It is interesting to note how while the LOP ensembles did slightly worse overall, they actually had slightly more accurate forecasts near the peak of the season, especially in the weeks where the scores were the highest.
 
 # Going further
 
 ## Challenge
 
--   Once you start looking at lots of plots of forecast scores, it is easy to fall into the trap of not looking at the actual forecasts. 
-Looking at the scores of the ensemble forecasts by date, it looks like there was one week when the `CovidHub-ensemble` did much worse than other forecasts. 
-Investigate this week in particular. 
-What did the forecasts look like that week and what was anomalous about it?
--   In the evaluation of the real-world models, we subset to only models that had submitted a large fraction of forecasts. 
-But this omits some interesting models, including the model from Metaculus, a human-judgment forecast aggregation company, and some models from the CDC Center for Forecasting and Outbreak Analytics (CFA).
-Adapt the code above to conduct a targeted and fair evaluation of the forecasts made by those models.
--   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). 
-Using the code above, try to replicate some of the analyses in this session for a different hub. 
-What challenges and obstacles do you run into?
+-   Once you start looking at lots of plots of forecast scores, it is easy to fall into the trap of not looking at the actual forecasts. Looking at the scores of the ensemble forecasts by date, it looks like there was one week when the `CovidHub-ensemble` did much worse than other forecasts. Investigate this week in particular. What did the forecasts look like that week and what was anomalous about it?
+-   In the evaluation of the real-world models, we subset to only models that had submitted a large fraction of forecasts. But this omits some interesting models, including the model from Metaculus, a human-judgment forecast aggregation company, and some models from the CDC Center for Forecasting and Outbreak Analytics (CFA). Adapt the code above to conduct a targeted and fair evaluation of the forecasts made by those models.
+-   Look at the [list of hubverse-style hubs](https://hubverse.io/community/hubs.html). Using the code above, try to replicate some of the analyses in this session for a different hub. What challenges and obstacles do you run into?
 
 ## Methods in practice
 
 -   @ray_comparing_2023 evaluates the performance of ensemble forecasts (including some weighted ensembles) in predicting COVID-19 cases, hospitalization and deaths, both with weighted and unweighted ensembles.
 -   @sherrattPredictivePerformanceMultimodel2023 investigates the performance of different ensembles in the European COVID-19 Forecast Hub.
 
-
-
 # Wrap up
 
 -   Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
 
 # References
+
 ::: {#refs}
 :::
