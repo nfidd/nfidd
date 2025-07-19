@@ -407,7 +407,7 @@ And now we can write the files out, one for each `origin_date`.
 ```{r write-out-files}
 # Group the forecasts by task id variables
 groups <- bind_rows(cv_forecasts_season1, cv_forecasts_season2) |> 
-  group_by(model_id, target, location, origin_date) |> 
+  group_by(model_id, target, origin_date) |> 
   group_split()
 
 # Save each group as a separate CSV
