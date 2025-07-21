@@ -21,14 +21,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout toy hub repository
+        uses: actions/checkout@v4
+        with:
+          repository: reichlab/sismid-ili-forecasting-sandbox
+          path: ./sismid-ili-forecasting-sandbox
+
       - uses: quarto-dev/quarto-actions/setup@v2
 
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
-          extra-repositories:
-            https://stan-dev.r-universe.dev,
-            https://epiforecasts.r-universe.dev
+
+      # Cache Quarto freeze directory for computational results
+      # This prevents re-running expensive computations (Stan models, simulations)
+      - name: Cache Quarto freeze
+        uses: actions/cache@v4
+        with:
+          path: _freeze
+          key: quarto-freeze-${{ runner.os }}-${{ hashFiles('sessions/**/*.qmd', 'sessions/**/*.Rmd') }}
+          restore-keys: |
+            quarto-freeze-${{ runner.os }}-
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
@@ -38,10 +51,6 @@ jobs:
             any::knitr,
             any::rmarkdown,
             local::.
-
-      - name: Update scoringutils
-        run: pak::pak("epiforecasts/scoringutils")
-        shell: Rscript {0}
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1

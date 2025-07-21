@@ -15,20 +15,16 @@ data {
   int h;                // number of days to forecast
 }
 
-transformed data {
-   int m = n + h;
-}
-
 parameters {
   real<lower = 0> init_R;         // initial reproduction number
-  array[m-1] real rw_noise; // random walk noise
+  array[n-1] real rw_noise; // random walk noise
   real<lower = 0, upper = 1> rw_sd; // random walk standard deviation
 }
 
 transformed parameters {
-  array[m] real R = geometric_random_walk(init_R, rw_noise, rw_sd);
-  array[m] real infections = renewal(I0, R, gen_time_pmf);
-  array[m] real onsets = convolve_with_delay(infections, ip_pmf);
+  array[n] real R = geometric_random_walk(init_R, rw_noise, rw_sd);
+  array[n] real infections = renewal(I0, R, gen_time_pmf);
+  array[n] real onsets = convolve_with_delay(infections, ip_pmf);
 }
 
 model {
@@ -38,12 +34,21 @@ model {
   rw_sd ~ normal(0, 0.05) T[0,];
   obs ~ poisson(onsets[1:n]);
 }
-
 generated quantities {
   array[h] real forecast;
   if (h > 0) {
+    array[n + h - 1] real f_rw_noise;
+    for (i in 1:(n-1)) {
+      f_rw_noise[i] = rw_noise[i];
+    }
+    for (i in n:(n + h - 1)) {
+      f_rw_noise[i] = normal_rng(0, 1);
+    }
+    array[h + n] real f_R = geometric_random_walk(init_R, f_rw_noise, rw_sd);
+    array[h + n] real f_infections = renewal(I0, f_R, gen_time_pmf);
+    array[h + n] real f_onsets = convolve_with_delay(f_infections, ip_pmf);
     for (i in 1:h) {
-      forecast[i] = poisson_rng(onsets[n + i]);
+      forecast[i] = poisson_rng(f_onsets[n + i]);
     }
   }
 }

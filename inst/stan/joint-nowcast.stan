@@ -31,9 +31,9 @@ transformed parameters {
 
 model {
   // Prior
-  init_onsets ~ normal(1, 1) T[0,];
+  init_onsets ~ normal(1, 5) T[0,];
   rw_noise ~ std_normal();
-  rw_sd ~ normal(0, 0.1) T[0,];
+  rw_sd ~ normal(0, 0.05) T[0,];
   reporting_delay ~ dirichlet(rep_vector(1, d));
   // Likelihood
   obs ~ poisson(onsets_by_report);

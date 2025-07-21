@@ -41,14 +41,6 @@ These patterns arise because:
 - There is a *delay* between this date, and the events showing up in the data
 - This leads to an "articifial" *dip* in the most recent data
 
-### The aim of nowcasting
-
-Predict what an epidemiological time series will look like *after all delayed reports* are in.
-
-![](figures/nowcasting.png)
-
-(slide courtesy of Johannes Bracher)
-
 ### Nowcasting as right truncation
 
 Remember from [biases in delay estimation](../biases-in-delay-distributions):
@@ -65,6 +57,14 @@ Remember from [biases in delay estimation](../biases-in-delay-distributions):
 - in that case, longer delays might be missing because whilst the *primary events* have occurred the *secondary events* **have not occurred yet**
 
 Nowcasting is exactly this!
+
+### The aim of nowcasting
+
+Predict what an epidemiological time series will look like *after all delayed reports* are in.
+
+![](figures/nowcasting.png)
+
+(slide courtesy of Johannes Bracher)
 
 ### A simple approach to nowcasting
 

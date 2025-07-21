@@ -9,6 +9,7 @@ nfidd_sample(
   iter_warmup = 500,
   iter_sampling = 500,
   parallel_chains = 4,
+  save_warmup = FALSE,
   ...
 )
 }
@@ -23,6 +24,9 @@ Defaults to 500 (reduced from cmdstanr default of 1000) for course speed.}
 
 \item{parallel_chains}{Integer, number of chains to run in parallel.
 Defaults to 4 for course speed.}
+
+\item{save_warmup}{Logical, whether to save warmup samples.
+Defaults to FALSE for course speed.}
 
 \item{...}{Additional arguments passed to the model's sample method.
 All cmdstanr sample arguments are supported.}

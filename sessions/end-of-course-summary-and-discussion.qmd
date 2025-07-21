@@ -1,6 +1,6 @@
 ---
 title: "End of course summary and discussion"
-order: 13
+order: 15
 ---
 
 # Introduction
