@@ -8,6 +8,7 @@ order: 13
 We hope that you've enjoyed taking this course on nowcasting and forecasting infectious disease dynamics.
 We will be very happy to have your feedback, comments or any questions on the [course discussion page](https://github.com/nfidd/nfidd/discussions).
 
+If you are exploring the course asynchronously, we'd be grateful to hear your experience. Please use this [survey](https://forms.gle/1LuhWJ2SNukgtUQM8) to let us know how you found the course.
 
 ## Slides
 
