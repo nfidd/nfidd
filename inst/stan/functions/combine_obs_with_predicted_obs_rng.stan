@@ -22,4 +22,3 @@ array[] int combine_obs_with_predicted_obs_rng(array[] int obs, array[] real com
     }
     return reported_onsets;
   }
-  
