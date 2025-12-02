@@ -49,10 +49,6 @@ jobs:
             any::rmarkdown,
             local::.
 
-      - name: Update scoringutils
-        run: pak::pak("epiforecasts/scoringutils")
-        shell: Rscript {0}
-
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1
         with:
