@@ -39,7 +39,7 @@ nfidd_stan_path <- function() {
     content,
     names_only = FALSE,
     functions = NULL) {
-  def_pattern <- "^(array\\[\\]\\s*(real|int|vector|matrix)|real|vector|matrix|void|int|array\\s*<\\s*(real|vector|matrix|int)\\s*>|tuple\\s*<\\s*.*\\s*>)\\s+" # nolint
+  def_pattern <- "^(array\\[\\]\\s*)?(real|int|void|vector|row_vector|matrix)\\s+"
   func_pattern <- paste0(
     def_pattern,
     "(\\w+)\\s*\\("
