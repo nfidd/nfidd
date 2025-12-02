@@ -12,54 +12,36 @@ format:
 
 ### Forecasting in infectious disease epidemiology
 
-![](figures/metcalf_lessler_fraught.png){width="50%"}
+![](figures/metcalf_lessler_fraught.png){width=50%}
 
 [Metcalf & Lessler, *Science*, 2017](https://doi.org/10.1126/science.aam8335)
 
-### Modelling the future can help with ... {.smaller}
+### Using models for statements about the future {.smaller}
 
-<br>
+Modelling the future can help decision making:
 
-:::: {.columns}
+- how many beds do we need?
+- where should we allocate vaccines?
+- where should we trial vaccines?
 
-::: {.column width="50%"}
-#### ... decision making
+However:
 
--   how many beds do we need?
--   where should we allocate vaccines?
--   where should we trial vaccines?
-:::
-
-::: {.column width="50%"}
-#### ...situational awareness
-
--   nowcast: where are we now?
--   forecast: where are we heading?
-
-:::
-
-::::
-
-<br>
-
-::: callout-warning
-But... 
-
--   not all modelling is prediction
--   not all modelling of the future is forecasting
-:::
-
+- not all modelling is prediction
+- not all modelling of the future is forecasting
 
 ### Different ways of modelling the future {.smaller}
 
--   **Nowcasts** make statements about current trends based on partial data
+- **Nowcasts** make statements about current trends based on partial data
 
--   **Forecasts** are *unconditional* statements about the future: what *will happen*
+- **Forecasts** are *unconditional* statements about the future: what *will happen*
 
--   **Scenarios** state what *would* happen under certain conditions
+- **Scenarios** state what *would* happen under certain conditions
 
-![Figure credit: [Scenario Modeling Hub](https://covid19scenariomodelinghub.org/)](figures/nowcast-forecast-project.png)
+### Why nowcast/forecast? {.smaller}
 
+- to create **situational awareness**
+  - nowcast: where are we now?
+  - forecast: where are we heading?
 
 ### CDC use of influenza forecasts
 
@@ -67,70 +49,29 @@ But...
 
 [CDC: About Flu Forecasting](https://www.cdc.gov/flu/weekly/flusight/how-flu-forecasting.htm)
 
-### Forecasting: relationship with $R_t$ estimation {.smaller}
+### Relationship with $R_t$ estimation {.smaller}
 
--   In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
--   Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
--   In that sense, predicting infections comes down to **predicting** $R_t$
--   Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
+- In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
+- Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
+- In that sense, predicting infections comes down to **predicting $R_t$**
+- Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
 
-### Forecasting: relationship with nowcasting {.smaller}
+### Relationship with nowcasting {.smaller}
 
--   Nowcast: we have **some** data from the dates we're predicting
--   Forecast: we have **no** data from the dates we're predicting (usually b/c they're in the future)
+- Nowcast: we have **some** data from the dates we're predicting
+- Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
 
-![Figure credit: [Scenario Modeling Hub](https://covid19scenariomodelinghub.org/)](figures/nowcast-forecast-project.png)
+### Forecasts are usually *probabilistic* {.smaller}
 
-### Forecasts are often *probabilistic* {.smaller}
-
--   Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
+- Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
 
 ![](figures/weather_forecast.png)
 
-### Probabilistic epi forecasts {.smaller}
-
-![Figure credit: Evan Ray](figures/probabilistic-structure.png)
-
-### The epi forecasting philosophical debate {.smaller}
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-#### Camp A 
-
-"It's a machine learning problem! We can gather enough data to make good predictions, and we don't really have to understand the underlying processes that well."
-
-<br> 
-
-#### Camp B
-
-"We have clear theory that explains transmission of pathogens in a networked population. I don't need to confront my model's statements with data."
-
-<br> 
-
-<span style="color:blue;">
-**What camp are you in?**
-</span>
-
-:::
-
-::: {.column width="50%"}
-
-Exhibit from Camp A: 
-
-![[xkcd](https://xkcd.com/1838/)](figures/machine_learning.png)
-
-:::
-
-::::
-
-
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1.  Learn about and explore seasonal influenza-like illness data from US CDC.
-2.  Build a simple forecast model and understand how it is represented in R.
+1. Load some forecasts we have generated and visualise them alongside the data.
+2. Explore different ways of visualising forecasts to assess how good the model performs at forecasting.
 
-# 
+#
 
-[Return to the session](../forecasting-concepts)
+[Return to the session](../forecast-visualisation)

@@ -80,11 +80,9 @@ Average of multiple predictions is often (not always) more performant than any i
 
 ::::
 
-   
 ### Hubs increasingly used in epi
 
 ![@Reich2022-jo](figures/history-of-hubs-2023.png)
-
 
 ### ... e.g., the European [Respicast Hub](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)

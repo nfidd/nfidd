@@ -12,8 +12,7 @@ format:
 
 ### Importance of evaluation {.smaller}
 
-- Because forecasts are unconditional quantitative statements about the future 
-("what *will* happen") we can compare them to data and see how well they did
+- Because forecasts are unconditional quantitative statements about the future ("what *will* happen") we can compare them to data and see how well they did
 - Doing this allows us to answer question like
   - Are our forecasts any good?
   - How far ahead can we trust forecasts?
@@ -42,9 +41,9 @@ format:
 
 ### Don't let the model cheat: cross-validation {.smaller}
 
-Picking a **cross-validation scheme that is specific to time-series data** ensures that your model only sees data in the past. 
+Picking a **cross-validation scheme that is specific to time-series data** ensures that your model only sees data in the past.
 
-![Time-series cross-valiation schematic](figures/time-series-cross-validation.png)
+![Time-series cross-validation schematic](figures/time-series-cross-validation.png)
 
 ### Don't let yourself cheat: prospective validation {.smaller}
 
@@ -57,10 +56,9 @@ If you know what the held-out data looks like, you might make subconscious decis
 
 It can be really hard to keep track of what version of epi surveillance data was released when.
 
-This makes prospective evaluation even more important. 
+This makes prospective evaluation even more important.
 
-For any retrospective experiment, you should always look for evidence that an analyst didn't let the model cheat! 
-
+For any retrospective experiment, you should always look for evidence that an analyst didn't let the model cheat!
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
