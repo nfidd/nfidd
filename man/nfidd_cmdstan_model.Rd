@@ -32,7 +32,7 @@ This function creates a CmdStanModel object using either a specified Stan
 model from the NFIDD package or a custom Stan file provided by the user.
 }
 \examples{
-\dontshow{if (requireNamespace("cmdstanr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("cmdstanr", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 if (!is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))) {
   # Using a model from the NFIDD package
   model <- nfidd_cmdstan_model("simple-nowcast", compile = FALSE)
