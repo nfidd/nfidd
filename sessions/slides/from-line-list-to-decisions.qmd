@@ -6,7 +6,6 @@ format:
   revealjs:
     output: slides/from-line-list-to-decisions.html
     footer: "From an epidemiological line list to informing decisions in real-time"
-    chalkboard: true
     slide-level: 3
 ---
 
@@ -31,30 +30,9 @@ Hans Rosling, Liberia, 2014
 [UKHSA, 2022](https://www.gov.uk/government/publications/monkeypox-outbreak-technical-briefings/investigation-into-monkeypox-outbreak-in-england-technical-briefing-1) <br>
 [Overton et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011463)
 
-### Sometimes we can only access proxy data {.smaller}
-
-**Influenza-like illness (ILI)**: fever AND additional "flu-like" symptom (cough, headache, sore throat, etc.)
-
-- Used when direct case data isn't available
-- Measures % of outpatient visits due to ILI
-
-```{r ili-plot, fig.width=8, fig.height=4, fig.align='center'}
-library(nfidd)
-library(ggplot2)
-library(dplyr)
-data(flu_data)
-flu_data <- flu_data |> filter(epiweek <= "2017-08-27")
-ggplot(flu_data, aes(x = epiweek, y = wili)) +
-  geom_path() +
-  labs(title = "US ILI surveillance data (2003-2017)",
-       x = "Epidemiological week", 
-       y = "Weighted ILI (% of visits)") +
-  theme_minimal()
-```
-
 ### Aim of this course:
 
-How can we use data typically collected for other purposes to answer questions like
+How can we use data typically collected in an outbreak to answer questions like
 
 - what **is** the number of cases now? (*nowcasting*)
 - is it rising/falling and by how much? (*$R_t$ estimation*)
@@ -88,36 +66,25 @@ ggplot(infection_times, aes(x = infection_time)) +
 
 Throughout the course we will
 
-2. apply generative models to simulated data in **Stan** to
+2. apply generative models to simulated data in **stan** to
    - learn about the system (conduct inference)
    - **make predictions** (nowcasting/forecasting)
-
-### Approach
-
-Throughout the course we will
-
-3. shift, in the second half, to demonstrations of **data-driven forecasting** and real-world applications
-
-### Approach
-
-Throughout the course we will
-
-4. work through all steps of a forecasting pipeline of data exploration, model and experimental design, forecast evaluation and combination.
 
 ### Timeline
 
 ::: {.incremental}
 - delay distributions and how to estimate them (day 1)
-- $R_t$ estimation and nowcasting (day 2)
-- forecasting, evaluation, and ensemble methods (day 2)
-- forecasting hubs, applications, and linking nowcasting and forecasting (day 3)
+- $R_t$ estimation and the generation interval (day 1)
+- nowcasting (day 2)
+- forecasting and evaluation, ensemble methods (day 2)
+- applications (day 3)
 :::
 
 #
 
 To start the course go to:
-[https://nfidd.github.io/sismid/](https://nfidd.github.io/sismid/)
-and get started on the first session (*Delay distributions*)
+[https://nfidd.github.io/nfidd/](https://nfidd.github.io/nfidd/)
+and get started on the first sesion (*Probability distributions and parameter estimation*)
 
 #
 

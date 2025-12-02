@@ -6,7 +6,6 @@ format:
   revealjs:
     output: slides/closing.html
     footer: "End of course summary"
-    chalkboard: true
     slide-level: 3
 ---
 
@@ -22,12 +21,11 @@ in real time.
 
 ### Timeline
 
-::: {.incremental}
 - delay distributions and how to estimate them (day 1)
-- $R_t$ estimation and nowcasting (day 2)
-- forecasting, evaluation, and ensemble methods (day 2)
-- forecasting hubs, applications, and linking nowcasting and forecasting (day 3)
-:::
+- $R_t$ estimation and the generation interval (day 1)
+- nowcasting (day 2)
+- forecasting and evaluation, ensemble methods (day 2)
+- applications (day 3)
 
 # Key takeaways
 
@@ -41,12 +39,12 @@ in real time.
   
 ![](figures/truncation_final.png)
 
-### Day 2: $R_t$ estimation {.smaller}
+### Day 1 (cont.): Convolutions {.smaller}
 
+- we can use **convolutions** to model delays at the population scale
+- when doing so we need to make sure to account for **double interval censoring**
 - **$R_t$ estimation** using the renewal equation is a convolution problem
 - improving the generative model leads to improvements in estimation (**geometric random walk** vs. independent priors)
-- **generation time** is a key delay distribution for transmission dynamics
-- understanding the role of the generative model in the estimation of $R_t$
 
 ![](figures/r_convolution_sketch.png)
 
@@ -58,30 +56,25 @@ in real time.
 
 ![](figures/complete_reporting_triangle.png)
 
-### Day 2 (cont.): Forecasting and evaluation {.smaller}
+### Day 2 (cont.): Forecasting {.smaller}
 
 - **forecasting** is the task of making unconditional statements about the future
 - meaningful forecasts are **probabilistic**
-- we can assess forecasts using **proper scoring rules** (MAE, RMSE, CRPS)
-- methods include **ARIMA models**, **ensemble approaches**, and **time-series cross-validation**
+- we can assess forecasts using **proper scoring rules**
+- a wide range of methods are available for making forecasts
 - we can use visualisation and scoring to understand the predictive performance of different models
 
 ![](figures/pit-log-scale.png)
 
-### Day 3: Collaborative modelling and applications {.smaller}
+### Day 3: Applications {.smaller}
 
-- **forecasting hubs** enable collaborative modelling efforts across institutions
-- **hubverse tools** provide standardised formats for forecast submission and evaluation
-- linking **nowcasting and forecasting** through joint or pipeline approaches
 - the methods introduced here have **wide applications** in infectious disease epidemiology
 - **open-source tools** are available to make this task easier in practice
 
-### Outlook: Contributing to forecast hubs {.smaller}
+### Outlook {.smaller}
 
-- apply these methods in practice to learn about typical nowcast/forecast performance
-- contribute to **collaborative forecast hubs** to compare approaches
-- use **hubverse standards** for forecast formatting and submission
-- example: European Respiratory Forecasting Hub
+- it is worth trying some of these methods here in practice to learn more about typical nowcast/forecast performance and intricacies of infectious disease data
+- one way of doing so is by contributing to forecast hubs
 
 ![](figures/respicast.png)
 
