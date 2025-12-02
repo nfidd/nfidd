@@ -8,15 +8,13 @@ format:
     output: slides/introduction-to-ensembles.html
     footer: "Multi-model ensembles"
     chalkboard: true
-    slide-level: 3
-
 ---
 
-### Ensembles: many forecasts into one
+## Ensembles: many forecasts into one
 
 ![Figure credit: Evan Ray and Nick Reich](figures/ensemble.jpg)
 
-### Why ensemble?
+## Why ensemble?
 
 ::: {.fragment .fade-in}
 1. Models are specialists and you want all the perspectives
@@ -29,7 +27,7 @@ format:
 2. A single "consensus forecast" is easier for decision-makers to digest 
 :::
 
-### "Whole is greater than sum of parts"
+## "Whole is greater than sum of parts"
 
 Average of multiple predictions is often (not always) more performant than any individual model
 
@@ -41,11 +39,11 @@ Average of multiple predictions is often (not always) more performant than any i
     - flu[@reich_accuracy_2019]
     - COVID-19[@cramer_evaluation_2022]
 
-### Ensemble methods: how to average?
+## Ensemble methods: how to average?
 
 ![Figure credit: @howertonContextdependentRepresentationBetweenmodel2023](figures/lop-vs-vincent.jpg)
 
-### Ensemble methods: to weight or not?
+## Ensemble methods: to weight or not?
 
    - Weight models by past forecast performance
    
@@ -56,7 +54,7 @@ Average of multiple predictions is often (not always) more performant than any i
       - lots of uncertainty in weight estimation!
       - put a "strong prior" on equal weights, both in your mental and statistical models
 
-### Collaborative modelling "hubs"
+## Collaborative modelling "hubs"
 
 :::: {.columns}
 
@@ -80,20 +78,20 @@ Average of multiple predictions is often (not always) more performant than any i
 
 ::::
 
-### Hubs increasingly used in epi
+## Hubs increasingly used in epi
 
 ![@Reich2022-jo](figures/history-of-hubs-2023.png)
 
-### ... e.g., the European [Respicast Hub](https://respicast.ecdc.europa.eu/) {.smaller}
+## ... e.g., the European [Respicast Hub](https://respicast.ecdc.europa.eu/) {.smaller}
 ![](figures/respicast-forecasts.png)
 
-### Single model {.smaller}
+## Single model {.smaller}
 ![](figures/respicast-single.png)
 
-### ... Multiple models {.smaller}
+## ... Multiple models {.smaller}
 ![](figures/respicast-multi.png)
 
-### ... ... Multi-model ensemble {.smaller}
+## ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
@@ -105,7 +103,7 @@ Average of multiple predictions is often (not always) more performant than any i
 
 [Return to the session](../forecast-ensembles)
 
-### References
+## References
 
 ::: {#refs}
 :::

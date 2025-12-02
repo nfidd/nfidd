@@ -340,7 +340,7 @@ ggplot(rw_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minute
+## Take 2 minutes
 What do you think of the nowcast now? Does it look better than the previous one?
 :::
 
@@ -409,7 +409,7 @@ ggplot(gamma_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minute
+## Take 2 minutes
 What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
 :::
 

@@ -62,7 +62,7 @@ For any retrospective experiment, you should always look for evidence that an an
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1. Build and visualize forecasts from multiple simple models.
+1. Build and visualise forecasts from multiple simple models.
 2. Evaluate the forecasts using proper scoring rules.
 3. Design and run an experiment to compare forecasts made from multiple models.
 4. Evaluate forecasts across forecast dates, horizons, and other dimensions.
