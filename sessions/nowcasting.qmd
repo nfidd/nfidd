@@ -6,9 +6,11 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-So far we've explored the delays and biases of real-time infectious disease surveillance data, started to correct for these, and considered the underlying process that drives the evolution of epidemics (looking at the reproduction number and renewal equation). Next, we'll focus on predicting new information about how infectious disease transmission is evolving in the present and future. 
+So far we've explored the delays and biases of real-time infectious disease surveillance data, started to correct for these, and considered the underlying process that drives the evolution of epidemics (looking at the reproduction number and renewal equation). 
+Next, we'll focus on predicting new information about how infectious disease transmission is evolving in the present and future. 
 
-We know that we have incomplete information in the present because of delays in the observation process (reporting delays). The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
+We know that we have incomplete information in the present because of delays in the observation process (reporting delays). 
+The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
 
 ## Slides
 
@@ -90,11 +92,12 @@ We can now convert this to a time series of symptom onsets and reports:
 ```{r aggregate}
 ## create time series of infections, onsets, and reports
 df_co <- df_co |>
-  transmute(
+  mutate(
     infection_day = floor(infection_time),
     onset_day = floor(onset_time),
     report_day = floor(report_time)
-  )
+  ) |>
+  select(-infection_time, -onset_time, -report_time)
 
 onset_ts <- df_co |>
   count(day = onset_day, name = "onsets")
@@ -126,7 +129,8 @@ We can see that if we plot the final data set of symptom onsets alongside the cu
 ```{r plot_cut_final}
 # Use full outbreak dataset
 final <- df |>
-  transmute(onset_day = floor(onset_time))
+  mutate(onset_day = floor(onset_time)) |>
+  select(-onset_time)
 final_onset_ts <- final |>
   count(day = onset_day, name = "onsets")
 final_all_days <- expand_grid(day = seq(0, max(final_onset_ts$day))) |>
@@ -201,7 +205,7 @@ tail(reported_onset_df)
 ```
 
 ::: {.callout-tip}
-## Take 5 minutes
+## Take 3 minutes
 Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
 :::
 
@@ -226,7 +230,7 @@ mod
 ```
 
 ::: {.callout-tip}
-## Take 5 minutes
+## Take 2 minutes
 Familiarise yourself with the model above. What does it do?
 :::
 
@@ -278,6 +282,24 @@ The points in this plot represent the data available when the nowcast was made (
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
+::: {.callout-important}
+## Simple multiplicative nowcasting methods
+
+Before moving to more complex models, it's worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 
+This approach is often called "multiplicative" or "scaling" nowcasting.
+
+While this method appears simple, it still embodies a model with specific assumptions that can be difficult to define precisely. 
+Key challenges include:
+
+- The method struggles with noisy data, particularly when counts are low
+- Sparse data (e.g., zero counts) can lead to unstable estimates
+- Generating uncertainty
+- The implicit assumptions about the data generating process are not always clear
+
+The [`baselinenowcast`](https://baselinenowcast.epinowcast.org) R package provides a set of tools for these types of methods, including approaches to handle both noise and sparsity in the data. 
+These baseline methods can serve as useful benchmarks when developing more complex nowcasting models.
+:::
+
 ## Adding in a geometric random walk to the nowcasting model
 
 As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-equation), a geometric random walk is a simple way to model multiplicative growth. Adding this into our simple nowcasting model may help us to better capture the generative process of the data and so produce a better nowcast.
@@ -318,7 +340,7 @@ ggplot(rw_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 2 minute
 What do you think of the nowcast now? Does it look better than the previous one?
 :::
 
@@ -332,7 +354,12 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
-## What happens if we get the delay distribution wrong?
+## What happens if we get the delay distribution wrong? {.optional}
+
+::: {.callout-note}
+## Optional section
+This section can be skipped if time is limited. It demonstrates the importance of accurate delay distribution estimation.
+:::
 
 In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
 In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.
@@ -382,7 +409,7 @@ ggplot(gamma_nowcast_onsets, aes(x = day)) +
 ```
 
 ::: {.callout-tip}
-## Take 2 minutes
+## Take 2 minute
 What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
 :::
 
@@ -398,6 +425,7 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 ## Methods in practice
 
 - Wolffram et al., [Collaborative nowcasting of COVID-19 hospitalization incidences in Germany](https://doi.org/10.1371/journal.pcbi.1011394) compares the performance of a range of methods that were used in a nowcasting hub and investigates what might explain performance differences.
+- The [`baselinenowcast`](https://baselinenowcast.epinowcast.org) R package provides implementations of simple multiplicative nowcasting methods that can serve as baselines for comparison with more complex approaches.
 
 # Wrap up
 
