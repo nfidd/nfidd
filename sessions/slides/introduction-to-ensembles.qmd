@@ -78,7 +78,7 @@ Average of multiple predictions is often (not always) more performant than any i
 
 ::::
 
-## Hubs increasingly used in epi
+## Hubs increasingly used in infectious disease modelling
 
 ![@Reich2022-jo](figures/history-of-hubs-2023.png)
 

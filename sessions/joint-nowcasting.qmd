@@ -201,8 +201,8 @@ This approach jointly estimates the delay distribution ($p_{t,d}$) and the under
 
 We now have two main modelling options:
 
-  - How we model the expected number of onsets $\lambda_{t}$
-  - How we model the probability of reporting $p_{t,d}$
+- How we model the expected number of onsets $\lambda_{t}$
+- How we model the probability of reporting $p_{t,d}$
 
 We will explore these in the next section.
 :::
