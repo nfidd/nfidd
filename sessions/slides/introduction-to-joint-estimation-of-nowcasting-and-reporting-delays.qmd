@@ -39,33 +39,22 @@ One potential solution is to jointly estimate the reporting delays and the nowca
 
 ![](figures/germany_historical.png)
 
-### The reporting triangle
+### Building on previous methods
 
-The reporting triangle is the name given to the data structure that arises when we have multiple snapshots of the data.
+The joint model has three key components:
 
-![](figures/reporting_triangle.png)
-
-### The reporting triangle
-
-Here the rows represent the time of the primary event, and the columns represent the time of the report.
-Some events are missing because they are yet to happen.
-
-![](figures/reporting_triangle.png)
-
-### Completing the reporting triangle
-
-The aim of nowcasting is to complete the reporting triangle. This means filling in the missing entries in the lower triangle and then summing the rows to get the nowcast.
-
-![](figures/complete_reporting_triangle.png)
+1. **Model for underlying counts** (what will end up being reported)
+2. **Model for delay distribution** (how long the reporting process will be)
+3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we don't take the sum)))
 
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
-1. Simulate the reporting triangle
+1. Simulate data with delayed reporting
 2. Perform a joint estimation of the delay and nowcast
 3. Understand the limitations of the data generating process
 4. Perform a joint estimation of the delay, nowcast, and reproduction number
 
-###
+#
 
 [Return to the session](../joint-nowcasting)
 
