@@ -49,6 +49,7 @@ library("tidybayes")
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 :::
 
+
 ## Initialisation
 
 We set a random seed for reproducibility. 
@@ -100,7 +101,7 @@ ggplot(infection_times, aes(x = infection_time)) +
        title = "Infections during an outbreak")
 ```
 
-::: callout-note
+::: {.callout-tip}
 In reality, data from infectious disease surveillance will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
 :::
@@ -119,7 +120,8 @@ We will start with our data on infection times, and work forwards to symptom ons
 
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
-::: {.callout-note}
+::: {.callout-tip}
+## Take a few minutes
 Throughout the course, we repeatedly use some small chunks of code.
 Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
 To see exactly what the function does, just type the function name, e.g. `add_delays` for the function below.
@@ -133,6 +135,16 @@ df <- add_delays(infection_times)
 ## Take 2 minutes
 Have a look at the `add_delays()`  function and try to understand its inner workings.
 You can also access a help file for this function, just like any other R function, using `?add_delays`.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+The `add_delays()` function takes a dataframe with `infection_time` and creates a complete simulated dataset:
+
+- Adds `onset_time` by sampling gamma-distributed incubation delays (`rgamma(n(), shape = 5, rate = 1)`)
+- Adds `hosp_time` by sampling lognormal-distributed delays from onset (`rlnorm(n(), meanlog = 1.75, sdlog = 0.5)`)
+- Sets `hosp_time` to `NA` for 70% of cases (only 30% are hospitalised) using `rbinom()`
+- Returns a dataframe with all three time columns
 :::
 
 Now we can plot infections, hospitalisations and onsets.
@@ -167,10 +179,48 @@ This might be an important delay to know about, for example when modelling and f
 
 To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
 
+::: {.callout-tip}
+## Take a few minutes
+This is where we apply the Bayesian inference concepts from the slides. 
+We're using Stan to estimate the parameters of a lognormal distribution (meanlog and sdlog) from our observed delay data. 
+The `nfidd_cmdstan_model()` function loads a pre-written Stan model for this purpose.
+:::
+
 ```{r naive_delay_model}
 mod <- nfidd_cmdstan_model("lognormal")
 mod
 ```
+
+::: {.callout-tip}
+## Take a few minutes
+Look at the Stan model code above and try to understand its structure. 
+What are the data, parameters, and model blocks doing? 
+What priors are being used?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The lognormal Stan model has three main blocks:
+
+- **Data block**: Specifies we need `n` (number of observations) and `y` (the delay data)
+- **Parameters block**: We want to estimate `meanlog` and `sdlog` (the two parameters of the lognormal distribution)
+- **Model block**: 
+  - Sets weakly informative normal priors for both parameters
+  - `sdlog` is constrained to be positive (standard deviations must be positive)
+  - The likelihood states that our data `y` follows a lognormal distribution with these parameters
+
+:::
+
+::: {.callout-note collapse="true"}
+## Stan reference materials
+
+For more information on the Stan based tools used in this session:
+
+- [Stan reference guide](../reference/stan) - covers probability distributions (log-normal, gamma), Bayesian inference basics, and Stan model structure
+- [Using our Stan models guide](../reference/using-our-stan-models) - practical guide to working with NFIDD's Stan models, including `nfidd_cmdstan_model()` and `nfidd_sample()` functions used below
+
+:::
 
 Let's estimate the onset-to-hospitalisation delay using the simulated data set we created above. Do we recover the parameters used for simulation?
 
@@ -192,12 +242,46 @@ res <- nfidd_sample(
 )
 ```
 
+::: {.callout-note}
+## What is sampling?
+
+Stan has used Markov Chain Monte Carlo (MCMC) to generate samples from the posterior distribution of our parameters. 
+The posterior distribution is the conditional probability distribution of the parameters given the observed data - p(parameters | data).
+This represents our updated beliefs about the parameter values after combining our prior knowledge with the evidence from the observed delays.
+Using Bayes' theorem: posterior ∝ likelihood × prior.
+Each sample represents a plausible set of parameter values given our data and priors. 
+:::
+
 To find out more about the arguments that can be passed to `cmdstanr::sample` via the `nfidd_sample()` function we used here, you can use `?cmdstanr::sample `.
 To see the estimates, we can use:
 
 ```{r summarise_naive_delay_model}
 res$summary() ## could also simply type `res`
 ```
+
+::: {.callout-tip}
+## Take a few minutes
+Look at the summary output above. What do the columns mean? What are the values of `meanlog` and `sdlog`?
+How do they compare to the true values we used in simulation (meanlog = 1.75, sdlog = 0.5)?
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The summary shows key statistics for each parameter:
+
+- **Mean**: Average value across all posterior samples
+- **Median**: Middle value when samples are sorted
+- **SD**: Standard deviation of the posterior samples (uncertainty)
+- **MAD**: Median absolute deviation (robust measure of uncertainty)
+- **Q5, Q95**: 5th and 95th percentiles (90% credible interval)
+- **Rhat**: Convergence diagnostic (should be close to 1.0)
+- **ESS**: Effective sample size (should be > 400 for reliable estimates)
+
+The `meanlog` and `sdlog` estimates should be close to the true simulation values (1.75 and 0.5), showing our model successfully recovered the parameters.
+
+For more details on interpreting Stan output, see the [Stan reference guide](../reference/stan).
+:::
 
 These estimates should look similar to what we used in the simulations.
 
@@ -235,14 +319,78 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
   geom_line(alpha = 0.3)
 ```
 
+::: {.callout-tip}
+## Take a few minutes
+Look at the plot above. What do you see? Why are there multiple lines? What does this tell us about our uncertainty in the delay distribution?
+:::
+
+::: {.callout-note collapse="true"}
+## Solutions
+
+The plot shows multiple semi-transparent lines, each representing a different plausible delay distribution:
+
+- **Multiple lines**: Each line represents one possible lognormal distribution based on a different sample from the posterior
+- **Uncertainty visualisation**: The spread of lines shows our uncertainty about the true delay distribution - we're not certain about the exact shape
+- **Limited data**: This uncertainty comes from having limited data - with more data, the lines would cluster more tightly together
+- **Parameter trade-offs**: Different combinations of meanlog and sdlog can produce very similar-looking distributions, making it hard to pin down exact parameter values
+- **Right-skewed shape**: All curves show the characteristic right-skewed shape of lognormal distributions, appropriate for delays
+- **Most likely region**: Where lines cluster together shows where we're most confident about the distribution shape
+
+This visualisation captures both our estimate of the delay distribution and our uncertainty about it.
+:::
+
 # Going further
 
 ## Challenge
 
 - In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
 With real data, of course, we don't have this information available. 
-Try using a different distribution for inference (e.g. normal, or gamma). 
-Do you get a good fit?
+
+- **Impact of sample size**: Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. 
+  
+  Subsample to 100 observations and refit the model to compare results:
+  ```{r, eval = FALSE}
+  df_small <- df_onset_to_hosp |> slice_sample(n = 100)
+  ```
+
+- **Different delay lengths**: The updated `add_delays()` function now allows you to change the delay parameters. 
+  
+  Try longer delays and see how this affects your parameter recovery:
+  ```{r, eval = FALSE}
+  df_long <- add_delays(infection_times, 
+                       hosp_params = list(meanlog = 2.5, sdlog = 0.5))
+  ```
+
+- **Different variability of the delay**: Try changing the variability of the delay to see how it affects uncertainty in estimates.
+  
+  More variable delays (higher sdlog):
+  ```{r, eval = FALSE}
+  df_variable <- add_delays(infection_times,
+                           hosp_params = list(meanlog = 1.75, sdlog = 1.0))
+  ```
+  
+  Less variable delays (lower sdlog):
+  ```{r, eval = FALSE}
+  df_precise <- add_delays(infection_times,
+                          hosp_params = list(meanlog = 1.75, sdlog = 0.2))
+  ```
+
+- **Different type of distribution**: Try using a completely different distribution for the delays.
+  
+  Use gamma distribution instead of lognormal:
+  ```{r, eval = FALSE}
+  df_gamma <- add_delays(infection_times,
+                        hosp_fun = rgamma,
+                        hosp_params = list(shape = 2, rate = 0.3))
+  ```
+
+- **Different fitted distribution**: Try fitting a different distribution to the data. For example, use the gamma Stan model instead of lognormal:
+  ```{r, eval = FALSE}
+  mod_gamma <- nfidd_cmdstan_model("gamma")
+  ```
+See the [Using our Stan models guide](../reference/using-our-stan-models) for more available models
+
+- Try using one of the methods in practice below to fit a distribution to the data.
 
 ## Methods in practice
 
