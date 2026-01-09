@@ -6,12 +6,13 @@ format:
   revealjs:
     output: slides/forecast-evaluation.html
     footer: "Forecast evaluation"
+    chalkboard: true
     slide-level: 3
 ---
 
 ### Importance of evaluation {.smaller}
 
-- Because forecasts are unconditional (what will happen) we can compare them to data and see how well they did
+- Because forecasts are unconditional quantitative statements about the future ("what *will* happen") we can compare them to data and see how well they did
 - Doing this allows us to answer question like
   - Are our forecasts any good?
   - How far ahead can we trust forecasts?
@@ -26,10 +27,43 @@ format:
 - Statements about the future should be **correct** ("calibration")
 - Statements about the future should aim to have **narrow uncertainty** ("sharpness")
 
+![Figure credit: Evan Ray](figures/sharpness-calibration.png)
+
+### Forecast workflow {.smaller}
+
+![](figures/forecast-workflow.png)
+
+### Evaluating forecasts {.smaller}
+
+1. *Vibes*: Do the forecasts look reasonable based on recent data?
+2. *Scores*: Measure the forecast accuracy. Different scores will measure important different facets of performance.
+3. *Testing and validation*: Design an experiment that evaluates forecasts made at different times, without "data leakage".
+
+### Don't let the model cheat: cross-validation {.smaller}
+
+Picking a **cross-validation scheme that is specific to time-series data** ensures that your model only sees data in the past.
+
+![Time-series cross-validation schematic](figures/time-series-cross-validation.png)
+
+### Don't let yourself cheat: prospective validation {.smaller}
+
+**Prospective validation** is when you "register" one (or a small number) of forecasts as your "best" prediction of the future, before the eventual data are observed.
+If you know what the held-out data looks like, you might make subconscious decisions about which model to choose, biasing the final results.
+
+![Figure credit: [Lauer et al, 2020](https://arxiv.org/abs/2006.00073)](figures/test-train.jpg)
+
+### Validation with epi data 
+
+It can be really hard to keep track of what version of epi surveillance data was released when.
+
+This makes prospective evaluation even more important.
+
+For any retrospective experiment, you should always look for evidence that an analyst didn't let the model cheat!
+
 ## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Load forecasts from the model we have visualised previously.
-2. Evaluate the forecasts using proper scoring rules
+2. Evaluate the forecasts using proper scoring rules.
 
 #
 
