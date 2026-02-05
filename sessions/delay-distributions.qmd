@@ -321,7 +321,7 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 
 ::: {.callout-tip}
 ## Take a few minutes
-Look at the plot above. What do you see? Why are there multiple lines? What does this tell us about our uncertainty in the delay distribution?
+Look at the plot above. What do you see? Why are there multiple lines? What does this tell us about our uncertainty in the delay distribution
 :::
 
 ::: {.callout-note collapse="true"}
