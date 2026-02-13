@@ -1,3 +1,5 @@
+# nfidd (development version)
+
 # nfidd 1.2.0
 
 - made `add_delays()` more flexible with configurable delay distributions and hospitalisation probability (#584)
