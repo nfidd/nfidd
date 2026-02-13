@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>R_t estimation and the renewal equation – NFIDD</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../nfidd-favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-c2184ee79b4189700a07fecab5507ffb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-c360435f7611cc61c5dfaa8e4cdf26fd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-c2184ee79b4189700a07fecab5507ffb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="\(R_t\) estimation and the renewal equation – NFIDD">
+<meta property="og:description" content="Nowcasting and forecasting infectious disease dynamics">
+<meta property="og:image" content="https://nfidd.github.io/nfidd/sessions/R-estimation-and-the-renewal-equation_files/figure-html/r_plot-1.png">
+<meta property="og:site_name" content="NFIDD">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">NFIDD</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../getting-started.html"> 
+<span class="menu-text">Getting started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-sessions" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Sessions</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-sessions">    
+        <li>
+    <a class="dropdown-item" href="../sessions/introduction-and-course-overview.html">
+ <span class="dropdown-text">Introduction and course overview</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/probability-distributions-and-parameter-estimation.html">
+ <span class="dropdown-text">Probability distributions and parameter estimation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/delay-distributions.html">
+ <span class="dropdown-text">Delay distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/biases-in-delay-distributions.html">
+ <span class="dropdown-text">Biases in delay distributions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.html">
+ <span class="dropdown-text">Using delay distributions to model the data generating process</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/R-estimation-and-the-renewal-equation.html">
+ <span class="dropdown-text"><span class="math inline">\(R_t\)</span> estimation and the renewal equation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/nowcasting.html">
+ <span class="dropdown-text">Nowcasting concepts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/joint-nowcasting.html">
+ <span class="dropdown-text">Nowcasting with an unknown reporting delay</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/forecasting-concepts.html">
+ <span class="dropdown-text">Forecasting concepts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/forecast-evaluation.html">
+ <span class="dropdown-text">Forecast evaluation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/forecasting-models.html">
+ <span class="dropdown-text">Forecasting models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/forecast-ensembles.html">
+ <span class="dropdown-text">Forecast ensembles</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/examples-of-available-tools.html">
+ <span class="dropdown-text">Examples of available tools</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/methods-in-the-real-world.html">
+ <span class="dropdown-text">Methods in the real world</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../sessions/end-of-course-summary-and-discussion.html">
+ <span class="dropdown-text">End of course summary and discussion</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">    
+        <li>
+    <a class="dropdown-item" href="../reference/sessions.html">
+ <span class="dropdown-text">Session timetable</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/learning_objectives.html">
+ <span class="dropdown-text">Learning outcomes</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/help.html">
+ <span class="dropdown-text">Getting help</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/further_reading.html">
+ <span class="dropdown-text">Further reading</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/stan.html">
+ <span class="dropdown-text">Stan Reference</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/using-our-stan-models.html">
+ <span class="dropdown-text">Using our Stan models</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../authors.html"> 
+<span class="menu-text">Authors</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/nfidd/nfidd"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sessions/R-estimation-and-the-renewal-equation.html"><span class="math inline">\(R_t\)</span> estimation and the renewal equation</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/introduction-and-course-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction and course overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/probability-distributions-and-parameter-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Probability distributions and parameter estimation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/delay-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Delay distributions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/biases-in-delay-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Biases in delay distributions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Using delay distributions to model the data generating process</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/R-estimation-and-the-renewal-equation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="math inline">\(R_t\)</span> estimation and the renewal equation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/nowcasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Nowcasting concepts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/joint-nowcasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Nowcasting with an unknown reporting delay</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/forecasting-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting concepts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/forecast-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecast evaluation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/forecasting-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecasting models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/forecast-ensembles.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Forecast ensembles</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/examples-of-available-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Examples of available tools</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/methods-in-the-real-world.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Methods in the real world</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sessions/end-of-course-summary-and-discussion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">End of course summary and discussion</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#slides" id="toc-slides" class="nav-link" data-scroll-target="#slides">Slides</a></li>
+  <li><a href="#objectives" id="toc-objectives" class="nav-link" data-scroll-target="#objectives">Objectives</a></li>
+  </ul></li>
+  <li><a href="#the-renewal-equation-as-a-process-model-for-infectious-diseases" id="toc-the-renewal-equation-as-a-process-model-for-infectious-diseases" class="nav-link" data-scroll-target="#the-renewal-equation-as-a-process-model-for-infectious-diseases">The renewal equation as a process model for infectious diseases</a></li>
+  <li><a href="#simulating-an-epidemic-using-the-renewal-equation" id="toc-simulating-an-epidemic-using-the-renewal-equation" class="nav-link" data-scroll-target="#simulating-an-epidemic-using-the-renewal-equation">Simulating an epidemic using the renewal equation</a></li>
+  <li><a href="#estimating-r_t-from-a-time-series-of-infections" id="toc-estimating-r_t-from-a-time-series-of-infections" class="nav-link" data-scroll-target="#estimating-r_t-from-a-time-series-of-infections">Estimating <span class="math inline">\(R_t\)</span> from a time series of infections</a></li>
+  <li><a href="#estimating-r_t-from-a-time-series-of-symptom-onsets" id="toc-estimating-r_t-from-a-time-series-of-symptom-onsets" class="nav-link" data-scroll-target="#estimating-r_t-from-a-time-series-of-symptom-onsets">Estimating <span class="math inline">\(R_t\)</span> from a time series of symptom onsets</a></li>
+  <li><a href="#improving-the-generative-model-for-the-reproduction-number" id="toc-improving-the-generative-model-for-the-reproduction-number" class="nav-link" data-scroll-target="#improving-the-generative-model-for-the-reproduction-number">Improving the generative model for the reproduction number</a>
+  <ul class="collapse">
+  <li><a href="#simulating-a-geometric-random-walk" id="toc-simulating-a-geometric-random-walk" class="nav-link" data-scroll-target="#simulating-a-geometric-random-walk">Simulating a geometric random walk</a></li>
+  <li><a href="#estimating-r_t-with-a-geometric-random-walk-prior" id="toc-estimating-r_t-with-a-geometric-random-walk-prior" class="nav-link" data-scroll-target="#estimating-r_t-with-a-geometric-random-walk-prior">Estimating <span class="math inline">\(R_t\)</span> with a geometric random walk prior</a></li>
+  <li><a href="#comparing-the-models" id="toc-comparing-the-models" class="nav-link" data-scroll-target="#comparing-the-models">Comparing the models</a></li>
+  </ul></li>
+  <li><a href="#going-further" id="toc-going-further" class="nav-link" data-scroll-target="#going-further">Going further</a>
+  <ul class="collapse">
+  <li><a href="#challenge" id="toc-challenge" class="nav-link" data-scroll-target="#challenge">Challenge</a></li>
+  <li><a href="#methods-in-practice" id="toc-methods-in-practice" class="nav-link" data-scroll-target="#methods-in-practice">Methods in practice</a></li>
+  </ul></li>
+  <li><a href="#wrap-up" id="toc-wrap-up" class="nav-link" data-scroll-target="#wrap-up">Wrap up</a>
+  <ul class="collapse">
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/nfidd/nfidd/blob/main/sessions/R-estimation-and-the-renewal-equation.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/nfidd/nfidd/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="math inline">\(R_t\)</span> estimation and the renewal equation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>In the last session we used the idea of convolutions as a way to interpret individual time delays at a population level. In that session, we linked symptom onsets back to infections. Now we want to link infections themselves together over time, knowing that current infections were infected by past infections. Correctly capturing this transmission process is crucial to modelling infections in the present and future.</p>
+<section id="slides" class="level2">
+<h2 class="anchored" data-anchor-id="slides">Slides</h2>
+<ul>
+<li><a href="slides/introduction-to-reproduction-number">Introduction to the reproduction number</a></li>
+</ul>
+</section>
+<section id="objectives" class="level2">
+<h2 class="anchored" data-anchor-id="objectives">Objectives</h2>
+<p>The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Setup
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<section id="source-file" class="level2">
+<h2 class="anchored" data-anchor-id="source-file">Source file</h2>
+<p>The source file of this session is located at <code>sessions/R-estimation-and-the-renewal-equation.qmd</code>.</p>
+</section>
+<section id="libraries-used" class="level2">
+<h2 class="anchored" data-anchor-id="libraries-used">Libraries used</h2>
+<p>In this session we will use the <code>nfidd</code> package to load a data set of infection times and access stan models and helper functions, the <code>dplyr</code> and <code>tidyr</code> packages for data wrangling, <code>ggplot2</code> library for plotting, the <code>tidybayes</code> package for extracting results of the inference, and the <code>purrr</code> package for <a href="https://adv-r.hadley.nz/fp.html">functional programming</a>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"nfidd"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyr"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ggplot2"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidybayes"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"purrr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The best way to interact with the material is via the <a href="https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html">Visual Editor</a> of RStudio.</p>
+</div>
+</div>
+</section>
+<section id="initialisation" class="level2">
+<h2 class="anchored" data-anchor-id="initialisation">Initialisation</h2>
+<p>We set a random seed for reproducibility. Setting this ensures that you should get exactly the same results on your computer as we do. We also set an option that makes <code>cmdstanr</code> show line numbers when printing model code. This is not strictly necessary but will help us talk about the models.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">cmdstanr_print_line_numbers =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="the-renewal-equation-as-a-process-model-for-infectious-diseases" class="level1">
+<h1>The renewal equation as a process model for infectious diseases</h1>
+<p>In this session we introduce modelling the infection process itself, in addition to modelling observation processes.</p>
+<p>Recall that in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections">session on convolutions</a> we tried to estimate the number of infections. In doing so we assumed that infections every day were independently identically distributed and determined only by the number of symptom onsets that they caused. In reality, however, we know that infections are not independent. Because infection is dependent on a pathogen being transmitted from one individual to another, we expect infections on any day to depend on existing infections, that is the number of individuals that became infectious in the recent past. We now express this relationship via the renewal equation, which links these recent infections to the number of new infections expected on any day via the reproduction number <span class="math inline">\(R_t\)</span>.</p>
+<p>Remember that this is a more general concept than the <em>basic</em> reproduction number <span class="math inline">\(R_0\)</span> which represents the average number of secondary infections caused by a single infectious individual in a completely susceptible population.</p>
+<p>The reproduction number <span class="math inline">\(R_t\)</span> (sometimes called the <em>effective</em> reproduction number) more generally describes the average number of secondary infections caused by a single infectious individual. It can vary in time and space as a function of differences in population level susceptibility, changes in behaviour, policy, seasonality etc.</p>
+<p>In most mechanistic models of infectious diseases (starting with the simplest SIR model), <span class="math inline">\(R_t\)</span> arises out of a combination of parameters and variables representing the system state, for example in a simple SIR model it can be calculated as <span class="math inline">\(R_0 S/N\)</span> where <span class="math inline">\(S\)</span> is the current number of susceptibles in the population of size <span class="math inline">\(N\)</span>. By fitting such models to data it is then possible to calculate the value of <span class="math inline">\(R_t\)</span> at any point in time.</p>
+<p>The <em>renewal equation</em> represents a more general model which includes the SIR model as a special case. In its basic form it makes no assumption about the specific processes that cause <span class="math inline">\(R_t\)</span> to have a certain value and/or change over time, but instead it only relates the number of infected people in the population, the current value of the reproduction number and a delay distribution that represents the timings of when individuals infect others relative to when they themselves became infected, the so-called generation time. Mathematically, it can be written as</p>
+<p><span class="math display">\[
+I_t = R_t \sum_{i=1}^{g_\mathrm{max}} I_{t-i} g_i
+\]</span></p>
+<p>Here, <span class="math inline">\(I_t\)</span> is the number of infected individuals on day <span class="math inline">\(t\)</span>, <span class="math inline">\(R_t\)</span> is the current value of the reproduction number and <span class="math inline">\(g_i\)</span> is the probability of a secondary infection occurring <span class="math inline">\(i\)</span> days after the infector became infected themselves, with a maximum <span class="math inline">\(g_\mathrm{max}\)</span>. Remembering the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a> you will be able to identify that the renewal equation represents a convolution of the infection time series with itself, with the delay distribution given by <span class="math inline">\(g_i\)</span> and <span class="math inline">\(R_t\)</span> representing a scaling that is being applied.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Discrete vs.&nbsp;continuous renewal equation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The equation shown above represents the discrete version of the reproduction number. Similar to discussions in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a> this can be interpreted as a discretised version of a continuous one where the sum is replaced by an integral and the generation time distribution is continuous. Note that in the discrete version we have started the sum at 1 and thus set <span class="math inline">\(g_0=0\)</span> which will make calculations easier.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Instantaneous vs.&nbsp;case reproduction number
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There are different definitions of the reproduction number that can be applied to the situation where it changes in time. As it is defined above it is also called the <em>instantaneous</em> reproduction number because any change affects all currently infectious individuals instantaneously. Another example of a definition is the <em>case</em> reproduction number, where changes affect individuals at the time that they are infected but then they have a constant reproduction number throughout their infectious period.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Stochastic vs.&nbsp;deterministic renewal equation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The version of the discrete renewal equation we wrote above is deterministic, i.e.&nbsp;knowing the number of infections up to a certain time point and the reproduction number we can work out exactly how many new infections we will see. Sometimes stochasticity is added where the equation above gives the <em>expectation</em> of <span class="math inline">\(I_t\)</span> but there exists random variation around it. In this course we will only deal with the deterministic renewal equation.</p>
+</div>
+</div>
+</section>
+<section id="simulating-an-epidemic-using-the-renewal-equation" class="level1">
+<h1>Simulating an epidemic using the renewal equation</h1>
+<p>With the theory out of the way we now turn to simulating an epidemic using the renewal equation. We can use function included in the <code>nfidd</code> package to simulate the epidemic using the discrete renewal equation.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>renewal</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (I0, R, gen_time) 
+{
+    max_gen_time &lt;- length(gen_time)
+    times &lt;- length(R)
+    I &lt;- c(I0, rep(0, times))
+    for (t in 1:times) {
+        first_index &lt;- max(1, t - max_gen_time + 1)
+        I_segment &lt;- I[seq(first_index, t)]
+        gen_pmf &lt;- rev(gen_time[seq_len(t - first_index + 1)])
+        I[t + 1] &lt;- sum(I_segment * gen_pmf) * R[t]
+    }
+    I[-1]
+}
+&lt;bytecode: 0x5653f33732f0&gt;
+&lt;environment: namespace:nfidd&gt;</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Try to understand the <code>renewal()</code> function above. Compare it to the <code>convolve_with_delay()</code> function from the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a>. How are they similar? Can you explain the key differences between the two? Try calling the function with a few different probability distributions and parameters. What kind of behaviours do you see depending on the values you put in?</p>
+</div>
+</div>
+</section>
+<section id="estimating-r_t-from-a-time-series-of-infections" class="level1">
+<h1>Estimating <span class="math inline">\(R_t\)</span> from a time series of infections</h1>
+<p>We now return to the time series of infections we used in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>inf_ts <span class="ot">&lt;-</span> <span class="fu">make_daily_infections</span>(infection_times)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(inf_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  infection_day infections
+          &lt;dbl&gt;      &lt;int&gt;
+1             0          1
+2             1          0
+3             2          1
+4             3          0
+5             4          2
+6             5          1</code></pre>
+</div>
+</div>
+<p>This creates the <code>inf_ts</code> data set which we can look at e.g.&nbsp;using</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(inf_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  infection_day infections
+          &lt;dbl&gt;      &lt;int&gt;
+1             0          1
+2             1          0
+3             2          1
+4             3          0
+5             4          2
+6             5          1</code></pre>
+</div>
+</div>
+<p>We use a renewal equation model in <em>stan</em> to estimate the effective reproduction number throughout the outbreak. We assume that the generation time is gamma-distributed with mean 4 and standard deviation 2, with a maximum of 2 weeks (14 days). From this we can calculate that the parameters of the distribution are shape 4 and rate 1. We can use the <code>censored_delay_pmf()</code> function defined in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a> to use this continuous distribution with the discrete renewal equation.</p>
+<p>To approximate the generation time PMF using random draws from the underlying continuous distribution use</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gen_time_pmf <span class="ot">&lt;-</span> <span class="fu">censored_delay_pmf</span>(rgamma, <span class="at">max =</span> <span class="dv">14</span>, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">rate =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The discrete renewal equation is only valid for generation times greater than 0 so we remove the first element of the pmf and re-normalise:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gen_time_pmf <span class="ot">&lt;-</span> gen_time_pmf[<span class="sc">-</span><span class="dv">1</span>] <span class="do">## remove first element</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gen_time_pmf <span class="ot">&lt;-</span> gen_time_pmf <span class="sc">/</span> <span class="fu">sum</span>(gen_time_pmf) <span class="do">## renormalise</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As always we first load the stan model and spend some time trying to understand it.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>r_mod <span class="ot">&lt;-</span> <span class="fu">nfidd_cmdstan_model</span>(<span class="st">"estimate-r"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>r_mod</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 1: functions {
+ 2:   #include "functions/renewal.stan"
+ 3: }
+ 4: 
+ 5: data {
+ 6:   int n;                // number of days
+ 7:   int I0;              // number initially infected
+ 8:   array[n] int obs;     // observed infections
+ 9:   int gen_time_max;     // maximum generation time
+10:   array[gen_time_max] real gen_time_pmf;  // pmf of generation time distribution
+11: }
+12: 
+13: parameters {
+14:   array[n] real&lt;lower = 0&gt; R;
+15: }
+16: 
+17: transformed parameters {
+18:   array[n] real infections = renewal(I0, R, gen_time_pmf);
+19: }
+20: 
+21: model {
+22:   // priors
+23:   R ~ normal(1, 1) T[0, ];
+24:   obs ~ poisson(infections);
+25: }</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Familiarise yourself with the model above. Again there is a <code>functions</code> block at the beginning of the model (lines 1-3), where we load a function called <code>renewal()</code> (line 2) from a file of the same name which can be found in the subdirectory <code>functions</code> of the <code>stan</code> directory or <a href="https://github.com/nfidd/nfidd/blob/main/inst/stan/functions/renewal.stan">viewed on the github repo</a>. The functions correspond exactly to our earlier <strong>R</strong> function of the same name. Later, this function is called in the <code>model</code> block, to generate the time series of infections using the discretised renewal model (line 19). Which line defines priors, and which the likelihood?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Line 24 defines the prior distribution of <span class="math inline">\(R_t\)</span> at each time point, and Line 25 defines the likelihood using Poisson observation uncertainty.</p>
+</div>
+</div>
+</div>
+<p>Once again we can generate estimates from this model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">nrow</span>(inf_ts) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs =</span> inf_ts<span class="sc">$</span>infections[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">I0 =</span> inf_ts<span class="sc">$</span>infections[<span class="dv">1</span>],</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_max =</span> <span class="fu">length</span>(gen_time_pmf),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_pmf =</span> gen_time_pmf</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>r_fit <span class="ot">&lt;-</span> <span class="fu">nfidd_sample</span>(r_mod, <span class="at">data =</span> data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>r_fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> variable     mean   median   sd  mad       q5      q95 rhat ess_bulk ess_tail
+     lp__ 22088.54 22088.76 8.49 8.33 22073.66 22101.69 1.00     1025     1291
+     R[1]     1.35     1.30 0.85 0.91     0.11     2.83 1.00      681      388
+     R[2]     2.06     2.02 0.78 0.80     0.85     3.38 1.00     1406      809
+     R[3]     1.56     1.51 0.79 0.82     0.30     2.94 1.00     1058      495
+     R[4]     2.28     2.24 0.77 0.78     1.06     3.59 1.00     2122      828
+     R[5]     1.86     1.82 0.77 0.76     0.62     3.20 1.00     1594      746
+     R[6]     1.75     1.70 0.77 0.79     0.60     3.17 1.00     2121     1102
+     R[7]     1.67     1.59 0.77 0.79     0.50     3.01 1.00     1760      914
+     R[8]     2.27     2.23 0.71 0.72     1.17     3.52 1.00     2062      971
+     R[9]     1.15     1.07 0.72 0.75     0.15     2.42 1.00     1458      666
+
+ # showing 10 of 283 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
+</div>
+</div>
+<p>Once stan has run its chains, we can visualise the posterior estimates.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract posterior draws</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>r_posterior <span class="ot">&lt;-</span> r_fit <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_draws</span>(R[infection_day]) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">infection_day =</span> infection_day <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.draw <span class="sc">%in%</span> <span class="fu">sample</span>(.draw, <span class="dv">100</span>))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> r_posterior,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> infection_day, <span class="at">y =</span> .value, <span class="at">group =</span> .draw))  <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span>  <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Estimated Rt"</span>, </span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Model 1: renewal equation from infections"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/r_plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>inf_posterior <span class="ot">&lt;-</span> r_fit <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_draws</span>(infections[infection_day]) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">infection_day =</span> infection_day <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">infections =</span> <span class="fu">map_dbl</span>(.value, <span class="sc">~</span> <span class="fu">rpois</span>(<span class="dv">1</span>, .x))) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.draw <span class="sc">%in%</span> <span class="fu">sample</span>(.draw, <span class="dv">100</span>))</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(inf_posterior, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day)) <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> .value, <span class="at">group =</span> .draw), <span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> inf_ts, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> infections), <span class="at">colour =</span> <span class="st">"red"</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Infections, estimated (grey) and observed (red)"</span>, </span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Model 1: renewal equation from infections"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_infections-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The estimates are quite noisy, especially in the early days of the outbreak and towards the estimation date. It looks like the precision of the estimates is related to the number of infections observed on each day. The model fits the observed infections very well. Rt crosses 1 at the peak of the outbreak which is consistent with the true Rt trajectory.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="estimating-r_t-from-a-time-series-of-symptom-onsets" class="level1">
+<h1>Estimating <span class="math inline">\(R_t\)</span> from a time series of symptom onsets</h1>
+<p>Epidemiological data is rarely, perhaps never, available as a time series of infection events. Instead, we usually observe outcomes such as symptom onsets when individuals interact with the health system, e.g.&nbsp;by presenting to a hospital. In the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions">session on convolutions</a> we simulated symptom onsets from a time series of infections by convolving with a delay and then sampling from a Poisson distribution: For this we used the <code>convolved_with_delay()</code> function.</p>
+<p>We then simulate observations again using:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ip_pmf <span class="ot">&lt;-</span> <span class="fu">censored_delay_pmf</span>(rgamma, <span class="at">max =</span> <span class="dv">14</span>, <span class="at">shape =</span> <span class="dv">5</span>, <span class="at">rate =</span> <span class="dv">1</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>onsets <span class="ot">&lt;-</span> <span class="fu">convolve_with_delay</span>(inf_ts<span class="sc">$</span>infections, ip_pmf)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="fu">length</span>(onsets), onsets)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We now add this to our renewal equation model and use this to estimate infections as well as the reproduction number:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>r_inf_mod <span class="ot">&lt;-</span> <span class="fu">nfidd_cmdstan_model</span>(<span class="st">"estimate-inf-and-r"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>r_inf_mod</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 1: functions {
+ 2:   #include "functions/convolve_with_delay.stan"
+ 3:   #include "functions/renewal.stan"
+ 4: }
+ 5: 
+ 6: data {
+ 7:   int n;                // number of days
+ 8:   int I0;              // number initially infected
+ 9:   array[n] int obs;     // observed symptom onsets
+10:   int gen_time_max;     // maximum generation time
+11:   array[gen_time_max] real gen_time_pmf;  // pmf of generation time distribution
+12:   int&lt;lower = 1&gt; ip_max; // max incubation period
+13:   array[ip_max + 1] real ip_pmf;
+14: }
+15: 
+16: parameters {
+17:   array[n] real&lt;lower = 0&gt; R;
+18: }
+19: 
+20: transformed parameters {
+21:   array[n] real infections = renewal(I0, R, gen_time_pmf);
+22:   array[n] real onsets = convolve_with_delay(infections, ip_pmf);
+23: }
+24: 
+25: model {
+26:   // priors
+27:   R ~ normal(1, 1) T[0, ];
+28:   obs ~ poisson(onsets);
+29: }</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Familiarise yourself with the model above. Compare it to the model used earlier in this session, and the one used in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections">session on convolutions</a>. Does this model have more parameters? How do the assumptions about the infections time series differ between the models?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The model has a similar number of parameters but the assumptions about the infections time series are different. The model used in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections">session on convolutions</a> assumes that the number of infections each day is independent and identically distributed. In contrast, the model used here assumes that the number of infections each day is dependent on the number of infections on previous days due to the renewal equation. Now it is Rt that is assumed to be independent and identically distributed.</p>
+</div>
+</div>
+</div>
+<p>We then generate estimates from this model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">length</span>(obs) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs =</span> obs[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">I0 =</span> inf_ts<span class="sc">$</span>infections[<span class="dv">1</span>],</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_max =</span> <span class="fu">length</span>(gen_time_pmf),</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_pmf =</span> gen_time_pmf,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ip_max =</span> <span class="fu">length</span>(ip_pmf) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ip_pmf =</span> ip_pmf</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>r_inf_fit <span class="ot">&lt;-</span> <span class="fu">nfidd_sample</span>(</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  r_inf_mod, <span class="at">data =</span> data, <span class="at">init =</span> \() <span class="fu">list</span>(<span class="at">init_R =</span> <span class="dv">1</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="{callout-note}">
+<p>Generally, one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored. When testing this model, we noticed that sometimes the model failed to fit the data at all. Because of this, we added an argument to start sampling with <code>init_R</code> set to 1. This makes sure the sampler starts fitting the model from a sensible value and avoids fitting failiures.</p>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>r_inf_fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> variable     mean   median   sd  mad       q5      q95 rhat ess_bulk ess_tail
+     lp__ 21498.48 21498.68 9.54 9.51 21482.54 21514.43 1.01      572     1074
+     R[1]     1.43     1.33 0.83 0.83     0.23     2.93 1.00     1189      444
+     R[2]     1.68     1.65 0.84 0.86     0.37     3.16 1.00     1018      531
+     R[3]     1.82     1.75 0.87 0.86     0.51     3.31 1.00     1679      887
+     R[4]     1.81     1.77 0.85 0.88     0.49     3.32 1.00     1174      530
+     R[5]     1.77     1.73 0.86 0.87     0.39     3.26 1.00     1180      636
+     R[6]     1.81     1.76 0.85 0.90     0.45     3.28 1.00     1119      583
+     R[7]     2.03     1.99 0.83 0.88     0.75     3.42 1.00     1886     1074
+     R[8]     1.54     1.50 0.80 0.87     0.33     2.93 1.00     1501      822
+     R[9]     1.57     1.54 0.86 0.93     0.28     3.04 1.00     1449      841
+
+ # showing 10 of 424 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
+</div>
+</div>
+<p>We again extract the posterior draws noting that this time infections is a latent quantity that we have to infer from the symptom onsets in the same way that Rt was in the previous model.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>r_inf_posteriors <span class="ot">&lt;-</span> r_inf_fit <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_draws</span>(infections[infection_day], R[infection_day]) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">infection_day =</span> infection_day <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.draw <span class="sc">%in%</span> <span class="fu">sample</span>(.draw, <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can visualise infections compared to the data used to generate the time series of onsets</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>inf_posterior <span class="ot">&lt;-</span> r_inf_posteriors <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.variable <span class="sc">==</span> <span class="st">"infections"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(inf_posterior, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day)) <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> .value, <span class="at">group =</span> .draw), <span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> inf_ts, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> infections), <span class="at">colour =</span> <span class="st">"red"</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Infections, estimated (grey) and observed (red)"</span>, </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Model 2: renewal equation from symptom onsets"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_inf_infections-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>and reproduction numbers</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>r_inf_posterior <span class="ot">&lt;-</span> r_inf_posteriors <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.variable <span class="sc">==</span> <span class="st">"R"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  r_inf_posterior, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day, <span class="at">y =</span> .value, <span class="at">group =</span> .draw)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_rt-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other? Are they consistent with the estimates from the previous model?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The estimates are very noisy across the whole outbreak. They still appear to roughly follow the true Rt trajectory, but the uncertainty is very high. Rt still crosses 1 at the peak of the outbreak which is consistent with the true Rt trajectory. Towards the end of the outbreak the model is not able to capture the true Rt trajectory as well as the previous model. It instead appears to be reverting to having a mean of 1 which is the prior mean. This is because we have specified the generative process for the reproduction number to be independent and identically distributed, which is not consistent with the true Rt trajectory. Now, there is not enough data (due to the delay distribution) to estimate the reproduction number at each time point (due to truncation).</p>
+</div>
+</div>
+</div>
+</section>
+<section id="improving-the-generative-model-for-the-reproduction-number" class="level1">
+<h1>Improving the generative model for the reproduction number</h1>
+<p>In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point. This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above. As we just saw, it also results in real-time estimates (i.e.&nbsp;towards the date of esitmation) that rely heavily on the prior.</p>
+<p>In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points. We can model this by assuming that the reproduction number at time <span class="math inline">\(t\)</span> is a random draw from a normal distribution with mean equal to the reproduction number at time <span class="math inline">\(t-1\)</span> and some standard deviation <span class="math inline">\(\sigma\)</span>. This can be described as a random walk model for the reproduction number. In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk. Tas this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive. Otherwise, the same absolute change in the reproduction number would have a larger effect when the reproduction number is small, which likely doesn’t match your intuition for how outbreaks evolve over time. We can write this model as</p>
+<p><span class="math display">\[
+\sigma \sim HalfNormal(0, 0.05) \\
+\]</span> <span class="math display">\[
+R_0 \sim \mathcal{Lognormal}(1, 0.5)
+\]</span> <span class="math display">\[
+\log(R_t) \sim \mathcal{N}(\log(R_{t-1}), \sigma)
+\]</span></p>
+<p>Here we have placed a prior on the standard deviation of the random walk, which we have assumed to be half-normal (i.e., normal but restricted to being non-negative) with a mean of 0 and a standard deviation of 0.05. This is a so-called <em>weakly informative prior</em> that allows for some variation in the reproduction number over time but not an unrealistic amount. We have also placed a prior on the initial reproduction number, which we have assumed to be normally distributed with a mean of 1 and a standard deviation of 0.5. This is a weakly informative prior that allows for a range of initial reproduction numbers but has a mean of 1. The last line is the geometric random walk.</p>
+<section id="simulating-a-geometric-random-walk" class="level2">
+<h2 class="anchored" data-anchor-id="simulating-a-geometric-random-walk">Simulating a geometric random walk</h2>
+<p>You can have a look at an R function for performing the geometric random walk:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>geometric_random_walk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (init, noise, std) 
+{
+    n &lt;- length(noise) + 1
+    x &lt;- numeric(n)
+    x[1] &lt;- log(init)
+    for (i in 2:n) {
+        x[i] &lt;- x[i - 1] + noise[i - 1] * std
+    }
+    exp(x)
+}
+&lt;bytecode: 0x5653f8180e10&gt;
+&lt;environment: namespace:nfidd&gt;</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Look at this function and try to understand what it does. Note that we use the fact that we can generate a random normally distributed variable <span class="math inline">\(X\)</span> with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span> by mutiplying a standard normally distributed variable (i.e., mean 0 and standard deviation 1) <span class="math inline">\(Y\)</span> with <span class="math inline">\(\sigma\)</span>. Using this <a href="https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html">non-centred parameterisation</a> for efficiency) will improve our computational efficency later when using an equivalent function in stan</p>
+</div>
+</div>
+<p>We can use this function to simulate a random walk (shown in black below) and compare it to a normal(1,1) prior (shown in red below) that we used in the previous model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">geometric_random_walk</span>(<span class="at">init =</span> <span class="dv">1</span>, <span class="at">noise =</span> <span class="fu">rnorm</span>(<span class="dv">100</span>), <span class="at">std =</span> <span class="fl">0.1</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> <span class="fu">seq_along</span>(R), <span class="at">R =</span> <span class="fu">exp</span>(R))</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate normal(1,1) prior samples for comparison</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>normal_prior <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>normal_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> <span class="fu">seq_along</span>(normal_prior), <span class="at">R =</span> normal_prior)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> R)) <span class="sc">+</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> normal_data, <span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> R), <span class="at">colour =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Simulated data from a random walk model"</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Random walk (black) vs Normal(1,1) prior (red)"</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Time"</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/simulate-geometric-walk-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Repeat this multiple times, either with the same parameters or changing some to get a feeling for what this does compared to the normal(1,1) prior.</p>
+</div>
+</div>
+</section>
+<section id="estimating-r_t-with-a-geometric-random-walk-prior" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-r_t-with-a-geometric-random-walk-prior">Estimating <span class="math inline">\(R_t\)</span> with a geometric random walk prior</h2>
+<p>We can now include this in a stan model,</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>rw_mod <span class="ot">&lt;-</span> <span class="fu">nfidd_cmdstan_model</span>(<span class="st">"estimate-inf-and-r-rw"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>rw_mod</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 1: functions {
+ 2:   #include "functions/convolve_with_delay.stan"
+ 3:   #include "functions/renewal.stan"
+ 4:   #include "functions/geometric_random_walk.stan"
+ 5: }
+ 6: 
+ 7: data {
+ 8:   int n;                // number of days
+ 9:   int I0;              // number initially infected
+10:   array[n] int obs;     // observed symptom onsets
+11:   int gen_time_max;     // maximum generation time
+12:   array[gen_time_max] real gen_time_pmf;  // pmf of generation time distribution
+13:   int&lt;lower = 1&gt; ip_max; // max incubation period
+14:   array[ip_max + 1] real ip_pmf;
+15: }
+16: 
+17: parameters {
+18:   real&lt;lower = 0&gt; init_R;         // initial reproduction number
+19:   array[n-1] real rw_noise; // random walk noise
+20:   real&lt;lower = 0&gt; rw_sd; // random walk standard deviation
+21: }
+22: 
+23: transformed parameters {
+24:   array[n] real R = geometric_random_walk(init_R, rw_noise, rw_sd);
+25:   array[n] real infections = renewal(I0, R, gen_time_pmf);
+26:   array[n] real onsets = convolve_with_delay(infections, ip_pmf);
+27: }
+28: 
+29: model {
+30:   // priors
+31:   init_R ~ normal(1, 0.5) T[0, ];
+32:   rw_noise ~ std_normal();
+33:   rw_sd ~ normal(0, 0.05) T[0, ];
+34:   obs ~ poisson(onsets);
+35: }</code></pre>
+</div>
+</div>
+<p>Note that the model is very similar to the one we used earlier, but with the addition of the random walk model for the reproduction number using a function in stan that does the same as our R function of the same name we defined.</p>
+<p>We can now generate estimates from this model:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">length</span>(obs) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">obs =</span> obs[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">I0 =</span> inf_ts<span class="sc">$</span>infections[<span class="dv">1</span>],</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_max =</span> <span class="fu">length</span>(gen_time_pmf),</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">gen_time_pmf =</span> gen_time_pmf,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ip_max =</span> <span class="fu">length</span>(ip_pmf) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ip_pmf =</span> ip_pmf</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>r_rw_inf_fit <span class="ot">&lt;-</span> <span class="fu">nfidd_sample</span>(</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  rw_mod, <span class="at">data =</span> data, <span class="at">max_treedepth =</span> <span class="dv">12</span>, </span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">init =</span> \() <span class="fu">list</span>(<span class="at">init_R =</span> <span class="dv">1</span>, <span class="at">rw_sd =</span> <span class="fl">0.01</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>r_rw_inf_fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    variable     mean   median   sd  mad       q5      q95 rhat ess_bulk
+ lp__        21467.47 21467.52 8.65 8.51 21452.73 21481.08 1.01      802
+ init_R          1.62     1.62 0.20 0.19     1.31     1.97 1.00     1372
+ rw_noise[1]     0.14     0.14 0.99 1.03    -1.46     1.73 1.00     2310
+ rw_noise[2]     0.11     0.08 0.96 0.95    -1.46     1.68 1.00     2283
+ rw_noise[3]     0.07     0.11 0.96 0.95    -1.56     1.66 1.00     2107
+ rw_noise[4]     0.01     0.01 1.00 1.01    -1.58     1.67 1.00     2649
+ rw_noise[5]    -0.02    -0.04 0.99 1.00    -1.64     1.58 1.00     2174
+ rw_noise[6]    -0.11    -0.11 1.01 1.00    -1.74     1.53 1.01     2567
+ rw_noise[7]    -0.18    -0.16 1.01 1.08    -1.82     1.48 1.00     2337
+ rw_noise[8]    -0.16    -0.17 1.00 1.01    -1.79     1.53 1.00     2304
+ ess_tail
+     1155
+     1370
+     1508
+     1404
+     1760
+     1678
+     1618
+     1184
+     1583
+     1214
+
+ # showing 10 of 566 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
+</div>
+</div>
+<div class="{callout-note}">
+<p>As this is a more complex model we have increased the <code>max_treedepth</code> parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the <code>init_R</code> and <code>rw_sd</code> parameters to help the sampler find the right region of parameter space. This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.</p>
+</div>
+<p>We can again extract and visualise the posteriors in the same way as earlier.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rw_posteriors <span class="ot">&lt;-</span> r_rw_inf_fit <span class="sc">|&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_draws</span>(infections[infection_day], R[infection_day]) <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">infection_day =</span> infection_day <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.draw <span class="sc">%in%</span> <span class="fu">sample</span>(.draw, <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>rw_inf_posterior <span class="ot">&lt;-</span> rw_posteriors <span class="sc">|&gt;</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.variable <span class="sc">==</span> <span class="st">"infections"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day)) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> rw_inf_posterior, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> .value, <span class="at">group =</span> .draw), <span class="at">alpha =</span> <span class="fl">0.1</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> inf_ts, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> infections), <span class="at">colour =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Infections, estimated (grey) and observed (red)"</span>, </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Model 3: renewal equation with random walk"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_infections_rw-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>and reproduction numbers</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>rw_r_inf_posterior <span class="ot">&lt;-</span> rw_posteriors <span class="sc">|&gt;</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.variable <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.draw <span class="sc">%in%</span> <span class="fu">sample</span>(.draw, <span class="dv">100</span>))</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> rw_r_inf_posterior,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day, <span class="at">y =</span> .value, <span class="at">group =</span> .draw)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Estimated R"</span>, </span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Model 3: renewal equation with random walk"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_rt_rw-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What do you think of these estimates? In particular, what do you think of the estimates at the beginning and end of the outbreak? Are they consistent with the true Rt trajectory and with each other? Are they consistent with the estimates from the previous model?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The estimates are smoothest so far, and the model is able to capture the true Rt trajectory more accurately than the previous model. Unlike the previous model, the model is able to capture the true Rt trajectory at the end of the outbreak with variance increasing towards the date of estimation. The infection estimates are the least uncertain from any model and potentially overly certain as they don’t fully cover the observed infections.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="comparing-the-models" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-the-models">Comparing the models</h2>
+<p>We can now plot all the Rt trajectories from the models together to compare them.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="do">## earlier posteriors</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>r_posterior <span class="ot">&lt;-</span> r_posterior <span class="sc">|&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="st">"infections"</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>r_inf_posterior <span class="ot">&lt;-</span> r_inf_posterior <span class="sc">|&gt;</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="st">"onsets (normal)"</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>rw_r_inf_posterior <span class="ot">&lt;-</span> rw_r_inf_posterior <span class="sc">|&gt;</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="st">"onsets (random walk)"</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>all_posteriors <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  r_inf_posterior,</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  rw_r_inf_posterior,</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  r_posterior</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  all_posteriors,</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> infection_day, <span class="at">y =</span> .value, <span class="at">group =</span> .draw,</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">colour =</span> data)</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Rt estimates from renewal equation models"</span>,</span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="fu">paste</span>(</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Estimates from infections, from symptom onsets, and from onsets with a"</span>,</span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"random walk"</span></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">alpha =</span> <span class="dv">1</span>))) <span class="sc">+</span> </span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="R-estimation-and-the-renewal-equation_files/figure-html/plot_r_posteriors-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Revisit your answers to the previous questions in this session. What are the key differences between the Rt estimates from the models? Which model do you think is the best fit for the data? Which model is the most realistic?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We can see that the estimates are smoother when using the random walk model for the reproduction number, compared to the normal model. The model that fits directly to infections has the lowest uncertainty, which we would expect as it doesn’t have to infer the number of infections from symptom onsets but even here the reproduction number estimates are unrealistically noisy due to the assumption of independence between infections each day when infection counts are low. The random walk model is the most realistic model, as it is able to capture the true Rt trajectory more accurately than the normal model. The model that fits directly to infections is the best fit for the data, but depends on the availability of infections data which in practice is never available.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Take 2 minutes
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Compare the results across the models used in this session, and the one used in the <a href="using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic">session on convolutions</a>. How do the models vary in the number of parameters that need to be estimated? How do the assumptions about the infections time series differ between the models? What do you notice about the level of uncertainty in the estimates of infections and <span class="math inline">\(R_t\)</span> over the course of the time series?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-22-contents" aria-controls="callout-22" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-22" class="callout-22-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We can see that using the renewal model as generative model we recover the time series of infections more accurately compared to previously when we assumed independent numbers of infections each day and that using a more believable model (i.e the geometric random walk) for the reproduction number improves things even more. Of course, this is helped by the fact that the data was generated by a model similar to the renewal model used for inference.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="going-further" class="level1">
+<h1>Going further</h1>
+<section id="challenge" class="level2">
+<h2 class="anchored" data-anchor-id="challenge">Challenge</h2>
+<ul>
+<li>We have used symptom onsets under the assumption that every infected person develops symptoms. Earlier we also created a time series of hospitalisation under the assumption that only a proportion (e.g., 30%) of symptomatic individuals get hospitalised. How would you change the model in this case? What are the implications for inference?</li>
+<li>If you have time you could try re-running the experiment with different <span class="math inline">\(R_t\)</span> trajectories (using the <code>renewal()</code> function to simulate data) and delay distributions to see whether results change.</li>
+</ul>
+</section>
+<section id="methods-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="methods-in-practice">Methods in practice</h2>
+<ul>
+<li><code>EpiEstim</code> provides a range of accessible tools for estimating <span class="math inline">\(R_t\)</span>, using a simpler approach than the model we have used here.</li>
+<li><code>EpiNow2</code> <span class="citation" data-cites="abbottEpiNow2EstimateRealtime2025">(<a href="#ref-abbottEpiNow2EstimateRealtime2025" role="doc-biblioref">Abbott et al. 2025</a>)</span> package again implements a range of models similar to the model we have used here.</li>
+<li><code>Epidemia</code> <span class="citation" data-cites="bhattSemiMechanisticBayesianModeling2020">Bhatt et al. (<a href="#ref-bhattSemiMechanisticBayesianModeling2020" role="doc-biblioref">2020</a>)</span> implements a regression model approach to <span class="math inline">\(R_t\)</span> estimation.</li>
+<li>In this course we focused on the instantaneous reproduction number. An alternative is the case reproduction number implemented in <span class="citation" data-cites="wallingaDifferentEpidemicCurves2004">Wallinga and Teunis (<a href="#ref-wallingaDifferentEpidemicCurves2004" role="doc-biblioref">2004</a>)</span>.</li>
+<li>We face many choices when estimating the reproduction number. <span class="citation" data-cites="brockhausWhyAreDifferent2023">Brockhaus et al. (<a href="#ref-brockhausWhyAreDifferent2023" role="doc-biblioref">2023</a>)</span> explores the impact of these choices on resulting estimates.</li>
+<li><span class="citation" data-cites="gosticPracticalConsiderationsMeasuring2020">Gostic et al. (<a href="#ref-gosticPracticalConsiderationsMeasuring2020" role="doc-biblioref">2020</a>)</span> has further guidance on best practice.</li>
+</ul>
+</section>
+</section>
+<section id="wrap-up" class="level1">
+<h1>Wrap up</h1>
+<ul>
+<li>Review what you’ve learned in this session with the <a href="../reference/learning_objectives">learning objectives</a></li>
+<li>Share your <a href="../reference/help">questions and thoughts</a></li>
+</ul>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-abbottEpiNow2EstimateRealtime2025" class="csl-entry" role="listitem">
+Abbott, Sam, Joel Hellewell, Katharine Sherratt, Katelyn Gostic, Joe Hickson, Hamada S. Badr, Michael DeWitt, James M. Azam, EpiForecasts, and Sebastian Funk. 2025. <span>“<span>EpiNow2</span>: <span>Estimate</span> Real-Time Case Counts and Time-Varying Epidemiological Parameters.”</span>
+</div>
+<div id="ref-bhattSemiMechanisticBayesianModeling2020" class="csl-entry" role="listitem">
+Bhatt, Samir, Neil Ferguson, Seth Flaxman, Axel Gandy, Swapnil Mishra, and James A. Scott. 2020. <span>“Semi-<span>Mechanistic Bayesian Modeling</span> of <span>COVID-19</span> with <span>Renewal Processes</span>.”</span> arXiv. <a href="https://doi.org/10.48550/arXiv.2012.00394">https://doi.org/10.48550/arXiv.2012.00394</a>.
+</div>
+<div id="ref-brockhausWhyAreDifferent2023" class="csl-entry" role="listitem">
+Brockhaus, Elisabeth K., Daniel Wolffram, Tanja Stadler, Michael Osthege, Tanmay Mitra, Jonas M. Littek, Ekaterina Krymova, et al. 2023. <span>“Why Are Different Estimates of the Effective Reproductive Number so Different? <span>A</span> Case Study on <span>COVID-19</span> in <span>Germany</span>.”</span> <em>PLOS Computational Biology</em> 19 (11): e1011653. <a href="https://doi.org/10.1371/journal.pcbi.1011653">https://doi.org/10.1371/journal.pcbi.1011653</a>.
+</div>
+<div id="ref-gosticPracticalConsiderationsMeasuring2020" class="csl-entry" role="listitem">
+Gostic, Katelyn M., Lauren McGough, Edward B. Baskerville, Sam Abbott, Keya Joshi, Christine Tedijanto, Rebecca Kahn, et al. 2020. <span>“Practical Considerations for Measuring the Effective Reproductive Number, <span>Rt</span>.”</span> <em>PLOS Computational Biology</em> 16 (12): e1008409. <a href="https://doi.org/10.1371/journal.pcbi.1008409">https://doi.org/10.1371/journal.pcbi.1008409</a>.
+</div>
+<div id="ref-wallingaDifferentEpidemicCurves2004" class="csl-entry" role="listitem">
+Wallinga, Jacco, and Peter Teunis. 2004. <span>“Different <span>Epidemic Curves</span> for <span>Severe Acute Respiratory Syndrome Reveal</span> <span>Similar Impacts</span> of <span>Control Measures</span>.”</span> <em>American Journal of Epidemiology</em> 160 (6): 509–16. <a href="https://doi.org/10.1093/aje/kwh255">https://doi.org/10.1093/aje/kwh255</a>.
+</div>
+</div>
+
+
+</section>
+</section>
+
+<script data-goatcounter="https://nfidd.goatcounter.com/count" async="" src="//gc.zgo.at/count.js"></script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/nfidd\.github\.io\/nfidd\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+            // default icon
+            link.classList.add("external");
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/nfidd/nfidd/blob/main/sessions/R-estimation-and-the-renewal-equation.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/nfidd/nfidd/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
