@@ -1,7 +1,7 @@
 Package: nfidd
 Title: Material to support course on nowcasting and forecasting of infectious
     disease dynamics
-Version: 1.1.2.9000
+Version: 1.2.0
 Authors@R: c(
     person(
       given = "NFIDD course contributors",
@@ -37,7 +37,7 @@ Suggests:
     lopensemble (>= 0.1.0),
     roxyglobals
 Additional_repositories:
-    https://stan-dev.r-universe.dev,
+    https://production.r-multiverse.org/2025-12-15,
     https://epiforecasts.r-universe.dev
 Encoding: UTF-8
 Language: en-GB

@@ -1,4 +1,14 @@
-# nfidd (development version)
+# nfidd 1.2.0
+
+- made `add_delays()` more flexible with configurable delay distributions and hospitalisation probability (#584)
+- added `save_warmup` argument to `nfidd_sample()` (#584)
+- fixed Stan function extraction regex to handle `array[]` return types (#584)
+- fixed forecasting model to generate forecast random walk in generated quantities rather than extending estimated parameters (#585)
+- allowed zero-day delays in censored delay model (#585)
+- added forecasting to the joint nowcasting with R model (#585)
+- improved priors in joint nowcasting models (#585)
+- added Stan reference documentation pages (#586)
+- updated session content with improvements from SISMID (#587)
 
 # nfidd 1.1.2
 
