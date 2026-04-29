@@ -629,8 +629,8 @@ qra_weights <- seq_along(qra_ensembles_obj) |>
     mutate(origin_day = forecast_dates[i + 1])
   ) |>
   bind_rows() |>
-  dplyr::filter(quantile == 0.5) |>
-  select(-quantile)
+  dplyr::filter(quantile_level == 0.5) |>
+  select(-quantile_level)
 
 qra_ensembles <- qra_ensembles_obj |>
   bind_rows()
