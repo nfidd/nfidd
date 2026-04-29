@@ -216,7 +216,7 @@ Do you still recover the parameters that we put in?
 mod <- nfidd_cmdstan_model("lognormal")
 res <- nfidd_sample(mod,
   data = list(
-    n = nrow(na.omit(df_dates)),
+    N = nrow(na.omit(df_dates)),
     y = na.omit(df_dates)$onset_to_hosp + 0.01
   )
 )
@@ -554,7 +554,7 @@ How far away from the "true" parameters do you end up?
 ```{r df_realtime_solution, results = 'hide', message = FALSE}
 res <- nfidd_sample(mod,
   data = list(
-    n = nrow(na.omit(df_realtime)),
+    N = nrow(na.omit(df_realtime)),
     y = na.omit(df_realtime)$onset_to_hosp
   )
 )
