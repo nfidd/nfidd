@@ -246,7 +246,7 @@ We will now use the mechanistic and statistical models to forecast the number of
 gen_time_pmf <- make_gen_time_pmf()
 ip_pmf <- make_ip_pmf()
 onset_df <- simulate_onsets(
-  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+  make_daily_infections(infection_times), ip_pmf
 )
 onset_df
 
