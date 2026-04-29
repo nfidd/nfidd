@@ -64,7 +64,7 @@ An important aspect of making forecasts is that we can later confront the foreca
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
 2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
-4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
+4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful. The weighted interval score [@bracherEvaluatingEpidemicForecasts2021] decomposes the score for an interval forecast into sharpness, over-, and under-prediction components.
 
 Note that sharpness is a property of the forecasts themselves, whereas calibration, unbiasedness, and accuracy are properties that emerge from comparing forecasts to observed data.
 
@@ -257,7 +257,7 @@ What does this tell you about the model?
 
 ### PIT histograms
 
-As well as the CRPS we can also look at the calibration and bias of the model. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values [@bracherEvaluatingEpidemicForecasts2021].
+As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019]. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
 
 There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
 
