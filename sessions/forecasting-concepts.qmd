@@ -63,6 +63,10 @@ Epidemiological forecasting is closely related to nowcasting and, when using mec
 The only difference is that we will extend the model into the future.
 In order to make things simpler we will remove the nowcasting part of the model, but in principle all these approaches could be combined in a single model.
 
+The general principle underlying forecast evaluation is to **maximise *sharpness* subject to *calibration*** [@gneiting2007]: forecasts should aim to have narrow uncertainty (sharpness) while remaining correct (calibration).
+Note that sharpness is a property of the forecasts themselves, whereas calibration and other measures of forecast quality (such as bias and accuracy) emerge from comparing forecasts to observed data.
+We will return to this paradigm and how to evaluate forecasts against it in the [forecast evaluation session](forecast-evaluation).
+
 # Extending a model into the future
 
 The model we introduced in the [renewal equation session](R-estimation-and-the-renewal-equation) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
