@@ -58,6 +58,10 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 # Simulating data from a probability distribution
 
+Throughout this course we use **simulated data** as our running examples.
+Working with simulation has two big teaching advantages: we always know the *true* parameter values, so we can check whether our inference recovers them; and we can isolate one part of the data-generating process at a time without confounding from real-world reporting noise.
+We will start by simulating from probability distributions; later sessions extend this to simulating delays, transmission, and reporting in turn, and then use the same probabilistic models to do inference on the data we have generated.
+
 First let us simulate some data from a probability distribution.
 In R, this is usually done using a family of random number generation functions that start with `r`.
 For example, to simulate random numbers from a normal distribution you would use the `rnorm()` function.
