@@ -1,7 +1,7 @@
 // lognormal_model.stan
 data {
-  int<lower=0> n; // number of data points
-  array[n] real y; // data
+  int<lower=0> N; // number of data points
+  array[N] real y; // data
 }
 
 parameters {

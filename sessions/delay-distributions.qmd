@@ -236,7 +236,7 @@ df_onset_to_hosp <- df |>
 res <- nfidd_sample(
   mod,
   data = list(
-    n = nrow(df_onset_to_hosp),
+    N = nrow(df_onset_to_hosp),
     y = df_onset_to_hosp$onset_to_hosp
   )
 )
