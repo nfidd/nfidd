@@ -1,0 +1,50 @@
+---
+title: "Stan model index"
+subtitle: "All Stan models used in the course"
+order: 12
+---
+
+```{r setup, include = FALSE}
+library(nfidd)
+```
+
+This page shows the source of every Stan model included in the NFIDD package, grouped by the session in which it is first introduced.
+Reading them in order makes it easier to see how the models build up across the course.
+
+```{r model-index, results = "asis", echo = FALSE}
+session_models <- list(
+  "Probability distributions and parameter estimation" =
+    c("coin", "gamma"),
+  "Delay distributions" =
+    c("lognormal"),
+  "Biases in delay distributions" =
+    c("censored-delay-model", "truncated-delay-model"),
+  "Using delay distributions to model the data generating process" =
+    c("estimate-infections"),
+  "$R_t$ estimation and the renewal equation" =
+    c("estimate-r", "estimate-inf-and-r", "estimate-inf-and-r-rw"),
+  "Nowcasting" =
+    c("simple-nowcast", "simple-nowcast-rw"),
+  "Joint nowcasting with an unknown reporting delay" =
+    c("joint-nowcast", "joint-nowcast-with-r"),
+  "Forecasting concepts" =
+    c("estimate-inf-and-r-rw-forecast"),
+  "Forecasting models" =
+    c("mechanistic-r", "statistical-r")
+)
+
+stopifnot(setequal(unlist(session_models), nfidd_stan_models()))
+
+for (session in names(session_models)) {
+  cat("\n\n## ", session, "\n", sep = "")
+  for (model in session_models[[session]]) {
+    cat("\n### `", model, "`\n\n", sep = "")
+    cat("```stan\n")
+    cat(
+      readLines(file.path(nfidd_stan_path(), paste0(model, ".stan"))),
+      sep = "\n"
+    )
+    cat("\n```\n")
+  }
+}
+```
