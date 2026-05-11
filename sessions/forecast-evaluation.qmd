@@ -257,7 +257,7 @@ What does this tell you about the model?
 
 ### PIT histograms
 
-As well as the CRPS we can also look at the calibration and bias of the model. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
+As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019]. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
 
 There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
 
