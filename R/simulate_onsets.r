@@ -36,9 +36,6 @@ make_ip_pmf <- function(max = 14, shape = 5, rate = 1) {
 #' @param inf_ts A data frame containing columns infection_day and infections,
 #'   as returned by `make_daily_infections()`.
 #'
-#' @param gen_time_pmf A vector of probabilities representing the generation
-#'   time PMF, as returned by `make_gen_time_pmf()`.
-#'
 #' @param ip_pmf A vector of probabilities representing the incubation period
 #'   PMF, as returned by `make_ip_pmf()`.
 #'
@@ -53,11 +50,9 @@ make_ip_pmf <- function(max = 14, shape = 5, rate = 1) {
 #' @export
 #'
 #' @examples
-#' gt_pmf <- make_gen_time_pmf()
 #' ip_pmf <- make_ip_pmf()
-#' simulate_onsets(make_daily_infections(infection_times), gt_pmf, ip_pmf)
-simulate_onsets <- function(inf_ts, gen_time_pmf = make_gen_time_pmf(),
-                            ip_pmf = make_ip_pmf()) {
+#' simulate_onsets(make_daily_infections(infection_times), ip_pmf)
+simulate_onsets <- function(inf_ts, ip_pmf = make_ip_pmf()) {
   onsets <- convolve_with_delay(inf_ts$infections, ip_pmf)
   onsets <- rpois(n = length(onsets), lambda = onsets)
   onset_df <- tibble(day = seq_along(onsets), onsets = onsets) |>
