@@ -12,6 +12,9 @@ website:
   body-footer: '<script data-goatcounter="https://nfidd.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
   open-graph: true
   favicon: nfidd-favicon.png
+  search:
+    location: navbar
+    type: textbox
   navbar:
     left:
       - getting-started.qmd
