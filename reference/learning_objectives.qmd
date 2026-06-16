@@ -10,7 +10,9 @@ While examples often use outbreak scenarios for clarity, participants should con
 ## R and statistical concepts used
 
 - understanding of common probability distributions used for epidemiological delays
+- familiarity with the basics of Bayesian inference and MCMC sampling
 - familiarity with using stan to estimate parameters of a probability distribution
+- ability to interpret a posterior summary, including key convergence diagnostics
 
 ## Delay distributions
 
@@ -44,15 +46,30 @@ While examples often use outbreak scenarios for clarity, participants should con
 - awareness of the breadth of methods to perform nowcasting
 - $R_t$ estimation as a nowcasting problem
 
-## Forecasting
+## Joint nowcasting with an unknown reporting delay
+
+- understanding of the reporting triangle as a representation of partially-observed reporting data
+- ability to jointly estimate a reporting delay distribution and a nowcast in R
+- awareness of how nowcasting can be combined with $R_t$ estimation in a single model
+
+## Forecasting concepts
 
 - understanding of forecasting as an epidemiological problem, and its relationship with nowcasting and $R_t$ estimation
 - ability to use a forecasting model on an epidemiological time series in R
+- familiarity with the forecasting paradigm of maximising sharpness subject to calibration
+
+## Forecasting models
+
+- awareness of forecasting models as a spectrum from mechanistic to statistical
+- ability to extend a renewal-equation forecasting model with additional mechanistic structure (e.g. susceptible depletion)
+- ability to extend a forecasting model with additional statistical structure (e.g. autoregressive components)
 
 ## Evaluating forecasts (and nowcasts)
 
 - ability to visually assess forecasts and nowcasts
 - familiarity with metrics for evaluating probabilistic forecasts and their properties
+- understanding of proper scoring rules and the components of the weighted interval score (sharpness, over- and under-prediction)
+- ability to assess calibration and bias using PIT histograms
 - ability to score probabilistic forecasts in R
 - ability to compare different models by their forecast scores
 
@@ -60,4 +77,5 @@ While examples often use outbreak scenarios for clarity, participants should con
 
 - understanding of predictive ensembles and their properties
 - ability to create a predictive ensemble of forecasts in R
+- familiarity with weighted ensembles, including inverse-WIS weighting and quantile regression averaging
 
