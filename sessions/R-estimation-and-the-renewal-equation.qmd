@@ -618,10 +618,17 @@ Estimates near "today" are then poorly informed in two ways: the random walk for
 ::: callout-tip
 ## Take 5 minutes
 
-Refit the random walk model from above, but pretend it is 14 days earlier than the end of the outbreak.
-You can do this by truncating the observations:
+Refit the random walk model from above, but pretend it is 14 days earlier than the end of the outbreak by truncating the observations (`obs`) before fitting.
+Extract the $R_t$ posterior as before and plot it alongside the full-data $R_t$ posterior at the same calendar dates.
+What happens to the $R_t$ estimates close to the (new) cutoff?
+:::
 
-```{r truncate-data, eval = FALSE}
+::: {.callout-note collapse="true"}
+## Solution
+
+We truncate the observations 14 days before the end of the outbreak and refit the same random walk model:
+
+```{r r_rw_real_time_fit, results = 'hide', message = FALSE}
 cutoff <- length(obs) - 14
 obs_real_time <- obs[seq_len(cutoff)]
 
@@ -640,16 +647,43 @@ r_rw_real_time_fit <- nfidd_sample(
 )
 ```
 
-Extract the $R_t$ posterior as before and plot it alongside the full-data $R_t$ posterior.
-What happens to the $R_t$ estimates close to the (new) cutoff?
-:::
+We extract the $R_t$ posterior from both fits and plot them together, marking the real-time cutoff:
 
-::: {.callout-note collapse="true"}
-## Solution
+```{r plot_rt_real_time}
+real_time_r_posterior <- r_rw_real_time_fit |>
+  gather_draws(R[infection_day]) |>
+  ungroup() |>
+  mutate(infection_day = infection_day - 1) |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  mutate(data = "real time")
 
-The $R_t$ estimates from the truncated fit have much wider uncertainty in the last few days before the cutoff.
+full_data_r_posterior <- r_rw_inf_fit |>
+  gather_draws(R[infection_day]) |>
+  ungroup() |>
+  mutate(infection_day = infection_day - 1) |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  mutate(data = "full data")
+
+ggplot(
+  rbind(full_data_r_posterior, real_time_r_posterior),
+  mapping = aes(x = infection_day, y = .value, group = .draw, colour = data)
+) +
+  geom_line(alpha = 0.1) +
+  geom_vline(
+    xintercept = max(real_time_r_posterior$infection_day), linetype = "dashed"
+  ) +
+  scale_colour_brewer(palette = "Set1") +
+  labs(
+    title = "Real-time vs full-data Rt estimates",
+    subtitle = "Random walk model, truncated 14 days before the end of the outbreak"
+  ) +
+  guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+  theme(legend.position = "bottom")
+```
+
+The $R_t$ estimates from the truncated (real-time) fit have much wider uncertainty in the last few days before the cutoff.
 The full-data fit, in contrast, sees onsets that happened *after* those days and so estimates $R_t$ at the same calendar dates much more sharply.
-The truncated fit's median also tends to flatten out near the cutoff: with no data telling it $R_t$ is changing, the random walk just continues from the last well-informed value, so in real time you can get both wider uncertainty *and* a biased point estimate.
+The real-time median also tends to flatten out near the cutoff: with no data telling it $R_t$ is changing, the random walk just continues from the last well-informed value, so in real time you can get both wider uncertainty *and* a biased point estimate.
 :::
 
 # Going further
