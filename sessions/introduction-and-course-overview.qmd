@@ -79,4 +79,6 @@ Let's get started!
 
 -   If you haven't already, start with [getting set up for the course](../getting-started)
 
--   Once you're all set up, let's introduce some concepts and methods we'll rely heavily in this course in the session on [probability distributions and parameter estimation](probability-distributions-and-parameter-estimation).
+-   Once you're all set up, we begin with [delay distributions](delay-distributions).
+
+-   For the probability distributions and Bayesian inference with stan that we rely on throughout the course, work through the [Stan reference guide](../reference/stan) as self-study (also shared on Slack); it is not taught as a separate session.

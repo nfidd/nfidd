@@ -56,6 +56,10 @@ A probability distribution describes how likely different outcomes are for a ran
 | Normal | Continuous measurements | mean, sd | Log(Rt) |
 | Beta | Proportions | alpha, beta | Reporting probability |
 
+Gamma and log-normal are the usual choices for delays.
+Both take two parameters, which can be converted from a target mean and variance: a gamma with mean 5 and variance 2 has shape $\alpha = 12.5$ and rate $\beta = 2.5$ (mean $\alpha/\beta$, variance $\alpha/\beta^2$); a log-normal with the same mean and variance has meanlog $\mu = 1.57$ and sdlog $\sigma = 0.28$.
+The log-normal typically has a heavier right tail, i.e. gives more probability to occasional very large values.
+
 ### Key Concept: Parameters vs Data
 - **Data**: What we observe (onset dates, test results)
 - **Parameters**: What we want to learn (mean delay, Rt)
