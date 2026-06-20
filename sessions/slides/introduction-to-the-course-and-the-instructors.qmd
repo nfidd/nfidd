@@ -59,7 +59,7 @@ Introduce yourself with:
 
 ::: {.incremental}
 - each session opens with a short introduction
-- you work through the material hands-on, stopping at several points to discuss observations and learnings together
+- you work through the material hands-on, and we stop at several points to discuss observations and learnings together
 - *optional* boxes and the "Going further" sections: skip these on a first pass and come back to them later
 :::
 

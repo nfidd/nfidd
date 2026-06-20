@@ -7,25 +7,25 @@ writing session content so the material stays consistent and easy to follow.
 
 We use a small set of boxed content types. Use them consistently:
 
-- **Exercises** — `::: {.callout-tip}` with a "Take N minutes" title. The task for
+- **Exercises**: `::: {.callout-tip}` with a "Take N minutes" title. The task for
   participants. Not collapsed.
-- **Solutions** — `::: {.callout-note collapse="true"}` with a "Solution" title.
+- **Solutions**: `::: {.callout-note collapse="true"}` with a "Solution" title.
   Collapsed so participants try the exercise first.
-- **Essential notes** — `::: {.callout-note}` or `::: {.callout-tip}`. Short
+- **Essential notes**: `::: {.callout-note}` or `::: {.callout-tip}`. Short
   clarifications everyone should read. Keep them brief.
-- **Optional asides / going deeper** — add the `.optional` class:
+- **Optional asides / going deeper**: add the `.optional` class:
   `::: {.callout-note .optional collapse="true"}`. The class styles the box as
   skippable (a "· optional" label and muted border, see `styles.css`). Use it for
   depth that isn't needed to follow the main thread, and keep it where it makes
   sense in context.
-- **Self-contained extensions** — put these under the session's `# Going further`
+- **Self-contained extensions**: put these under the session's `# Going further`
   heading at the end of the file, rather than inline.
 
 A few rules of thumb:
 
 - Use the full `::: {.callout-TYPE}` syntax (braces and a leading dot on the class)
   and quote attribute values (`collapse="true"`).
-- Don't use `collapse="true"` on its own to mean "optional" — collapse is for
+- Don't use `collapse="true"` on its own to mean "optional". Collapse is for
   Solutions. Mark genuinely optional content with the `.optional` class so readers
   can tell the difference.
 - Every session ends with one `# Going further` section (a single `#` heading) for

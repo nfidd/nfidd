@@ -65,7 +65,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 - It was unbiased when the reproduction number was approximately constant but when the reproduction number was reducing due to susceptible depletion, the random walk model overestimated the number of cases systematically.
 - It did relatively well at short-term forecasting indicating that it was capturing some of the underlying dynamics of the data generating process.
 
-::: {.callout-note .optional collapse="true"}
+::: {.callout-note collapse="true"}
 ## What did a geometric random walk model look like again?
 
 ```{r geometric-random-walk-sim}
@@ -107,7 +107,7 @@ $$
 This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
 :::
 
-::: {.callout-note .optional collapse="true"}
+::: {.callout-note collapse="true"}
 
 ## What behaviour would we expect from this model?
 
@@ -174,7 +174,7 @@ $$
 
 where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
 
-::: {.callout-note .optional collapse="true"}
+::: {.callout-note collapse="true"}
 ## What behaviour would we expect from this model?
 
 ```{r}
@@ -205,7 +205,7 @@ log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
 $$
 
 
-::: {.callout-note .optional collapse="true"}
+::: {.callout-note collapse="true"}
 ## What behaviour would we expect from this model?
 
 Again we look at an R function that implements this model:
@@ -517,7 +517,7 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 As in the [forecast evaluation session](forecast-evaluation), we will start by looking at the CRPS by horizon and forecast date.
 
-::: {.callout-tip .optional}
+::: {.callout-tip}
 ## Reminder: Key things to note about the CRPS
   - Small values are better
   - When scoring absolute values (e.g. number of cases) it can be difficult to compare forecasts across scales (i.e., when case numbers are different, for example between locations or at different times).
@@ -565,7 +565,7 @@ How do the CRPS values change with forecast date?
 
 ### PIT histograms
 
-::: {.callout-tip .optional}
+::: {.callout-tip}
 ## Reminder: Interpreting the PIT histogram
 - Ideally PIT histograms should be uniform. 
 - If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
@@ -646,7 +646,7 @@ log_sc_scores <- log_sc_forecasts |>
 ```
 
 
-::: {.callout-tip .optional}
+::: {.callout-tip}
 Reminder: For more on scoring on the log scale see @bosse2023scorin on scoring forecasts on transformed scales.
 :::
 
