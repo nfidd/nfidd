@@ -17,16 +17,16 @@ Monday June 22: 09.00-09.30
 
 ## Getting set up
 
-Monday June 22: 09.30-10.30
+Monday June 22: 09.30-10.15
 
 -   [Getting set up for the course](../getting-started): installing R, the `nfidd` package and cmdstan, and checking everyone's environment is working
 
 ## Session 1: Delay distributions
 
-Monday June 22: 11.00-11.45
+Monday June 22: 10.15-10.30 and 11.00-11.45
 
 -   [Introduction](../sessions/slides/introduction-to-epidemiological-delays): epidemiological delays and how to represent them with probability distributions (10 mins)
--   [Practice](../sessions/delay-distributions): simulate and estimate epidemiological delays (30 mins)
+-   [Practice](../sessions/delay-distributions): simulate and estimate epidemiological delays (45 mins)
 -   Wrap up (5 mins)
 
 ## Session 2: Biases in delay distributions
