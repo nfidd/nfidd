@@ -58,8 +58,8 @@ Introduce yourself with:
 # How the course works
 
 ::: {.incremental}
-- a short talk, then you work through the material interactively
-- we pause to review and discuss after each section
+- each session opens with a short introduction
+- you work through the material hands-on, stopping at several points to discuss observations and learnings together
 - *optional* boxes and the "Going further" sections: skip these on a first pass and come back to them later
 :::
 
