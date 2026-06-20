@@ -310,7 +310,7 @@ r_inf_fit <- nfidd_sample(
 )
 ```
 
-::: {callout-note}
+::: {.callout-note}
 Generally, one should start MCMC samplers with multiple different starting values to make sure the whole posterior distribution is explored.
 When testing this model, we noticed that sometimes the model failed to fit the data at all.
 Because of this, we added an argument to start sampling with `init_R` set to 1.
@@ -479,7 +479,7 @@ r_rw_inf_fit <- nfidd_sample(
 r_rw_inf_fit
 ```
 
-::: {callout-note}
+::: {.callout-note}
 As this is a more complex model we have increased the `max_treedepth` parameter to 12 to allow for more complex posterior distributions and we have also provided an initialisation for the `init_R` and `rw_sd` parameters to help the sampler find the right region of parameter space.
 This is a common technique when fitting more complex models and is needed as it is hard a priori to know where the sampler should start.
 :::
