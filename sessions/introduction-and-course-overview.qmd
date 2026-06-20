@@ -52,7 +52,7 @@ Each session in the course:
 - builds on the previous one so that participants will have an overview of the real-time analysis workflow by the end of the course;
 - starts with a short introductory talk;
 - mainly consists of interactive content that participants will work through;
-- has optional/additional material that can be skipped or completed after the course ends;
+- marks optional and additional material clearly (boxes labelled *optional*, plus a "Going further" section at the end of each session). Skip these on a first pass and come back to them later or after the course; the main material comes first;
 
 For those attending the in-person version the course also:
 
