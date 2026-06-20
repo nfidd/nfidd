@@ -20,6 +20,9 @@ We use a small set of boxed content types. Use them consistently:
   sense in context.
 - **Self-contained extensions**: put these under the session's `# Going further`
   heading at the end of the file, rather than inline.
+- **Optional sections kept in place**: if a longer optional section reads best where
+  it sits rather than under "Going further", add the `.optional` class to its
+  heading, e.g. `## Going deeper {.optional}`. It gets the same "· optional" label.
 
 A few rules of thumb:
 

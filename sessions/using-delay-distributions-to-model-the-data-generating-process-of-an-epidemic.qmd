@@ -110,7 +110,7 @@ Therefore, both observations are **censored** (as events are rounded to the near
 This means that our distribution is **double interval censored** which we encountered in the [the biases in delay distribution session](sessions/biases-in-delay-distributions), so we need to use the same ideas introduced in that session. 
 
 ::: {.callout-note .optional collapse="true"}
-#### Mathematical Definition (optional): Discretising a delay distribution subject to double interval censoring
+#### Mathematical Definition: Discretising a delay distribution subject to double interval censoring
 
 The cumulative distribution function (CDF) ($F(t)$) of a distribution that has a daily censored primary event can be expressed as,
 

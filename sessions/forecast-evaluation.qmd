@@ -200,7 +200,7 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 
 
 ::: {.callout-tip .optional collapse="true"}
-#### Mathematical Definition (optional)
+#### Mathematical Definition
 
 The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $x$ is calculated as
 
@@ -269,7 +269,7 @@ There are many ways to assess calibration and bias but one common way is to use 
 :::
 
 ::: {.callout-tip .optional collapse="true"}
-## Mathematical Definition (optional)
+## Mathematical Definition
 
 ### Continuous Case
 

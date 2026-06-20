@@ -354,12 +354,7 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
-## What happens if we get the delay distribution wrong? {.optional}
-
-::: {.callout-note}
-## Optional section
-This section can be skipped if time is limited. It demonstrates the importance of accurate delay distribution estimation.
-:::
+## What happens if we get the delay distribution wrong?
 
 In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
 In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.

@@ -16,3 +16,15 @@ element.style {
   font-weight: normal;
   opacity: 0.7;
 }
+
+/* Optional whole sections: add the `.optional` class to the heading,
+   e.g. ## Going deeper {.optional} */
+section.optional > h1::after, section.optional > h2::after,
+section.optional > h3::after, section.optional > h4::after,
+h1.optional::after, h2.optional::after,
+h3.optional::after, h4.optional::after {
+  content: " · optional";
+  font-style: italic;
+  font-weight: normal;
+  opacity: 0.7;
+}
