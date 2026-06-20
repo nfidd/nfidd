@@ -82,7 +82,7 @@ mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
 mod
 ```
 
-::: .callout-tip
+::: {.callout-tip}
 ## Take 5 minutes
 What have we changed in the model to make it a forecasting model?
 Do you see any limitations of this approach?
