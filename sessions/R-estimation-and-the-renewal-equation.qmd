@@ -85,7 +85,7 @@ $$
 Here, $I_t$ is the number of infected individuals on day $t$, $R_t$ is the current value of the reproduction number and $g_i$ is the probability of a secondary infection occurring $i$ days after the infector became infected themselves, with a maximum $g_\mathrm{max}$.
 Remembering the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#delay-distributions-and-convolutions) you will be able to identify that the renewal equation represents a convolution of the infection time series with itself, with the delay distribution given by $g_i$ and $R_t$ representing a scaling that is being applied.
 
-::: callout-tip
+::: {.callout-tip .optional}
 ## Discrete vs. continuous renewal equation
 
 The equation shown above represents the discrete version of the reproduction number.
@@ -93,7 +93,7 @@ Similar to discussions in the [session on convolutions](using-delay-distribution
 Note that in the discrete version we have started the sum at 1 and thus set $g_0=0$ which will make calculations easier.
 :::
 
-::: callout-tip
+::: {.callout-tip .optional}
 ## Instantaneous vs. case reproduction number
 
 There are different definitions of the reproduction number that can be applied to the situation where it changes in time.
@@ -101,7 +101,7 @@ As it is defined above it is also called the *instantaneous* reproduction number
 Another example of a definition is the *case* reproduction number, where changes affect individuals at the time that they are infected but then they have a constant reproduction number throughout their infectious period.
 :::
 
-::: callout-tip
+::: {.callout-tip .optional}
 ## Stochastic vs. deterministic renewal equation
 
 The version of the discrete renewal equation we wrote above is deterministic, i.e. knowing the number of infections up to a certain time point and the reproduction number we can work out exactly how many new infections we will see.

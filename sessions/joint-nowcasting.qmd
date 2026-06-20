@@ -218,7 +218,7 @@ where:
 
 The joint model uses the observed data to estimate both the delay distribution and the underlying onset counts, which then allows us to predict the missing entries.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 ## The reporting triangle
 
 This data structure is sometimes called the "reporting triangle" in the literature because when visualised as a matrix (with onset days as rows and reporting days as columns), the observed data ($n_{t,d}^{obs}$) creates a triangular shape.
