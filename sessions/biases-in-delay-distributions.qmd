@@ -628,7 +628,7 @@ Can you establish under which conditions the bias in estimation gets worse?
 ## How epidemic dynamics affect bias severity
 
 ::: {.callout-note collapse="true"}
-## Advanced: How epidemic dynamics affect bias severity
+## The role of the epidemic growth rate
 
 The severity of censoring and truncation biases depends on the epidemic growth rate. 
 Understanding this relationship helps us prioritise when bias correction is most important.

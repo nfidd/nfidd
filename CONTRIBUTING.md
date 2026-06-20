@@ -32,13 +32,13 @@ A few rules of thumb:
   Solutions. Mark genuinely optional content with the `.optional` class so readers
   can tell the difference.
 - Every session ends with one `# Going further` section (a single `#` heading) for
-  self-study material: challenges, deeper reading, and extensions.
+  self-study material such as challenges and further reading.
 
 ## How the course is taught
 
 The taught material is the main thread of each session. Optional asides and the
-"Going further" section are genuinely optional: participants are expected to work
-through the main material first and come back to the optional content later or
+"Going further" section are genuinely optional: participants work
+through the main material first and return to optional content later or
 after the course. Bear this in mind when deciding whether new material belongs in
 the main flow or in an optional box.
 
