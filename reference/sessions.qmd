@@ -79,9 +79,7 @@ Tuesday June 23: 09.15-10.30
 Tuesday June 23: 11.00-12.30
 
 -   [Introduction](../sessions/slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays): joint estimation of delays and nowcasts (10 mins)
--   [Practice](../sessions/joint-nowcasting):
-    - joint estimation of delays and nowcasts (70 mins)
-    - *optional (self-study):* joint estimation of delays, nowcasts and reproduction numbers
+-   [Practice](../sessions/joint-nowcasting): joint estimation of delays and nowcasts (70 mins)
 -   Wrap up (10 mins)
 
 ## Session 7: Forecasting concepts
