@@ -274,7 +274,7 @@ ggplot(nowcast_onsets, aes(x = day)) +
   geom_point(data = reported_onset_df, mapping = aes(y = reported_onsets))
 ```
 
-:::{.callout-tip}
+::: {.callout-tip}
 The points in this plot represent the data available when the nowcast was made (and so are truncated) whilst the bars represent the finally reported data (a perfect nowcast would exactly reproduce these).
 :::
 
