@@ -36,9 +36,14 @@ jobs:
         uses: actions/cache@v5
         with:
           path: _freeze
-          key: quarto-freeze-${{ runner.os }}-${{ hashFiles('sessions/**/*.qmd', 'sessions/**/*.Rmd') }}
+          # Rendered output depends on the nfidd package (the knit_print method, the
+          # printed Stan code), so a package change has to invalidate the freeze. The
+          # package hash sits in the restore-keys prefix, so a package change leaves no
+          # cache to fall back to and forces a cold render; session-only edits keep the
+          # prefix stable, reuse a sibling freeze, and re-render just the changed page.
+          key: quarto-freeze-${{ runner.os }}-${{ hashFiles('R/**', 'inst/**', 'DESCRIPTION', 'NAMESPACE') }}-${{ hashFiles('sessions/**/*.qmd', 'sessions/**/*.Rmd') }}
           restore-keys: |
-            quarto-freeze-${{ runner.os }}-
+            quarto-freeze-${{ runner.os }}-${{ hashFiles('R/**', 'inst/**', 'DESCRIPTION', 'NAMESPACE') }}-
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
