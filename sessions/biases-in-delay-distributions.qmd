@@ -177,7 +177,7 @@ The concepts and techniques that we use here also apply to longer time intervals
 
 Let's estimate the time from symptom onset to hospitalisation with the censored data.
 
-A naïve approach to estimating the delay would be to ignore the fact that the data are censored.
+A naive approach to estimating the delay would be to ignore the fact that the data are censored.
 To estimate the delay from onset to hospitalisation, we could just use the difference between the censored times, which is an integer (the number of days).
 
 ```{r integer-delays}
@@ -242,8 +242,8 @@ res |>
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
 :::
 
-There are many ad-hoc solutions to this problem that, for example, introduce a shift in the data by half a day to centre it on mid-day or discretise the distribution and use the difference between two cumulative density functions with a day, or two day interval.
-Of these all but the two-day interval approach introduce more bias than doing nothing as above.
+There are many ad-hoc solutions to this problem that, for example, introduce a shift in the data by half a day to centre it on mid-day or discretise the distribution and use the difference between two cumulative density functions with a one-day, or two-day interval.
+These approximations vary in quality, and some can be more biased than doing nothing as above, so rather than relying on them we recommend the principled double interval censoring approach described below.
 See the [How epidemic dynamics affect bias severity](#how-epidemic-dynamics-affect-bias-severity) callout for a visual comparison of these approaches and Park et al. for a detailed discussion of approximate approaches [@parkEstimatingEpidemiologicalDelay2024].
 
 To properly account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
@@ -532,7 +532,7 @@ Ending observation close to periods of exponential growth will lead to more trun
 
 ## Implementing bias correction for truncation
 
-If we take the naïve mean of delays we get an underestimate as expected:
+If we take the naive mean of delays we get an underestimate as expected:
 
 ```{r mean_truncated}
 # truncated mean delay
