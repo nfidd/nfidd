@@ -409,6 +409,18 @@ Do they seem to under or over predict consistently?
 - @heldProbabilisticForecastingInfectious2017 makes a compelling argument for the use of probabilistic forecasts and evaluates spatial forecasts based on routine surveillance data.
 - @hadleyVisualPreferencesCommunicating2025 describes the visualisation of modelling results for national COVID-19 policy and decision makers, with recommendations on what aspects of visuals, graphs, and plots policymakers found to be most helpful in COVID-19 response work.
 
+::: {.callout-note collapse="true"}
+## Using this model as a baseline
+
+The random walk renewal model used here is deliberately simple, which makes it a natural *baseline*: a reference forecast that more sophisticated models should be expected to beat before we trust them.
+Comparing models against a baseline is central to forecast evaluation, and the choice of baseline itself can substantially change which models appear skilful [@stapperMindBaseline2025].
+Baselines are useful because they:
+
+- give an interpretable reference point for whether a model adds value beyond a naive extrapolation of recent trends;
+- are cheap to fit and robust, so they almost always produce a forecast to compare against;
+- help reveal when added model complexity is not justified by better performance.
+:::
+
 # Wrap up
 
 - Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
