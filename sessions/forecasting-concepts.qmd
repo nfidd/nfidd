@@ -274,8 +274,17 @@ We first need to extract the forecast and estimated reproduction numbers.
 ```{r extract-Rt}
 forecast_r <- rw_forecast |>
   gather_draws(R[day]) |>
-  ungroup() |> 
+  ungroup() |>
   mutate(type = "forecast")
+
+# The forecast model also produces reproduction numbers for the forecast
+# horizon (`forecast_R`), which we append so the forecast extends past the
+# cutoff. Its day index runs from 1, so we shift it to follow the fitted days.
+forecast_r <- rw_forecast |>
+  gather_draws(forecast_R[day]) |>
+  ungroup() |>
+  mutate(day = day + cutoff, type = "forecast") |>
+  bind_rows(forecast_r)
 
 long_r <- rw_long |>
   gather_draws(R[day]) |>
