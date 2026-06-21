@@ -177,7 +177,7 @@ The concepts and techniques that we use here also apply to longer time intervals
 
 Let's estimate the time from symptom onset to hospitalisation with the censored data.
 
-A naïve approach to estimating the delay would be to ignore the fact that the data are censored.
+A naive approach to estimating the delay would be to ignore the fact that the data are censored.
 To estimate the delay from onset to hospitalisation, we could just use the difference between the censored times, which is an integer (the number of days).
 
 ```{r integer-delays}
@@ -532,7 +532,7 @@ Ending observation close to periods of exponential growth will lead to more trun
 
 ## Implementing bias correction for truncation
 
-If we take the naïve mean of delays we get an underestimate as expected:
+If we take the naive mean of delays we get an underestimate as expected:
 
 ```{r mean_truncated}
 # truncated mean delay
