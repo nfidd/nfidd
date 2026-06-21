@@ -208,6 +208,8 @@ $$
 CRPS(F, y) = \int_{-\infty}^{+\infty} \left( F(x) - \mathbb{1}(x \geq y) \right)^2 \, dx
 $$
 
+where $\mathbb{1}(\cdot)$ is the indicator function, which evaluates to 1 if its argument is true and 0 if it is false.
+
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
 
 $$
