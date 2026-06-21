@@ -26,6 +26,7 @@ Suggests:
     bayesplot,
     covr,
     ggplot2,
+    knitr,
     lintr,
     lubridate,
     posterior,
