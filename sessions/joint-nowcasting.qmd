@@ -480,6 +480,15 @@ Think about seasonal patterns, long-term trends, or other cyclical behaviours th
 - This session focused on the role of the generative process in nowcasting. This is an area of active research but [@lisonGenerativeBayesianModeling2024] gives a good overview of the current state of the art.
 - The [`epinowcast`](https://package.epinowcast.org/) package implements a more complex version of the model we have used here. It is designed to be highly flexible and so can be used to model a wide range of different datasets.
 
+::: {.callout-note collapse="true"}
+## Optional: Marginal vs conditional approaches to nowcasting
+
+[@stonerPowerfulModellingFramework2020] review the literature on correcting delayed reporting and group methods into two broad classes based on how they treat the reporting delay.
+*Conditional* approaches model the delayed counts conditional on the eventual total, alongside a separate model for that total - typically by decomposing the reporting process into the probabilities of reporting at each delay (for example via a multinomial or survival-style model of the reporting triangle). The joint model in this session is of this type: we model the expected onsets $\lambda_{t}$ and the delay probabilities $p_{t,d}$ separately and combine them.
+
+*Marginal* approaches instead model the counts in each delay cell more directly, capturing the delay structure through covariates and random effects rather than an explicit conditional delay distribution. Regression-based and chain-ladder-style models therefore sit within the marginal class. A practical trade-off is that, because marginal approaches do not explicitly model the total, they can be less well suited to propagating uncertainty into the nowcast of the eventual count.
+:::
+
 # Wrap up
 
 The learning objectives for this session were:
