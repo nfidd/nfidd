@@ -202,10 +202,10 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 ::: {.callout-tip .optional collapse="true"}
 #### Mathematical Definition
 
-The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $x$ is calculated as
+The CRPS for a predictive distribution characterised by a cumulative distribution function $F$ and observed value $y$ is calculated as
 
 $$
-CRPS(F, x) = \int_{-\infty}^{+\infty} \left( F(y) - \mathbb{1} ({\y \geq x})^2 \right).
+CRPS(F, y) = \int_{-\infty}^{+\infty} \left( F(x) - \mathbb{1}(x \geq y) \right)^2 \, dx
 $$
 
 For distributions with a finite first moment (a mean exists and it is finite), the CRPS can be expressed as:
