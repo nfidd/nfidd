@@ -20,6 +20,7 @@ Stan is a probabilistic programming language for Bayesian inference. It allows u
 - Get proper uncertainty quantification for our estimates
 
 We use Stan because:
+
 - We'll need to estimate things (delays, reproduction numbers, case numbers now and in the future)
 - We'll want to correctly specify uncertainty
 - We'll want to incorporate our domain expertise
@@ -32,11 +33,13 @@ We use Stan because:
 A probability distribution describes how likely different outcomes are for a random variable.
 
 **Discrete distributions** (for countable outcomes):
+
 - Example: Number of horse kick deaths per year (0, 1, 2, 3, ...)
 - Poisson distribution with $\lambda$ = 0.61 kicks per year
 - Probability of exactly 2 deaths: `dpois(2, lambda = 0.61)` = 0.11
 
 **Continuous distributions** (for measurable quantities):
+
 - Example: Temperature in Stockholm tomorrow
 - Normal distribution with mean 23°C, standard deviation 2°C
 - Probability density at 30°C: `dnorm(30, mean = 23, sd = 2)` = 0.0001
