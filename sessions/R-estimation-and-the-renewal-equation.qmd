@@ -381,13 +381,13 @@ Now, there is not enough data (due to the delay distribution) to estimate the re
 
 In the model so far we have assumed that the reproduction number at any time point is independent of the reproduction number at any other time point.
 This assumption has resulted in the quite noisy estimates of the reproduction number that we have seen in the plots above.
-As we just saw, it also results in real-time estimates (i.e. towards the date of esitmation) that rely heavily on the prior.
+As we just saw, it also results in real-time estimates (i.e. towards the date of estimation) that rely heavily on the prior.
 
 In reality, we might expect the reproduction number to change more smoothly over time (except in situations of drastic change such as a very effective intervention) and to be more similar at adjacent time points.
 We can model this by assuming that the reproduction number at time $t$ is a random draw from a normal distribution with mean equal to the reproduction number at time $t-1$ and some standard deviation $\sigma$.
 This can be described as a random walk model for the reproduction number.
 In fact, rather than using this model directly, a better choice might be to use a model where the logarithm of the reproduction number does a random walk.
-Tas this will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive.
+This will ensure that the reproduction number is always positive and that changes are multiplicative rather than additive.
 Otherwise, the same absolute change in the reproduction number would have a larger effect when the reproduction number is small, which likely doesn't match your intuition for how outbreaks evolve over time.
 We can write this model as
 
