@@ -36,6 +36,7 @@ model {
 }
 generated quantities {
   array[h] real forecast;
+  array[h] real forecast_R;
   if (h > 0) {
     array[n + h - 1] real f_rw_noise;
     for (i in 1:(n-1)) {
@@ -49,6 +50,7 @@ generated quantities {
     array[h + n] real f_onsets = convolve_with_delay(f_infections, ip_pmf);
     for (i in 1:h) {
       forecast[i] = poisson_rng(f_onsets[n + i]);
+      forecast_R[i] = f_R[n + i];
     }
   }
 }
