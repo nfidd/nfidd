@@ -74,7 +74,7 @@ For this session, we'll use **shorter delays** to better demonstrate censoring e
 Using shorter delays makes the 24-hour censoring interval more impactful relative to the delay length, making bias effects more visible.
 :::
 
-We'll use the updated `add_delays` function with shorter parameters for the censoring demonstration:
+We'll use the `add_delays` function with shorter parameters for the censoring demonstration:
 
 ```{r inf_hosp_solution}
 df <- add_delays(

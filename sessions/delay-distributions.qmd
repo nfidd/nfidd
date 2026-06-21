@@ -353,7 +353,7 @@ With real data, of course, we don't have this information available.
   df_small <- df_onset_to_hosp |> slice_sample(n = 100)
   ```
 
-- **Different delay lengths**: The updated `add_delays()` function now allows you to change the delay parameters. 
+- **Different delay lengths**: The `add_delays()` function allows you to change the delay parameters.
   
   Try longer delays and see how this affects your parameter recovery:
   ```{r, eval = FALSE}
