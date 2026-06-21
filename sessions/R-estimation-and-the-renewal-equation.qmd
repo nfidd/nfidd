@@ -616,7 +616,7 @@ In practice, $R_t$ estimation usually happens *during* an outbreak, when the dat
 Estimates near "today" are then poorly informed in two ways: the random walk for $R_t$ has very few downstream observations constraining its latest steps, and the convolution with the incubation period means the symptom onsets caused by very recent infections haven't been observed yet.
 
 ::: callout-tip
-## Take 5 minutes
+## Try it yourself
 
 Refit the random walk model from above, but pretend it is 14 days earlier than the end of the outbreak by truncating the observations (`obs`) before fitting.
 Extract the $R_t$ posterior as before and plot it alongside the full-data $R_t$ posterior at the same calendar dates.
