@@ -419,8 +419,18 @@ Baselines are useful because they:
 - give an interpretable reference point for whether a model adds value beyond a naive extrapolation of recent trends;
 - are cheap to fit and robust, so they almost always produce a forecast to compare against;
 - help reveal when added model complexity is not justified by better performance.
+
+Which of these, if any, does the random walk renewal model we just fitted satisfy?
 :::
 
+::: {.callout-note collapse="true"}
+## Solution
+- Interpretable reference point: yes, it's just a naive extrapolation of the recent trend in $R_t$.
+- Cheap to fit and robust: not really. It's a full Bayesian latent-state model that takes appreciably longer to fit than a naive baseline, and we had to raise `adapt_delta` and supply initial values to sample it cleanly.
+- Revealing unnecessary complexity: yes, if competing models are compared against it fairly.
+
+Stapper & Funk [@stapperMindBaseline2025] set out five criteria for a good baseline (capturing key epidemiological dynamics, producing the required output format, using only commonly available data, simplicity, and calibrated uncertainty), and find that no single baseline meets all of them.
+:::
 # Wrap up
 
 - Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
