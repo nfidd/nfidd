@@ -242,8 +242,11 @@ res |>
 Usually the estimates will be further from the "true" parameters than before when we worked with the unrounded data.
 :::
 
-There are many ad-hoc solutions to this problem that, for example, introduce a shift in the data by half a day to centre it on mid-day or discretise the distribution and use the difference between two cumulative density functions with a day, or two day interval.
-Of these all but the two-day interval approach introduce more bias than doing nothing as above.
+There are many ad-hoc solutions to this problem that, for example, introduce a shift in the data by half a day to centre it on mid-day or discretise the distribution and use the difference between two cumulative density functions with a one-day, or two-day interval.
+The key point is that the observed integer delay corresponds to *two* days of combined uncertainty (one day from each censored event), so the correct discretised likelihood compares the cumulative distribution function across a two-day window, $F(d+1) - F(d-1)$ [@parkEstimatingEpidemiologicalDelay2024].
+Approximations that only span a single day, such as the forward difference $F(d+1) - F(d)$ that in effect accounts for the censoring of just one event, can therefore be *more* biased than doing nothing as above, and a half-day shift of the data tends to over-correct in a similar way.
+By contrast, a centred one-day difference $F(d+0.5) - F(d-0.5)$ and the two-day window are both close to unbiased.
+The relative ranking of these approximations depends on the length of the delay and the epidemic growth rate, so rather than relying on any of these ad-hoc fixes we recommend the principled double interval censoring approach described below.
 See the [How epidemic dynamics affect bias severity](#how-epidemic-dynamics-affect-bias-severity) callout for a visual comparison of these approaches and Park et al. for a detailed discussion of approximate approaches [@parkEstimatingEpidemiologicalDelay2024].
 
 To properly account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
