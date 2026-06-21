@@ -167,8 +167,8 @@ prior_sd_delay <- abs(rnorm(1000, mean = 0.5, sd = 0.1))
 
 # Simulate delays from these priors
 prior_delays <- rlnorm(
-  1000, 
-  meanlog = log(prior_mean_delay), 
+  1000,
+  meanlog = log(prior_mean_delay),
   sdlog = prior_sd_delay
 )
 
@@ -223,9 +223,9 @@ Solutions:
 ```{r, eval = FALSE}
 # Increase adapt_delta (default is 0.8)
 fit <- nfidd_sample(
-  model, 
+  model,
   data = stan_data,
-  adapt_delta = 0.95  # or even 0.99 for difficult models
+  adapt_delta = 0.95 # or even 0.99 for difficult models
 )
 ```
 
