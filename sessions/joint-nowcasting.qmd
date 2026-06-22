@@ -387,7 +387,7 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 ## Solution
 Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
-We would also remove the `generated quantities` block as we are not nowcasting the data, and simplify the observations to just the number of onsets.
+We would also remove the `generated quantities` block as we no longer reconstruct unobserved onsets via the reporting-delay model; we are not nowcasting the data, so simplify the observations to just the number of onsets.
 :::
 
 Now let's fit the final model for this session!
@@ -458,7 +458,7 @@ What about the reproduction number?
 ## Solution
 
 - Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model can capture the trend in infections and account for delays from infection to onset and onset to report.
-- The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation).
+- The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](sessions/R-estimation-and-the-renewal-equation).
 This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
 :::
 
