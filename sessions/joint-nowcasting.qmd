@@ -160,19 +160,19 @@ Notice how this simulation creates a similar, but different, data structure than
 
 So far we've worked with data that has two dimensions. Such as:
 
-- **Onset day**: when symptoms began
-- **Onset counts**: the number of cases that occurred on each day
+- **Onset day**: the day that each infected case saw symptoms begin
+- **Onset counts**: the number of cases with symptoms that began on each day
 
 Now we are introducing a third dimension:
 
-- **Report day**: when the case enters our surveillance system
+- **Report day**: when the symptomatic case enters our surveillance reporting system
 
-This means that to recover the true onset counts we need to sum across the third dimension and we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
+This means that to recover the true onset counts we need to sum across the third dimension, but we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
 This is just a **reformulation** of the nowcasting problem we saw in the [nowcasting concepts session](sessions/nowcasting).
 
 :::
 
-This richer data structure contains information about both the delay distribution and the final expected counts so we can use it to jointly estimate both which was not possible with the simpler data structure we used in the [nowcasting concepts session](sessions/nowcasting).
+This richer data structure contains information about both the delay distribution and the final expected counts so we can use it to jointly estimate both, which was not possible with the simpler data structure we used in the [nowcasting concepts session](sessions/nowcasting).
 
 ## Mathematical formulation
 
