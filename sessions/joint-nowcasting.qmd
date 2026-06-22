@@ -124,7 +124,7 @@ tail(reporting_triangle)
 
 We also apply the Poisson observation error to the reported onsets to capture our uncertainty in the reporting process (remember we have lost uncertainty in the onsets as we are not individually simulating the reporting delays).
 
-To recover the onsets onsets by day we group by day and then sum reported onsets across report days.
+To recover the onsets by day we group by day and then sum reported onsets across report days.
 
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
@@ -133,13 +133,13 @@ noisy_onsets_df <- reporting_triangle |>
 tail(noisy_onsets_df)
 ```
 
-As we only observed reported cases up to the current day we need to filter it to only include the data we have observed:
+As we only observed reported onsets up to the current day we need to filter it to only include the data we have observed:
 
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
 
-tail(noisy_onsets_df)
+tail(filtered_reporting_triangle)
 ```
 
 Finally, we sum this to get the counts we actually observe. This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
