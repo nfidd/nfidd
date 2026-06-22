@@ -340,11 +340,11 @@ This is because we are fitting a model to the reporting triangle, which is a muc
 ::: {.callout-note collapse="true"}
 ## Key learning points
 
-- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data.
-- When reporting delays, don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
+- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data
+- When reporting delays don't provide enough information to identify recent trends, using the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
-- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment. 
-They avoid issues of passing estimates between the nowcast and the reproduction number estimation model.
+- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment.
+They avoid issues of passing fixed estimates between the nowcast and the reproduction number estimation model.
 :::
 
 ::: {.callout-note}
@@ -355,8 +355,8 @@ In the previous sessions, we have seen how to estimate the reproduction number a
 We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly.
 This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
-As in the [renewal session](R-estimation-and-the-renewal-equation), we need to define the generation time distribution and an incubation period distribution.
-We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity.
+As in the [renewal session](sessions/R-estimation-and-the-renewal-equation), we need to define the generation time distribution and an incubation period distribution.
+We will use the same distributions as in the [renewal session](sessions/R-estimation-and-the-renewal-equation) for simplicity.
 These are:
 
 ```{r gt}
@@ -385,7 +385,7 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
+Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
 We would also remove the `generated quantities` block as we are not nowcasting the data, and simplify the observations to just the number of onsets.
 :::
