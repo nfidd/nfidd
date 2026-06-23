@@ -278,7 +278,7 @@ joint_data <- list(
    mutate(d = d + 1) |>
    pull(d),            # number of observations per day
   obs = filtered_reporting_triangle$reported_onsets,   # observed symptom onsets
-  d = 16               # number of reporting delays
+  d = 16               # max number of days that we know have some reporting delay
 )
 joint_nowcast_fit <- nfidd_sample(joint_mod, data = joint_data)
 ```
