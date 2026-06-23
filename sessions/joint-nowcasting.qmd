@@ -252,6 +252,10 @@ For now, it is important that you understand the concept, but as the models get 
 One thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
 This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
 In most situations, this number would be unknown, so what we do here is closer to what one would do in the real world.
+
+Another new feature is the `generated quantities` block.
+This block runs once per posterior draw to compute quantities derived from the fitted parameters, rather than contributing to the likelihood.
+Here we use it to produce the nowcast: we reconstruct the complete reporting triangle (onsets by all delays, including those not yet observed) and combine the observed counts with model predictions for the not-yet-reported parts to estimate the true onsets.
 :::
 
 ::: {.callout-note}
