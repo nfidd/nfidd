@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The renewal equation and the time-varying reproduction number R(t)</title>
+<style>
+  :root{
+    --rt:#9333ea;     /* R(t) trajectory / purple */
+    --inc:#2563eb;    /* incidence I(t) / blue */
+    --gi:#0891b2;     /* generation interval / teal */
+    --peak:#ea580c;   /* peak marker / orange */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#f5f3ff 0%, var(--bg) 100%); border-bottom:1px solid var(--line);}
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:22px auto 0; max-width:780px}
+  nav.toc a{text-decoration:none; color:var(--rt); font-weight:600; font-size:14px;
+    border:1px solid #ddd6fe; background:#fff; padding:6px 13px; border-radius:999px}
+  nav.toc a:hover{background:#f5f3ff}
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px; margin:18px 0 6px; background:#fff}
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; margin:8px 4px 2px;
+    padding:12px 14px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; font-size:14px}
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:150px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:160px; accent-color:var(--rt)}
+  .toggle{display:flex; align-items:center; gap:7px; min-width:auto}
+  .toggle input{accent-color:var(--inc)}
+  .readout{display:inline-flex; gap:14px; flex-wrap:wrap; margin:10px 4px 0; font-variant-numeric:tabular-nums}
+  .readout .chip{background:#f1f5f9; border:1px solid var(--line); border-radius:8px; padding:6px 12px; font-size:14px}
+  .readout .chip b{font-size:16px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#f5f3ff; border-left:4px solid var(--rt); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.blue{background:#eff6ff; border-color:var(--inc)}
+  .key.teal{background:#ecfeff; border-color:var(--gi)}
+  .key.orange{background:#fff7ed; border-color:var(--peak)}
+  .formula{background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; font-size:15px; overflow-x:auto; margin:14px 0}
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.grow{background:#ede9fe; color:#5b21b6}
+  .pill.sim{background:#dbeafe; color:#1e40af}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{font:600 13px inherit; border:1px solid #ddd6fe; background:#fff; color:var(--rt);
+    padding:6px 13px; border-radius:8px; cursor:pointer}
+  .presets button:hover{background:#f5f3ff}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--rt)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/R-estimation-and-the-renewal-equation.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← R_t and the renewal equation session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>The renewal equation</h1>
+  <p>How a single number — the time-varying reproduction number <b style="color:var(--rt)">R(t)</b> — drives an epidemic forward. The <b>renewal equation</b> turns today's transmissibility and the <b style="color:var(--gi)">generation interval</b> into tomorrow's cases. Above 1 it grows, below 1 it shrinks, and the epidemic <b style="color:var(--peak)">peaks</b> exactly where R(t) crosses 1. Everything here is live — drag the sliders and watch the outbreak respond.</p>
+  <nav class="toc">
+    <a href="#intro">The equation</a>
+    <a href="#kernel">Generation interval</a>
+    <a href="#sim">Renewal simulator</a>
+    <a href="#growth">R, growth &amp; doubling</a>
+    <a href="#takeaways">Takeaways</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>The renewal equation</h2>
+  <p class="tagline">New infections are made by old infections — scaled by R(t)</p>
+  <p>Infections are not independent. Each new case was infected by someone who is already infectious. The <b>renewal equation</b> writes this down directly: the expected number of new infections on day <i>t</i> is the reproduction number times a weighted sum of recent infections, where the weights are the <b style="color:var(--gi)">generation interval</b> <i>g(s)</i> — the distribution of times between an infector being infected and them infecting someone else:</p>
+
+  <div class="formula">I(t) = R(t) &middot; &Sigma;<sub>s=1</sub><sup>&infin;</sup> I(t &minus; s) &middot; g(s)</div>
+
+  <p>Read it piece by piece:</p>
+  <ul>
+    <li><b style="color:var(--rt)">R(t)</b> — the average number of secondary infections per infectious person <i>at time t</i>. It is allowed to change as susceptibility, behaviour, policy and seasonality change.</li>
+    <li><b style="color:var(--gi)">g(s)</b> — the generation interval. It says how a person infected today spreads their onward infections across the coming days. We set <i>g(0) = 0</i>: nobody infects others on the very same day.</li>
+    <li>The <b>sum</b> is a convolution of the infection time series with itself — the renewal equation is the convolution from the previous session, but feeding back on the same series being generated.</li>
+  </ul>
+  <div class="key"><b>The headline.</b> Because <i>g(s)</i> sums to 1, on average each infectious person produces <b>R(t)</b> others. So <b>R(t) &gt; 1 &rarr; growth</b>, <b>R(t) &lt; 1 &rarr; decline</b>, and the epidemic <b>peaks at the moment R(t) crosses 1</b>. This is the single most useful fact about R(t), and the simulator below makes it visible.</div>
+  <p>This is more general than the basic reproduction number <i>R<sub>0</sub></i> (secondary infections in a fully susceptible population) and includes the simple SIR model as a special case — there <i>R(t) = R<sub>0</sub> S/N</i>, falling as susceptibles are depleted.</p>
+</section>
+
+<!-- ============ GENERATION INTERVAL ============ -->
+<section id="kernel">
+  <h2>The generation interval sets the clock <span class="pill grow">timescale</span></h2>
+  <p class="tagline">A discretised lognormal kernel g(s), s = 1, 2, 3, …</p>
+  <p>The generation interval decides <i>how fast</i> a given R(t) plays out. A short interval means each generation of infections follows hard on the last, so the same R(t) produces faster growth; a long interval stretches the same R(t) out over more time. We use a <b>lognormal</b> distribution discretised onto whole days, with no same-day transmission (<i>g(0) = 0</i>):</p>
+
+  <div class="formula">&sigma;&sup2; = ln(1 + s<sub>sd</sub>&sup2; / m&sup2;)&nbsp;&nbsp; &mu; = ln(m) &minus; &sigma;&sup2;/2 &nbsp;&nbsp; g(s) &prop; F(s+1) &minus; F(s)</div>
+
+  <p>where <i>F</i> is the lognormal CDF and the raw masses are normalised over <i>s</i> = 1…<i>S<sub>max</sub></i> so that <span style="white-space:nowrap">&Sigma; g(s) = 1</span>. Drag the mean and standard deviation and watch the kernel — a typical respiratory pathogen has a mean of around 5 days.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--gi);border-top-width:10px;opacity:.85"></i> generation interval g(s)</span>
+  </div>
+  <div class="fig">
+    <svg id="giSvg" viewBox="0 0 720 300" role="img" aria-label="Discretised lognormal generation interval as a bar chart over days since infection"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Mean m (days): <span id="giMeanVal">5.0</span></span>
+      <input id="giMean" type="range" min="2" max="10" step="0.1" value="5"></label>
+    <label><span class="vlabel">SD s<sub>sd</sub> (days): <span id="giSdVal">2.0</span></span>
+      <input id="giSd" type="range" min="1" max="5" step="0.1" value="2"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">mode at day <b id="giMode">—</b></span>
+    <span class="chip">mass within day <b id="giMass">—</b> = 90%</span>
+    <span class="chip">g<sub>max</sub> = <b id="giMax">—</b> days</span>
+  </div>
+</section>
+
+<!-- ============ RENEWAL SIMULATOR ============ -->
+<section id="sim">
+  <h2>Renewal simulator <span class="pill sim">the centrepiece</span></h2>
+  <p class="tagline">Steer R(t) and watch the epidemic it generates</p>
+  <p>You control an <b style="color:var(--rt)">R(t) trajectory</b> with a few handles: the <b>initial</b> R, the <b>day it changes</b> (think of an intervention), and the <b>later</b> R it settles to — with an optional smooth transition. The epidemic is seeded with a handful of infections on day 0, then the renewal recursion <i>I(t) = R(t)&middot;&Sigma;<sub>s</sub> I(t&minus;s) g(s)</i> runs forward for 120 days using the generation interval you set below.</p>
+  <p>The two panels share the day axis. The <b>top</b> shows R(t) with a slate dashed line at <b>R = 1</b>; the <b>bottom</b> shows the resulting incidence I(t). The <b style="color:var(--peak)">orange marker</b> sits on the epidemic's peak — notice it lines up with where R(t) crosses 1. Flip the incidence to a log scale to see the straight-line exponential phases.</p>
+
+  <div class="presets" id="simPresets">
+    <button data-r0="2" data-day="30" data-r1="0.7">Controlled outbreak</button>
+    <button data-r0="0.8" data-day="25" data-r1="1.4">Resurgence</button>
+    <button data-r0="1.02" data-day="40" data-r1="1.0">Critical (R≈1)</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--rt);border-top-width:4px"></i> R(t)</span>
+    <span><i class="swatch" style="border-color:#94a3b8;border-top-style:dashed"></i> R = 1 reference</span>
+    <span><i class="swatch" style="border-color:var(--inc);border-top-width:8px;opacity:.6"></i> incidence I(t)</span>
+    <span><i class="swatch" style="border-color:var(--peak);border-top-width:4px"></i> epidemic peak</span>
+  </div>
+
+  <div class="fig">
+    <svg id="simSvg" viewBox="0 0 720 470" role="img" aria-label="Top: the chosen R(t) trajectory with a reference line at R=1. Bottom: the incidence generated by the renewal equation, with the peak marked."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Initial R<sub>0</sub>: <span id="r0Val">2.0</span></span>
+      <input id="r0" type="range" min="0.5" max="4" step="0.05" value="2"></label>
+    <label><span class="vlabel">Change on day: <span id="dayVal">30</span></span>
+      <input id="changeDay" type="range" min="5" max="60" step="1" value="30"></label>
+    <label><span class="vlabel">Later R<sub>1</sub>: <span id="r1Val">0.70</span></span>
+      <input id="r1" type="range" min="0.3" max="2" step="0.05" value="0.7"></label>
+    <label><span class="vlabel">Transition width (days): <span id="transVal">2</span></span>
+      <input id="trans" type="range" min="0" max="20" step="1" value="2"></label>
+    <label><span class="vlabel">Generation interval mean: <span id="simGiVal">5.0</span></span>
+      <input id="simGi" type="range" min="2" max="10" step="0.1" value="5"></label>
+    <label class="toggle"><input id="logToggle" type="checkbox"> <span class="vlabel">log incidence axis</span></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--peak);padding-left:10px">peak day = <b id="peakDay">—</b></span>
+    <span class="chip">R(t) crosses 1 near day <b id="crossDay">—</b></span>
+    <span class="chip">peak incidence = <b id="peakInc">—</b></span>
+    <span class="chip">final daily R = <b id="finalR">—</b></span>
+    <span class="chip" id="simState" style="background:#f5f3ff"></span>
+  </div>
+
+  <h3>Why the peak sits where R(t) = 1</h3>
+  <p>When R(t) is above 1, every cohort of infections more than replaces itself, so incidence keeps climbing. When it dips below 1, each cohort under-replaces and incidence falls. The turning point — the peak — is exactly where R(t) passes through 1. There is a small lag set by the generation interval (incidence responds to R(t) with roughly one generation's delay), which is why the orange marker can sit a few days after the crossing rather than exactly on it.</p>
+</section>
+
+<!-- ============ GROWTH AND DOUBLING ============ -->
+<section id="growth">
+  <h2>R, growth rate and doubling time <span class="pill grow">the link</span></h2>
+  <p class="tagline">The same R grows faster when the generation interval is shorter</p>
+  <p>A constant R(t) = R produces pure exponential growth, <i>I(t) &prop; e<sup>r t</sup></i>, once the kernel has settled. The per-day <b>growth rate r</b> and the reproduction number are tied together through the generation interval. We estimate <i>r</i> here by running the renewal equation at constant R until the day-to-day ratio of incidence stops changing, then reading <span style="white-space:nowrap"><i>r = ln(ratio)</i></span>. When growth is positive, the <b>doubling time</b> is <i>ln(2)/r</i>; when R &lt; 1 the same formula gives the <b>halving time</b>.</p>
+
+  <div class="formula">ratio = <span class="frac"><span>I(t)</span><span>I(t&minus;1)</span></span>&nbsp;&nbsp; r = ln(ratio)&nbsp;&nbsp; doubling time = <span class="frac"><span>ln 2</span><span>r</span></span></div>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--inc);border-top-width:4px"></i> incidence at constant R (log scale)</span>
+  </div>
+  <div class="fig">
+    <svg id="growSvg" viewBox="0 0 720 300" role="img" aria-label="An illustrative exponential growth curve at the chosen constant R, drawn on a log axis so it is a straight line."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Constant R: <span id="grR Val">1.50</span></span>
+      <input id="grR" type="range" min="0.5" max="3" step="0.05" value="1.5"></label>
+    <label><span class="vlabel">Generation interval mean: <span id="grGiVal">5.0</span></span>
+      <input id="grGi" type="range" min="2" max="10" step="0.1" value="5"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">growth rate r = <b id="grRate">—</b> / day</span>
+    <span class="chip" id="grDouble" style="border-left:4px solid var(--inc);padding-left:10px">—</span>
+    <span class="chip" id="grRegime" style="background:#ede9fe"></span>
+  </div>
+  <div class="key teal"><b>Why the generation interval matters.</b> R only counts <i>how many</i> people each case infects, not <i>how fast</i>. With a short generation interval those secondary infections arrive sooner, so the same R compounds more quickly: a higher growth rate <i>r</i> and a shorter doubling time. Slide the generation interval mean down and watch r climb even though R has not moved.</div>
+</section>
+
+<!-- ============ TAKEAWAYS ============ -->
+<section id="takeaways">
+  <h2>Takeaways</h2>
+  <ul>
+    <li>The <b>renewal equation</b> <i>I(t) = R(t)&middot;&Sigma;<sub>s</sub> I(t&minus;s) g(s)</i> generates incidence from the reproduction number and the generation interval — a convolution of the infection series with itself.</li>
+    <li><b style="color:var(--rt)">R(t) &gt; 1</b> means growth, <b style="color:var(--rt)">R(t) &lt; 1</b> means decline, and the epidemic <b style="color:var(--peak)">peaks where R(t) crosses 1</b> (give or take one generation's lag).</li>
+    <li>The <b style="color:var(--gi)">generation interval</b> sets the timescale: it links R to the exponential growth rate <i>r</i> and the doubling time. The same R grows faster with a shorter interval.</li>
+    <li>R(t) is rarely observed directly. In the course you instead <b>estimate</b> it: invert the renewal equation in Stan, place priors on R(t) (e.g. a geometric random walk for smoothness), and propagate uncertainty — see the <a href="../sessions/R-estimation-and-the-renewal-equation.html">session</a>.</li>
+    <li>Because this version is <b>deterministic</b>, the equation gives the <i>expectation</i> of I(t); fitting to data adds observation noise (e.g. Poisson) on top.</li>
+  </ul>
+  <footer>Built as a teaching aid for the NFIDD R(t) and renewal-equation session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library (shared with the other explainers) ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- renewal-equation maths ---------- */
+// discretised lognormal generation interval g(s), s = 1..Smax, normalised, g(0)=0.
+function genInterval(mean, sd){
+  const Smax = 21;
+  const sigma2 = Math.log(1 + (sd*sd)/(mean*mean));
+  const sigma = Math.sqrt(sigma2);
+  const mu = Math.log(mean) - sigma2/2;
+  // lognormal CDF F(x) = Phi((ln x - mu)/sigma)
+  const F = x => x<=0 ? 0 : normCdf((Math.log(x)-mu)/sigma);
+  const raw = [0]; // index 0 -> g(0)=0
+  let total = 0;
+  for(let s=1;s<=Smax;s++){ const v = F(s+1)-F(s); raw[s]=v; total+=v; }
+  for(let s=1;s<=Smax;s++) raw[s]/=(total||1e-12);
+  return raw; // raw[s] for s=0..Smax
+}
+// run the deterministic renewal equation. Rfun(t) returns R on day t. Returns incidence array length nDays.
+function simulate(Rfun, g, nDays, I0){
+  const Smax = g.length-1;
+  const I = new Array(nDays).fill(0);
+  I[0] = I0;
+  for(let t=1;t<nDays;t++){
+    let force=0;
+    for(let s=1;s<=Smax;s++){ if(t-s>=0) force += I[t-s]*g[s]; }
+    I[t] = Rfun(t)*force;
+  }
+  return I;
+}
+
+/* ================= FIGURE 1 : generation interval kernel ================= */
+(function(){
+  const svg=document.getElementById("giSvg");
+  const W=720,H=300, m={l:52,r:20,t:24,b:46};
+  const meanInp=document.getElementById("giMean"), sdInp=document.getElementById("giSd");
+  const Smax=21;
+  const sx=s=>m.l+(s-0.5)/(Smax)*(W-m.l-m.r);
+  function draw(){
+    const mean=+meanInp.value, sd=+sdInp.value;
+    document.getElementById("giMeanVal").textContent=mean.toFixed(1);
+    document.getElementById("giSdVal").textContent=sd.toFixed(1);
+    const g=genInterval(mean,sd);
+    clear(svg);
+    let gmaxV=0, mode=1, cum=0, mass90=Smax, lastNZ=1;
+    for(let s=1;s<=Smax;s++){ if(g[s]>gmaxV){gmaxV=g[s]; mode=s;} }
+    for(let s=1;s<=Smax;s++){ cum+=g[s]; if(cum<0.9) mass90=s+1; if(g[s]>1e-4) lastNZ=s; }
+    const dmax=gmaxV*1.18;
+    const sy=v=>H-m.b-(v/dmax)*(H-m.t-m.b);
+    // gridlines
+    [0,0.25,0.5,0.75,1].forEach(f=>{
+      const v=f*dmax;
+      svg.appendChild(el("line",{x1:m.l,y1:sy(v),x2:W-m.r,y2:sy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v.toFixed(2);
+    });
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:m.t,stroke:"#cbd5e1"}));
+    const bw=(W-m.l-m.r)/Smax;
+    for(let s=1;s<=Smax;s++){
+      const h=Math.max(sy(0)-sy(g[s]),0);
+      svg.appendChild(el("rect",{x:m.l+(s-1)*bw+1.5,y:sy(g[s]),width:bw-3,height:h,fill:"#0891b2",opacity:s===mode?0.95:0.72,rx:2}));
+    }
+    for(let s=1;s<=Smax;s+=2) svg.appendChild(el("text",{x:m.l+(s-0.5)*bw,y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=s;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-8,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="days since infection, s";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="probability g(s)"; svg.appendChild(yl);
+    // mean marker
+    svg.appendChild(el("line",{x1:sx(mean),y1:m.t,x2:sx(mean),y2:sy(0),stroke:"#9333ea","stroke-dasharray":"4 3","stroke-width":1.4}));
+    svg.appendChild(el("text",{x:sx(mean),y:m.t-2,"text-anchor":"middle","font-size":10,fill:"#9333ea","font-weight":600})).textContent="mean";
+    document.getElementById("giMode").textContent=mode;
+    document.getElementById("giMass").textContent=mass90;
+    document.getElementById("giMax").textContent=lastNZ;
+  }
+  meanInp.addEventListener("input",draw); sdInp.addEventListener("input",draw); draw();
+})();
+
+/* ================= FIGURE 2 : renewal simulator ================= */
+(function(){
+  const svg=document.getElementById("simSvg");
+  const W=720,H=470, nDays=120, I0=10;
+  const r0Inp=document.getElementById("r0"), dayInp=document.getElementById("changeDay"),
+        r1Inp=document.getElementById("r1"), transInp=document.getElementById("trans"),
+        giInp=document.getElementById("simGi"), logInp=document.getElementById("logToggle");
+  // top panel: R(t)
+  const m={l:52,r:20};
+  const Ttop=28, Th=130, Tbot=Ttop+Th;
+  // bottom panel: I(t)
+  const Btop=Tbot+58, Bh=210, Bbot=Btop+Bh;
+  const sx=t=>m.l+t/(nDays-1)*(W-m.l-m.r);
+
+  function Rfun(t,r0,r1,day,trans){
+    if(trans<=0) return t<day ? r0 : r1;
+    // smooth logistic transition centred on `day` with width `trans`
+    const z=(t-day)/(trans/2.5);
+    const f=1/(1+Math.exp(-z));
+    return r0+(r1-r0)*f;
+  }
+
+  function draw(){
+    const r0=+r0Inp.value, r1=+r1Inp.value, day=+dayInp.value, trans=+transInp.value, giMean=+giInp.value;
+    const useLog=logInp.checked;
+    document.getElementById("r0Val").textContent=r0.toFixed(2);
+    document.getElementById("r1Val").textContent=r1.toFixed(2);
+    document.getElementById("dayVal").textContent=day;
+    document.getElementById("transVal").textContent=trans;
+    document.getElementById("simGiVal").textContent=giMean.toFixed(1);
+    const g=genInterval(giMean, Math.max(1, giMean*0.45));
+    const Rt=t=>Rfun(t,r0,r1,day,trans);
+    const I=simulate(Rt,g,nDays,I0);
+    clear(svg);
+
+    /* ---- TOP: R(t) ---- */
+    const Rmax=Math.max(2.2, r0+0.3, r1+0.3, 1.2), Rmin=0;
+    const syR=v=>Tbot-(v-Rmin)/(Rmax-Rmin)*Th;
+    svg.appendChild(el("text",{x:m.l,y:16,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Reproduction number R(t)";
+    [0,1,2,3].forEach(v=>{ if(v<=Rmax){
+      svg.appendChild(el("line",{x1:m.l,y1:syR(v),x2:W-m.r,y2:syR(v),stroke:v===1?"#94a3b8":"#eef2f7","stroke-dasharray":v===1?"5 4":"","stroke-width":v===1?1.5:1}));
+      svg.appendChild(el("text",{x:m.l-8,y:syR(v)+4,"text-anchor":"end","font-size":10,fill:v===1?"#64748b":"#6b7280"})).textContent=v;
+    }});
+    svg.appendChild(el("text",{x:W-m.r,y:syR(1)-4,"text-anchor":"end","font-size":10,fill:"#64748b","font-weight":600})).textContent="R = 1";
+    let pR="";
+    for(let t=0;t<nDays;t++) pR+=(t?" L ":"M ")+sx(t)+" "+syR(Rt(t));
+    svg.appendChild(el("path",{d:pR,fill:"none",stroke:"#9333ea","stroke-width":2.6}));
+    svg.appendChild(el("line",{x1:m.l,y1:Tbot,x2:W-m.r,y2:Tbot,stroke:"#cbd5e1"}));
+
+    /* ---- find peak and R=1 crossing ---- */
+    let peakT=0, peakV=-1;
+    for(let t=0;t<nDays;t++){ if(I[t]>peakV){peakV=I[t]; peakT=t;} }
+    let crossT=-1;
+    for(let t=1;t<nDays;t++){ if((Rt(t-1)-1)*(Rt(t)-1)<=0 && Rt(t-1)!==Rt(t)){ crossT=t; break; } }
+    if(crossT<0){ // constant-R cases
+      if(Math.abs(r0-1)<0.04) crossT=0;
+    }
+
+    /* ---- BOTTOM: incidence I(t) ---- */
+    svg.appendChild(el("text",{x:m.l,y:Btop-12,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Incidence I(t)"+(useLog?" — log scale":"");
+    const finiteMax=Math.max(...I.filter(v=>isFinite(v)&&v>0),1);
+    let syI, ticks=[];
+    if(useLog){
+      const loMin=Math.max(1, I0*0.5);
+      const lo=Math.log10(loMin), hi=Math.log10(finiteMax*1.6);
+      syI=v=>{ const lv=Math.log10(Math.max(v,loMin*0.5)); return Bbot-(lv-lo)/(hi-lo)*Bh; };
+      for(let e=Math.floor(lo); e<=Math.ceil(hi); e++) ticks.push(Math.pow(10,e));
+    } else {
+      const hi=finiteMax*1.12;
+      syI=v=>Bbot-(Math.min(v,hi)/hi)*Bh;
+      for(let k=0;k<=4;k++) ticks.push(hi*k/4);
+    }
+    ticks.forEach(v=>{
+      const yy=syI(v); if(yy<Btop-1||yy>Bbot+1) return;
+      svg.appendChild(el("line",{x1:m.l,y1:yy,x2:W-m.r,y2:yy,stroke:"#eef2f7"}));
+      const lab = useLog ? (v>=1000? (v/1000)+"k" : ""+Math.round(v)) : (v>=1000?(v/1000).toFixed(1)+"k":Math.round(v));
+      svg.appendChild(el("text",{x:m.l-8,y:yy+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=lab;
+    });
+    // filled incidence area
+    let area="M "+sx(0)+" "+Bbot;
+    for(let t=0;t<nDays;t++){ const v=isFinite(I[t])?I[t]:finiteMax; area+=" L "+sx(t)+" "+syI(Math.max(v,useLog?1:0)); }
+    area+=" L "+sx(nDays-1)+" "+Bbot+" Z";
+    svg.appendChild(el("path",{d:area,fill:"#2563eb",opacity:.16}));
+    let pI="";
+    for(let t=0;t<nDays;t++){ const v=isFinite(I[t])?I[t]:finiteMax; pI+=(t?" L ":"M ")+sx(t)+" "+syI(Math.max(v,useLog?1:0)); }
+    svg.appendChild(el("path",{d:pI,fill:"none",stroke:"#2563eb","stroke-width":2.4}));
+    svg.appendChild(el("line",{x1:m.l,y1:Bbot,x2:W-m.r,y2:Bbot,stroke:"#cbd5e1"}));
+    // x axis labels (shared)
+    for(let t=0;t<=nDays;t+=20){
+      svg.appendChild(el("text",{x:sx(t),y:Bbot+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    }
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:Bbot+34,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day t";
+
+    // peak marker spanning both panels
+    if(peakV>I0*1.05){
+      svg.appendChild(el("line",{x1:sx(peakT),y1:Ttop,x2:sx(peakT),y2:Bbot,stroke:"#ea580c","stroke-width":1.6,"stroke-dasharray":"4 4",opacity:.8}));
+      svg.appendChild(el("circle",{cx:sx(peakT),cy:syI(peakV),r:5,fill:"#ea580c",stroke:"#fff","stroke-width":1.5}));
+      svg.appendChild(el("text",{x:sx(peakT),y:syI(peakV)-9,"text-anchor":"middle","font-size":11,"font-weight":700,fill:"#ea580c"})).textContent="peak";
+    }
+    // crossing marker on R panel
+    if(crossT>0){
+      svg.appendChild(el("circle",{cx:sx(crossT),cy:syR(1),r:4,fill:"#9333ea",stroke:"#fff","stroke-width":1.3}));
+    }
+
+    /* ---- readouts ---- */
+    document.getElementById("peakDay").textContent = peakV>I0*1.05 ? peakT : "—";
+    document.getElementById("crossDay").textContent = crossT>0 ? crossT : "—";
+    document.getElementById("peakInc").textContent = peakV>I0*1.05 ? Math.round(peakV).toLocaleString() : "—";
+    document.getElementById("finalR").textContent = Rt(nDays-1).toFixed(2);
+    const st=document.getElementById("simState");
+    const finalR=Rt(nDays-1);
+    if(peakV>I0*1.05 && finalR<1) st.textContent="grew, then turned over once R fell below 1";
+    else if(finalR>1.02) st.textContent="still growing — R stays above 1";
+    else if(finalR<0.98 && peakV<=I0*1.05) st.textContent="never took off — R stayed below 1";
+    else st.textContent="R near 1 — roughly flat (critical)";
+  }
+  [r0Inp,dayInp,r1Inp,transInp,giInp].forEach(i=>i.addEventListener("input",draw));
+  logInp.addEventListener("change",draw);
+  document.querySelectorAll("#simPresets button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      r0Inp.value=b.dataset.r0; r1Inp.value=b.dataset.r1; dayInp.value=b.dataset.day;
+      draw();
+    });
+  });
+  draw();
+})();
+
+/* ================= FIGURE 3 : R, growth rate, doubling time ================= */
+(function(){
+  const svg=document.getElementById("growSvg");
+  const W=720,H=300, m={l:54,r:20,t:26,b:46};
+  const rInp=document.getElementById("grR"), giInp=document.getElementById("grGi");
+  const rValLab=document.getElementById("grR Val");
+
+  // estimate per-day growth ratio by running constant-R renewal until it stabilises
+  function growthRate(R, giMean){
+    const g=genInterval(giMean, Math.max(1, giMean*0.45));
+    const nDays=140;
+    const I=simulate(()=>R, g, nDays, 10);
+    // average the log-ratio over the last stretch where it has converged
+    let acc=0, n=0;
+    for(let t=nDays-30;t<nDays;t++){
+      if(I[t-1]>1e-9 && isFinite(I[t]) && isFinite(I[t-1])){ acc+=Math.log(I[t]/I[t-1]); n++; }
+    }
+    return n? acc/n : 0;
+  }
+
+  function draw(){
+    const R=+rInp.value, giMean=+giInp.value;
+    rValLab.textContent=R.toFixed(2);
+    document.getElementById("grGiVal").textContent=giMean.toFixed(1);
+    const r=growthRate(R, giMean);
+    clear(svg);
+
+    // illustrative curve I(t)=10*e^{r t} on a log axis (straight line)
+    const nDays=60, I0=10;
+    const series=[]; for(let t=0;t<nDays;t++) series.push(I0*Math.exp(r*t));
+    const sx=t=>m.l+t/(nDays-1)*(W-m.l-m.r);
+    const vmax=Math.max(...series), vmin=Math.min(...series);
+    const lo=Math.log10(Math.max(Math.min(vmin,I0)*0.7,0.5)), hi=Math.log10(Math.max(vmax*1.4,I0*2));
+    const sy=v=>{ const lv=Math.log10(Math.max(v,0.5)); return H-m.b-(lv-lo)/(hi-lo)*(H-m.t-m.b); };
+    for(let e=Math.floor(lo); e<=Math.ceil(hi); e++){
+      const v=Math.pow(10,e), yy=sy(v); if(yy<m.t-1||yy>H-m.b+1) continue;
+      svg.appendChild(el("line",{x1:m.l,y1:yy,x2:W-m.r,y2:yy,stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:yy+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent= v>=1000?(v/1000)+"k":""+v;
+    }
+    svg.appendChild(el("line",{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:m.t,x2:m.l,y2:H-m.b,stroke:"#cbd5e1"}));
+    for(let t=0;t<=nDays;t+=10) svg.appendChild(el("text",{x:sx(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-8,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":11.5,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="incidence (log)"; svg.appendChild(yl);
+    let p="";
+    for(let t=0;t<nDays;t++) p+=(t?" L ":"M ")+sx(t)+" "+sy(series[t]);
+    svg.appendChild(el("path",{d:p,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    /* readouts */
+    document.getElementById("grRate").textContent=(r>=0?"+":"")+r.toFixed(3);
+    const dt=document.getElementById("grDouble");
+    const reg=document.getElementById("grRegime");
+    if(Math.abs(r)<1e-3){
+      dt.textContent="flat — no doubling or halving";
+      reg.textContent="R ≈ 1 → endemic / stable";
+    } else if(r>0){
+      dt.textContent="doubling time = "+(Math.log(2)/r).toFixed(1)+" days";
+      reg.textContent="R > 1 → epidemic grows";
+    } else {
+      dt.textContent="halving time = "+(Math.log(2)/(-r)).toFixed(1)+" days";
+      reg.textContent="R < 1 → epidemic declines";
+    }
+  }
+  rInp.addEventListener("input",draw); giInp.addEventListener("input",draw); draw();
+})();
+</script>
+</body>
+</html>

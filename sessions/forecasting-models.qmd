@@ -13,6 +13,11 @@ In this session, we'll start with the renewal model that we've been using and ex
 
 - [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**forecasting models** interactive](../interactive/forecasting-models.html){target="_blank"} — compare random-walk, statistical and mechanistic forecasts diverging across the horizon. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.

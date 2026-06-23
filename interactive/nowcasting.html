@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nowcasting — the right-truncation problem &amp; the reporting triangle</title>
+<style>
+  :root{
+    --fc:#2563eb;     /* nowcast / blue */
+    --ob:#ea580c;     /* observed-so-far / orange */
+    --now:#dc2626;    /* "now" line / red */
+    --tri:#0891b2;    /* triangle observed cells / teal */
+    --true:#64748b;   /* eventual / true curve / slate */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#ecfeff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:780px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--fc); font-weight:600; font-size:14px;
+    border:1px solid #bae6fd; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#ecfeff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:16px 26px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:170px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:180px; accent-color:var(--fc)}
+  .readout{
+    display:inline-flex; gap:18px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0; align-items:center}
+  .presets button{
+    font:600 13px inherit; border:1px solid #bae6fd; background:#fff; color:var(--fc);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#ecfeff}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .swbox{width:16px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle}
+  .key{background:#ecfeff; border-left:4px solid var(--tri); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.orange{background:#fff7ed; border-color:var(--ob)}
+  .key.blue{background:#eff6ff; border-color:var(--fc)}
+  .key.red{background:#fef2f2; border-color:var(--now)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.prob{background:#cffafe; color:#155e75}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--fc)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/nowcasting.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Nowcasting concepts session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>Nowcasting: the right-truncation problem</h1>
+  <p>Counts for the most recent dates are <b>incomplete</b> — events are reported only after a delay, so today's column always looks artificially low. <b>Nowcasting</b> estimates what those recent counts will become once every late report has arrived, using the <b>reporting triangle</b> and the delay distribution.</p>
+  <nav class="toc">
+    <a href="#intro">The dip</a>
+    <a href="#dip">Dip &amp; nowcast</a>
+    <a href="#maths">The maths</a>
+    <a href="#triangle">Reporting triangle</a>
+    <a href="#caveats">Caveats</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>Why the present looks like it's falling</h2>
+  <p class="tagline">A delay in reporting masquerades as a decline</p>
+  <p>Epidemiological data is never available the instant an event happens. Someone develops symptoms, then days pass before that onset is tested, collated, cleaned and finally entered into the dataset an analyst sees. We call the moment a record arrives its <b>reporting time</b>. Because of this lag, when we look at the data <b>now</b> we have only seen <i>some</i> of the events that have actually occurred recently — the rest are still in the post.</p>
+  <p>The damage is concentrated at the <b>right edge</b> of the time series. A date two weeks ago has had time for nearly all its reports to land, so its count is essentially complete. A date from yesterday has had almost no time, so we see only a fraction of its eventual total. Plotted naively, this makes the curve <b>dip toward the present</b> — and that dip is easy to mistake for the epidemic turning over.</p>
+  <div class="key red">In the NFIDD session, onsets cut off at day 70 appear to be <i>flattening and declining</i>, while the final dataset shows they were still <b>rising</b>. The apparent downturn was an artefact of reporting delay — pure <b>right truncation</b>.</div>
+  <p>Two quantities are in play, and keeping them straight is the whole game:</p>
+  <ul>
+    <li><b style="color:var(--true)">N(t)</b> — the <i>eventual</i> count for reference date <i>t</i> (when the event happened), once every report is in. This is what we want.</li>
+    <li><b style="color:var(--ob)">observed(t)</b> — what we have seen <i>so far</i>, as of "now" <i>T</i>. For recent <i>t</i> this is much smaller than N(t).</li>
+  </ul>
+  <p><b>Nowcasting</b> is the act of estimating <span style="color:var(--true)">N(t)</span> from <span style="color:var(--ob)">observed(t)</span> plus knowledge of the reporting-delay distribution.</p>
+</section>
+
+<!-- ============ DIP & NOWCAST ============ -->
+<section id="dip">
+  <h2>The right-edge dip and the nowcast</h2>
+  <p class="tagline">Watch the observed curve peel away from the truth, then put it back</p>
+  <p>Below is a synthetic outbreak. The <b style="color:var(--true)">faint slate curve</b> is the eventual count <span style="color:var(--true)">N(t)</span> — the thing we would see if we waited forever. The <b style="color:var(--ob)">solid orange curve</b> is what we have actually observed by "now" <span style="color:var(--now)">T</span> (the red line): each recent day is scaled down by the fraction of its reports that have had time to arrive, so the orange curve <b>dips sharply</b> as it approaches <span style="color:var(--now)">T</span>. The <b style="color:var(--fc)">blue curve</b> is the simple <b>nowcast</b> — it divides the observed count back up by that same fraction, recovering the truth, with a <b style="color:#93c5fd">band</b> that flares out for the last few days where we are extrapolating from almost nothing.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--true);opacity:.7"></i> eventual count N(t)</span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> observed so far</span>
+    <span><i class="swatch" style="border-color:var(--fc);border-top-width:4px"></i> nowcast</span>
+    <span><i class="swbox" style="background:#bfdbfe;opacity:.65"></i> nowcast uncertainty</span>
+    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T)</span>
+  </div>
+
+  <div class="fig">
+    <svg id="dipSvg" viewBox="0 0 720 380" role="img" aria-label="A true epidemic curve, the observed-so-far curve dipping toward now, and the nowcast that recovers the truth with a widening uncertainty band."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Reporting delay mean (days): <span id="dipMval">4.0</span></span>
+      <input id="dipM" type="range" min="1.5" max="8" step="0.1" value="4.0"></label>
+    <label><span class="vlabel">Now — current day T: <span id="dipTval">46</span></span>
+      <input id="dipT" type="range" min="24" max="60" step="1" value="46"></label>
+    <label><span class="vlabel">Epidemic peak day: <span id="dipPval">40</span></span>
+      <input id="dipP" type="range" min="28" max="56" step="1" value="40"></label>
+    <label><span class="vlabel">Epidemic width (growth): <span id="dipWval">9</span></span>
+      <input id="dipW" type="range" min="5" max="16" step="0.5" value="9"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">most recent day (T) reported: <b id="dipPct">—</b></span>
+    <span class="chip">scale-up multiplier 1/F: <b id="dipMult">—</b></span>
+    <span class="chip" id="dipHint" style="background:#ecfeff"></span>
+  </div>
+
+  <div class="key blue">Slide <b>T</b> backwards and forwards: the orange dip and the blue band both live in the <b>last few days only</b>. Older dates are fully reported (multiplier ≈ 1), so the nowcast leaves them untouched. Increase the <b>delay mean</b> and the truncation eats further back into the series — a long delay is what makes nowcasting hard.</div>
+</section>
+
+<!-- ============ MATHS ============ -->
+<section id="maths">
+  <h2>The simplest nowcast, in one line</h2>
+  <p class="tagline">Divide by the fraction you expect to have seen</p>
+  <p>Let <i>F</i> be the cumulative distribution function (CDF) of the reporting delay: <i>F(d)</i> is the probability that a report arrives within <i>d</i> days of the event. For a reference date <i>t</i> observed at "now" <i>T</i>, the available time for reports is <i>T − t</i>, so the fraction we <b>expect</b> to have seen is:</p>
+
+  <div class="formula">p(t) = F(T &minus; t)
+    <span style="color:#64748b">&nbsp;&nbsp;// fraction of date t's reports in by now</span></div>
+
+  <p>If the eventual count is <i>N(t)</i>, then on average we observe a thinned-down version of it, and a simple nowcast just inverts that thinning:</p>
+
+  <div class="formula">observed(t) &asymp; N(t) &middot; F(T &minus; t)
+    &nbsp;&nbsp;&rarr;&nbsp;&nbsp;
+    nowcast(t) =
+    <span class="frac"><span>observed(t)</span><span>F(T &minus; t)</span></span></div>
+
+  <p>This is the <b>multiplicative</b> or <b>scaling</b> nowcast. The delay here is a discretised <b>lognormal</b> (the NFIDD session uses <code>plnorm</code> with meanlog 1, sdlog 0.5). From a target mean <i>m</i> and spread <i>s</i> the lognormal parameters are recovered as &sigma;&sup2; = ln(1 + s&sup2;/m&sup2;) and &mu; = ln <i>m</i> &minus; &sigma;&sup2;/2, giving <i>F(x) =</i> &Phi;((ln <i>x</i> &minus; &mu;) / &sigma;).</p>
+
+  <div class="key orange"><b>Why the uncertainty explodes at the edge.</b> When <i>F(T − t)</i> is small — say we have seen 10% of a recent day's reports — we are multiplying a tiny, noisy observed count by a large number (here, &times;10). A binomial-completion argument gives a band that scales like nowcast(t)&middot;&radic;((1&minus;p)/p) per &radic;(observed): as <i>p</i> &rarr; 0 this blows up, which is exactly the flared band in the figure above. Extrapolating from few reports is intrinsically uncertain.</p></div>
+
+  <p>This one-liner is genuinely useful as a <b>baseline</b>, but it embeds strong assumptions — that the delay distribution is known and stable, and that recent dates behave like older ones. The NFIDD course builds up from here to full Bayesian models (a simple model, then a geometric-random-walk model) that share statistical strength across dates and propagate uncertainty properly. The scaling nowcast is the intuition those models formalise.</p>
+</section>
+
+<!-- ============ REPORTING TRIANGLE ============ -->
+<section id="triangle">
+  <h2>The reporting triangle</h2>
+  <p class="tagline">Why it's a <i>triangle</i>, and why recent rows are nearly empty</p>
+  <p>Lay the data out as a grid. Each <b>row</b> is a reference date <i>t</i> (when the event happened); each <b>column</b> is a reporting <b>delay</b> <i>d</i> = 0, 1, 2, … days. Cell <i>(t, d)</i> holds the events from date <i>t</i> that were reported <i>d</i> days later. At "now" <i>T</i> we can only have observed cells with <i>t + d &le; T</i> — a report can't arrive before the present. That constraint carves the grid into two pieces:</p>
+  <ul>
+    <li>An <b style="color:var(--tri)">upper-left triangle</b> of <b>observed</b> cells (teal). Old dates at the top are fully filled; their row is complete.</li>
+    <li>A <b style="color:#94a3b8">lower-right triangle</b> of <b>not-yet-reported</b> cells (grey hatch). The most recent date, at the bottom, has only its delay-0 cell observed — almost the whole row is still in the future.</li>
+  </ul>
+  <p>The <b>row sum over the teal cells</b> is <span style="color:var(--ob)">observed(t)</span>; the <b>full row sum</b> (teal + grey) is <span style="color:var(--true)">N(t)</span>. Nowcasting is the job of filling in the grey triangle. Press <b>play</b> to advance "now" and watch the triangle fill diagonally as time passes — every report that lands moves one grey cell to teal.</p>
+
+  <div class="legend">
+    <span><i class="swbox" style="background:#0891b2"></i> observed (t + d ≤ T)</span>
+    <span><i class="swbox" style="background:#e2e8f0;border:1px solid #cbd5e1"></i> not yet reported</span>
+    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T) diagonal</span>
+  </div>
+
+  <div class="fig">
+    <svg id="triSvg" viewBox="0 0 720 430" role="img" aria-label="A reporting triangle: rows are reference dates, columns are reporting delays. The upper-left observed cells are teal; the lower-right not-yet-reported cells are a grey hatch."></svg>
+  </div>
+  <div class="presets">
+    <button id="triPlay">▶ play</button>
+    <button id="triStep">step ▸</button>
+    <button id="triReset">reset</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:6px 12px">now T = day <b id="triNow">—</b></span>
+    <span class="chip" id="triFrac" style="background:#ecfeff;border:1px solid var(--line);border-radius:8px;padding:6px 12px"></span>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Reporting delay mean (days): <span id="triMval">4.0</span></span>
+      <input id="triM" type="range" min="1.5" max="8" step="0.1" value="4.0"></label>
+    <label><span class="vlabel">Max delay shown D<sub>max</sub>: <span id="triDval">12</span></span>
+      <input id="triD" type="range" min="7" max="14" step="1" value="12"></label>
+  </div>
+  <p class="figcap">Cell shading depth reflects the expected number of reports at that delay (darker = more reports), so you can see the bulk of each row's mass cluster near small delays around the delay mean.</p>
+  <div class="key">The name is literal: the boundary <i>t + d = T</i> is a diagonal, and "observed" is everything above it — a triangle. The reason recent dates are unreliable is geometric: their rows simply have <b>fewer cells inside the triangle</b>, so less of their total has been seen.</div>
+</section>
+
+<!-- ============ CAVEATS ============ -->
+<section id="caveats">
+  <h2>Things worth remembering</h2>
+  <ul>
+    <li><b>The dip is not a signal.</b> A downturn in the last few days of a real-time curve is, by default, a reporting artefact until a nowcast says otherwise. Never call a peak off the right edge of raw data.</li>
+    <li><b>Reporting by date of report avoids truncation but answers a different question.</b> Counting by <i>when reports arrived</i> isn't subject to revision, but it doesn't tell you how many people actually fell ill on a given day — and it inherits weekend and holiday reporting patterns.</li>
+    <li><b>Uncertainty must grow toward the present.</b> Any honest nowcast widens at the right edge. A nowcast that looks confident about yesterday is hiding the fact that it has barely any data for yesterday.</li>
+    <li><b>Get the delay wrong and the nowcast is wrong.</b> The scaling factor <i>1/F(T − t)</i> is only as good as <i>F</i>. In practice the delay is estimated from data (and can drift over time), which is why the course separates "nowcasting with a known delay" from the harder real problem.</li>
+    <li><b>The reporting triangle is the data structure behind every method.</b> Simple scaling, the renewal-based Bayesian models in the course, and dedicated tools like <code>baselinenowcast</code> all reduce to filling in that lower-right triangle.</li>
+  </ul>
+  <div class="key blue"><b>The big picture.</b> Right truncation makes the present look better (lower) than it is. Nowcasting reverses the thinning imposed by reporting delay — observed = N&middot;F, so nowcast = observed / F — and the reporting triangle shows exactly which counts need that correction and how much data each one has to spare.</div>
+  <footer>Built as a teaching aid for the NFIDD nowcasting session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library (shared with the other NFIDD explainers) ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- nowcasting helpers ---------- */
+// discretised lognormal reporting-delay CDF, parameterised by target mean m and spread s.
+function delayParams(m,s){
+  const sigma2=Math.log(1+(s*s)/(m*m));
+  const mu=Math.log(m)-sigma2/2;
+  return {mu, sd:Math.sqrt(sigma2)};
+}
+// F(x) = P(delay <= x days). Defined to be 0 for x<=0, climbing to ~1.
+function delayCdf(x,m,s){
+  if(x<=0) return 0;
+  const {mu,sd}=delayParams(m,s);
+  return normCdf((Math.log(x)-mu)/sd);
+}
+// eventual epidemic curve N(t): a smooth Gaussian-ish bump (peak height fixed, controllable peak/width)
+function trueCurve(t,peak,width,height){
+  return height*Math.exp(-0.5*((t-peak)/width)**2);
+}
+
+/* ================= FIGURE 1 : the right-edge dip and the nowcast ================= */
+(function(){
+  const svg=document.getElementById("dipSvg");
+  const W=720,H=380, m={l:54,r:20,t:24,b:46};
+  const t0=20, t1=64, HEIGHT=100;
+  const sx=v=>m.l+(v-t0)/(t1-t0)*(W-m.l-m.r);
+  const ids={M:document.getElementById("dipM"),T:document.getElementById("dipT"),
+             P:document.getElementById("dipP"),Wd:document.getElementById("dipW")};
+
+  function draw(){
+    const dm=+ids.M.value, T=+ids.T.value, peak=+ids.P.value, width=+ids.Wd.value, s=dm*0.6;
+    document.getElementById("dipMval").textContent=dm.toFixed(1);
+    document.getElementById("dipTval").textContent=T;
+    document.getElementById("dipPval").textContent=peak;
+    document.getElementById("dipWval").textContent=width;
+    clear(svg);
+
+    // y-scale
+    const ymax=HEIGHT*1.15;
+    const sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+
+    // gridlines + axes
+    for(let g=0; g<=HEIGHT; g+=25){
+      svg.appendChild(el("line",{x1:m.l,y1:sy(g),x2:W-m.r,y2:sy(g),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(g)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=g;
+    }
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:m.t,stroke:"#cbd5e1"}));
+    for(let v=t0; v<=t1; v+=4) svg.appendChild(el("text",{x:sx(v),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="reference date t (day of event)";
+    const yl=el("text",{x:15,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 15 ${(m.t+H-m.b)/2})`}); yl.textContent="count"; svg.appendChild(yl);
+
+    // ---- TRUE eventual curve N(t), full range, faint ----
+    let pTrue="";
+    for(let t=t0;t<=t1;t+=0.5){ pTrue+=(pTrue?" L ":"M ")+sx(t)+" "+sy(trueCurve(t,peak,width,HEIGHT)); }
+    svg.appendChild(el("path",{d:pTrue,fill:"none",stroke:"#64748b","stroke-width":2,opacity:.45,"stroke-dasharray":"1 0"}));
+
+    // ---- NOWCAST uncertainty band (only up to T), built as a filled polygon ----
+    const tsRecent=[]; for(let t=t0;t<=T;t++) tsRecent.push(t);
+    const upper=[], lower=[], nowcastPts=[], observedPts=[];
+    tsRecent.forEach(t=>{
+      const N=trueCurve(t,peak,width,HEIGHT);
+      const p=Math.min(delayCdf(T-t+0.5,dm,s),1);          // fraction reported by now (half-day offset for delay 0)
+      const obs=N*p;                                        // observed-so-far (expected)
+      const nc=obs/Math.max(p,1e-3);                        // simple scaling nowcast (recovers N)
+      // binomial-style completion uncertainty: widen sharply as p -> 0
+      const half=nc*Math.sqrt((1-Math.min(p,0.999))/Math.max(p,1e-3))/Math.sqrt(Math.max(obs,1));
+      const halfScaled=half*6;                              // visual scale
+      observedPts.push([t,obs]);
+      nowcastPts.push([t,nc]);
+      upper.push([t,nc+halfScaled]);
+      lower.push([t,Math.max(nc-halfScaled,0)]);
+    });
+    // band polygon
+    let band="";
+    upper.forEach((pt,i)=>{ band+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    for(let i=lower.length-1;i>=0;i--){ band+=" L "+sx(lower[i][0])+" "+sy(lower[i][1]); }
+    band+=" Z";
+    svg.appendChild(el("path",{d:band,fill:"#bfdbfe",opacity:.6,stroke:"none"}));
+
+    // ---- NOWCAST line (blue) ----
+    let pNc="";
+    nowcastPts.forEach((pt,i)=>{ pNc+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    svg.appendChild(el("path",{d:pNc,fill:"none",stroke:"#2563eb","stroke-width":3}));
+
+    // ---- OBSERVED-so-far line (orange, dipping) ----
+    let pObs="";
+    observedPts.forEach((pt,i)=>{ pObs+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    svg.appendChild(el("path",{d:pObs,fill:"none",stroke:"#ea580c","stroke-width":2.6}));
+
+    // ---- "now" T vertical line (red, dashed) ----
+    svg.appendChild(el("line",{x1:sx(T),y1:m.t-2,x2:sx(T),y2:sy(0),stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"6 4"}));
+    svg.appendChild(el("text",{x:sx(T),y:m.t+8,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#dc2626"})).textContent="now";
+
+    // ---- readouts for the most recent day ----
+    const pT=Math.min(delayCdf(0.5,dm,s),1);     // delay 0 for t=T
+    document.getElementById("dipPct").textContent=(pT*100).toFixed(0)+"%";
+    document.getElementById("dipMult").textContent="×"+(1/Math.max(pT,1e-3)).toFixed(1);
+    const hint=document.getElementById("dipHint");
+    if(pT<0.2) hint.textContent="today: almost nothing in yet → huge correction, wide band";
+    else if(pT<0.5) hint.textContent="today: less than half reported → big scale-up";
+    else hint.textContent="today: most reports already in → modest correction";
+  }
+  Object.values(ids).forEach(i=>i.addEventListener("input",draw)); draw();
+})();
+
+/* ================= FIGURE 2 : the reporting triangle ================= */
+(function(){
+  const svg=document.getElementById("triSvg");
+  const W=720,H=430, m={l:96,r:18,t:46,b:40};
+  const nRows=14;                                  // recent reference dates shown
+  const mInp=document.getElementById("triM"), dInp=document.getElementById("triD");
+  let now=null, timer=null;
+
+  // expected reports at delay d for a row (used only for shading depth): pmf = F(d+1)-F(d)
+  function pmf(d,dm,s){ return Math.max(delayCdf(d+1,dm,s)-delayCdf(d,dm,s),0); }
+
+  function reset(){
+    stop();
+    now=Math.floor(nRows/2);   // start halfway so the triangle is partly filled
+    draw();
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("triPlay").textContent="▶ play"; } }
+  function stepFwd(){ now=now+1; if(now>nRows+ (+dInp.value)) now=0; draw(); }
+
+  function draw(){
+    const dm=+mInp.value, s=dm*0.6, Dmax=+dInp.value;
+    document.getElementById("triMval").textContent=dm.toFixed(1);
+    document.getElementById("triDval").textContent=Dmax;
+    clear(svg);
+
+    const nCols=Dmax+1;
+    const gw=(W-m.l-m.r)/nCols, gh=(H-m.t-m.b)/nRows;
+
+    // reference dates: rows top (oldest) to bottom (most recent = now)
+    // assign each row a calendar day: row r (0=top) corresponds to day (now - (nRows-1-r))
+    // header: delay columns
+    svg.appendChild(el("text",{x:m.l+(W-m.l-m.r)/2,y:18,"text-anchor":"middle","font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="reporting delay d  (days after the event)";
+    for(let d=0; d<nCols; d++){
+      svg.appendChild(el("text",{x:m.l+d*gw+gw/2,y:m.t-8,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=d;
+    }
+    // y-axis label
+    const yl=el("text",{x:18,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":13,"font-weight":700,fill:"#1f2933",transform:`rotate(-90 18 ${(m.t+H-m.b)/2})`}); yl.textContent="reference date t"; svg.appendChild(yl);
+
+    // peak shading reference
+    let maxPmf=0; for(let d=0; d<nCols; d++){ const p=pmf(d,dm,s); if(p>maxPmf)maxPmf=p; }
+    maxPmf=maxPmf||1;
+
+    for(let r=0;r<nRows;r++){
+      const t = now - (nRows-1-r);                 // calendar day of this row
+      const ry=m.t+r*gh;
+      // row label
+      svg.appendChild(el("text",{x:m.l-10,y:ry+gh/2+4,"text-anchor":"end","font-size":10.5,fill:"#374151"})).textContent="day "+t;
+      for(let d=0; d<nCols; d++){
+        const cx=m.l+d*gw, cyr=ry;
+        const observed = (t + d) <= now;           // report has had time to arrive
+        const depth = pmf(d,dm,s)/maxPmf;          // 0..1 how much mass this cell carries
+        if(observed){
+          // teal, shaded by expected count
+          const op=0.18+0.72*depth;
+          svg.appendChild(el("rect",{x:cx+0.7,y:cyr+0.7,width:gw-1.4,height:gh-1.4,fill:"#0891b2",opacity:op,rx:2}));
+        } else {
+          // not yet reported: faint grey with hatch
+          svg.appendChild(el("rect",{x:cx+0.7,y:cyr+0.7,width:gw-1.4,height:gh-1.4,fill:"#e2e8f0",opacity:.7,rx:2,stroke:"#cbd5e1","stroke-width":0.6}));
+          // hatch line
+          svg.appendChild(el("line",{x1:cx+1.5,y1:cyr+gh-1.5,x2:cx+gw-1.5,y2:cyr+1.5,stroke:"#94a3b8","stroke-width":0.8,opacity:.7}));
+        }
+      }
+    }
+
+    // "now" diagonal: boundary t + d = now, i.e. d = now - t. For row r, the observed
+    // cells are d <= now - t; draw a stepped red dashed line along that boundary.
+    let diag="";
+    for(let r=0;r<nRows;r++){
+      const t = now - (nRows-1-r);
+      const boundary = now - t;                    // last observed delay index (cells 0..boundary observed)
+      const dEdge = Math.min(boundary+1, nCols);   // right edge of observed cells in column units
+      if(dEdge<=0) continue;
+      const xEdge=m.l+dEdge*gw, yTop=m.t+r*gh, yBot=m.t+(r+1)*gh;
+      diag+=(diag?" L ":"M ")+xEdge+" "+yTop+" L "+xEdge+" "+yBot;
+    }
+    if(diag) svg.appendChild(el("path",{d:diag,fill:"none",stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"5 4"}));
+
+    // readouts: fraction of the most recent row observed (teal cells / total expected mass)
+    document.getElementById("triNow").textContent=now;
+    const tRecent=now;                              // bottom row's reference date == now
+    let seen=0, tot=0;
+    for(let d=0; d<nCols; d++){ const p=pmf(d,dm,s); tot+=p; if((tRecent+d)<=now) seen+=p; }
+    const frac = tot>0 ? seen/tot : 0;
+    document.getElementById("triFrac").textContent="most recent row: "+(frac*100).toFixed(0)+"% of reports observed";
+  }
+
+  document.getElementById("triPlay").addEventListener("click",function(){
+    if(timer){ stop(); }
+    else { this.textContent="❚❚ pause"; timer=setInterval(()=>{ stepFwd(); },650); }
+  });
+  document.getElementById("triStep").addEventListener("click",()=>{ stop(); stepFwd(); });
+  document.getElementById("triReset").addEventListener("click",reset);
+  mInp.addEventListener("input",draw); dInp.addEventListener("input",draw);
+  reset();
+})();
+</script>
+</body>
+</html>

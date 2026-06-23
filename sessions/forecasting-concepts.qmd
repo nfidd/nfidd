@@ -14,6 +14,11 @@ We will see how we can visualise such forecasts, and visually compare them to wh
 
 - [Introduction to forecasting](slides/introduction-to-forecasting)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**forecasting concepts** interactive](../interactive/forecasting-concepts.html){target="_blank"} — extend a model into the future and watch the uncertainty fan grow with the horizon. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is to introduce the concept of forecasting and forecast visualisation using a simple model.

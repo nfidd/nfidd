@@ -17,6 +17,11 @@ We can again handle these by including them as uncertain parameters in the model
 
 [Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**biases in delay distributions** interactive](../interactive/biases-in-delay-distributions.html){target="_blank"} — see how right truncation biases observed delays short in real time. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 In this session, we'll introduce censoring and right truncation as typical properties of the process that generates infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.

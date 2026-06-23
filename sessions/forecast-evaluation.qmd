@@ -14,6 +14,11 @@ In this session you will get to know several ways of assessing different aspects
 
 - [Forecast evaluation](slides/forecast-evaluation)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**forecast evaluation** interactive](../interactive/forecast-evaluation.html){target="_blank"} — CRPS, the PIT histogram, DSS and WIS, with component breakdowns. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is to introduce the concept of forecasting, using a simple model, and forecasting evaluation.

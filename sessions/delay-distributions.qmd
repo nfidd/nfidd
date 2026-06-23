@@ -18,6 +18,11 @@ However, the length of time between any of these events might be highly variable
 
 - [Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**delay distributions** interactive](../interactive/delay-distributions.html){target="_blank"} — discretise a continuous delay into a daily PMF and see the effect of censoring. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.

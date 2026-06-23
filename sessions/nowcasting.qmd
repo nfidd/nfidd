@@ -16,6 +16,11 @@ The aim of nowcasting is to predict what an epidemiological time series will loo
 
 - [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**nowcasting** interactive](../interactive/nowcasting.html){target="_blank"} — the right-edge dip, the reporting triangle, and the nowcast correction. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.

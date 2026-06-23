@@ -15,6 +15,11 @@ Correctly capturing this transmission process is crucial to modelling infections
 
 -   [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**renewal equation** interactive](../interactive/renewal-equation.html){target="_blank"} — drive an epidemic with R(t) and a generation interval, and watch it turn when R crosses 1. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.

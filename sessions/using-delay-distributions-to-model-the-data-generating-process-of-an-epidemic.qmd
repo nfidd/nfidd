@@ -14,6 +14,11 @@ This means working with aggregated count data. This creates some new issues in c
 
 - [Delay distributions at the population level](slides/convolutions)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**convolutions** interactive](../interactive/convolutions.html){target="_blank"} — slide, multiply and sum latent infections into observed onsets. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 In this session, we'll focus on the delay from infection to symptom onset at a population level.

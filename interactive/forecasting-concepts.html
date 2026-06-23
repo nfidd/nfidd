@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>What is a forecast? — extrapolation and the growing fan of uncertainty</title>
+<style>
+  :root{
+    --fc:#2563eb;     /* forecast / blue */
+    --ob:#1f2933;     /* observed / slate-black */
+    --thr:#ea580c;    /* threshold / orange */
+    --now:#64748b;    /* "now" divider / slate */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#eef2ff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:760px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--fc); font-weight:600; font-size:14px;
+    border:1px solid #c7d2fe; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#eef2ff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:170px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:180px; accent-color:var(--fc)}
+  .toggles{display:flex; flex-wrap:wrap; gap:18px; align-items:center}
+  .toggles .grp{display:inline-flex; border:1px solid #c7d2fe; border-radius:8px; overflow:hidden}
+  .toggles .grp button{
+    font:600 13px inherit; border:0; background:#fff; color:var(--fc);
+    padding:7px 13px; cursor:pointer;
+  }
+  .toggles .grp button.on{background:var(--fc); color:#fff}
+  .toggles .grp button + button{border-left:1px solid #c7d2fe}
+  .readout{
+    display:inline-flex; gap:18px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{
+    font:600 13px inherit; border:1px solid #c7d2fe; background:#fff; color:var(--fc);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#eef2ff}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .dot{width:11px; height:11px; border-radius:50%; display:inline-block}
+  .band{width:22px; height:13px; border-radius:3px; display:inline-block}
+  .key{background:#eff6ff; border-left:4px solid var(--fc); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.orange{background:#fff7ed; border-color:var(--thr)}
+  .key.slate{background:#f8fafc; border-color:var(--now)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.now{background:#dbeafe; color:#1e40af}
+  .pill.fut{background:#ffedd5; color:#9a3412}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--fc)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/forecasting-concepts.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Forecasting concepts session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>What is a forecast?</h1>
+  <p>A forecast extends the latent epidemic process <b>into the future</b> — beyond where the data ends. A <i>good</i> forecast is not a single line but a <b>distribution</b>, and its hallmark is uncertainty that <b>grows with the horizon</b>: the characteristic <b style="color:var(--fc)">fan</b>. This page builds that fan from a random walk and shows why the interval, not the central line, is the product.</p>
+  <nav class="toc">
+    <a href="#intro">The continuum</a>
+    <a href="#maths">The maths</a>
+    <a href="#fan">The forecast fan</a>
+    <a href="#interval">Why the interval matters</a>
+    <a href="#takeaways">Takeaways</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>Forecasting sits on a continuum</h2>
+  <p class="tagline">Past, present, future — the same latent process, asked about at different times</p>
+  <p>Estimating an epidemic in real time is really one question — <i>what is the latent infection process doing?</i> — asked at three points in time. The methods you meet in this course are three slices of that single continuum:</p>
+  <table>
+    <tr><th>Task</th><th>Asks about…</th><th>Relative to the data</th></tr>
+    <tr><td class="metric">R(t) estimation</td><td>the <b>mechanism</b> — how fast transmission is changing</td><td>within the data</td></tr>
+    <tr><td class="metric">Nowcasting</td><td>the <b>present</b> — what today's count will become once delays resolve</td><td>at the edge of the data</td></tr>
+    <tr><td class="metric">Forecasting</td><td>the <b>future</b> — what happens next</td><td><b>beyond</b> the data</td></tr>
+  </table>
+  <p>In the session, the forecasting model <i>is</i> the renewal-equation model used for R(t) and nowcasting — simply <b>extended into the future</b>. You drop the likelihood past "now", let the random walk on R(t) keep wandering, and read off the simulated onsets. Nothing new is invented; the model is just run forward.</p>
+  <div class="key">A forecast is a <b>probabilistic statement about the future</b>. It must come with uncertainty, and — because we are extrapolating beyond anything the data pins down — that uncertainty has to <b>grow the further ahead we look</b>. A forecast that stays equally confident at 1 day and 28 days ahead is almost certainly wrong about something.</div>
+  <p>The same paradigm as everywhere else in the course applies: <b>maximise sharpness subject to calibration</b> (Gneiting et al., 2007). Be as narrow as you can get away with, but never narrower than honesty allows.</p>
+</section>
+
+<!-- ============ MATHS ============ -->
+<section id="maths">
+  <h2>A forecast in one equation: the random walk</h2>
+  <p class="tagline">Why the fan opens like the square root of the horizon</p>
+  <p>Epidemic incidence grows and shrinks <i>multiplicatively</i>, so we model the <b>log</b> of incidence. The simplest honest forecast is a <b>random walk</b>: each day, log-incidence takes the previous value plus a small drift and a random shock. Starting from the last observed value <i>y</i><sub>now</sub> (on the log scale), the value <i>h</i> steps ahead is a sum of <i>h</i> independent shocks — which is Normal:</p>
+
+  <div class="formula">log y<sub>now+h</sub> ~ Normal( &mu;<sub>h</sub>, &sigma;<sub>h</sub> )
+    &nbsp;&nbsp; with &nbsp; &mu;<sub>h</sub> = y<sub>now</sub> + drift&middot;h &nbsp;&nbsp; &sigma;<sub>h</sub> = &sigma; &radic;h</div>
+
+  <p>Two ingredients drive everything:</p>
+  <ul>
+    <li>The <b>mean</b> &mu;<sub>h</sub> walks in a straight line. With <b>drift = 0</b> (a pure random walk) the central forecast is <b>flat</b> — "tomorrow looks like today". With a non-zero drift it <b>continues the recent slope</b>.</li>
+    <li>The <b>spread</b> &sigma;<sub>h</sub> = &sigma;&radic;<span style="text-decoration:overline">&nbsp;h&nbsp;</span> grows like the <b>square root of the horizon</b>. Variances of independent shocks add, so after <i>h</i> days the variance is <i>h</i>&sigma;&sup2; and the standard deviation is &sigma;&radic;h. This is the engine of the fan.</li>
+  </ul>
+
+  <p>To turn this into <b>prediction intervals</b> we map quantiles back to the natural scale. The <i>q</i>-quantile of a Normal sits at <code>mean + sd&middot;z<sub>q</sub></code> where <code>z<sub>q</sub> = normInv(q)</code>; exponentiating gives incidence:</p>
+
+  <div class="formula">median<sub>h</sub> = exp( &mu;<sub>h</sub> ) &nbsp;&nbsp;&nbsp;
+    Q<sub>h</sub>(q) = exp( &mu;<sub>h</sub> + &sigma;&radic;h &middot; z<sub>q</sub> ) , &nbsp; z<sub>q</sub> = normInv(q)</div>
+
+  <p>A 90% interval uses <i>q</i> = 0.05 and 0.95; a 50% interval uses 0.25 and 0.75. Because the spread enters <i>inside</i> the exponential, the interval is <b>symmetric in log space but skewed on the natural scale</b> — the upper edge runs away faster than the lower edge falls. That asymmetry is exactly what makes epidemic fans look the way they do.</p>
+  <div class="key slate">In short: <b>random walk + sqrt-of-horizon spread + exponentiate</b> is a complete, minimal probabilistic forecast. The next figure draws it.</div>
+</section>
+
+<!-- ============ FAN ============ -->
+<section id="fan">
+  <h2>The forecast fan <span class="pill now">observed</span> <span class="pill fut">forecast</span></h2>
+  <p class="tagline">The headline figure: extrapolate past "now", and watch the uncertainty open</p>
+  <p>On the left, a fixed pseudo-historical trajectory of daily onsets up to <b>"now"</b> (it does not reshuffle when you move a slider). On the right, the forecast: a <b style="color:var(--fc)">median line</b> wrapped in <b>nested prediction intervals</b> — a darker 50% band inside a lighter 90% band — that <b>widen with the horizon</b>. Move the controls and watch the fan breathe.</p>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--ob)"></i> observed onsets (fixed)</span>
+    <span><i class="swatch" style="border-color:var(--fc);border-top-width:3px"></i> median forecast</span>
+    <span><i class="band" style="background:#60a5fa"></i> 50% interval</span>
+    <span><i class="band" style="background:#bfdbfe"></i> 90% interval</span>
+    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> "now"</span>
+  </div>
+
+  <div class="fig">
+    <svg id="fanSvg" viewBox="0 0 720 380" role="img" aria-label="Observed epidemic trajectory up to now, then a forecast median with 50% and 90% prediction intervals widening with horizon."></svg>
+  </div>
+
+  <div class="controls">
+    <div class="toggles" style="width:100%">
+      <span class="vlabel">Forecast type:</span>
+      <span class="grp" id="typeGrp">
+        <button data-type="rw" class="on">random walk (flat median)</button>
+        <button data-type="drift">trend / drift</button>
+      </span>
+      <span class="vlabel">Scale:</span>
+      <span class="grp" id="scaleGrp">
+        <button data-scale="nat" class="on">natural</button>
+        <button data-scale="log">log</button>
+      </span>
+    </div>
+    <label><span class="vlabel">Recent trend (drift/day): <span id="fanDriftVal">+0.00</span></span>
+      <input id="fanDrift" type="range" min="-0.08" max="0.08" step="0.005" value="0"></label>
+    <label><span class="vlabel">Process volatility &sigma;: <span id="fanSigVal">0.10</span></span>
+      <input id="fanSig" type="range" min="0.02" max="0.25" step="0.01" value="0.10"></label>
+    <label><span class="vlabel">Horizon (days): <span id="fanHzVal">28</span></span>
+      <input id="fanHz" type="range" min="3" max="40" step="1" value="28"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">at h = <b id="fanHzEcho">28</b>: median = <b id="fanMed">—</b></span>
+    <span class="chip" style="border-left:4px solid #bfdbfe;padding-left:10px">90% interval = <b id="fanPI">—</b></span>
+    <span class="chip" id="fanWiden" style="background:#eff6ff">—</span>
+  </div>
+  <p class="figcap">The drift slider sets the median's slope (the <b>random walk</b> toggle forces drift = 0 → a flat median). The volatility &sigma; sets how fast the fan opens. On the <b>log scale</b> the 90% edges are straight lines that splay symmetrically; switch to <b>natural scale</b> and the same forecast becomes exponential growth with an <b>asymmetric</b> fan — the upper edge towers over the lower.</p>
+
+  <div class="key">Notice the readout's last chip: the 90% interval at the chosen horizon is many times wider than it is at <i>h</i> = 1. That ratio grows like &radic;h <i>in log space</i> and even faster on the natural scale — the visual signature of an honest forecast. A model whose fan barely opens is claiming knowledge it does not have.</div>
+</section>
+
+<!-- ============ INTERVAL ============ -->
+<section id="interval">
+  <h2>Why the interval — not the line — is the product</h2>
+  <p class="tagline">Same central forecast, very different risks</p>
+  <p>A point forecast (the median line alone) can be dangerously incomplete. Here two forecasts share the <b>exact same median trajectory</b> but differ in volatility &sigma;. They tell the same story about the "most likely" path — yet imply <b>very different probabilities</b> of crossing a decision threshold (say, a hospital-capacity line). The point forecast hides this entirely; only the interval reveals it.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--fc);border-top-width:3px"></i> shared median</span>
+    <span><i class="band" style="background:#bfdbfe"></i> forecast A — calm (small &sigma;)</span>
+    <span><i class="band" style="background:#fdba74"></i> forecast B — volatile (large &sigma;)</span>
+    <span><i class="swatch" style="border-color:var(--thr)"></i> threshold</span>
+  </div>
+
+  <div class="fig">
+    <svg id="riskSvg" viewBox="0 0 720 360" role="img" aria-label="Two forecasts with the same median but different volatility, and a threshold line. Shaded mass above the threshold shows the differing exceedance probability."></svg>
+  </div>
+
+  <div class="controls">
+    <label><span class="vlabel">Threshold (cases): <span id="riskThrVal">120</span></span>
+      <input id="riskThr" type="range" min="40" max="260" step="5" value="120"></label>
+    <label><span class="vlabel">&sigma; — calm forecast A: <span id="riskSaVal">0.06</span></span>
+      <input id="riskSa" type="range" min="0.02" max="0.18" step="0.01" value="0.06"></label>
+    <label><span class="vlabel">&sigma; — volatile forecast B: <span id="riskSbVal">0.16</span></span>
+      <input id="riskSb" type="range" min="0.02" max="0.28" step="0.01" value="0.16"></label>
+    <label><span class="vlabel">Horizon to assess (days): <span id="riskHzVal">21</span></span>
+      <input id="riskHz" type="range" min="5" max="40" step="1" value="21"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">shared median at h = <b id="riskMedH">—</b></span>
+    <span class="chip" style="border-left:4px solid #2563eb;padding-left:10px">P(exceed | A) = <b id="riskPa">—</b></span>
+    <span class="chip" style="border-left:4px solid #ea580c;padding-left:10px">P(exceed | B) = <b id="riskPb">—</b></span>
+    <span class="chip" id="riskRatio" style="background:#fff7ed">—</span>
+  </div>
+  <p class="figcap">Both forecasts agree on the median path (blue line). The shaded mass <b>above the orange threshold</b> is the probability of exceedance, computed from the log-Normal: P(y<sub>h</sub> &gt; T) = 1 &minus; &Phi;( (log T &minus; &mu;<sub>h</sub>) / (&sigma;&radic;h) ). Slide the threshold near the median and the two probabilities diverge sharply — the volatile forecast carries far more tail risk despite the identical "best guess".</p>
+
+  <div class="key orange">The lesson: <b>report the distribution, score the distribution.</b> Two models with the same point forecast are not equally good — the one whose interval is honest about the risk is the one a decision-maker needs. This is exactly why the next session evaluates the <i>whole</i> predictive distribution (CRPS, WIS, PIT) rather than the central line.</div>
+</section>
+
+<!-- ============ TAKEAWAYS ============ -->
+<section id="takeaways">
+  <h2>Takeaways</h2>
+  <ul>
+    <li>A <b>forecast extrapolates the latent process into the future</b> — the same renewal model used for R(t) and nowcasting, run past the data.</li>
+    <li>It must be <b>probabilistic</b>: a single line is never enough. The deliverable is the <b>prediction interval</b>.</li>
+    <li>Modelling log-incidence as a <b>random walk</b> gives a Normal forecast with mean <code>y<sub>now</sub> + drift&middot;h</code> and spread <code>&sigma;&radic;h</code> — uncertainty grows like the <b>square root of the horizon</b>.</li>
+    <li>Exponentiating produces the <b>fan</b>: straight, symmetric edges on the log scale; exponential and <b>asymmetric</b> on the natural scale.</li>
+    <li><b>Drift = 0</b> gives a flat median that still fans out; non-zero drift continues the recent slope. Both are honest only if &sigma; is honest.</li>
+    <li>The <b>same median can imply very different risks</b>. Decisions hinge on the interval, which is why we score the entire distribution, not the point.</li>
+  </ul>
+  <footer>Built as a teaching aid for the NFIDD forecasting-concepts session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library (shared with the other explainers) ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- fixed pseudo-historical series (generated ONCE, seeded) ---------- */
+/* A small deterministic LCG so the "observed" data never reshuffles on redraw. */
+function makeSeries(){
+  let s = 20240619 >>> 0;                         // fixed seed
+  const rand = ()=>{ s = (1664525*s + 1013904223) >>> 0; return s/4294967296; };
+  const gauss = ()=>{ const u1=rand()||1e-9, u2=rand(); return Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2); };
+  const nObs = 45;                                // days of history
+  const obs = [];
+  let logY = Math.log(6);                          // start ~6 onsets/day
+  for(let t=0;t<nObs;t++){
+    // gentle rising epidemic that bends over near the end (so trend is ambiguous)
+    const trend = 0.075 - 0.0026*t;                // slope decays: growth then plateau
+    logY += trend + 0.11*gauss();
+    const mean = Math.exp(logY);
+    // Poisson-ish observation noise via a couple of jitters, kept positive
+    const y = Math.max(1, Math.round(mean*(1 + 0.10*gauss())));
+    obs.push({t, y, logY});
+  }
+  return obs;
+}
+const SERIES = makeSeries();
+const NOW_T = SERIES.length - 1;
+const Y_NOW = SERIES[NOW_T].y;
+const LOGY_NOW = Math.log(Y_NOW);
+// a "recent slope" estimated from the last week of history (used by the drift toggle's default feel)
+const RECENT_SLOPE = (Math.log(SERIES[NOW_T].y) - Math.log(SERIES[NOW_T-7].y))/7;
+
+/* ================= FIGURE 1 : THE FORECAST FAN ================= */
+(function(){
+  const svg=document.getElementById("fanSvg");
+  const W=720,H=380, m={l:54,r:18,t:22,b:42};
+  let drift=0, sigma=0.10, horizon=28, type="rw", scale="nat";
+
+  const driftInp=document.getElementById("fanDrift");
+  const sigInp=document.getElementById("fanSig");
+  const hzInp=document.getElementById("fanHz");
+
+  // quantile of incidence h steps ahead under the log-random-walk
+  function quant(h,q){ return Math.exp(LOGY_NOW + drift*h + sigma*Math.sqrt(h)*normInv(q)); }
+  function median(h){ return Math.exp(LOGY_NOW + drift*h); }
+
+  function draw(){
+    drift = type==="rw" ? 0 : +driftInp.value;
+    sigma = +sigInp.value; horizon = +hzInp.value;
+    document.getElementById("fanDriftVal").textContent=(drift>=0?"+":"")+drift.toFixed(3);
+    document.getElementById("fanSigVal").textContent=sigma.toFixed(2);
+    document.getElementById("fanHzVal").textContent=horizon;
+    document.getElementById("fanHzEcho").textContent=horizon;
+    driftInp.disabled = (type==="rw");
+    clear(svg);
+
+    const tMin=0, tMax=NOW_T+horizon;
+    const sx=t=>m.l+(t-tMin)/(tMax-tMin)*(W-m.l-m.r);
+
+    // y-range: cover observed + the 90% upper edge at the horizon
+    let yHi = quant(horizon,0.95), yLo = quant(horizon,0.05);
+    SERIES.forEach(d=>{ if(d.y>yHi) yHi=d.y; if(d.y<yLo) yLo=d.y; });
+    yHi*=1.06; yLo=Math.max(0.6, yLo*0.9);
+
+    const logMode = (scale==="log");
+    const tY = v=> logMode ? Math.log(v) : v;
+    const vTop = tY(yHi), vBot = logMode ? tY(yLo) : 0;
+    const sy=v=>{ const tv=tY(Math.max(v, logMode?yLo*0.5:0.0001)); return m.t + (1-(tv-vBot)/(vTop-vBot))*(H-m.t-m.b); };
+
+    // gridlines + y ticks
+    const ticks = logMode
+      ? [1,2,5,10,20,50,100,200,500,1000].filter(v=>v>=yLo*0.8 && v<=yHi)
+      : niceTicks(0,yHi,5);
+    ticks.forEach(v=>{
+      svg.appendChild(el("line",{x1:m.l,y1:sy(v),x2:W-m.r,y2:sy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v;
+    });
+    svg.appendChild(el("line",{x1:m.l,y1:m.t,x2:m.l,y2:H-m.b,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:"#cbd5e1"}));
+    // x ticks (days)
+    for(let t=0;t<=tMax;t+=10){
+      svg.appendChild(el("text",{x:sx(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    }
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`});
+    yl.textContent= logMode ? "onsets (log scale)" : "onsets per day"; svg.appendChild(yl);
+
+    // ---- forecast bands (build polygons sampled over the horizon) ----
+    const Hsteps=64;
+    function band(qLo,qHi,fill,op){
+      let up="", dn=[];
+      for(let i=0;i<=Hsteps;i++){
+        const h=horizon*i/Hsteps; const t=NOW_T+h;
+        up += (i?" L ":"M ")+sx(t)+" "+sy(quant(Math.max(h,0.0001),qHi));
+        dn.push([sx(t), sy(quant(Math.max(h,0.0001),qLo))]);
+      }
+      // close the polygon by walking back along the lower edge
+      for(let i=dn.length-1;i>=0;i--){ up += " L "+dn[i][0]+" "+dn[i][1]; }
+      up += " Z";
+      svg.appendChild(el("path",{d:up,fill,opacity:op}));
+    }
+    band(0.05,0.95,"#bfdbfe",0.95);   // 90% (light)
+    band(0.25,0.75,"#60a5fa",0.85);   // 50% (darker)
+
+    // median forecast line
+    let mp="";
+    for(let i=0;i<=Hsteps;i++){ const h=horizon*i/Hsteps; const t=NOW_T+h; mp+=(i?" L ":"M ")+sx(t)+" "+sy(median(Math.max(h,0.0001))); }
+    svg.appendChild(el("path",{d:mp,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // "now" divider
+    svg.appendChild(el("line",{x1:sx(NOW_T),y1:m.t,x2:sx(NOW_T),y2:H-m.b,stroke:"#64748b","stroke-width":1.6,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("text",{x:sx(NOW_T),y:m.t-4,"text-anchor":"middle","font-size":11,fill:"#475569","font-weight":600})).textContent="now";
+
+    // observed dots (slate/black), drawn last so they sit on top
+    SERIES.forEach(d=>{
+      svg.appendChild(el("circle",{cx:sx(d.t),cy:sy(d.y),r:2.8,fill:"#1f2933"}));
+    });
+    // connect with a faint line for legibility
+    let op="";
+    SERIES.forEach((d,i)=>{ op+=(i?" L ":"M ")+sx(d.t)+" "+sy(d.y); });
+    svg.appendChild(el("path",{d:op,fill:"none",stroke:"#1f2933","stroke-width":1,opacity:.3}));
+
+    // ---- readouts ----
+    const med=median(horizon), lo=quant(horizon,0.05), hi=quant(horizon,0.95);
+    document.getElementById("fanMed").textContent=med.toFixed(0);
+    document.getElementById("fanPI").textContent="["+lo.toFixed(0)+", "+hi.toFixed(0)+"]";
+    const w1=quant(1,0.95)-quant(1,0.05), wh=hi-lo;
+    document.getElementById("fanWiden").textContent="90% width ×"+(wh/Math.max(w1,1e-6)).toFixed(1)+" vs h=1";
+  }
+
+  function niceTicks(lo,hi,n){
+    const step=niceNum((hi-lo)/n); const out=[]; let v=Math.ceil(lo/step)*step;
+    for(; v<=hi+1e-9; v+=step) out.push(Math.round(v));
+    return out;
+  }
+  function niceNum(x){ const e=Math.pow(10,Math.floor(Math.log10(x))); const f=x/e;
+    const nf = f<1.5?1 : f<3?2 : f<7?5 : 10; return nf*e; }
+
+  [driftInp,sigInp,hzInp].forEach(i=>i.addEventListener("input",draw));
+  document.querySelectorAll("#typeGrp button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      type=b.dataset.type;
+      document.querySelectorAll("#typeGrp button").forEach(x=>x.classList.toggle("on",x===b));
+      if(type==="drift" && +driftInp.value===0){ driftInp.value=RECENT_SLOPE.toFixed(3); }
+      draw();
+    });
+  });
+  document.querySelectorAll("#scaleGrp button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      scale=b.dataset.scale;
+      document.querySelectorAll("#scaleGrp button").forEach(x=>x.classList.toggle("on",x===b));
+      draw();
+    });
+  });
+  draw();
+})();
+
+/* ================= FIGURE 2 : WHY THE INTERVAL MATTERS ================= */
+(function(){
+  const svg=document.getElementById("riskSvg");
+  const W=720,H=360, m={l:54,r:18,t:22,b:42};
+  const thrInp=document.getElementById("riskThr");
+  const saInp=document.getElementById("riskSa");
+  const sbInp=document.getElementById("riskSb");
+  const hzInp=document.getElementById("riskHz");
+
+  // shared median uses a fixed positive drift so both forecasts have the SAME central path
+  const driftShared = 0.045;
+  function med(h){ return Math.exp(LOGY_NOW + driftShared*h); }
+  function quant(h,q,sig){ return Math.exp(LOGY_NOW + driftShared*h + sig*Math.sqrt(h)*normInv(q)); }
+  // P(y_h > T) under the log-Normal forecast
+  function pExceed(h,T,sig){ const z=(Math.log(T)-(LOGY_NOW+driftShared*h))/(sig*Math.sqrt(h)); return 1-normCdf(z); }
+
+  function draw(){
+    const T=+thrInp.value, sa=+saInp.value, sb=+sbInp.value, hz=+hzInp.value;
+    document.getElementById("riskThrVal").textContent=T;
+    document.getElementById("riskSaVal").textContent=sa.toFixed(2);
+    document.getElementById("riskSbVal").textContent=sb.toFixed(2);
+    document.getElementById("riskHzVal").textContent=hz;
+    clear(svg);
+
+    const tMin=NOW_T-10, tMax=NOW_T+hz;
+    const sx=t=>m.l+(t-tMin)/(tMax-tMin)*(W-m.l-m.r);
+    // y-range from the wider (B) 95% edge and the threshold
+    let yHi=Math.max(quant(hz,0.97,Math.max(sa,sb)), T*1.15);
+    yHi*=1.05;
+    const sy=v=>m.t+(1-Math.max(v,0)/yHi)*(H-m.t-m.b);
+
+    // gridlines
+    const ticks=[]; { const step=niceNum(yHi/5); for(let v=0; v<=yHi; v+=step) ticks.push(Math.round(v)); }
+    ticks.forEach(v=>{
+      svg.appendChild(el("line",{x1:m.l,y1:sy(v),x2:W-m.r,y2:sy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v;
+    });
+    svg.appendChild(el("line",{x1:m.l,y1:m.t,x2:m.l,y2:H-m.b,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:"#cbd5e1"}));
+    for(let t=tMin;t<=tMax;t+=10){ if(t>=tMin) svg.appendChild(el("text",{x:sx(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t; }
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`});
+    yl.textContent="onsets per day"; svg.appendChild(yl);
+
+    const Hsteps=56;
+    function band(sig,fill,op){
+      let up="", dn=[];
+      for(let i=0;i<=Hsteps;i++){
+        const h=hz*i/Hsteps; const t=NOW_T+h;
+        up += (i?" L ":"M ")+sx(t)+" "+sy(quant(Math.max(h,0.0001),0.95,sig));
+        dn.push([sx(t), sy(quant(Math.max(h,0.0001),0.05,sig))]);
+      }
+      for(let i=dn.length-1;i>=0;i--){ up += " L "+dn[i][0]+" "+dn[i][1]; }
+      up+=" Z"; svg.appendChild(el("path",{d:up,fill,opacity:op}));
+    }
+    // draw the wider (B) band first, then the narrower (A) on top
+    band(sb,"#fdba74",0.55);   // volatile B (orange-ish)
+    band(sa,"#bfdbfe",0.75);   // calm A (blue)
+
+    // shared median line
+    let mp="";
+    for(let i=0;i<=Hsteps;i++){ const h=hz*i/Hsteps; const t=NOW_T+h; mp+=(i?" L ":"M ")+sx(t)+" "+sy(med(Math.max(h,0.0001))); }
+    svg.appendChild(el("path",{d:mp,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // a few recent observed dots for grounding
+    SERIES.filter(d=>d.t>=tMin).forEach(d=>{ svg.appendChild(el("circle",{cx:sx(d.t),cy:sy(d.y),r:2.6,fill:"#1f2933"})); });
+
+    // threshold line
+    svg.appendChild(el("line",{x1:m.l,y1:sy(T),x2:W-m.r,y2:sy(T),stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"6 4"}));
+    svg.appendChild(el("text",{x:W-m.r,y:sy(T)-5,"text-anchor":"end","font-size":11,fill:"#ea580c","font-weight":700})).textContent="threshold = "+T;
+
+    // "now" divider
+    svg.appendChild(el("line",{x1:sx(NOW_T),y1:m.t,x2:sx(NOW_T),y2:H-m.b,stroke:"#64748b","stroke-width":1.4,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("text",{x:sx(NOW_T),y:m.t-4,"text-anchor":"middle","font-size":11,fill:"#475569","font-weight":600})).textContent="now";
+
+    // ---- readouts ----
+    const pa=pExceed(hz,T,sa), pb=pExceed(hz,T,sb);
+    document.getElementById("riskMedH").textContent=med(hz).toFixed(0);
+    document.getElementById("riskPa").textContent=(100*pa).toFixed(1)+"%";
+    document.getElementById("riskPb").textContent=(100*pb).toFixed(1)+"%";
+    const ratio = pa>1e-4 ? (pb/pa) : Infinity;
+    const chip=document.getElementById("riskRatio");
+    chip.textContent = isFinite(ratio)
+      ? "B is ×"+ratio.toFixed(1)+" as likely to exceed"
+      : "A barely risks it; B clearly does";
+  }
+  function niceNum(x){ if(x<=0) return 1; const e=Math.pow(10,Math.floor(Math.log10(x))); const f=x/e;
+    const nf = f<1.5?1 : f<3?2 : f<7?5 : 10; return nf*e; }
+
+  [thrInp,saInp,sbInp,hzInp].forEach(i=>i.addEventListener("input",draw));
+  draw();
+})();
+</script>
+</body>
+</html>

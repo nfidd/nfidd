@@ -34,6 +34,11 @@ Many collaborative forecasting projects and so-called forecasting hubs use quant
 
 - [Introduction to ensembles](slides/introduction-to-ensembles)
 
+::: {.callout-tip}
+## Interactive explainer
+Build intuition for this session with the [**forecast ensembles** interactive](../interactive/forecast-ensembles.html){target="_blank"} — linear opinion pool vs quantile (Vincent) averaging. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+:::
+
 ## Objectives
 
 The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the [forecasting models](forecasting-models) session.

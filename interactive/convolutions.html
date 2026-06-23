@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Convolutions — from infections to observations</title>
+<style>
+  :root{
+    --inf:#2563eb;    /* latent infections I(t) / blue */
+    --obs:#ea580c;    /* onsets / observations C(t) / orange */
+    --ker:#0891b2;    /* delay kernel weights / teal */
+    --cur:#f97316;    /* current output point highlight */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#eff6ff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:780px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--inf); font-weight:600; font-size:14px;
+    border:1px solid #c7d2fe; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#eff6ff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:150px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:170px; accent-color:var(--inf)}
+  .readout{
+    display:inline-flex; gap:14px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0; align-items:center}
+  .presets button{
+    font:600 13px inherit; border:1px solid #c7d2fe; background:#fff; color:var(--inf);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#eff6ff}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#eff6ff; border-left:4px solid var(--inf); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.orange{background:#fff7ed; border-color:var(--obs)}
+  .key.teal{background:#ecfeff; border-color:var(--ker)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.fwd{background:#dbeafe; color:#1e40af}
+  .pill.inv{background:#ffedd5; color:#9a3412}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--inf)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Convolutions session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>Convolutions: from infections to observations</h1>
+  <p>The case curve we actually <b>see</b> — symptom onsets, reports — is never the same as the latent <b style="color:var(--inf)">infections</b> that drove it. Each infection is observed only after an individual delay, and adding those delayed contributions up across the whole population is a <b>convolution</b>. It <b>shifts</b> the curve later and <b>smears</b> it wider. This is the forward data-generating process; inference later runs it in reverse.</p>
+  <nav class="toc">
+    <a href="#intro">The idea</a>
+    <a href="#delay">The delay PMF</a>
+    <a href="#builder">Convolution builder</a>
+    <a href="#sum">Slide, multiply, sum</a>
+    <a href="#inverse">Forward &amp; back</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>The idea in one equation</h2>
+  <p class="tagline">Population-level delays turn into a convolution of two time series</p>
+  <p>Work in discrete daily time. Let <b style="color:var(--inf)"><i>I</i>(t)</b> be the number of <b>latent infections</b> on day <i>t</i>, and let <b style="color:var(--ker)"><i>f</i>(s)</b> be the <b>delay distribution</b> — the probability that an infected person is observed (e.g. develops symptoms) exactly <i>s</i> days later. An infection on day <i>t</i>&minus;<i>s</i> shows up on day <i>t</i> with probability <i>f</i>(<i>s</i>). Sum those contributions over every earlier day and you get the observed count <b style="color:var(--obs)"><i>C</i>(t)</b>:</p>
+
+  <div class="formula">C(t) = &Sigma;<sub>s=0</sub><sup>&infin;</sup> I(t &minus; s) &middot; f(s)</div>
+
+  <p>That single sum <i>is</i> the convolution, written <i>C</i> = <i>I</i> &lowast; <i>f</i>. Read it as a recipe: for each output day <i>t</i>, walk back over the infection history, weight each past day by how likely its infections are to surface <i>today</i>, and add. Two things happen as a result, and they are the whole story of this page:</p>
+  <ul>
+    <li><b style="color:var(--obs)">Shift.</b> Because every contribution arrives <i>late</i>, the observed curve is pushed later in time — by roughly the <b>mean</b> of the delay distribution.</li>
+    <li><b style="color:var(--obs)">Smear.</b> Because different individuals take different numbers of days, a sharp pulse of infections is spread out into a broader bump — by roughly the <b>spread</b> (standard deviation) of the delay.</li>
+  </ul>
+  <div class="key">A clean spike of infections never produces a clean spike of onsets. The delay distribution acts like a blur filter sliding along the time axis. The wider the delay, the later and flatter the curve you observe — which is exactly why nowcasting the "true" recent signal from delayed reports is hard.</div>
+  <table>
+    <tr><th>Symbol</th><th>Meaning</th><th>In the figures</th></tr>
+    <tr><td class="metric"><i>I</i>(t)</td><td>latent incidence (infections) on day <i>t</i></td><td><span style="color:var(--inf)">blue</span> filled bars</td></tr>
+    <tr><td class="metric"><i>f</i>(s)</td><td>discretised delay distribution (a PMF over days)</td><td><span style="color:var(--ker)">teal</span> kernel weights</td></tr>
+    <tr><td class="metric"><i>C</i>(t)</td><td>observed counts (onsets / reports) on day <i>t</i></td><td><span style="color:var(--obs)">orange</span> bold line</td></tr>
+  </table>
+</section>
+
+<!-- ============ DELAY PMF ============ -->
+<section id="delay">
+  <h2>The delay, as a daily PMF <span class="pill fwd">f(s)</span></h2>
+  <p class="tagline">A continuous delay distribution, discretised into per-day probabilities</p>
+  <p>The incubation period is naturally a <b>continuous</b> distribution, but our counts are tallied by day. We therefore <b>discretise</b> it into a probability mass function <i>f</i>(s), one bar per whole day of delay. Here we use a <b>lognormal</b> delay with a chosen mean <i>m</i> and standard deviation <i>s</i><sub>sd</sub>. Match the moments, then take daily differences of the CDF:</p>
+
+  <div class="formula">&sigma;&sup2; = log(1 + s<sub>sd</sub>&sup2; / m&sup2;) &nbsp;&nbsp; &mu; = log(m) &minus; &sigma;&sup2;/2 <br>
+    F(x) = &Phi;( (log x &minus; &mu;) / &sigma; ) &nbsp;&nbsp; f(s) = F(s+1) &minus; F(s)</div>
+
+  <p>The bars are then renormalised to sum to 1 over the days we keep (0 … <i>S</i><sub>max</sub>). Slide the mean and the spread and watch the shape: a small mean piles probability on the first day or two; a large spread flattens it into a long right tail. This <i>f</i>(s) is the kernel that does all the shifting and smearing in the next figures.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--ker);border-top-width:10px"></i> delay PMF <i>f</i>(s)</span>
+    <span><i class="swatch" style="border-color:#94a3b8;border-top-style:dashed"></i> mean delay <i>m</i></span>
+  </div>
+
+  <div class="fig">
+    <svg id="pmfSvg" viewBox="0 0 720 280" role="img" aria-label="Discretised lognormal delay PMF as a bar chart"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Delay mean <i>m</i> (days): <span id="pmfMval">5.0</span></span>
+      <input id="pmfM" type="range" min="1" max="14" step="0.1" value="5"></label>
+    <label><span class="vlabel">Delay sd <i>s</i><sub>sd</sub> (days): <span id="pmfSval">2.0</span></span>
+      <input id="pmfS" type="range" min="0.6" max="7" step="0.1" value="2"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">mode &asymp; day <b id="pmfMode">—</b></span>
+    <span class="chip">P(delay = 0) = <b id="pmfP0">—</b></span>
+    <span class="chip">P(delay &le; mean) = <b id="pmfPmean">—</b></span>
+  </div>
+</section>
+
+<!-- ============ BUILDER ============ -->
+<section id="builder">
+  <h2>Convolution builder <span class="pill fwd">forward process</span></h2>
+  <p class="tagline">Feed an infection curve through the delay and watch the onsets appear</p>
+  <p>Here is the whole forward process at a glance. The <b style="color:var(--inf)">blue</b> filled bars are a latent infection curve <i>I</i>(t) — control its <b>peak day</b> and <b>width</b>, and add an optional <b>second wave</b>. The <b style="color:var(--obs)">orange</b> line is the resulting onset curve <i>C</i>(t) after convolving with the same delay PMF as above. Move any slider and watch the orange curve slide <b>right</b> (by about the delay mean) and flatten <b>out</b> (by about the delay spread).</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--inf);border-top-width:10px;opacity:.5"></i> infections <i>I</i>(t)</span>
+    <span><i class="swatch" style="border-color:var(--obs);border-top-width:4px"></i> onsets <i>C</i>(t)</span>
+    <span><i class="swatch" style="border-color:#94a3b8;border-top-style:dashed"></i> peak of <i>I</i> vs peak of <i>C</i></span>
+  </div>
+
+  <div class="fig">
+    <svg id="buildSvg" viewBox="0 0 720 340" role="img" aria-label="Latent infection curve as blue bars and the convolved onset curve as an orange line"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Infection peak day: <span id="bPeakVal">14</span></span>
+      <input id="bPeak" type="range" min="6" max="26" step="1" value="14"></label>
+    <label><span class="vlabel">Infection width: <span id="bWidthVal">3.5</span></span>
+      <input id="bWidth" type="range" min="1.2" max="8" step="0.1" value="3.5"></label>
+    <label><span class="vlabel">Second wave size: <span id="bAmpVal">0.0</span></span>
+      <input id="bAmp" type="range" min="0" max="1" step="0.05" value="0"></label>
+    <label><span class="vlabel">Delay mean <i>m</i>: <span id="bMval">5.0</span></span>
+      <input id="bM" type="range" min="1" max="14" step="0.1" value="5"></label>
+    <label><span class="vlabel">Delay sd <i>s</i><sub>sd</sub>: <span id="bSval">2.0</span></span>
+      <input id="bS" type="range" min="0.6" max="7" step="0.1" value="2"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--inf);padding-left:10px">peak of <i>I</i> &asymp; day <b id="bPkI">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--obs);padding-left:10px">peak of <i>C</i> &asymp; day <b id="bPkC">—</b></span>
+    <span class="chip">shift &asymp; <b id="bShift">—</b> days</span>
+    <span class="chip" id="bWide" style="background:#ecfeff"></span>
+  </div>
+  <div class="key orange">The shift between the two peaks tracks the <b>mean</b> of the delay; the broadening tracks its <b>spread</b>. Set the delay spread small and the orange curve keeps the shape of the blue one, just translated. Crank the spread up and even a tall, narrow outbreak is observed as a low, lazy hump.</div>
+</section>
+
+<!-- ============ THE SUM ============ -->
+<section id="sum">
+  <h2>Slide, multiply, sum <span class="pill fwd">how C(t) is built</span></h2>
+  <p class="tagline">The convolution sum, one output day at a time</p>
+  <p>This is the heart of it. To get the single observed value <b style="color:var(--cur)"><i>C</i>(t&#42;)</b> on one output day <i>t&#42;</i>, the convolution does three things:</p>
+  <ul>
+    <li><b>Slide.</b> Take the delay PMF, <b>flip</b> it, and lay it over the infection history ending at <i>t&#42;</i>. The bar sitting on infection day <i>&tau;</i> carries the weight <i>f</i>(t&#42; &minus; &tau;) — recent infections get the small-delay weights, older ones the long-delay tail.</li>
+    <li><b>Multiply.</b> On each day, multiply the infections by that weight: <i>I</i>(&tau;) &middot; <i>f</i>(t&#42; &minus; &tau;). Those are the <b style="color:var(--ker)">teal products</b>.</li>
+    <li><b>Sum.</b> Add the products. That single total is the height of the <b style="color:var(--cur)">orange point</b> raised at <i>t&#42;</i>.</li>
+  </ul>
+  <p>Drag <i>t&#42;</i> across the axis — or press <b>▶ play</b> — and watch the flipped kernel sweep left to right, its weighted products rise and fall, and their running sum trace out the entire onset curve, point by point.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--inf);border-top-width:10px;opacity:.4"></i> infections <i>I</i>(&tau;)</span>
+    <span><i class="swatch" style="border-color:var(--ker);border-top-width:10px"></i> weighted product <i>I</i>(&tau;)&middot;<i>f</i>(t&#42;&minus;&tau;)</span>
+    <span><i class="swatch" style="border-color:var(--obs);border-top-width:4px"></i> onsets <i>C</i>(t) so far</span>
+    <span><i class="swatch" style="border-color:var(--cur);border-top-width:8px"></i> current sum <i>C</i>(t&#42;)</span>
+  </div>
+
+  <div class="fig">
+    <svg id="sumSvg" viewBox="0 0 720 420" role="img" aria-label="Top: infection bars with the flipped delay kernel and weighted products at the current output day. Bottom: the onset curve traced out so far."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Output day <i>t&#42;</i>: <span id="sTval">10</span></span>
+      <input id="sT" type="range" min="0" max="39" step="1" value="10"></label>
+    <label><span class="vlabel">Delay mean <i>m</i>: <span id="sMval">5.0</span></span>
+      <input id="sM" type="range" min="1" max="12" step="0.1" value="5"></label>
+    <label><span class="vlabel">Delay sd <i>s</i><sub>sd</sub>: <span id="sSval">2.0</span></span>
+      <input id="sS" type="range" min="0.6" max="6" step="0.1" value="2"></label>
+  </div>
+  <div class="presets">
+    <button id="sPlay">▶ play</button>
+    <button id="sStep">step ▶</button>
+    <button id="sReset">reset</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:6px 12px">
+      C(t&#42;) = &Sigma; I(&tau;)&middot;f(t&#42;&minus;&tau;) = <b id="sCval">—</b></span>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--cur);padding-left:10px">largest single contribution: day <b id="sTop">—</b></span>
+    <span class="chip" id="sHint" style="background:#ecfeff"></span>
+  </div>
+  <div class="key teal">Notice that the <b>biggest</b> contribution to today's onsets usually comes not from today's infections but from those <b>around <i>m</i> days ago</b> — wherever the flipped kernel's peak lands on the infection curve. That lag is the shift you saw in the builder, now visible term by term.</div>
+</section>
+
+<!-- ============ INVERSE ============ -->
+<section id="inverse">
+  <h2>Forward and back <span class="pill inv">deconvolution</span></h2>
+  <p class="tagline">Why inference is the convolution run in reverse</p>
+  <p>Everything above is the <b>forward</b> direction: given infections and a delay, produce the observations. In practice we have the opposite problem — we <b>see</b> the onsets <i>C</i>(t) and want the infections <i>I</i>(t) that we never observed directly. Recovering <i>I</i> from <i>C</i> and <i>f</i> is <b>deconvolution</b>, and the course fits it as a Bayesian model.</p>
+  <ul>
+    <li><b>It is genuinely harder than it looks.</b> The smearing throws away fine detail: many slightly different infection curves convolve to almost the same onset curve, so the inverse is ill-posed and noisy. Sharp features in <i>I</i> become unrecoverable once blurred.</li>
+    <li><b>The delay anchors recent days.</b> Because today's onsets mostly reflect infections from <i>m</i> days ago, the <b>most recent</b> infections are barely represented in the data yet — the deep reason nowcasts of the latest days are so uncertain.</li>
+    <li><b>Observation noise sits on top.</b> The convolution is a smooth, deterministic operation; real counts are noisy. The session adds a <b>Poisson</b> layer, <i>C</i><sup>obs</sup>(t) &sim; Poisson(<i>C</i>(t)), so the model must separate genuine signal from sampling jitter.</li>
+  </ul>
+  <div class="key">The forward convolution is the easy, honest part of the model — a clear statement of how delays generate the data. The hard, interesting work is inverting it well: estimating the latent infection curve, with calibrated uncertainty, from the shifted and smeared signal you actually get to see.</div>
+  <table>
+    <tr><th></th><th class="metric">Forward (this page)</th><th class="metric">Inverse (inference)</th></tr>
+    <tr><td class="metric">You know</td><td><i>I</i>(t) and <i>f</i>(s)</td><td><i>C</i>(t) and <i>f</i>(s)</td></tr>
+    <tr><td class="metric">You want</td><td><i>C</i>(t)</td><td><i>I</i>(t)</td></tr>
+    <tr><td class="metric">Operation</td><td>convolution <i>I</i> &lowast; <i>f</i></td><td>deconvolution</td></tr>
+    <tr><td class="metric">Difficulty</td><td>one direct sum</td><td>ill-posed; needs priors &amp; MCMC</td></tr>
+    <tr><td class="metric">Uncertainty</td><td>none (deterministic)</td><td>large, esp. for recent days</td></tr>
+  </table>
+  <footer>Built as a teaching aid for the NFIDD convolutions session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- discretised lognormal delay PMF ---------- */
+// mean m, sd s_sd -> lognormal params; daily-censored PMF f(s)=F(s+1)-F(s), normalised.
+function delayPmf(m, ssd, Smax){
+  const sigma2 = Math.log(1 + (ssd*ssd)/(m*m));
+  const sigma = Math.sqrt(sigma2);
+  const mu = Math.log(m) - sigma2/2;
+  const Fln = x => x<=0 ? 0 : normCdf((Math.log(x)-mu)/sigma);   // standard-normal CDF of standardised log
+  const pmf=[]; let tot=0;
+  for(let s=0;s<=Smax;s++){ const p=Math.max(Fln(s+1)-Fln(s),0); pmf.push(p); tot+=p; }
+  if(tot<=0){ pmf[0]=1; tot=1; }
+  for(let s=0;s<=Smax;s++) pmf[s]/=tot;
+  return pmf;
+}
+
+/* ================= FIGURE 1 : the delay PMF ================= */
+(function(){
+  const svg=document.getElementById("pmfSvg");
+  const W=720,H=280, m={l:48,r:20,t:24,b:46};
+  const Smax=20;
+  const mInp=document.getElementById("pmfM"), sInp=document.getElementById("pmfS");
+  const sx=i=>m.l+(i+0.5)/(Smax+1)*(W-m.l-m.r);
+  function draw(){
+    const mean=+mInp.value, ssd=+sInp.value;
+    document.getElementById("pmfMval").textContent=mean.toFixed(1);
+    document.getElementById("pmfSval").textContent=ssd.toFixed(1);
+    const pmf=delayPmf(mean,ssd,Smax);
+    clear(svg);
+    const pmax=Math.max(...pmf)*1.12+1e-9;
+    const sy=p=>H-m.b-(p/pmax)*(H-m.t-m.b);
+    // gridlines
+    for(let g=0; g<=pmax; g+=0.1){
+      svg.appendChild(el("line",{x1:m.l,y1:sy(g),x2:W-m.r,y2:sy(g),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(g)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=g.toFixed(1);
+    }
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:m.t,stroke:"#cbd5e1"}));
+    const bw=(W-m.l-m.r)/(Smax+1)*0.74;
+    pmf.forEach((p,s)=>{
+      svg.appendChild(el("rect",{x:sx(s)-bw/2,y:sy(p),width:bw,height:Math.max(H-m.b-sy(p),0),fill:"#0891b2",opacity:.85,rx:2}));
+      if(s%2===0) svg.appendChild(el("text",{x:sx(s),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=s;
+    });
+    // mean marker
+    const mx=m.l+(mean+0.5)/(Smax+1)*(W-m.l-m.r);
+    svg.appendChild(el("line",{x1:mx,y1:m.t,x2:mx,y2:sy(0),stroke:"#94a3b8","stroke-dasharray":"4 4","stroke-width":1.4}));
+    svg.appendChild(el("text",{x:mx,y:m.t-4,"text-anchor":"middle","font-size":10.5,fill:"#64748b","font-weight":600})).textContent="mean = "+mean.toFixed(1);
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="delay s (days from infection to observation)";
+    const yl=el("text",{x:13,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 13 ${(m.t+H-m.b)/2})`}); yl.textContent="probability f(s)"; svg.appendChild(yl);
+    // readouts
+    let mode=0; for(let s=1;s<=Smax;s++) if(pmf[s]>pmf[mode]) mode=s;
+    document.getElementById("pmfMode").textContent=mode;
+    document.getElementById("pmfP0").textContent=pmf[0].toFixed(3);
+    let cum=0; const k=Math.floor(mean); for(let s=0;s<=k && s<=Smax;s++) cum+=pmf[s];
+    document.getElementById("pmfPmean").textContent=cum.toFixed(2);
+  }
+  mInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
+})();
+
+/* ---------- shared infection-curve generator (Gaussian bump + optional 2nd wave) ---------- */
+function infectionCurve(T, peak, width, amp){
+  const I=[];
+  for(let t=0;t<T;t++){
+    let v=100*Math.exp(-0.5*((t-peak)/width)**2);
+    if(amp>0){ const p2=Math.min(T-3, peak+Math.round(2.6*width)); v+=amp*62*Math.exp(-0.5*((t-p2)/(width*0.85))**2); }
+    I.push(v);
+  }
+  return I;
+}
+function convolve(I, f){
+  const T=I.length, C=new Array(T).fill(0);
+  for(let t=0;t<T;t++){
+    let s=0;
+    for(let k=0;k<f.length;k++){ const tau=t-k; if(tau>=0) s+=I[tau]*f[k]; }
+    C[t]=s;
+  }
+  return C;
+}
+function peakDay(arr){ let p=0; for(let i=1;i<arr.length;i++) if(arr[i]>arr[p]) p=i; return p; }
+
+/* ================= FIGURE 2 : convolution builder ================= */
+(function(){
+  const svg=document.getElementById("buildSvg");
+  const W=720,H=340, m={l:50,r:20,t:24,b:46}, T=40, Smax=24;
+  const ids=["bPeak","bWidth","bAmp","bM","bS"].map(i=>document.getElementById(i));
+  const sx=t=>m.l+t/(T-1)*(W-m.l-m.r);
+  function draw(){
+    const peak=+ids[0].value, width=+ids[1].value, amp=+ids[2].value, mean=+ids[3].value, ssd=+ids[4].value;
+    document.getElementById("bPeakVal").textContent=peak;
+    document.getElementById("bWidthVal").textContent=width.toFixed(1);
+    document.getElementById("bAmpVal").textContent=amp.toFixed(2);
+    document.getElementById("bMval").textContent=mean.toFixed(1);
+    document.getElementById("bSval").textContent=ssd.toFixed(1);
+    const I=infectionCurve(T,peak,width,amp);
+    const f=delayPmf(mean,ssd,Smax);
+    const C=convolve(I,f);
+    clear(svg);
+    const ymax=Math.max(Math.max(...I),Math.max(...C))*1.12+1e-9;
+    const sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:m.t,stroke:"#cbd5e1"}));
+    for(let t=0;t<T;t+=5) svg.appendChild(el("text",{x:sx(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day t";
+    // infection bars
+    const bw=(W-m.l-m.r)/T*0.7;
+    I.forEach((v,t)=>{ svg.appendChild(el("rect",{x:sx(t)-bw/2,y:sy(v),width:bw,height:Math.max(H-m.b-sy(v),0),fill:"#2563eb",opacity:.32,rx:1.5})); });
+    // onset line
+    let p="";
+    C.forEach((v,t)=>{ p+=(t?" L ":"M ")+sx(t)+" "+sy(v); });
+    svg.appendChild(el("path",{d:p,fill:"none",stroke:"#ea580c","stroke-width":3}));
+    // peak markers
+    const pI=peakDay(I), pC=peakDay(C);
+    svg.appendChild(el("line",{x1:sx(pI),y1:sy(0),x2:sx(pI),y2:sy(I[pI]),stroke:"#94a3b8","stroke-dasharray":"3 3"}));
+    svg.appendChild(el("line",{x1:sx(pC),y1:sy(0),x2:sx(pC),y2:sy(C[pC]),stroke:"#fb923c","stroke-dasharray":"3 3"}));
+    svg.appendChild(el("circle",{cx:sx(pC),cy:sy(C[pC]),r:4.5,fill:"#ea580c"}));
+    // crude width (sd) of each curve, for the broadening readout
+    function spread(arr){ let s=0,w=0; arr.forEach((v,t)=>{s+=v*t;w+=v;}); const mn=s/w; let v2=0; arr.forEach((v,t)=>{v2+=v*(t-mn)*(t-mn);}); return Math.sqrt(v2/w); }
+    document.getElementById("bPkI").textContent=pI;
+    document.getElementById("bPkC").textContent=pC;
+    document.getElementById("bShift").textContent=(pC-pI);
+    const sI=spread(I), sC=spread(C);
+    const wide=document.getElementById("bWide");
+    wide.textContent="C is ~"+(sC/sI).toFixed(2)+"× wider than I";
+  }
+  ids.forEach(i=>i.addEventListener("input",draw)); draw();
+})();
+
+/* ================= FIGURE 3 : slide, multiply, sum ================= */
+(function(){
+  const svg=document.getElementById("sumSvg");
+  const W=720,H=420, T=40, Smax=18;
+  const m={l:50,r:20}, Th=210, Bh=150;        // top panel height, bottom panel height
+  const Ttop=34, Tbot=Ttop+Th, Btop=Tbot+34, Bbot=Btop+Bh;
+  const sx=t=>m.l+t/(T-1)*(W-m.l-m.r);
+  const tInp=document.getElementById("sT"), mInp=document.getElementById("sM"), sInp=document.getElementById("sS");
+  // fixed infection curve for clarity
+  const Ifix=infectionCurve(T,13,3.2,0.35);
+  let timer=null;
+
+  function curF(){ return delayPmf(+mInp.value,+sInp.value,Smax); }
+
+  function draw(){
+    const tstar=+tInp.value, mean=+mInp.value, ssd=+sInp.value;
+    document.getElementById("sTval").textContent=tstar;
+    document.getElementById("sMval").textContent=mean.toFixed(1);
+    document.getElementById("sSval").textContent=ssd.toFixed(1);
+    const f=curF();
+    const C=convolve(Ifix,f);
+    // products contributing to C(tstar)
+    const prod=new Array(T).fill(0);
+    let topDay=-1, topVal=-1;
+    for(let k=0;k<f.length;k++){ const tau=tstar-k; if(tau>=0){ prod[tau]=Ifix[tau]*f[k]; if(prod[tau]>topVal){topVal=prod[tau];topDay=tau;} } }
+    clear(svg);
+    const Imax=Math.max(...Ifix)*1.12+1e-9;
+    const syT=v=>Tbot-(v/Imax)*(Tbot-Ttop);
+    const Cmax=Math.max(...C)*1.15+1e-9;
+    const syB=v=>Bbot-(v/Cmax)*(Bbot-Btop);
+    const bw=(W-m.l-m.r)/T*0.7;
+
+    /* ---- TOP: infections + flipped kernel products ---- */
+    svg.appendChild(el("text",{x:m.l,y:20,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="1 · slide the flipped delay over the infections, 2 · multiply";
+    svg.appendChild(el("line",{x1:m.l,y1:syT(0),x2:W-m.r,y2:syT(0),stroke:"#cbd5e1"}));
+    for(let t=0;t<T;t+=5) svg.appendChild(el("text",{x:sx(t),y:Tbot+15,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    // base infection bars (faint)
+    Ifix.forEach((v,t)=>{ svg.appendChild(el("rect",{x:sx(t)-bw/2,y:syT(v),width:bw,height:Math.max(Tbot-syT(v),0),fill:"#2563eb",opacity:.16,rx:1.5})); });
+    // weighted-product bars (teal) over the window tau<=tstar
+    for(let tau=0;tau<=tstar && tau<T;tau++){
+      if(prod[tau]>0) svg.appendChild(el("rect",{x:sx(tau)-bw/2,y:syT(prod[tau]),width:bw,height:Math.max(Tbot-syT(prod[tau]),0),fill:"#0891b2",opacity:.9,rx:1.5}));
+    }
+    // flipped kernel outline: weight f(tstar-tau) drawn as a curve scaled to panel
+    let kp=""; let started=false; const kmax=Math.max(...f);
+    for(let tau=Math.max(0,tstar-Smax); tau<=tstar; tau++){
+      const k=tstar-tau; const wv=(k<f.length?f[k]:0)/kmax;       // 0..1
+      const yy=Ttop+6+(1-wv)*(Tbot-Ttop-6);
+      kp+=(started?" L ":"M ")+sx(tau)+" "+yy; started=true;
+    }
+    if(started) svg.appendChild(el("path",{d:kp,fill:"none",stroke:"#0e7490","stroke-width":1.8,"stroke-dasharray":"5 3",opacity:.8}));
+    // marker at tstar
+    svg.appendChild(el("line",{x1:sx(tstar),y1:Ttop,x2:sx(tstar),y2:Tbot,stroke:"#f97316","stroke-width":2,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("text",{x:sx(tstar),y:Ttop-2,"text-anchor":"middle","font-size":11,"font-weight":700,fill:"#ea580c"})).textContent="t* = "+tstar;
+    if(topDay>=0){
+      svg.appendChild(el("text",{x:sx(topDay),y:syT(prod[topDay])-6,"text-anchor":"middle","font-size":10,fill:"#0e7490","font-weight":700})).textContent="biggest";
+    }
+
+    /* ---- BOTTOM: onset curve traced so far + raised point ---- */
+    svg.appendChild(el("text",{x:m.l,y:Btop-12,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="3 · sum the products → one point of C(t)";
+    svg.appendChild(el("line",{x1:m.l,y1:syB(0),x2:W-m.r,y2:syB(0),stroke:"#cbd5e1"}));
+    for(let t=0;t<T;t+=5) svg.appendChild(el("text",{x:sx(t),y:Bbot+15,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:Bbot+30,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day t";
+    // full curve faint, revealed curve bold up to tstar
+    let pf="";
+    C.forEach((v,t)=>{ pf+=(t?" L ":"M ")+sx(t)+" "+syB(v); });
+    svg.appendChild(el("path",{d:pf,fill:"none",stroke:"#fdba74","stroke-width":1.6,opacity:.6,"stroke-dasharray":"3 3"}));
+    let pr="";
+    for(let t=0;t<=tstar;t++){ pr+=(t?" L ":"M ")+sx(t)+" "+syB(C[t]); }
+    svg.appendChild(el("path",{d:pr,fill:"none",stroke:"#ea580c","stroke-width":3}));
+    // drop line + raised point
+    svg.appendChild(el("line",{x1:sx(tstar),y1:syB(0),x2:sx(tstar),y2:syB(C[tstar]),stroke:"#f97316","stroke-width":1.6,"stroke-dasharray":"4 3"}));
+    svg.appendChild(el("circle",{cx:sx(tstar),cy:syB(C[tstar]),r:6,fill:"#f97316",stroke:"#fff","stroke-width":1.6}));
+
+    // readouts
+    document.getElementById("sCval").textContent=C[tstar].toFixed(1);
+    document.getElementById("sTop").textContent= topDay>=0 ? topDay : "—";
+    const hint=document.getElementById("sHint");
+    if(topDay>=0) hint.textContent="peak contribution sits ~"+(tstar-topDay)+" days back (≈ delay mode)";
+    else hint.textContent="no infections yet contribute";
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("sPlay").textContent="▶ play"; } }
+  function step(){ let t=+tInp.value; t=(t+1)%T; tInp.value=t; draw(); }
+  tInp.addEventListener("input",()=>{ stop(); draw(); });
+  mInp.addEventListener("input",draw); sInp.addEventListener("input",draw);
+  document.getElementById("sStep").addEventListener("click",()=>{ stop(); step(); });
+  document.getElementById("sReset").addEventListener("click",()=>{ stop(); tInp.value=0; draw(); });
+  document.getElementById("sPlay").addEventListener("click",function(){
+    if(timer){ stop(); }
+    else { this.textContent="❚❚ pause"; timer=setInterval(step,260); }
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

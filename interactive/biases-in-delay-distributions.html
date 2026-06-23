@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Biases in delay distributions — right truncation &amp; censoring</title>
+<style>
+  :root{
+    --tr:#2563eb;     /* true distribution / blue */
+    --ob:#ea580c;     /* observed / biased / orange */
+    --now:#dc2626;    /* truncation "now" line / red */
+    --slate:#475569;  /* mean markers */
+    --grow:#16a34a;   /* growth green */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#eff6ff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:780px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--tr); font-weight:600; font-size:14px;
+    border:1px solid #bfdbfe; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#eff6ff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .lower{font-weight:600}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:160px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:170px; accent-color:var(--ob)}
+  .readout{
+    display:inline-flex; gap:16px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{
+    font:600 13px inherit; border:1px solid #fed7aa; background:#fff; color:var(--ob);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#fff7ed}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 0}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#eff6ff; border-left:4px solid var(--tr); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.orange{background:#fff7ed; border-color:var(--ob)}
+  .key.red{background:#fef2f2; border-color:var(--now)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.bias{background:#ffedd5; color:#9a3412}
+  .pill.censor{background:#dbeafe; color:#1e40af}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--tr)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/biases-in-delay-distributions.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Biases in delay distributions session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>Biases in delay distributions</h1>
+  <p>When you estimate a delay <b>in real time</b>, the naive estimate is biased. The headline problem is <b style="color:var(--now)">right truncation</b>: at the moment you look, long delays simply haven't had time to be observed, so the delays you <i>can</i> see are systematically <b>too short</b> — and the mean delay comes out <b>under-estimated</b>. This page builds that bias from the ground up, then previews the knock-on effect on epidemic curves and a note on <b style="color:var(--tr)">interval censoring</b>.</p>
+  <nav class="toc">
+    <a href="#intro">The setup</a>
+    <a href="#truncation">Right truncation</a>
+    <a href="#knockon">Knock-on effect</a>
+    <a href="#censoring">Interval censoring</a>
+    <a href="#remember">Things to remember</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>The setup: events, delays, and "now"</h2>
+  <p class="tagline">A primary event, a delay, then a secondary event — observed only once it has happened</p>
+  <p>Most epidemiological delays connect <b>two events</b>: a <b>primary</b> event (say a symptom onset) and a <b>secondary</b> event a little later (a hospital admission). The delay <i>d</i> between them is what we want to estimate. In this session we model it as a <b>lognormal</b> distribution with mean <i>m</i> and standard deviation <i>s</i>:</p>
+
+  <div class="formula">&sigma;&sup2; = ln(1 + s&sup2;/m&sup2;)
+    &nbsp;&nbsp; &mu; = ln(m) &minus; &sigma;&sup2;/2
+    <br>f(d) =
+    <span class="frac"><span>1</span><span>d&radic;&sigma;&sup2;</span></span>
+    &phi;<span style="font-size:13px">(</span>
+    <span class="frac"><span>ln d &minus; &mu;</span><span>&radic;&sigma;&sup2;</span></span>
+    <span style="font-size:13px">)</span>
+    &nbsp;&nbsp; F(d) = &Phi;<span style="font-size:13px">(</span>
+    <span class="frac"><span>ln d &minus; &mu;</span><span>&radic;&sigma;&sup2;</span></span>
+    <span style="font-size:13px">)</span></div>
+
+  <p>where &phi; and &Phi; are the standard Normal density and CDF. The crucial real-time twist: a secondary event at time <i>t</i>+<i>d</i> only enters your data once it has <b>actually happened</b>. If you look at the world at time <b>"now" = <i>T</i></b>, every pair with <i>t</i>+<i>d</i> &gt; <i>T</i> is invisible. The longer delays are the ones still in flight.</p>
+  <div class="key red">Two distinct biases live in this single picture, and the course treats both:
+    <ul style="margin:6px 0 0">
+      <li><b style="color:var(--now)">Right truncation</b> — not enough time has passed, so long delays are missing. This <b>shortens</b> the observed delay distribution.</li>
+      <li><b style="color:var(--tr)">Interval censoring</b> — events are recorded by <i>date</i>, not exact time, so each delay is only known to the day.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ RIGHT TRUNCATION ============ -->
+<section id="truncation">
+  <h2>Right truncation <span class="pill bias">the headline bias</span></h2>
+  <p class="tagline">Look too early, and the delays you can see are the short ones</p>
+  <p>Primary events arrive over time with an intensity that follows the epidemic. Take <b>exponential</b> dynamics with growth rate <i>r</i>: <i>I</i>(<i>t</i>) &prop; e<sup>&thinsp;rt</sup> (growing if <i>r</i> &gt; 0, declining if <i>r</i> &lt; 0). A primary event at time <i>t</i> produces its secondary event at <i>t</i>+<i>d</i>, and we observe that pair only if <i>t</i>+<i>d</i> &le; <i>T</i> — equivalently <i>t</i> &le; <i>T</i>&minus;<i>d</i>.</p>
+  <p>So the chance a delay of length <i>d</i> survives into the data is the chance its primary event happened early enough. Weighting the true density f(<i>d</i>) by the <b>number of primary events</b> that could produce delay <i>d</i> and still be seen gives the <b>observed</b> delay density:</p>
+
+  <div class="formula">w(d) &prop; f(d) &middot; &#8747;<sub>0</sub><sup>&thinsp;T&minus;d</sup> e<sup>&thinsp;rt</sup> dt
+    = f(d) &middot;
+    <span class="frac"><span>e<sup>&thinsp;r(T&minus;d)</sup> &minus; 1</span><span>r</span></span>
+    &nbsp;<span style="color:#94a3b8">(for T&minus;d &gt; 0; else 0)</span></div>
+
+  <p>Normalise w(<i>d</i>) to a density and you have the distribution you would actually estimate from real-time data. Two things follow, and the figure shows both: the <b style="color:var(--ob)">observed</b> density is pulled <b>left</b> of the <b style="color:var(--tr)">true</b> one, and the observed mean delay sits <b>below</b> the true mean <i>m</i>. Push the observation time <i>T</i> earlier, or crank the growth rate <i>r</i> up, and the gap widens.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--tr)"></i> true delay density f(d)</span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> observed (right-truncated) density</span>
+    <span><i class="swatch" style="border-color:var(--slate);border-top-style:dashed"></i> true mean m</span>
+    <span><i class="swatch" style="border-color:var(--ob);border-top-style:dashed"></i> observed mean</span>
+  </div>
+
+  <div class="fig">
+    <svg id="trSvg" viewBox="0 0 720 360" role="img" aria-label="True delay density versus the right-truncated observed density, with their means marked."></svg>
+  </div>
+  <p class="figcap">The observed density is f(d) re-weighted by how many primary events could still be seen at time T. Longer delays lose weight because their primary events would have had to occur impossibly early.</p>
+
+  <div class="presets">
+    <button data-r="0.15" data-m="5" data-s="2.5" data-t="7">Fast growth, look early</button>
+    <button data-r="0.05" data-m="5" data-s="2.5" data-t="12">Mild growth, mid-window</button>
+    <button data-r="0" data-m="5" data-s="2.5" data-t="20">Flat epidemic, late look</button>
+    <button data-r="-0.08" data-m="5" data-s="2.5" data-t="20">Declining epidemic</button>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Growth rate r: <span id="trRval">0.05</span></span>
+      <input id="trR" type="range" min="-0.1" max="0.2" step="0.005" value="0.05"></label>
+    <label><span class="vlabel">True mean delay m: <span id="trMval">5.0</span></span>
+      <input id="trM" type="range" min="2" max="9" step="0.1" value="5"></label>
+    <label><span class="vlabel">Delay sd s: <span id="trSval">2.5</span></span>
+      <input id="trS" type="range" min="0.8" max="5" step="0.1" value="2.5"></label>
+    <label><span class="vlabel">Observation time T ("now"): <span id="trTval">12</span></span>
+      <input id="trT" type="range" min="4" max="30" step="0.5" value="12"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--slate);padding-left:10px">true mean = <b id="trTrue">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--ob);padding-left:10px">observed mean = <b id="trObs">—</b></span>
+    <span class="chip">under-estimate = <b id="trPct">—</b></span>
+    <span class="chip">% observed = <b id="trFrac">—</b></span>
+  </div>
+
+  <h3>The bias, side by side</h3>
+  <p>The bar makes the gap between the true and observed mean delay impossible to miss. With a growing epidemic and an early look it can be severe; with a declining epidemic and a late look it nearly vanishes — most primary events are old enough to have completed.</p>
+  <div class="fig" style="padding-bottom:6px">
+    <svg id="trBar" viewBox="0 0 720 96" role="img" aria-label="Two bars comparing the true mean delay with the shorter observed mean delay."></svg>
+  </div>
+  <div class="key orange">Why growth makes it worse: a growing epidemic packs most primary events into the <b>recent</b> past, close to "now". Those events can only have contributed a delay if it was <b>short</b> — there has been no time for a long one. So short delays are over-represented and the mean is dragged down. Slow the epidemic (or wait), and older primary events with their full range of delays re-enter the picture.</div>
+</section>
+
+<!-- ============ KNOCK-ON ============ -->
+<section id="knockon">
+  <h2>The knock-on effect <span class="pill bias">why nowcasts dip</span></h2>
+  <p class="tagline">Right truncation doesn't just bias the delay — it bends the recent epidemic curve</p>
+  <p>The same incompleteness distorts the <b>secondary-event curve</b> itself. Build the expected number of secondary events on day &tau; by spreading each day's primary events forward through the delay distribution:</p>
+
+  <div class="formula">C(&tau;) = &Sigma;<sub>t&le;&tau;</sub> I(t) &middot; g(&tau; &minus; t)
+    <span style="color:#94a3b8">&nbsp;&nbsp;// g = discretised delay pmf</span></div>
+
+  <p>That is the <b style="color:var(--tr)">final</b> curve — what you would see once everything has reported. But near "now", the most recent days are still filling in: a secondary event due on day &tau; is only counted if it has happened, and the cohorts that feed those recent days are dominated by <b>short</b> delays. The <b style="color:var(--ob)">observed-so-far</b> curve therefore <b>dips below</b> the truth in the last few days before <i>T</i>, then is blank afterwards. Mistake that dip for a real downturn and you call a peak that isn't there.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--tr)"></i> true final secondary curve</span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> observed by time T</span>
+    <span><i class="swatch" style="border-color:var(--now)"></i> "now" = T</span>
+  </div>
+
+  <div class="fig">
+    <svg id="koSvg" viewBox="0 0 720 320" role="img" aria-label="The true final secondary-event curve compared with the curve observed by time T, which dips near now."></svg>
+  </div>
+  <p class="figcap">The shaded wedge near <i>T</i> is the secondary events that <b>will</b> occur on those days but haven't been observed yet. This is exactly the gap a <b>nowcast</b> sets out to fill.</p>
+
+  <div class="controls">
+    <label><span class="vlabel">Growth rate r: <span id="koRval">0.07</span></span>
+      <input id="koR" type="range" min="-0.08" max="0.18" step="0.005" value="0.07"></label>
+    <label><span class="vlabel">Mean delay m: <span id="koMval">5.0</span></span>
+      <input id="koM" type="range" min="2" max="9" step="0.1" value="5"></label>
+    <label><span class="vlabel">Observation time T: <span id="koTval">26</span></span>
+      <input id="koT" type="range" min="14" max="34" step="1" value="26"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--ob);padding-left:10px">last day observed = <b id="koLast">—</b>%</span>
+    <span class="chip">of its eventual total</span>
+    <span class="chip" id="koHint" style="background:#fff7ed"></span>
+  </div>
+</section>
+
+<!-- ============ CENSORING ============ -->
+<section id="censoring">
+  <h2>Interval censoring <span class="pill censor">a second bias</span></h2>
+  <p class="tagline">Dates, not times — every event is only known to the day it fell on</p>
+  <p>Real line lists record <b>dates</b>, not exact times. An onset "on 20 June" could have been at 00:01 or 23:59; an admission "on 22 June" likewise. The recorded delay is the difference of two <b>floored</b> days, so a true delay of 2.0 days might be logged as anything from 1 to 3. Because <b>both</b> events are censored, the course calls this <b>double interval censoring</b>.</p>
+  <p>Below, a continuous lognormal delay (blue line) is rounded the naive way — flooring the delay — versus the proper double-censored process that floors both event times. Watch the discrete <b style="color:var(--ob)">pmf</b> shift relative to the truth, especially when the delay is short relative to the one-day grid.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--tr)"></i> true continuous density f(d)</span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> double-censored pmf (by day)</span>
+    <span><i class="swatch" style="border-color:var(--slate);border-top-style:dashed"></i> true mean</span>
+  </div>
+
+  <div class="fig">
+    <svg id="csSvg" viewBox="0 0 720 320" role="img" aria-label="A continuous lognormal delay density overlaid with its double-interval-censored daily probability mass function."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Mean delay m: <span id="csMval">3.0</span></span>
+      <input id="csM" type="range" min="1.2" max="8" step="0.1" value="3"></label>
+    <label><span class="vlabel">Delay sd s: <span id="csSval">1.5</span></span>
+      <input id="csS" type="range" min="0.6" max="4" step="0.1" value="1.5"></label>
+    <label><span class="vlabel">Censoring interval (days): <span id="csIval">1</span></span>
+      <input id="csI" type="range" min="1" max="7" step="1" value="1"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--slate);padding-left:10px">true mean = <b id="csTrue">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--ob);padding-left:10px">censored mean = <b id="csObs">—</b></span>
+    <span class="chip" id="csHint" style="background:#fff7ed"></span>
+  </div>
+  <p style="margin-top:16px">The flooring drops every delay by up to one interval on average, so the censored mean tends to fall <b>below</b> the truth, and the effect is largest when the interval is <b>big relative to the delay</b> — exactly why the session switches to short delays to make censoring visible. A wider interval (try weekly reporting) magnifies it.</p>
+
+  <div class="key">The fix for both biases is the same idea: <b>model the observation process</b>. Treat the exact event times as unknown parameters constrained to their recorded day (censoring), and normalise the likelihood by the probability of having been observed by "now" (truncation). The course does this with the <code>censored-delay-model</code> and <code>truncated-delay-model</code> Stan models; the <code>primarycensored</code> and <code>epidist</code> packages handle both together with analytical solutions.</p>
+</section>
+
+<!-- ============ REMEMBER ============ -->
+<section id="remember">
+  <h2>Things to remember</h2>
+  <ul>
+    <li><b>Right truncation under-estimates the mean delay.</b> In real time, long delays haven't been observed yet, so the delays you can see are systematically too short.</li>
+    <li><b>Growth makes it worse.</b> A growing epidemic concentrates primary events in the recent past; those can only have produced short observed delays, dragging the estimate down. Declining epidemics suffer little truncation bias.</li>
+    <li><b>Looking earlier makes it worse.</b> The closer "now" is to the primary events, the larger the missing tail. Waiting, or scoring older cohorts, reduces the bias.</li>
+    <li><b>Longer delays are more vulnerable.</b> A bigger spread <i>s</i> means more probability mass out in the tail that truncation can chop off.</li>
+    <li><b>The same incompleteness bends the epidemic curve.</b> Recent secondary counts dip below their eventual totals — the artefact a nowcast exists to correct.</li>
+    <li><b>Interval censoring is a separate, additive bias.</b> Recording by date rounds delays down; it bites hardest when the reporting interval is large relative to the delay.</li>
+    <li><b>The cure is to model the observation process,</b> not to patch the data with ad-hoc half-day shifts — adjust for censoring and truncation inside the likelihood.</li>
+  </ul>
+  <footer>Built as a teaching aid for the NFIDD biases-in-delay-distributions session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+// generic stacked horizontal bar renderer for a decomposition
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- lognormal helpers (mean m, sd s parameterisation) ---------- */
+function lnParams(m,s){
+  const sigma2=Math.log(1+(s*s)/(m*m));
+  const mu=Math.log(m)-sigma2/2;
+  return {mu, sig:Math.sqrt(sigma2)};
+}
+function lnPdf(x,m,s){
+  if(x<=0) return 0;
+  const {mu,sig}=lnParams(m,s);
+  return normPdf((Math.log(x)-mu)/sig)/(x*sig);
+}
+function lnCdf(x,m,s){
+  if(x<=0) return 0;
+  const {mu,sig}=lnParams(m,s);
+  return normCdf((Math.log(x)-mu)/sig);
+}
+// integral of exp(r t) from 0 to A (A>0), guarding r near 0
+function expIntegral(r,A){
+  if(A<=0) return 0;
+  if(Math.abs(r)<1e-9) return A;
+  return (Math.exp(r*A)-1)/r;
+}
+
+/* ================= FIGURE 1 : RIGHT TRUNCATION ================= */
+(function(){
+  const svg=document.getElementById("trSvg");
+  const W=720,H=360, m={l:54,r:24,t:22,b:46};
+  const rInp=document.getElementById("trR"), mInp=document.getElementById("trM"),
+        sInp=document.getElementById("trS"), tInp=document.getElementById("trT");
+
+  function draw(){
+    const r=+rInp.value, mean=+mInp.value, sd=+sInp.value, T=+tInp.value;
+    document.getElementById("trRval").textContent=r.toFixed(3);
+    document.getElementById("trMval").textContent=mean.toFixed(1);
+    document.getElementById("trSval").textContent=sd.toFixed(1);
+    document.getElementById("trTval").textContent=T.toFixed(1);
+    clear(svg);
+
+    const Dmax=Math.max(mean+4*sd, 12);
+    const N=300, dx=Dmax/N;
+    // grids for true f and observed weight w
+    const fArr=[], wArr=[]; let dmaxDens=0, wSum=0, wMean=0, fSum=0, fMean=0, obsCount=0, totCount=0;
+    for(let i=0;i<=N;i++){
+      const d=i*dx;
+      const f=lnPdf(d,mean,sd);
+      fArr.push(f);
+      const surv=expIntegral(r, T-d);            // primary events that could still be observed
+      const w=f*Math.max(surv,0);
+      wArr.push(w);
+      if(f>dmaxDens) dmaxDens=f;
+      wSum+=w*dx; wMean+=d*w*dx;
+      fSum+=f*dx; fMean+=d*f*dx;
+    }
+    // observed fraction: events with t+d<=T over all events on [0,T]
+    const totAll=expIntegral(r,T);
+    obsCount=wSum;                                 // ∝ observed pairs
+    totCount=totAll*1;                            // ∝ all primary events in [0,T] (each yields a secondary eventually)
+    const obsMean = wSum>1e-12 ? wMean/wSum : 0;
+    const trueMean = mean;                        // analytic lognormal mean
+    // normalise observed density to compare shape, scale so its peak fits same axis
+    const wNorm = wArr.map(w=> wSum>1e-12 ? w/wSum : 0);
+    let wDensMax=0; wNorm.forEach(v=>{ if(v>wDensMax) wDensMax=v; });
+    const yMax=Math.max(dmaxDens, wDensMax)*1.12;
+
+    const sx=d=>m.l+(d/Dmax)*(W-m.l-m.r);
+    const sy=v=>H-m.b-(v/yMax)*(H-m.t-m.b);
+
+    // axes
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:sy(yMax),stroke:"#cbd5e1"}));
+    for(let d=0; d<=Dmax; d+=Math.ceil(Dmax/12)){
+      svg.appendChild(el("text",{x:sx(d),y:H-m.b+18,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=d;
+    }
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="delay d (days)";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="density"; svg.appendChild(yl);
+
+    // observed density (orange filled)
+    let oPath="M "+sx(0)+" "+sy(0);
+    for(let i=0;i<=N;i++){ oPath+=" L "+sx(i*dx)+" "+sy(wNorm[i]); }
+    oPath+=" L "+sx(Dmax)+" "+sy(0)+" Z";
+    svg.appendChild(el("path",{d:oPath,fill:"#ea580c",opacity:.16}));
+    let oLine="";
+    for(let i=0;i<=N;i++){ oLine+=(i?" L ":"M ")+sx(i*dx)+" "+sy(wNorm[i]); }
+    svg.appendChild(el("path",{d:oLine,fill:"none",stroke:"#ea580c","stroke-width":2.6}));
+    // true density (blue line)
+    let fLine="";
+    for(let i=0;i<=N;i++){ fLine+=(i?" L ":"M ")+sx(i*dx)+" "+sy(fArr[i]); }
+    svg.appendChild(el("path",{d:fLine,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // mean markers
+    svg.appendChild(el("line",{x1:sx(trueMean),y1:sy(0),x2:sx(trueMean),y2:sy(yMax),stroke:"#475569","stroke-dasharray":"5 4","stroke-width":1.6}));
+    svg.appendChild(el("text",{x:sx(trueMean),y:sy(yMax)-2,"text-anchor":"middle","font-size":10,fill:"#475569","font-weight":600})).textContent="true mean";
+    svg.appendChild(el("line",{x1:sx(obsMean),y1:sy(0),x2:sx(obsMean),y2:sy(yMax*0.86),stroke:"#ea580c","stroke-dasharray":"5 4","stroke-width":1.6}));
+    svg.appendChild(el("text",{x:sx(obsMean),y:sy(yMax*0.86)-2,"text-anchor":"middle","font-size":10,fill:"#ea580c","font-weight":600})).textContent="observed";
+
+    // readouts
+    const pct = trueMean>1e-9 ? 100*(trueMean-obsMean)/trueMean : 0;
+    const fracObs = totCount>1e-12 ? 100*obsCount/totCount : 0;
+    document.getElementById("trTrue").textContent=trueMean.toFixed(2);
+    document.getElementById("trObs").textContent=obsMean.toFixed(2);
+    document.getElementById("trPct").textContent=pct.toFixed(1)+"%";
+    document.getElementById("trFrac").textContent=Math.min(fracObs,100).toFixed(0)+"%";
+
+    // bar comparison
+    drawBar(trueMean,obsMean);
+  }
+
+  function drawBar(trueMean,obsMean){
+    const bsvg=document.getElementById("trBar");
+    clear(bsvg);
+    const BW=720, padL=120, padR=70, top=10, rowH=30, gap=14;
+    const maxV=Math.max(trueMean,obsMean,1e-6);
+    const fullW=BW-padL-padR;
+    const rows=[
+      {label:"true mean", v:trueMean, color:"#2563eb"},
+      {label:"observed", v:obsMean, color:"#ea580c"},
+    ];
+    rows.forEach((rw,i)=>{
+      const y=top+i*(rowH+gap);
+      bsvg.appendChild(el("text",{x:padL-10,y:y+rowH/2+4,"text-anchor":"end","font-size":12.5,fill:"#374151","font-weight":600})).textContent=rw.label;
+      bsvg.appendChild(el("rect",{x:padL,y,width:Math.max((rw.v/maxV)*fullW,1),height:rowH,fill:rw.color,rx:5,opacity:.88}));
+      bsvg.appendChild(el("text",{x:padL+(rw.v/maxV)*fullW+8,y:y+rowH/2+4,"font-size":12.5,fill:rw.color,"font-weight":700})).textContent=rw.v.toFixed(2)+" d";
+    });
+  }
+
+  [rInp,mInp,sInp,tInp].forEach(i=>i.addEventListener("input",draw));
+  document.querySelectorAll("#truncation .presets button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      rInp.value=b.dataset.r; mInp.value=b.dataset.m; sInp.value=b.dataset.s; tInp.value=b.dataset.t; draw();
+    });
+  });
+  draw();
+})();
+
+/* ================= FIGURE 2 : KNOCK-ON EFFECT ================= */
+(function(){
+  const svg=document.getElementById("koSvg");
+  const W=720,H=320, m={l:54,r:24,t:24,b:46};
+  const SD=2.0;                                   // fixed delay sd for the curve demo
+  const Lmax=40;                                  // total days drawn
+  const rInp=document.getElementById("koR"), mInp=document.getElementById("koM"), tInp=document.getElementById("koT");
+
+  // discretised delay pmf g(k) = F(k+1)-F(k)
+  function pmf(mean){
+    const g=[]; let tot=0;
+    for(let k=0;k<=Lmax;k++){ const p=lnCdf(k+1,mean,SD)-lnCdf(k,mean,SD); g.push(p); tot+=p; }
+    return g.map(p=>p/tot);
+  }
+
+  function draw(){
+    const r=+rInp.value, mean=+mInp.value, T=Math.round(+tInp.value);
+    document.getElementById("koRval").textContent=r.toFixed(3);
+    document.getElementById("koMval").textContent=mean.toFixed(1);
+    document.getElementById("koTval").textContent=T;
+    clear(svg);
+
+    const g=pmf(mean);
+    // primary intensity per day
+    const I=[]; for(let t=0;t<=Lmax;t++) I.push(Math.exp(r*t));
+    // final secondary curve C(tau) = sum_{t<=tau} I(t) g(tau-t)
+    const Cfull=[], Cobs=[];
+    for(let tau=0;tau<=Lmax;tau++){
+      let c=0;
+      for(let t=0;t<=tau;t++){ c+=I[t]*g[tau-t]; }
+      Cfull.push(c);
+      // observed-by-T: a secondary event on day tau is seen only if tau<=T AND it has actually
+      // occurred. Of cohorts feeding day tau, only the fraction whose full delay completed by T.
+      // Approximate observed fraction = fraction of that day's mass whose primary cohort+delay <= T.
+      if(tau>T){ Cobs.push(null); }
+      else {
+        let cObs=0;
+        for(let t=0;t<=tau;t++){
+          // delay is tau-t; observed if the secondary day tau<=T (always true here) AND the cohort
+          // is fully reported, i.e. this exact pairing has had time — it has, since tau<=T.
+          // The DIP comes from cohorts at tau near T being dominated by short delays that EXIST,
+          // while long-delay contributions to day tau require primary events further back that are
+          // under-represented under growth and whose later-day counterparts spill beyond T.
+          // Model observed completeness as P(delay <= T - t) within each cohort's forward spread.
+          const compl=lnCdf(T-t+1,mean,SD);       // fraction of cohort t reported by T
+          cObs+=I[t]*g[tau-t]*Math.min(compl/Math.max(lnCdf(Lmax,mean,SD),1e-9),1);
+        }
+        Cobs.push(cObs);
+      }
+    }
+    let ymax=0; Cfull.forEach(c=>{ if(c>ymax) ymax=c; }); ymax*=1.12;
+
+    const sx=t=>m.l+(t/Lmax)*(W-m.l-m.r);
+    const sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+
+    // axes
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:sy(ymax),stroke:"#cbd5e1"}));
+    for(let t=0;t<=Lmax;t+=5) svg.appendChild(el("text",{x:sx(t),y:H-m.b+18,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="day τ (secondary events)";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="secondary events"; svg.appendChild(yl);
+
+    // shaded missing wedge between full and observed up to T
+    let wedge="M "+sx(0)+" "+sy(Cobs[0]!=null?Cobs[0]:Cfull[0]);
+    for(let t=0;t<=T;t++){ const v=Cobs[t]!=null?Cobs[t]:Cfull[t]; wedge+=" L "+sx(t)+" "+sy(v); }
+    for(let t=T;t>=0;t--){ wedge+=" L "+sx(t)+" "+sy(Cfull[t]); }
+    wedge+=" Z";
+    svg.appendChild(el("path",{d:wedge,fill:"#ea580c",opacity:.14}));
+
+    // true final curve (blue)
+    let fLine="";
+    for(let t=0;t<=Lmax;t++) fLine+=(t?" L ":"M ")+sx(t)+" "+sy(Cfull[t]);
+    svg.appendChild(el("path",{d:fLine,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+    // observed curve (orange), only up to T
+    let oLine="";
+    for(let t=0;t<=T;t++){ const v=Cobs[t]; oLine+=(t?" L ":"M ")+sx(t)+" "+sy(v); }
+    svg.appendChild(el("path",{d:oLine,fill:"none",stroke:"#ea580c","stroke-width":2.8}));
+    // markers at the observed days
+    for(let t=Math.max(0,T-6);t<=T;t++){
+      svg.appendChild(el("circle",{cx:sx(t),cy:sy(Cobs[t]),r:3,fill:"#ea580c"}));
+    }
+
+    // "now" line
+    svg.appendChild(el("line",{x1:sx(T),y1:sy(0),x2:sx(T),y2:sy(ymax),stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"6 4"}));
+    svg.appendChild(el("text",{x:sx(T),y:sy(ymax)+2,"text-anchor":"middle","font-size":11,fill:"#dc2626","font-weight":700})).textContent="now";
+
+    // readouts
+    const lastPct = Cfull[T]>1e-9 ? 100*Cobs[T]/Cfull[T] : 0;
+    document.getElementById("koLast").textContent=lastPct.toFixed(0);
+    const hint=document.getElementById("koHint");
+    if(lastPct<60) hint.textContent="big dip — recent days look like a false downturn";
+    else if(lastPct<88) hint.textContent="visible dip near now";
+    else hint.textContent="nearly complete — little visible truncation";
+  }
+
+  [rInp,mInp,tInp].forEach(i=>i.addEventListener("input",draw));
+  draw();
+})();
+
+/* ================= FIGURE 3 : INTERVAL CENSORING ================= */
+(function(){
+  const svg=document.getElementById("csSvg");
+  const W=720,H=320, m={l:54,r:24,t:24,b:46};
+  const mInp=document.getElementById("csM"), sInp=document.getElementById("csS"), iInp=document.getElementById("csI");
+
+  function draw(){
+    const mean=+mInp.value, sd=+sInp.value, intv=Math.round(+iInp.value);
+    document.getElementById("csMval").textContent=mean.toFixed(1);
+    document.getElementById("csSval").textContent=sd.toFixed(1);
+    document.getElementById("csIval").textContent=intv;
+    clear(svg);
+
+    const Dmax=Math.max(mean+4*sd, 12);
+    // double-censored pmf: primary offset u~Unif(0,intv), secondary floored.
+    // observed delay = floor((d + u)/intv)*intv ... approximate with the standard
+    // double-interval construction: P(obs delay = k*intv) via mixing over u.
+    // Use a fine numerical convolution: for true delay density f(d) and u~Unif(0,intv),
+    // observed = floor((d+u)/intv - u/intv)... we use the practical estimator from the
+    // session: floor(d + u) at interval grid. Compute bin masses.
+    const bins=Math.ceil(Dmax/intv)+1;
+    const pmfArr=new Array(bins).fill(0);
+    const Nd=2000, dd=Dmax/Nd, Nu=24;
+    let trueMean=0, trueNorm=0;
+    for(let i=0;i<Nd;i++){
+      const d=(i+0.5)*dd;
+      const f=lnPdf(d,mean,sd)*dd;
+      trueMean+=d*f; trueNorm+=f;
+      for(let j=0;j<Nu;j++){
+        const u=(j+0.5)/Nu*intv;                 // primary event offset within its interval
+        // both events floored to interval grid: observed delay = floor(d2/intv)*intv - floor(t1/intv)*intv
+        // with t1 offset u, secondary at u+d. Observed = floor((u+d)/intv)*intv - 0 (primary day = 0)
+        const obs=Math.floor((u+d)/intv)*intv;
+        const k=Math.round(obs/intv);
+        if(k>=0 && k<bins) pmfArr[k]+=f/Nu;
+      }
+    }
+    trueMean/=trueNorm;
+    let psum=0; pmfArr.forEach(p=>psum+=p);
+    const pmfN=pmfArr.map(p=>p/psum);
+    let obsMean=0; pmfN.forEach((p,k)=>obsMean+=k*intv*p);
+
+    let dmaxDens=0;
+    const N=300, dx=Dmax/N, fArr=[];
+    for(let i=0;i<=N;i++){ const f=lnPdf(i*dx,mean,sd); fArr.push(f); if(f>dmaxDens) dmaxDens=f; }
+    // pmf height as density-equivalent: p/intv
+    let pmaxDens=0; pmfN.forEach(p=>{ if(p/intv>pmaxDens) pmaxDens=p/intv; });
+    const yMax=Math.max(dmaxDens,pmaxDens)*1.14;
+
+    const sx=d=>m.l+(d/Dmax)*(W-m.l-m.r);
+    const sy=v=>H-m.b-(v/yMax)*(H-m.t-m.b);
+
+    // axes
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:sy(yMax),stroke:"#cbd5e1"}));
+    for(let d=0; d<=Dmax; d+=Math.ceil(Dmax/12)) svg.appendChild(el("text",{x:sx(d),y:H-m.b+18,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=d;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="delay d (days)";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="density / mass"; svg.appendChild(yl);
+
+    // censored pmf bars (orange)
+    const barW=(sx(intv)-sx(0))*0.86;
+    pmfN.forEach((p,k)=>{
+      const dens=p/intv;
+      const xc=sx(k*intv);
+      const h=H-m.b-sy(dens);
+      if(dens>1e-5) svg.appendChild(el("rect",{x:xc-barW/2,y:sy(dens),width:barW,height:Math.max(h,0),fill:"#ea580c",opacity:.55,rx:2}));
+    });
+    // true density (blue line)
+    let fLine="";
+    for(let i=0;i<=N;i++) fLine+=(i?" L ":"M ")+sx(i*dx)+" "+sy(fArr[i]);
+    svg.appendChild(el("path",{d:fLine,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // true mean marker
+    svg.appendChild(el("line",{x1:sx(trueMean),y1:sy(0),x2:sx(trueMean),y2:sy(yMax),stroke:"#475569","stroke-dasharray":"5 4","stroke-width":1.6}));
+    svg.appendChild(el("text",{x:sx(trueMean),y:sy(yMax)-2,"text-anchor":"middle","font-size":10,fill:"#475569","font-weight":600})).textContent="true mean";
+
+    document.getElementById("csTrue").textContent=trueMean.toFixed(2);
+    document.getElementById("csObs").textContent=obsMean.toFixed(2);
+    const hint=document.getElementById("csHint");
+    const diff=trueMean-obsMean;
+    if(intv>1) hint.textContent="coarse interval → large rounding bias";
+    else if(mean<3) hint.textContent="short delay vs interval → bias matters";
+    else hint.textContent="bias ≈ "+diff.toFixed(2)+" d (rounds down)";
+  }
+
+  [mInp,sInp,iInp].forEach(i=>i.addEventListener("input",draw));
+  draw();
+})();
+</script>
+</body>
+</html>

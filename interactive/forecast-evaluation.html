@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Evaluating probabilistic forecasts — CRPS, PIT &amp; DSS</title>
+<style>
+  :root{
+    --fc:#2563eb;     /* forecast / blue */
+    --ob:#ea580c;     /* observation / orange */
+    --sharp:#16a34a;  /* green */
+    --wide:#9333ea;   /* purple */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#eef2ff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:680px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:760px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--fc); font-weight:600; font-size:14px;
+    border:1px solid #c7d2fe; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#eef2ff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .lower{font-weight:600}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:170px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:180px; accent-color:var(--fc)}
+  .readout{
+    display:inline-flex; gap:18px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{
+    font:600 13px inherit; border:1px solid #c7d2fe; background:#fff; color:var(--fc);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#eef2ff}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 0}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#eff6ff; border-left:4px solid var(--fc); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.green{background:#f0fdf4; border-color:var(--sharp)}
+  .key.orange{background:#fff7ed; border-color:var(--ob)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.score{background:#dcfce7; color:#166534}
+  .pill.diag{background:#fef9c3; color:#854d0e}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--fc)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/forecast-evaluation.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Forecast evaluation session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>Evaluating probabilistic forecasts</h1>
+  <p>Three tools you meet in the NFIDD forecast-evaluation session — the <b>CRPS</b> and the <b>DSS</b> score how good a forecast is, while the <b>PIT histogram</b> diagnoses <i>why</i>. The guiding principle throughout: <i>maximise sharpness subject to calibration</i>.</p>
+  <nav class="toc">
+    <a href="#intro">Big picture</a>
+    <a href="#crps">CRPS</a>
+    <a href="#pit">PIT histogram</a>
+    <a href="#dss">DSS</a>
+    <a href="#wis">WIS</a>
+    <a href="#compare">Side by side</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>The big picture</h2>
+  <p class="tagline">What makes a probabilistic forecast "good"?</p>
+  <p>A probabilistic forecast is not a single number but a whole <b>distribution</b> over what might happen. To judge it we use two ideas:</p>
+  <ul>
+    <li><b>Calibration</b> — do the stated probabilities match reality? If you say "20% chance" on many occasions, it should happen about 20% of the time. A property that emerges from <i>comparing forecasts to outcomes</i>.</li>
+    <li><b>Sharpness</b> — how concentrated is the forecast? "Anything could happen" is safe but useless. A property of the <i>forecast alone</i>.</li>
+  </ul>
+  <div class="key">The goal of forecast evaluation: <b>maximise sharpness subject to calibration</b> (Gneiting et al., 2007). Be as confident as you can get away with — but no more.</div>
+  <p>A <b>proper scoring rule</b> is a score, assigned to each (forecast, outcome) pair, that you minimise <i>in expectation</i> only by reporting your true beliefs. It rewards calibration and sharpness together, so it can't be gamed. Here we use the convention throughout that <b class="lower">lower is better</b>.</p>
+  <table>
+    <tr><th>Tool</th><th>Type</th><th>Answers</th><th>Units</th></tr>
+    <tr><td class="metric">CRPS</td><td><span class="pill score">score</span></td><td>How far is the whole forecast distribution from the outcome?</td><td>same as the data</td></tr>
+    <tr><td class="metric">WIS</td><td><span class="pill score">score</span></td><td>The CRPS computed from a handful of quantiles (forecast-hub format)</td><td>same as the data</td></tr>
+    <tr><td class="metric">DSS</td><td><span class="pill score">score</span></td><td>Same, using only the forecast's mean &amp; spread</td><td>unitless (log)</td></tr>
+    <tr><td class="metric">PIT</td><td><span class="pill diag">diagnostic</span></td><td><i>Why</i> is calibration off — too sharp, too wide, or biased?</td><td>a histogram</td></tr>
+  </table>
+</section>
+
+<!-- ============ CRPS ============ -->
+<section id="crps">
+  <h2>CRPS <span class="pill score">score · lower is better</span></h2>
+  <p class="tagline">Continuous Ranked Probability Score — the MAE of probabilistic forecasts</p>
+  <p>For a point forecast you would use the <b>mean absolute error</b>: the distance between your single guess and the truth. The CRPS generalises this to a forecast that is a <i>distribution</i>. Write the forecast as its cumulative distribution function (CDF) <i>F</i>, and the observed value as <i>y</i>. The CRPS compares the forecast CDF to the "perfect-hindsight" CDF — a single step from 0 to 1 at the value that actually happened:</p>
+
+  <div class="formula">CRPS(F, y) = &#8747;<sub>&minus;&infin;</sub><sup>&infin;</sup> ( F(x) &minus; <b>1</b>{x &ge; y} )&sup2; dx</div>
+
+  <p>The shaded region below <i>is</i> the CRPS: wherever the smooth forecast curve disagrees with the step at the observation, that squared gap is added up. A forecast that is both <b>accurate</b> (centred near <i>y</i>) and <b>sharp</b> (steep) leaves little gap and scores low. Drag the observation, or widen the forecast, and watch the area — and the score — change.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--fc)"></i> forecast CDF <i>F(x)</i></span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> observation step <b>1</b>{x &ge; y}</span>
+    <span><i class="swatch" style="border-color:#93c5fd;border-top-width:10px;opacity:.6"></i> squared gap = CRPS</span>
+  </div>
+
+  <div class="fig">
+    <svg id="crpsSvg" viewBox="0 0 720 360" role="img" aria-label="CRPS as the area between the forecast CDF and the observation step"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Observation <i>y</i>: <span id="crpsYval">7.0</span></span>
+      <input id="crpsY" type="range" min="1" max="11" step="0.1" value="7.0"></label>
+    <label><span class="vlabel">Forecast spread &sigma; (sharpness): <span id="crpsSval">1.6</span></span>
+      <input id="crpsS" type="range" min="0.5" max="3.5" step="0.1" value="1.6"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">forecast mean &mu; = <b>6.0</b></span>
+    <span class="chip">CRPS = <b id="crpsVal">—</b></span>
+    <span class="chip" id="crpsHint" style="background:#ecfeff"></span>
+  </div>
+
+  <h3>Breaking the CRPS into components</h3>
+  <p>A single CRPS number tells you <i>how</i> wrong a forecast is, but not <i>why</i>. It splits cleanly into three additive pieces that always sum back to the total — the same decomposition <code>scoringutils</code> reports:</p>
+  <ul>
+    <li><b style="color:#0891b2">Dispersion</b> — the price of the forecast's own spread. Even a perfectly centred forecast pays this; it is the irreducible cost of being uncertain (and the reward for being sharp is paying <i>less</i> of it).</li>
+    <li><b style="color:#ea580c">Overprediction</b> — extra penalty incurred because the forecast sat <b>too high</b> (the outcome fell below it).</li>
+    <li><b style="color:#9333ea">Underprediction</b> — extra penalty because the forecast sat <b>too low</b> (the outcome fell above it).</li>
+  </ul>
+  <p>Drag the controls above and watch the split: centre the forecast on <i>y</i> and only <span style="color:#0891b2">dispersion</span> remains; push the observation into a tail and a directional penalty grows.</p>
+  <div class="fig" style="padding-bottom:6px">
+    <svg id="crpsDecomp" viewBox="0 0 720 62" role="img" aria-label="Stacked bar: CRPS split into dispersion, overprediction and underprediction"></svg>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid #0891b2;padding-left:10px">dispersion = <b id="cDisp">—</b></span>
+    <span class="chip" style="border-left:4px solid #ea580c;padding-left:10px">overprediction = <b id="cOver">—</b></span>
+    <span class="chip" style="border-left:4px solid #9333ea;padding-left:10px">underprediction = <b id="cUnder">—</b></span>
+    <span class="chip">sum = <b id="cSum">—</b> &asymp; CRPS</span>
+  </div>
+
+  <h3>Things worth remembering</h3>
+  <ul>
+    <li>CRPS is reported in the <b>same units as the data</b> (e.g. cases), so it is directly interpretable.</li>
+    <li>For a <b>point</b> (deterministic) forecast the step meets the step and CRPS collapses to the <b>absolute error</b> — it is a true generalisation of MAE.</li>
+    <li>An equivalent "energy" form avoids the integral: CRPS(F, y) = E|X &minus; y| &minus; &frac12; E|X &minus; X&prime;|, with X, X&prime; independent draws from <i>F</i>. The first term rewards accuracy; the second rewards sharpness.</li>
+    <li>It is hard to read <i>in isolation</i> — its value depends on the scale of the data. Use it to <b>compare</b> models, horizons, or dates. (On a fast-growing epidemic, scoring on the log scale tames the scale dependence.)</li>
+  </ul>
+</section>
+
+<!-- ============ PIT ============ -->
+<section id="pit">
+  <h2>PIT histogram <span class="pill diag">diagnostic</span></h2>
+  <p class="tagline">Probability Integral Transform — a calibration check, not a score</p>
+  <p>Take each forecast CDF <i>F</i> and evaluate it at the value that actually occurred: <i>u</i> = F(y). This single number says <b>where in the forecast distribution the outcome landed</b>. If the forecasts are perfectly calibrated, these <i>u</i> values are spread evenly across 0–1 — so a histogram of them should be <b>flat</b>. The <i>shape</i> of the departure from flat tells you exactly what is wrong:</p>
+
+  <div class="fig">
+    <svg id="pitSvg" viewBox="0 0 720 460" role="img" aria-label="Four PIT histograms: calibrated, overconfident, underconfident, biased"></svg>
+  </div>
+  <p class="figcap">All four forecasters predict a Normal; the truth is also Normal. Only the shape of the predictive distribution differs.</p>
+
+  <div class="key green"><b>Flat (uniform)</b> — well calibrated. Outcomes fall everywhere in the predictive distribution as often as they should. This is the target.</div>
+  <div class="key orange"><b>U-shape</b> — <b>overconfident / too sharp</b> (under-dispersed). The forecast is too narrow, so the truth keeps landing in the tails (very low or very high <i>u</i>) more often than predicted.</div>
+  <div class="key"><b>Dome / hump</b> — <b>underconfident / too wide</b> (over-dispersed). The forecast is too cautious; outcomes cluster in the middle of an over-wide distribution.</div>
+  <div class="key" style="border-color:var(--ob);background:#fff7ed"><b>Sloped / lop-sided</b> — <b>biased</b>. A forecast that runs systematically high pushes outcomes into the low <i>u</i> bins (and vice-versa).</div>
+
+  <h3>Try it yourself</h3>
+  <p>Move the forecaster's <b>bias</b> and <b>spread</b> and watch the histogram morph between the four shapes above. The truth is fixed at a standard Normal (mean 0, &sigma; = 1); only the forecast changes. The preset buttons snap to each canonical case.</p>
+  <div class="presets">
+    <button data-mu="0" data-sd="1">Calibrated</button>
+    <button data-mu="0" data-sd="0.6">Overconfident</button>
+    <button data-mu="0" data-sd="1.7">Underconfident</button>
+    <button data-mu="0.7" data-sd="1">Biased high</button>
+  </div>
+  <div class="fig">
+    <svg id="pitIntSvg" viewBox="0 0 720 320" role="img" aria-label="Interactive PIT histogram driven by forecast bias and spread"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Forecast bias &mu; (truth = 0): <span id="pitMuVal">0.00</span></span>
+      <input id="pitMu" type="range" min="-1.5" max="1.5" step="0.05" value="0"></label>
+    <label><span class="vlabel">Forecast spread &sigma; (truth &sigma; = 1): <span id="pitSdVal">1.00</span></span>
+      <input id="pitSd" type="range" min="0.4" max="2.2" step="0.05" value="1"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">&sigma; ratio (forecast &divide; truth) = <b id="pitRatio">—</b></span>
+    <span class="chip" id="pitDiag" style="background:#ecfeff"></span>
+  </div>
+
+  <h3>Where the histogram comes from — one forecast at a time</h3>
+  <p>This is the step that trips people up. The histogram above doesn't come from one forecast — it is built from <b>many</b>. Each forecast contributes a <b>single</b> number: <b>where its own outcome landed on its own CDF</b>. Read up from the observation <i>y</i> to the forecast's S-curve, then across to the axis — that height is <i>u</i> = F(y). The histogram is just those heights piling up. Pick a scenario, then press <b>play</b> and watch a fresh outcome get drawn, read off the CDF on the left, and dropped into its bin on the right.</p>
+  <div class="presets" id="pitBuildPresets">
+    <button data-mu="0" data-sd="1">Calibrated</button>
+    <button data-mu="0" data-sd="0.6">Overconfident</button>
+    <button data-mu="0" data-sd="1.7">Underconfident</button>
+    <button data-mu="0.7" data-sd="1">Biased high</button>
+  </div>
+  <div class="fig">
+    <svg id="pitBuildSvg" viewBox="0 0 720 300" role="img" aria-label="Left: a forecast CDF with the observation read off as u = F(y). Right: the PIT histogram accumulating those u values."></svg>
+  </div>
+  <div class="presets" style="align-items:center">
+    <button id="pitAdd1">+1 forecast</button>
+    <button id="pitAdd25">+25</button>
+    <button id="pitPlay">▶ play</button>
+    <button id="pitReset">reset</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px">collected n = <b id="pitN">0</b></span>
+    <span class="chip" id="pitBuildDiag" style="background:#ecfeff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px"></span>
+  </div>
+
+  <p style="margin-top:18px"><b>One subtlety for count data.</b> The clean uniform result holds for <i>continuous</i> forecasts. For integer-valued forecasts (case counts!) the PIT is no longer exactly uniform even when calibrated, so the course uses a <b>randomised PIT</b> — it replaces the single step with a uniform draw across the probability jump at <i>y</i> — which restores uniformity under calibration.</p>
+</section>
+
+<!-- ============ DSS ============ -->
+<section id="dss">
+  <h2>DSS <span class="pill score">score · lower is better</span></h2>
+  <p class="tagline">Dawid–Sebastiani Score — accuracy and sharpness from just two numbers</p>
+  <p>The DSS asks only for the forecast's <b>mean</b> &mu; and <b>standard deviation</b> &sigma; — no full distribution required. It is the squared <i>standardised</i> error plus a penalty on the spread:</p>
+
+  <div class="formula">DSS(F, y) =
+    <span class="frac"><span>(y &minus; &mu;)&sup2;</span><span>&sigma;&sup2;</span></span>
+    + 2&nbsp;log&nbsp;&sigma;</div>
+
+  <p>Read the two terms as a tug-of-war:</p>
+  <ul>
+    <li>The first term is the error <b>measured in units of the forecast's own spread</b>. Claiming to be very sharp (small &sigma;) and then missing is punished hard — the miss is divided by a tiny &sigma;&sup2;.</li>
+    <li>The second term, 2&nbsp;log&nbsp;&sigma;, <b>rewards being sharp</b> (it falls as &sigma; shrinks). That reward is what stops the score from simply preferring an infinitely wide, un-fallible forecast.</li>
+  </ul>
+  <div class="key">Together they re-create "maximise sharpness subject to calibration": shrink &sigma; <i>only</i> as far as your accuracy can back up. The figure shows it directly — a <span style="color:var(--sharp);font-weight:600">sharp</span> forecast wins near the truth but is penalised steeply when wrong, while a <span style="color:var(--wide);font-weight:600">wide</span> forecast is mediocre everywhere.</p></div>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--sharp)"></i> sharp forecast (&sigma; = 0.7)</span>
+    <span><i class="swatch" style="border-color:var(--wide)"></i> wide forecast (&sigma; = 2.0)</span>
+    <span><i class="swatch" style="border-color:var(--ob)"></i> observation <i>y</i></span>
+  </div>
+
+  <div class="fig">
+    <svg id="dssSvg" viewBox="0 0 720 470" role="img" aria-label="Top: two predictive densities and an observation. Bottom: DSS as a function of the observation for each forecast."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Observation <i>y</i>: <span id="dssYval">0.0</span></span>
+      <input id="dssY" type="range" min="-3" max="3" step="0.05" value="0"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--sharp)">DSS sharp = <b id="dssSharp">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--wide)">DSS wide = <b id="dssWide">—</b></span>
+    <span class="chip" id="dssWin" style="background:#f1f5f9"></span>
+  </div>
+
+  <h3>How DSS relates to CRPS</h3>
+  <ul>
+    <li>DSS uses only the <b>first two moments</b>, so it is light-weight, but it is <b>blind to shape</b> — skewness and heavy tails are invisible to it. CRPS uses the whole distribution.</li>
+    <li>Because of the squared standardised error, DSS is <b>far more sensitive to outliers</b>: a single observation deep in a sharp forecast's tail can dominate the average. CRPS is gentler and stays in the data's units.</li>
+    <li>Both are <b>proper</b>. In the special case of a Normal forecast scored at its own mean, both bottom out — they just disagree on how harshly to punish the misses.</li>
+  </ul>
+</section>
+
+<!-- ============ WIS ============ -->
+<section id="wis">
+  <h2>WIS <span class="pill score">score · lower is better</span></h2>
+  <p class="tagline">Weighted Interval Score — the CRPS for quantile forecasts</p>
+  <p>Forecast hubs (COVID-19, flu, RSV) don't collect a forecaster's whole distribution — they collect a <b>handful of quantiles</b>, e.g. the 2.5%, 25%, 50%, 75%, 97.5% points. The WIS scores exactly that. It is built from the <b>interval score</b> of each central prediction interval [<i>l</i>, <i>u</i>] at level (1&minus;&alpha;):</p>
+
+  <div class="formula">IS<sub>&alpha;</sub>(y) = <u>(u &minus; l)</u><sub style="font-size:11px">width</sub>
+    + <span class="frac"><span>2</span><span>&alpha;</span></span>(l &minus; y)&middot;<b>1</b>{y &lt; l}
+    + <span class="frac"><span>2</span><span>&alpha;</span></span>(y &minus; u)&middot;<b>1</b>{y &gt; u}</div>
+
+  <p>Pay for the interval's <b>width</b> (sharpness), then pay a penalty if the outcome lands <b>outside</b> it. The WIS averages these across <i>K</i> intervals plus the median <i>m</i>, weighting each by <span class="frac"><span>&alpha;<sub>k</sub></span><span>2</span></span>:</p>
+
+  <div class="formula">WIS(y) =
+    <span class="frac"><span>1</span><span>K + &frac12;</span></span>
+    ( &frac12;|y &minus; m| + &Sigma;<sub>k=1</sub><sup>K</sup>
+    <span class="frac"><span>&alpha;<sub>k</sub></span><span>2</span></span> IS<sub>&alpha;<sub>k</sub></sub>(y) )</div>
+
+  <div class="key"><b>The link to CRPS.</b> Recall the CRPS can be written as an average of quantile (pinball) losses over <i>all</i> probability levels. The WIS is exactly that average evaluated on a <b>finite</b> grid of quantiles — a numerical approximation of the CRPS. Add more quantile levels and <b>WIS &rarr; CRPS</b>. With just a handful of quantiles it is already very close, which is why hubs can score distributional forecasts they never fully observe.</div>
+
+  <p>The lower panel makes this concrete: the dashed line is the exact CRPS of the underlying forecast, and the WIS curve climbs toward it as the number of intervals <i>K</i> increases. The upper panel shows the nested intervals (the forecast "fan") and where the observation falls — intervals it escapes are drawn in red.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:#2563eb"></i> prediction intervals</span>
+    <span><i class="swatch" style="border-color:#dc2626"></i> interval missed (penalty)</span>
+    <span><i class="swatch" style="border-color:#ea580c"></i> observation y</span>
+    <span><i class="swatch" style="border-color:#64748b;border-top-style:dashed"></i> exact CRPS</span>
+  </div>
+
+  <div class="fig">
+    <svg id="wisSvg" viewBox="0 0 720 430" role="img" aria-label="Top: nested prediction intervals with the observation. Bottom: WIS approaching CRPS as the number of intervals grows."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Observation y: <span id="wisYval">7.0</span></span>
+      <input id="wisY" type="range" min="1" max="11" step="0.1" value="7.0"></label>
+    <label><span class="vlabel">Number of intervals K: <span id="wisKval">8</span></span>
+      <input id="wisK" type="range" min="1" max="40" step="1" value="8"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">WIS = <b id="wisVal">—</b></span>
+    <span class="chip">exact CRPS = <b id="wisCrps">—</b></span>
+    <span class="chip" id="wisGap" style="background:#ecfeff"></span>
+  </div>
+
+  <h3>Same components as the CRPS</h3>
+  <p>Because WIS is the finite-quantile CRPS, it carries the <b>identical three-part decomposition</b> — and the interval form makes each piece tangible:</p>
+  <div class="fig" style="padding-bottom:6px">
+    <svg id="wisDecomp" viewBox="0 0 720 62" role="img" aria-label="Stacked bar: WIS split into dispersion, overprediction and underprediction"></svg>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid #0891b2;padding-left:10px">dispersion = <b id="wDisp">—</b></span>
+    <span class="chip" style="border-left:4px solid #ea580c;padding-left:10px">overprediction = <b id="wOver">—</b></span>
+    <span class="chip" style="border-left:4px solid #9333ea;padding-left:10px">underprediction = <b id="wUnder">—</b></span>
+  </div>
+  <ul>
+    <li><b style="color:#0891b2">Dispersion</b> = the summed interval <b>widths</b> — pure sharpness cost, paid whatever the outcome.</li>
+    <li><b style="color:#ea580c">Overprediction</b> = penalties from intervals whose <b>lower</b> bound sat above the outcome (forecast too high).</li>
+    <li><b style="color:#9333ea">Underprediction</b> = penalties from intervals whose <b>upper</b> bound sat below the outcome (forecast too low).</li>
+  </ul>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section id="compare">
+  <h2>Side by side</h2>
+  <table>
+    <tr><th></th><th>CRPS</th><th>WIS</th><th>DSS</th><th>PIT histogram</th></tr>
+    <tr><td class="metric">What it is</td><td>Proper score</td><td>Proper score</td><td>Proper score</td><td>Calibration diagnostic</td></tr>
+    <tr><td class="metric">Needs</td><td>Full predictive distribution</td><td>A set of quantiles</td><td>Only mean &amp; SD</td><td>Full predictive CDF at the outcome</td></tr>
+    <tr><td class="metric">Units</td><td>Same as the data</td><td>Same as the data</td><td>Unitless (log scale)</td><td>—</td></tr>
+    <tr><td class="metric">Best value</td><td class="lower">Lower</td><td class="lower">Lower</td><td class="lower">Lower</td><td>Flat / uniform</td></tr>
+    <tr><td class="metric">Sees distribution shape?</td><td>Yes</td><td>At the chosen quantiles</td><td>No (moments only)</td><td>Indirectly, via where outcomes land</td></tr>
+    <tr><td class="metric">Outlier sensitivity</td><td>Moderate</td><td>Moderate</td><td>High (squared, standardised)</td><td>Shows up as tail bins</td></tr>
+    <tr><td class="metric">Decomposes?</td><td>Dispersion + over + under</td><td>Dispersion + over + under</td><td>No</td><td>—</td></tr>
+    <tr><td class="metric">Use it to…</td><td>Rank full distributions</td><td>Score hub-style quantile forecasts</td><td>Score quickly from summaries</td><td>Explain <i>why</i> a model mis-scores</td></tr>
+  </table>
+  <div class="key">In practice: <b>score</b> with the CRPS — or the <b>WIS</b> when you only have quantiles (it <i>is</i> the CRPS, approximated) — to get a single ranking number and its dispersion/over/under breakdown, then reach for the <b>PIT histogram</b> to diagnose <i>why</i> one model beats another — too sharp, too wide, or biased.</div>
+  <footer>Built as a teaching aid for the NFIDD forecast-evaluation session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+// closed-form CRPS for a Normal forecast (Gneiting & Raftery 2007)
+function crpsNorm(mu,sd,y){
+  const z=(y-mu)/sd;
+  return sd*( z*(2*normCdf(z)-1) + 2*normPdf(z) - 1/Math.sqrt(Math.PI) );
+}
+// dispersion / overprediction / underprediction split of the (weighted) interval score.
+// K central intervals at equally-spaced quantile levels + a median. As K grows this is
+// the WIS; in the limit it converges to the CRPS (Bracher et al. 2021) — so the same
+// helper gives both the WIS decomposition and, at large K, the CRPS decomposition.
+function intervalParts(mu,sd,y,K){
+  let disp=0, over=0, under=0;
+  for(let i=1;i<=K;i++){
+    const pl=i/(2*K+2);                       // lower quantile level (<0.5); weight = alpha/2 = pl
+    const l=mu+sd*normInv(pl), u=mu+sd*normInv(1-pl);
+    disp  += pl*(u-l);                        // interval width  → sharpness/dispersion penalty
+    over  += Math.max(l-y,0);                 // obs below lower bound → forecast too high
+    under += Math.max(y-u,0);                 // obs above upper bound → forecast too low
+  }
+  over  += 0.5*Math.max(mu-y,0);              // median term (mu = median for a Normal)
+  under += 0.5*Math.max(y-mu,0);
+  const norm=1/(K+0.5);
+  return {disp:disp*norm, over:over*norm, under:under*norm, total:(disp+over+under)*norm};
+}
+// generic stacked horizontal bar renderer for a decomposition
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+/* ================= FIGURE 1 : CRPS ================= */
+(function(){
+  const svg=document.getElementById("crpsSvg");
+  const W=720,H=360, m={l:54,r:24,t:20,b:46};
+  const x0=1, x1=11, MU=6;
+  const sx=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r);
+  const sy=p=>H-m.b-p*(H-m.t-m.b);
+  const yInp=document.getElementById("crpsY"), sInp=document.getElementById("crpsS");
+
+  function draw(){
+    const y=+yInp.value, sd=+sInp.value;
+    document.getElementById("crpsYval").textContent=y.toFixed(1);
+    document.getElementById("crpsSval").textContent=sd.toFixed(1);
+    clear(svg);
+    // axes + gridlines
+    [0,.25,.5,.75,1].forEach(p=>{
+      svg.appendChild(el("line",{x1:m.l,y1:sy(p),x2:W-m.r,y2:sy(p),stroke:"#eef2f7","stroke-width":1}));
+      svg.appendChild(el("text",{x:m.l-10,y:sy(p)+4,"text-anchor":"end","font-size":11,fill:"#6b7280"})).textContent=p.toFixed(2);
+    });
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:sy(1),stroke:"#cbd5e1"}));
+    for(let v=x0; v<=x1; v++){
+      svg.appendChild(el("text",{x:sx(v),y:H-m.b+18,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="value x (e.g. cases)";
+    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="cumulative probability"; svg.appendChild(yl);
+
+    // shaded squared-gap region between F and step, sampled finely
+    const N=240; let dPath="";
+    for(let i=0;i<=N;i++){
+      const xv=x0+(x1-x0)*i/N;
+      const F=normCdf(xv,MU,sd);
+      const step=xv>=y?1:0;
+      const top=Math.max(F,step), bot=Math.min(F,step);
+      // draw as thin vertical band
+      if(top-bot>1e-4){
+        svg.appendChild(el("line",{x1:sx(xv),y1:sy(top),x2:sx(xv),y2:sy(bot),stroke:"#bfdbfe","stroke-width":(W-m.l-m.r)/N+0.8,opacity:.55}));
+      }
+    }
+    // observation step (orange)
+    const stepPath=`M ${sx(x0)} ${sy(0)} L ${sx(y)} ${sy(0)} L ${sx(y)} ${sy(1)} L ${sx(x1)} ${sy(1)}`;
+    svg.appendChild(el("path",{d:stepPath,fill:"none",stroke:"#ea580c","stroke-width":2.5}));
+    // forecast CDF (blue)
+    let fPath="";
+    for(let i=0;i<=N;i++){ const xv=x0+(x1-x0)*i/N; fPath+=(i?" L ":"M ")+sx(xv)+" "+sy(normCdf(xv,MU,sd)); }
+    svg.appendChild(el("path",{d:fPath,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+    // observation marker
+    svg.appendChild(el("circle",{cx:sx(y),cy:sy(0),r:4.5,fill:"#ea580c"}));
+    svg.appendChild(el("text",{x:sx(y),y:sy(0)+34,"text-anchor":"middle","font-size":12,fill:"#ea580c","font-weight":700})).textContent="y";
+
+    // readouts
+    const crps=crpsNorm(MU,sd,y);
+    document.getElementById("crpsVal").textContent=crps.toFixed(3);
+    const hint=document.getElementById("crpsHint");
+    const err=Math.abs(y-MU);
+    if(err<0.6 && sd<1.4) hint.textContent="accurate + sharp → low score ✓";
+    else if(err>2.2 && sd<1.2) hint.textContent="sharp but wrong → punished";
+    else if(sd>2.6) hint.textContent="very wide → safe but vague";
+    else hint.textContent="";
+
+    // CRPS decomposition (large-K limit of the interval-score split = the CRPS components)
+    const p=intervalParts(MU,sd,y,400);
+    stackedBar(document.getElementById("crpsDecomp"),[
+      {v:p.disp, color:"#0891b2", label:"dispersion"},
+      {v:p.over, color:"#ea580c", label:"overpred."},
+      {v:p.under,color:"#9333ea", label:"underpred."},
+    ],720);
+    document.getElementById("cDisp").textContent=p.disp.toFixed(3);
+    document.getElementById("cOver").textContent=p.over.toFixed(3);
+    document.getElementById("cUnder").textContent=p.under.toFixed(3);
+    document.getElementById("cSum").textContent=(p.disp+p.over+p.under).toFixed(3);
+  }
+  yInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
+})();
+
+/* ================= FIGURE 2 : PIT histograms ================= */
+(function(){
+  const svg=document.getElementById("pitSvg");
+  const W=720,H=460;
+  // forecast N(muF,sdF); truth N(0,1). Exact PIT bin probs via P(F(Y)<=u)=G(F^-1(u)).
+  const panels=[
+    {title:"Calibrated",       sub:"flat → ✓",            muF:0,  sdF:1.0, color:"#16a34a"},
+    {title:"Overconfident",    sub:"U-shape → too sharp", muF:0,  sdF:0.6, color:"#ea580c"},
+    {title:"Underconfident",   sub:"dome → too wide",     muF:0,  sdF:1.7, color:"#2563eb"},
+    {title:"Biased high",      sub:"slope → biased",      muF:0.7,sdF:1.0, color:"#9333ea"},
+  ];
+  const nb=10;
+  function binProbs(muF,sdF){
+    const out=[]; let maxp=0;
+    for(let k=0;k<nb;k++){
+      const uLo=k/nb, uHi=(k+1)/nb;
+      const xLo=muF+sdF*normInv(Math.max(uLo,1e-6));
+      const xHi=muF+sdF*normInv(Math.min(uHi,1-1e-6));
+      const p=normCdf(xHi)-normCdf(xLo);
+      out.push(p); if(p>maxp) maxp=p;
+    }
+    return {out,maxp};
+  }
+  const cols=2, rows=2, pad=18;
+  const pw=(W-pad*3)/cols, ph=(H-pad*3)/rows;
+  panels.forEach((pn,idx)=>{
+    const cx=pad+(idx%cols)*(pw+pad), cy=pad+Math.floor(idx/cols)*(ph+pad);
+    const ax=cx+40, ay=cy+34, aw=pw-54, ah=ph-66;
+    // frame
+    svg.appendChild(el("rect",{x:cx,y:cy,width:pw,height:ph,rx:10,fill:"#fff",stroke:"#e5e7eb"}));
+    svg.appendChild(el("text",{x:cx+14,y:cy+20,"font-size":14,"font-weight":700,fill:"#1f2933"})).textContent=pn.title;
+    svg.appendChild(el("text",{x:pw+cx-14,y:cy+20,"text-anchor":"end","font-size":12,fill:pn.color,"font-weight":600})).textContent=pn.sub;
+    // uniform reference line at density 1
+    const refY=ay+ah-(1/2.2)*ah; // scale so density 2.2 = full height
+    svg.appendChild(el("line",{x1:ax,y1:refY,x2:ax+aw,y2:refY,stroke:"#94a3b8","stroke-dasharray":"4 4","stroke-width":1.3}));
+    svg.appendChild(el("text",{x:ax+aw,y:refY-4,"text-anchor":"end","font-size":10,fill:"#94a3b8"})).textContent="uniform";
+    // bars: convert prob to density (prob*nb)
+    const {out}=binProbs(pn.muF,pn.sdF);
+    const bw=aw/nb;
+    out.forEach((p,k)=>{
+      const dens=p*nb; const h=Math.min(dens/2.2,1)*ah;
+      svg.appendChild(el("rect",{x:ax+k*bw+1.5,y:ay+ah-h,width:bw-3,height:h,fill:pn.color,opacity:.85,rx:2}));
+    });
+    // axis
+    svg.appendChild(el("line",{x1:ax,y1:ay+ah,x2:ax+aw,y2:ay+ah,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:ay,x2:ax,y2:ay+ah,stroke:"#cbd5e1"}));
+    ["0","0.5","1"].forEach((t,i)=>{
+      svg.appendChild(el("text",{x:ax+aw*i/2,y:ay+ah+15,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    });
+    svg.appendChild(el("text",{x:ax+aw/2,y:cy+ph-6,"text-anchor":"middle","font-size":11,fill:"#374151"})).textContent="PIT value u = F(y)";
+  });
+})();
+
+/* ================= FIGURE 2b : interactive PIT ================= */
+(function(){
+  const svg=document.getElementById("pitIntSvg");
+  const W=720,H=320, m={l:56,r:24,t:24,b:46}, nb=12;
+  const ax=m.l, aw=W-m.l-m.r, ay=m.t, ah=H-m.t-m.b;
+  const muInp=document.getElementById("pitMu"), sdInp=document.getElementById("pitSd");
+  function binProbs(muF,sdF){
+    const out=[];
+    for(let k=0;k<nb;k++){
+      const xLo=muF+sdF*normInv(Math.max(k/nb,1e-6));
+      const xHi=muF+sdF*normInv(Math.min((k+1)/nb,1-1e-6));
+      out.push(normCdf(xHi)-normCdf(xLo));
+    }
+    return out;
+  }
+  function diagnose(muF,sdF){
+    const disp = sdF<0.85 ? "sharp" : sdF>1.15 ? "wide" : "ok";
+    const biased = Math.abs(muF)>=0.25;
+    if(disp==="ok" && !biased) return {color:"#16a34a",text:"Calibrated → flat, uniform ✓"};
+    if(biased && disp!=="ok")  return {color:"#9333ea",text:`Biased ${muF>0?"high":"low"} + too ${disp} → lop-sided ${disp==="sharp"?"U":"dome"}`};
+    if(disp==="sharp")         return {color:"#ea580c",text:"Overconfident / too sharp → U-shape"};
+    if(disp==="wide")          return {color:"#2563eb",text:"Underconfident / too wide → dome"};
+    return {color:"#9333ea",text:`Biased ${muF>0?"high → mass on the left":"low → mass on the right"} → sloped`};
+  }
+  function draw(){
+    const muF=+muInp.value, sdF=+sdInp.value;
+    document.getElementById("pitMuVal").textContent=muF.toFixed(2);
+    document.getElementById("pitSdVal").textContent=sdF.toFixed(2);
+    document.getElementById("pitRatio").textContent=sdF.toFixed(2);
+    clear(svg);
+    const {color,text}=diagnose(muF,sdF);
+    const densMax=3.2, sy=d=>ay+ah-Math.min(d/densMax,1)*ah;
+    [0,1,2,3].forEach(d=>{
+      svg.appendChild(el("line",{x1:ax,y1:sy(d),x2:ax+aw,y2:sy(d),stroke:d===1?"#94a3b8":"#eef2f7","stroke-dasharray":d===1?"4 4":"","stroke-width":d===1?1.3:1}));
+      svg.appendChild(el("text",{x:ax-8,y:sy(d)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=d;
+    });
+    svg.appendChild(el("text",{x:ax+aw,y:sy(1)-4,"text-anchor":"end","font-size":10,fill:"#94a3b8"})).textContent="uniform";
+    const probs=binProbs(muF,sdF), bw=aw/nb;
+    probs.forEach((p,k)=>{
+      const dens=p*nb, top=sy(dens);
+      svg.appendChild(el("rect",{x:ax+k*bw+1.5,y:top,width:bw-3,height:Math.max(ay+ah-top,0),fill:color,opacity:.85,rx:2}));
+    });
+    svg.appendChild(el("line",{x1:ax,y1:ay+ah,x2:ax+aw,y2:ay+ah,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:ay,x2:ax,y2:ay+ah,stroke:"#cbd5e1"}));
+    ["0","0.25","0.5","0.75","1"].forEach((t,i)=>{
+      svg.appendChild(el("text",{x:ax+aw*i/4,y:ay+ah+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    });
+    svg.appendChild(el("text",{x:ax+aw/2,y:H-8,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="PIT value u = F(y)";
+    const yl=el("text",{x:16,y:ay+ah/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 16 ${ay+ah/2})`}); yl.textContent="density"; svg.appendChild(yl);
+    const chip=document.getElementById("pitDiag");
+    chip.textContent=text; chip.style.borderLeft="4px solid "+color; chip.style.paddingLeft="10px";
+  }
+  muInp.addEventListener("input",draw); sdInp.addEventListener("input",draw);
+  document.querySelectorAll(".presets button").forEach(b=>{
+    b.addEventListener("click",()=>{ muInp.value=b.dataset.mu; sdInp.value=b.dataset.sd; draw(); });
+  });
+  draw();
+})();
+
+/* ================= FIGURE 2c : PIT build-up from many forecasts ================= */
+(function(){
+  const svg=document.getElementById("pitBuildSvg");
+  const nb=10;
+  // forecast N(muF,sdF); truth fixed N(0,1). Each round: draw y~truth, read u=F_forecast(y).
+  let muF=0, sdF=0.6, us=[], lastY=null, lastU=null, timer=null;
+  // left CDF panel
+  const Lx0=44,Lx1=336, xd0=-4,xd1=4, Ltop=36,Lbot=250;
+  const sLx=v=>Lx0+(v-xd0)/(xd1-xd0)*(Lx1-Lx0);
+  const sLy=p=>Lbot-p*(Lbot-Ltop);
+  // right histogram panel
+  const Rx0=412,Rx1=700, Rtop=36,Rbot=250, binW=(Rx1-Rx0)/nb;
+  function gauss(){ const u1=Math.random()||1e-9, u2=Math.random(); return Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2); }
+
+  function addOne(){ const y=gauss(); lastY=y; lastU=normCdf(y,muF,sdF); us.push(lastU); draw(); }
+
+  function draw(){
+    clear(svg);
+    document.getElementById("pitN").textContent=us.length;
+
+    /* ---- LEFT: CDF read-off ---- */
+    svg.appendChild(el("text",{x:Lx0,y:20,"font-size":12.5,"font-weight":700,fill:"#1f2933"})).textContent="1 · read u = F(y) off the forecast CDF";
+    [0,.5,1].forEach(p=>{
+      svg.appendChild(el("line",{x1:Lx0,y1:sLy(p),x2:Lx1,y2:sLy(p),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:Lx0-7,y:sLy(p)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=p.toFixed(1);
+    });
+    svg.appendChild(el("line",{x1:Lx0,y1:Lbot,x2:Lx1,y2:Lbot,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:Lx0,y1:Ltop,x2:Lx0,y2:Lbot,stroke:"#cbd5e1"}));
+    svg.appendChild(el("text",{x:(Lx0+Lx1)/2,y:Lbot+20,"text-anchor":"middle","font-size":11,fill:"#374151"})).textContent="observation y";
+    // forecast CDF
+    let p="";const N=160;
+    for(let i=0;i<=N;i++){const x=xd0+(xd1-xd0)*i/N; p+=(i?" L ":"M ")+sLx(x)+" "+sLy(normCdf(x,muF,sdF));}
+    svg.appendChild(el("path",{d:p,fill:"none",stroke:"#2563eb","stroke-width":2.4}));
+    // read-off for the latest observation
+    if(lastY!==null){
+      const yc=Math.max(xd0,Math.min(xd1,lastY));
+      svg.appendChild(el("line",{x1:sLx(yc),y1:Lbot,x2:sLx(yc),y2:sLy(lastU),stroke:"#ea580c","stroke-width":1.8,"stroke-dasharray":"4 3"}));
+      svg.appendChild(el("line",{x1:sLx(yc),y1:sLy(lastU),x2:Lx0,y2:sLy(lastU),stroke:"#16a34a","stroke-width":1.8,"stroke-dasharray":"4 3"}));
+      svg.appendChild(el("circle",{cx:sLx(yc),cy:Lbot,r:4,fill:"#ea580c"}));
+      svg.appendChild(el("circle",{cx:sLx(yc),cy:sLy(lastU),r:4,fill:"#2563eb"}));
+      svg.appendChild(el("circle",{cx:Lx0,cy:sLy(lastU),r:4.5,fill:"#16a34a"}));
+      svg.appendChild(el("text",{x:Lx0+8,y:sLy(lastU)-6,"font-size":11,"font-weight":700,fill:"#16a34a"})).textContent="u = "+lastU.toFixed(2);
+    }
+
+    /* ---- RIGHT: accumulating histogram ---- */
+    svg.appendChild(el("text",{x:Rx0,y:20,"font-size":12.5,"font-weight":700,fill:"#1f2933"})).textContent="2 · drop u into its bin";
+    const counts=new Array(nb).fill(0);
+    us.forEach(u=>{ let k=Math.floor(u*nb); if(k<0)k=0; if(k>=nb)k=nb-1; counts[k]++; });
+    const maxC=Math.max(1,...counts), ymax=maxC*1.25;
+    const sRy=c=>Rbot-(c/ymax)*(Rbot-Rtop);
+    // expected (uniform) level
+    if(us.length){
+      const exp=us.length/nb;
+      svg.appendChild(el("line",{x1:Rx0,y1:sRy(exp),x2:Rx1,y2:sRy(exp),stroke:"#94a3b8","stroke-dasharray":"4 4","stroke-width":1.3}));
+      svg.appendChild(el("text",{x:Rx1,y:sRy(exp)-4,"text-anchor":"end","font-size":10,fill:"#94a3b8"})).textContent="uniform";
+    }
+    const lastBin = lastU!==null ? Math.min(nb-1,Math.max(0,Math.floor(lastU*nb))) : -1;
+    counts.forEach((c,k)=>{
+      const h=Rbot-sRy(c);
+      svg.appendChild(el("rect",{x:Rx0+k*binW+1.5,y:sRy(c),width:binW-3,height:Math.max(h,0),
+        fill: k===lastBin?"#f97316":"#2563eb", opacity:k===lastBin?0.95:0.6, rx:2}));
+    });
+    svg.appendChild(el("line",{x1:Rx0,y1:Rbot,x2:Rx1,y2:Rbot,stroke:"#cbd5e1"}));
+    ["0","0.5","1"].forEach((t,i)=>svg.appendChild(el("text",{x:Rx0+(Rx1-Rx0)*i/2,y:Rbot+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t);
+    svg.appendChild(el("text",{x:(Rx0+Rx1)/2,y:Rbot+20,"text-anchor":"middle","font-size":11,fill:"#374151"})).textContent="PIT value u";
+
+    // diagnosis once enough data
+    const d=document.getElementById("pitBuildDiag");
+    if(us.length<15){ d.textContent="collect more to see the shape…"; }
+    else {
+      if(sdF<0.85) d.textContent="filling the tails → U-shape (overconfident)";
+      else if(sdF>1.15) d.textContent="piling up in the middle → dome (underconfident)";
+      else if(muF>0.25) d.textContent="leaning low → biased high";
+      else d.textContent="staying roughly flat → calibrated ✓";
+    }
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("pitPlay").textContent="▶ play"; } }
+  function setScenario(mu,sd){ stop(); muF=mu; sdF=sd; us=[]; lastY=null; lastU=null; draw(); }
+
+  document.querySelectorAll("#pitBuildPresets button").forEach(b=>{
+    b.addEventListener("click",()=>setScenario(+b.dataset.mu,+b.dataset.sd));
+  });
+  document.getElementById("pitAdd1").addEventListener("click",()=>{ stop(); addOne(); });
+  document.getElementById("pitAdd25").addEventListener("click",()=>{ stop(); for(let i=0;i<25;i++) addOne(); });
+  document.getElementById("pitReset").addEventListener("click",()=>{ stop(); us=[]; lastY=null; lastU=null; draw(); });
+  document.getElementById("pitPlay").addEventListener("click",function(){
+    if(timer){ stop(); }
+    else { this.textContent="❚❚ pause"; timer=setInterval(()=>{ addOne(); if(us.length>=400) stop(); },140); }
+  });
+  draw();
+})();
+
+/* ================= FIGURE 3 : DSS ================= */
+(function(){
+  const svg=document.getElementById("dssSvg");
+  const W=720,H=470;
+  const SH=0.7, WD=2.0;         // sharp / wide sigma, both mean 0
+  const x0=-4, x1=4;
+  const yInp=document.getElementById("dssY");
+
+  // top panel (densities)
+  const Tm={l:54,r:24,t:24,b:30}, Th=190;
+  // bottom panel (DSS vs y)
+  const Bm={l:54,r:24,t:24,b:46}, By0=Th+34, Bh=H-By0-Bm.b+24;
+
+  const sx=v=>Tm.l+(v-x0)/(x1-x0)*(W-Tm.l-Tm.r);
+  function dss(sd,y){ return (y*y)/(sd*sd)+2*Math.log(sd); }
+
+  function draw(){
+    const y=+yInp.value;
+    document.getElementById("dssYval").textContent=y.toFixed(2);
+    clear(svg);
+
+    /* ---- TOP : densities ---- */
+    const dmax=normPdf(0,0,SH)*1.05;
+    const syD=d=>Tm.t+Th-Tm.b-(d/dmax)*(Th-Tm.t-Tm.b);
+    svg.appendChild(el("text",{x:Tm.l,y:16,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Predictive densities (both centred at 0)";
+    svg.appendChild(el("line",{x1:Tm.l,y1:syD(0),x2:W-Tm.r,y2:syD(0),stroke:"#cbd5e1"}));
+    for(let v=x0; v<=x1; v++) svg.appendChild(el("text",{x:sx(v),y:syD(0)+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    const N=200;
+    [[SH,"#16a34a"],[WD,"#9333ea"]].forEach(([sd,col])=>{
+      let p="";
+      for(let i=0;i<=N;i++){ const xv=x0+(x1-x0)*i/N; p+=(i?" L ":"M ")+sx(xv)+" "+syD(normPdf(xv,0,sd)); }
+      svg.appendChild(el("path",{d:p,fill:"none",stroke:col,"stroke-width":2.4}));
+    });
+    // observation line
+    svg.appendChild(el("line",{x1:sx(y),y1:Tm.t,x2:sx(y),y2:syD(0),stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("circle",{cx:sx(y),cy:syD(0),r:4.5,fill:"#ea580c"}));
+    svg.appendChild(el("text",{x:sx(y),y:Tm.t+12,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#ea580c"})).textContent="y";
+
+    /* ---- BOTTOM : DSS vs observation ---- */
+    const dssMax=14, dssMin=-2;
+    const syS=s=>By0+Bm.t+(1-(s-dssMin)/(dssMax-dssMin))*(Bh-Bm.t-Bm.b);
+    svg.appendChild(el("text",{x:Tm.l,y:By0+12,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Resulting DSS, as the observation y varies";
+    // gridlines
+    [0,4,8,12].forEach(s=>{
+      svg.appendChild(el("line",{x1:Tm.l,y1:syS(s),x2:W-Tm.r,y2:syS(s),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:Tm.l-8,y:syS(s)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=s;
+    });
+    svg.appendChild(el("line",{x1:Tm.l,y1:syS(dssMin),x2:Tm.l,y2:syS(dssMax),stroke:"#cbd5e1"}));
+    for(let v=x0; v<=x1; v++) svg.appendChild(el("text",{x:sx(v),y:syS(dssMin)+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    svg.appendChild(el("text",{x:(Tm.l+W-Tm.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="observation y";
+    // crossover at |y| = 1.083
+    const xc=1.083;
+    [xc,-xc].forEach(cx=>svg.appendChild(el("line",{x1:sx(cx),y1:syS(dssMin),x2:sx(cx),y2:syS(dssMax),stroke:"#e5e7eb","stroke-dasharray":"3 3"})));
+    svg.appendChild(el("text",{x:sx(0),y:syS(dssMax)+2,"text-anchor":"middle","font-size":10,fill:"#16a34a"})).textContent="sharp wins";
+    svg.appendChild(el("text",{x:sx(2.7),y:syS(dssMax)+2,"text-anchor":"middle","font-size":10,fill:"#9333ea"})).textContent="wide wins";
+    // DSS curves
+    [[SH,"#16a34a"],[WD,"#9333ea"]].forEach(([sd,col])=>{
+      let p="";
+      for(let i=0;i<=N;i++){ const xv=x0+(x1-x0)*i/N; const s=Math.min(dss(sd,xv),dssMax); p+=(i?" L ":"M ")+sx(xv)+" "+syS(s); }
+      svg.appendChild(el("path",{d:p,fill:"none",stroke:col,"stroke-width":2.4}));
+    });
+    // current observation markers on each curve
+    [[SH,"#16a34a","dssSharp"],[WD,"#9333ea","dssWide"]].forEach(([sd,col,id])=>{
+      const s=dss(sd,y);
+      svg.appendChild(el("circle",{cx:sx(y),cy:syS(Math.min(s,dssMax)),r:4.5,fill:col,stroke:"#fff","stroke-width":1.5}));
+      document.getElementById(id).textContent=s.toFixed(2);
+    });
+    const win=document.getElementById("dssWin");
+    const better=dss(SH,y)<dss(WD,y);
+    win.textContent = better ? "→ sharp scores better here" : "→ wide scores better here";
+    win.style.borderLeft = "4px solid "+(better?"#16a34a":"#9333ea");
+    win.style.paddingLeft="10px";
+  }
+  yInp.addEventListener("input",draw); draw();
+})();
+
+/* ================= FIGURE 4 : WIS → CRPS ================= */
+(function(){
+  const svg=document.getElementById("wisSvg");
+  const W=720,H=430, MU=6, SD=1.6, x0=1, x1=11, Kmax=40;
+  const yInp=document.getElementById("wisY"), kInp=document.getElementById("wisK");
+  const Tm={l:54,r:24,t:30}, Th=212;
+  const sx=v=>Tm.l+(v-x0)/(x1-x0)*(W-Tm.l-Tm.r);
+  const Bx0=Th+30, Bm={l:54,r:24,t:22,b:40}, Bh=H-Bx0;
+  const wisTotal=(K,y)=>intervalParts(MU,SD,y,K).total;
+
+  function draw(){
+    const y=+yInp.value, K=+kInp.value;
+    document.getElementById("wisYval").textContent=y.toFixed(1);
+    document.getElementById("wisKval").textContent=K;
+    clear(svg);
+
+    /* ---- TOP: interval fan ---- */
+    const ay=Tm.t, rowsH=Th-Tm.t-26, baseY=ay+rowsH+6;
+    svg.appendChild(el("text",{x:Tm.l,y:18,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Forecast as "+K+" nested prediction interval"+(K>1?"s":"")+" + median";
+    svg.appendChild(el("line",{x1:Tm.l,y1:baseY,x2:W-Tm.r,y2:baseY,stroke:"#cbd5e1"}));
+    for(let v=x0; v<=x1; v++) svg.appendChild(el("text",{x:sx(v),y:baseY+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    const rowH=rowsH/(K+1), sw=Math.max(Math.min(rowH-1.5,7),1.6);
+    for(let k=1;k<=K;k++){
+      const pl=k/(2*K+2);
+      const l=MU+SD*normInv(pl), u=MU+SD*normInv(1-pl);
+      const ry=ay+rowsH*(1-k/(K+1));
+      svg.appendChild(el("line",{x1:sx(l),y1:ry,x2:sx(u),y2:ry,stroke:"#2563eb","stroke-width":sw,"stroke-linecap":"round",opacity:0.3+0.55*(k/K)}));
+      if(y<l) svg.appendChild(el("line",{x1:sx(y),y1:ry,x2:sx(l),y2:ry,stroke:"#dc2626","stroke-width":sw,"stroke-linecap":"round"}));
+      if(y>u) svg.appendChild(el("line",{x1:sx(u),y1:ry,x2:sx(y),y2:ry,stroke:"#dc2626","stroke-width":sw,"stroke-linecap":"round"}));
+    }
+    svg.appendChild(el("line",{x1:sx(MU),y1:ay,x2:sx(MU),y2:baseY,stroke:"#94a3b8","stroke-dasharray":"2 3"}));
+    svg.appendChild(el("text",{x:sx(MU),y:baseY+16,"text-anchor":"middle","font-size":9,fill:"#94a3b8"})).textContent="median";
+    svg.appendChild(el("line",{x1:sx(y),y1:ay-6,x2:sx(y),y2:baseY,stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("circle",{cx:sx(y),cy:baseY,r:4.5,fill:"#ea580c"}));
+    svg.appendChild(el("text",{x:sx(y),y:ay-9,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#ea580c"})).textContent="y";
+
+    /* ---- BOTTOM: WIS vs K converging to CRPS ---- */
+    const crps=crpsNorm(MU,SD,y);
+    const ax=Bm.l, aw=W-Bm.l-Bm.r, ayB=Bx0+Bm.t, ahB=Bh-Bm.t-Bm.b;
+    const wisArr=[]; let wmax=crps;
+    for(let kk=1;kk<=Kmax;kk++){ const w=wisTotal(kk,y); wisArr.push(w); if(w>wmax) wmax=w; }
+    const ymax=wmax*1.15+1e-6;
+    const sK=k=>ax+(k-1)/(Kmax-1)*aw;
+    const sV=v=>ayB+ahB-(v/ymax)*ahB;
+    svg.appendChild(el("text",{x:Bm.l,y:Bx0+14,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="WIS → CRPS as the number of intervals grows";
+    const gstep = ymax>4?2:1;
+    for(let g=0; g<=ymax; g+=gstep){
+      svg.appendChild(el("line",{x1:ax,y1:sV(g),x2:ax+aw,y2:sV(g),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:ax-8,y:sV(g)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=g;
+    }
+    svg.appendChild(el("line",{x1:ax,y1:sV(0),x2:ax,y2:ayB,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:sV(crps),x2:ax+aw,y2:sV(crps),stroke:"#64748b","stroke-dasharray":"6 4","stroke-width":1.6}));
+    svg.appendChild(el("text",{x:ax+aw,y:sV(crps)-5,"text-anchor":"end","font-size":11,fill:"#475569"})).textContent="CRPS = "+crps.toFixed(3);
+    let p="";
+    wisArr.forEach((w,i)=>{ p+=(i?" L ":"M ")+sK(i+1)+" "+sV(w); });
+    svg.appendChild(el("path",{d:p,fill:"none",stroke:"#2563eb","stroke-width":2.4}));
+    svg.appendChild(el("circle",{cx:sK(K),cy:sV(wisArr[K-1]),r:5,fill:"#2563eb",stroke:"#fff","stroke-width":1.5}));
+    svg.appendChild(el("text",{x:ax+aw/2,y:H-6,"text-anchor":"middle","font-size":11,fill:"#374151"})).textContent="number of intervals K";
+
+    const wisNow=wisArr[K-1];
+    document.getElementById("wisVal").textContent=wisNow.toFixed(3);
+    document.getElementById("wisCrps").textContent=crps.toFixed(3);
+    const pct=crps>1e-6?100*Math.abs(wisNow-crps)/crps:0;
+    document.getElementById("wisGap").textContent = K>=30 ? "within "+pct.toFixed(1)+"% of CRPS ✓" : "gap to CRPS: "+pct.toFixed(1)+"% (raise K)";
+
+    const pr=intervalParts(MU,SD,y,K);
+    stackedBar(document.getElementById("wisDecomp"),[
+      {v:pr.disp, color:"#0891b2", label:"dispersion"},
+      {v:pr.over, color:"#ea580c", label:"overpred."},
+      {v:pr.under,color:"#9333ea", label:"underpred."},
+    ],720);
+    document.getElementById("wDisp").textContent=pr.disp.toFixed(3);
+    document.getElementById("wOver").textContent=pr.over.toFixed(3);
+    document.getElementById("wUnder").textContent=pr.under.toFixed(3);
+  }
+  yInp.addEventListener("input",draw); kInp.addEventListener("input",draw); draw();
+})();
+</script>
+</body>
+</html>
