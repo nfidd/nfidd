@@ -14,9 +14,15 @@ We will see how we can visualise such forecasts, and visually compare them to wh
 
 - [Introduction to forecasting](slides/introduction-to-forecasting)
 
-::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**forecasting concepts** interactive](../interactive/forecasting-concepts.html){target="_blank"} — extend a model into the future and watch the uncertainty fan grow with the horizon. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+::: {.callout-tip collapse="true"}
+## Interactive: the forecast fan
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecasting-concepts.html?embed=fan" title="forecasting concepts interactive" loading="lazy" style="width:100%;height:1000px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Extend a model forward and watch the uncertainty fan grow with the horizon. [Open the full explainer ↗](../interactive/forecasting-concepts.html){target="_blank"}
 :::
 
 ## Objectives

@@ -16,9 +16,15 @@ The aim of nowcasting is to predict what an epidemiological time series will loo
 
 - [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
-::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**nowcasting** interactive](../interactive/nowcasting.html){target="_blank"} — the right-edge dip, the reporting triangle, and the nowcast correction. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+::: {.callout-tip collapse="true"}
+## Interactive: nowcasting
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build" title="nowcasting interactive" loading="lazy" style="width:100%;height:1250px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See each day's cases split into observed + missing and summed into a nowcast. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
 :::
 
 ## Objectives

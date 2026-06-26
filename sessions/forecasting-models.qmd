@@ -13,9 +13,15 @@ In this session, we'll start with the renewal model that we've been using and ex
 
 - [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
 
-::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**forecasting models** interactive](../interactive/forecasting-models.html){target="_blank"} — compare random-walk, statistical and mechanistic forecasts diverging across the horizon. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+::: {.callout-tip collapse="true"}
+## Interactive: a spectrum of models
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecasting-models.html?embed=headline" title="forecasting models interactive" loading="lazy" style="width:100%;height:1050px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Compare random-walk, statistical and mechanistic forecasts diverging over the horizon. [Open the full explainer ↗](../interactive/forecasting-models.html){target="_blank"}
 :::
 
 ## Objectives

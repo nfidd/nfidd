@@ -34,9 +34,15 @@ Many collaborative forecasting projects and so-called forecasting hubs use quant
 
 - [Introduction to ensembles](slides/introduction-to-ensembles)
 
-::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**forecast ensembles** interactive](../interactive/forecast-ensembles.html){target="_blank"} — linear opinion pool vs quantile (Vincent) averaging. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+::: {.callout-tip collapse="true"}
+## Interactive: opinion pool vs quantile averaging
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-ensembles.html?embed=headtohead" title="forecast ensembles interactive" loading="lazy" style="width:100%;height:1300px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge. [Open the full explainer ↗](../interactive/forecast-ensembles.html){target="_blank"}
 :::
 
 ## Objectives
@@ -348,6 +354,17 @@ ensemble_scores <- simple_ensembles |>
 The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
 
 We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
+:::
+
+::: {.callout-tip collapse="true"}
+## Interactive: WIS → CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:1100px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Add prediction intervals and watch the WIS converge to the CRPS, with the same dispersion / over / under split. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
 :::
 
 Again we start with a high level overview of the scores by model.

@@ -17,9 +17,15 @@ We can again handle these by including them as uncertain parameters in the model
 
 [Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
-::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**biases in delay distributions** interactive](../interactive/biases-in-delay-distributions.html){target="_blank"} — see how right truncation biases observed delays short in real time. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+::: {.callout-tip collapse="true"}
+## Interactive: biases in delay distributions
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/biases-in-delay-distributions.html?embed=truncation" title="biases in delay distributions interactive" loading="lazy" style="width:100%;height:1050px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Watch right truncation bias the observed delays short in real time. [Open the full explainer ↗](../interactive/biases-in-delay-distributions.html){target="_blank"}
 :::
 
 ## Objectives

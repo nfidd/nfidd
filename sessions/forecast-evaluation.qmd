@@ -15,8 +15,8 @@ In this session you will get to know several ways of assessing different aspects
 - [Forecast evaluation](slides/forecast-evaluation)
 
 ::: {.callout-tip}
-## Interactive explainer
-Build intuition for this session with the [**forecast evaluation** interactive](../interactive/forecast-evaluation.html){target="_blank"} — CRPS, the PIT histogram, DSS and WIS, with component breakdowns. Part of the [interactive explainers](../reference/interactive-explainers.qmd) collection.
+## Interactive explainers
+Interactive visualisations are embedded at the **CRPS** and **PIT histogram** definitions below — expand the dropdowns to explore them. They are also collected on the [interactive explainers](../reference/interactive-explainers.qmd) page.
 :::
 
 ## Objectives
@@ -197,6 +197,17 @@ The CRPS can be thought about as the combination of two key aspects of forecasti
 
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
+::: {.callout-tip collapse="true"}
+## Interactive: the CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+:::
+
 ::: {.callout-tip}
 ## Key things to note about the CRPS
   - Small values are better
@@ -267,6 +278,17 @@ What does this tell you about the model?
 As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019]. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
 
 There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
+
+::: {.callout-tip collapse="true"}
+## Interactive: the PIT histogram
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=pit" title="PIT histogram interactive" loading="lazy" style="width:100%;height:1500px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+:::
 
 ::: {.callout-tip}
 ## Interpreting the PIT histogram
