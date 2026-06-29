@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bayesian updating — posterior ∝ prior × likelihood</title>
+<style>
+  :root{
+    --prior:#2563eb;   /* prior / blue */
+    --like:#ea580c;    /* likelihood / orange */
+    --post:#9333ea;    /* posterior / purple */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#f5f3ff 0%, var(--bg) 100%); border-bottom:1px solid var(--line);}
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:22px auto 0; max-width:780px}
+  nav.toc a{text-decoration:none; color:var(--post); font-weight:600; font-size:14px;
+    border:1px solid #ddd6fe; background:#fff; padding:6px 13px; border-radius:999px}
+  nav.toc a:hover{background:#f5f3ff}
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px; margin:18px 0 6px; background:#fff}
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; margin:8px 4px 2px;
+    padding:12px 14px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; font-size:14px}
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:150px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:160px; accent-color:var(--post)}
+  .readout{display:inline-flex; gap:14px; flex-wrap:wrap; margin:10px 4px 0; font-variant-numeric:tabular-nums}
+  .readout .chip{background:#f1f5f9; border:1px solid var(--line); border-radius:8px; padding:6px 12px; font-size:14px}
+  .readout .chip b{font-size:16px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#f5f3ff; border-left:4px solid var(--post); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.blue{background:#eff6ff; border-color:var(--prior)}
+  .key.orange{background:#fff7ed; border-color:var(--like)}
+  .formula{background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; font-size:15px; overflow-x:auto; margin:14px 0}
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.beta{background:#ede9fe; color:#5b21b6}
+  .pill.norm{background:#dcfce7; color:#166534}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{font:600 13px inherit; border:1px solid #ddd6fe; background:#fff; color:var(--post);
+    padding:6px 13px; border-radius:8px; cursor:pointer}
+  .presets button:hover{background:#f5f3ff}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--post)}
+</style>
+</head>
+<body>
+
+<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+  <a href="../sessions/forecasting-concepts.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Forecasting concepts session</a>
+  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
+</div>
+
+<header class="hero">
+  <h1>Bayesian updating</h1>
+  <p>The engine behind every model in this course: <b class="lower">posterior &prop; prior &times; likelihood</b>. The posterior is a <b>compromise</b> between what you believed beforehand (the <b style="color:var(--prior)">prior</b>) and what the data say (the <b style="color:var(--like)">likelihood</b>). More data lets the likelihood win; a stronger prior pulls harder. These figures let you feel that tug-of-war.</p>
+  <nav class="toc">
+    <a href="#intro">Bayes' theorem</a>
+    <a href="#update">Updating a probability</a>
+    <a href="#normal">A continuous mean</a>
+    <a href="#takeaways">Takeaways</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>Bayes' theorem</h2>
+  <p class="tagline">Turning "what we believe" plus "what we saw" into "what we now believe"</p>
+  <p>We want the probability of unknown parameters &theta; <i>given</i> the data — but our model tells us the reverse, the probability of the data given the parameters. Bayes' theorem inverts it:</p>
+
+  <div class="formula">p(&theta; | data) =
+    <span class="frac"><span>p(data | &theta;) &middot; p(&theta;)</span><span>p(data)</span></span>
+    &nbsp;&nbsp;<span style="color:#64748b">// posterior = (likelihood &times; prior) / evidence</span></div>
+
+  <p>The denominator <i>p</i>(data) does not depend on &theta; — it is just a constant that makes the posterior integrate to 1. So the shape of the answer comes entirely from the numerator, which is why the whole of Bayesian inference fits in one proportionality:</p>
+
+  <div class="formula">p(&theta; | data) &prop; p(data | &theta;) &times; p(&theta;)
+    &nbsp;&nbsp;<span style="color:#64748b">// posterior &prop; likelihood &times; prior</span></div>
+
+  <h3>Why bother with a prior?</h3>
+  <ul>
+    <li><b>Encode knowledge.</b> You often <i>know</i> things — an incubation period is a few days, a reporting probability is between 0 and 1, R(t) rarely jumps from 0.8 to 3 overnight. The prior is where that epidemiological knowledge enters the model.</li>
+    <li><b>Regularise.</b> Maximum likelihood can overfit badly on sparse data (3 cases today, 6 tomorrow &rarr; "R(t) = 2.0 exactly"). A prior pulls wild estimates back toward the plausible, especially when data are thin.</li>
+    <li><b>Honest uncertainty.</b> Bayes returns a whole <b>distribution</b> over &theta;, not a single number — so you can ask "what is the probability the outbreak is growing?" rather than just reading off a point estimate.</li>
+  </ul>
+  <div class="key blue">A prior is not cheating — it is the explicit, auditable statement of what you assumed. With lots of data it barely matters; with little data it is doing the honest work of stopping the model from believing nonsense.</div>
+
+  <h3>In this course we <i>sample</i> the posterior</h3>
+  <p>For the toy examples on this page the posterior has a tidy closed form. Real epidemic models have hundreds of parameters and no such formula, so the normalising integral <i>p</i>(data) is intractable. Instead of solving it we <b>draw samples</b> from the posterior using <b>MCMC</b> (in Stan). Each sample is one plausible parameter set — one possible version of the epidemic — and the cloud of samples <i>is</i> the posterior. Everything below is the conjugate, exactly-solvable shadow of that sampling machinery.</p>
+</section>
+
+<!-- ============ UPDATE (Beta-Binomial) ============ -->
+<section id="update">
+  <h2>Updating a probability <span class="pill beta">Beta–Binomial</span></h2>
+  <p class="tagline">Estimating a reporting / ascertainment probability &theta; from "k of n" data</p>
+  <p>Suppose &theta; is a probability we want to learn — the chance a true case is <b>reported</b>, say, or a test comes back positive. We hold a <b style="color:var(--prior)">prior</b> belief about &theta;, then observe data: <b>k successes in n trials</b>. The likelihood of that data is Binomial, &prop; &theta;<sup>k</sup>(1&minus;&theta;)<sup>n&minus;k</sup>. A <b>Beta(a, b)</b> prior, &prop; &theta;<sup>a&minus;1</sup>(1&minus;&theta;)<sup>b&minus;1</sup>, is the natural partner — multiply the two and the exponents simply add:</p>
+
+  <div class="formula">prior Beta(a, b) &nbsp;&times;&nbsp; data (k of n) &nbsp;&rarr;&nbsp; <b>posterior Beta(a + k, &nbsp;b + n &minus; k)</b></div>
+
+  <p>So updating is just bookkeeping: add the successes to <i>a</i> and the failures to <i>b</i>. The figure evaluates each Beta density on a fine grid of &theta; &isin; [0, 1] and normalises it numerically (the trapezoid rule) — no special functions needed. Watch how the <b style="color:var(--post)">posterior</b> sits <i>between</i> prior and likelihood, and how it slides toward the data as <i>n</i> grows.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--prior)"></i> prior Beta(a, b)</span>
+    <span><i class="swatch" style="border-color:var(--like)"></i> likelihood (scaled)</span>
+    <span><i class="swatch" style="border-color:var(--post);border-top-width:4px"></i> posterior Beta(a+k, b+n&minus;k)</span>
+  </div>
+  <div class="presets" id="bbPriorPresets">
+    <button data-a="1" data-b="1">Uniform prior</button>
+    <button data-a="2" data-b="2">Weak (toward 0.5)</button>
+    <button data-a="20" data-b="20">Strong toward 0.5</button>
+    <button data-a="8" data-b="2">Prior favours high</button>
+  </div>
+  <div class="fig">
+    <svg id="bbSvg" viewBox="0 0 720 340" role="img" aria-label="Prior, scaled likelihood and posterior Beta densities over theta in [0,1]."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">prior a: <span id="bbAval">2.0</span></span><input id="bbA" type="range" min="0.5" max="30" step="0.5" value="2"></label>
+    <label><span class="vlabel">prior b: <span id="bbBval">2.0</span></span><input id="bbB" type="range" min="0.5" max="30" step="0.5" value="2"></label>
+    <label><span class="vlabel">trials n: <span id="bbNval">10</span></span><input id="bbN" type="range" min="0" max="200" step="1" value="10"></label>
+    <label><span class="vlabel">successes k: <span id="bbKval">7</span></span><input id="bbK" type="range" min="0" max="200" step="1" value="7"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--prior);padding-left:10px">prior mean = <b id="bbPriorMean">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--like);padding-left:10px">data k/n = <b id="bbData">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--post);padding-left:10px">posterior mean = <b id="bbPostMean">—</b></span>
+    <span class="chip">95% CrI = <b id="bbCrI">—</b></span>
+  </div>
+  <div class="readout">
+    <span class="chip" id="bbHint" style="background:#f5f3ff">—</span>
+  </div>
+
+  <h3>Watch the data take over, one draw at a time</h3>
+  <p>Press <b>play</b> to stream Bernoulli draws (each a "success" with true probability 0.7) and feed them in <i>sequentially</i>. The prior is fixed at whatever <i>a, b</i> you set above. Early on, the posterior barely moves from the prior; as the trials pile up the likelihood dominates and the posterior tightens around the true 0.7 — the data swamp the prior.</p>
+  <div class="presets" style="align-items:center">
+    <button id="bbAdd1">+1 draw</button>
+    <button id="bbAdd10">+10</button>
+    <button id="bbPlay">▶ play</button>
+    <button id="bbStreamReset">reset stream</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px">streamed n = <b id="bbStreamN">0</b>, k = <b id="bbStreamK">0</b></span>
+  </div>
+  <p class="figcap">The "play" stream overrides the n and k sliders and uses the live prior a, b. Press <b>reset stream</b> to return to the manual sliders.</p>
+</section>
+
+<!-- ============ NORMAL (Normal-Normal) ============ -->
+<section id="normal">
+  <h2>A continuous mean <span class="pill norm">Normal–Normal</span></h2>
+  <p class="tagline">The posterior mean is a <b>precision-weighted average</b> of prior and data</p>
+  <p>Now &theta; is a continuous quantity — a mean we want to estimate (an average delay, a log-incidence level). We hold a <b style="color:var(--prior)">prior</b> N(&mu;<sub>0</sub>, &sigma;<sub>0</sub>&sup2;) and observe <i>n</i> data points with sample mean x&#772; and known observation noise &sigma;. With a Normal prior and Normal likelihood the posterior is again Normal, and its mean is the two sources blended by their <b>precisions</b> (precision = 1/variance):</p>
+
+  <div class="formula">&mu;<sub>post</sub> =
+    <span class="frac"><span>&mu;<sub>0</sub>/&sigma;<sub>0</sub>&sup2; + n&middot;x&#772;/&sigma;&sup2;</span><span>1/&sigma;<sub>0</sub>&sup2; + n/&sigma;&sup2;</span></span>
+    &nbsp;&nbsp;&nbsp; <span class="frac"><span>1</span><span>&sigma;<sub>post</sub>&sup2;</span></span> =
+    <span class="frac"><span>1</span><span>&sigma;<sub>0</sub>&sup2;</span></span> + <span class="frac"><span>n</span><span>&sigma;&sup2;</span></span></div>
+
+  <p>Read it as a weighted tug-of-war: whichever side is more <i>precise</i> (less variance, or — for the data — more observations) pulls the posterior toward itself. A confident prior (small &sigma;<sub>0</sub>) holds firm; lots of data (large <i>n</i>) overwhelms it. And the posterior is always <b>sharper than either input</b> — precisions add, so it can only narrow.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--prior)"></i> prior N(&mu;<sub>0</sub>, &sigma;<sub>0</sub>&sup2;)</span>
+    <span><i class="swatch" style="border-color:var(--like)"></i> likelihood (from data)</span>
+    <span><i class="swatch" style="border-color:var(--post);border-top-width:4px"></i> posterior</span>
+  </div>
+  <div class="fig">
+    <svg id="nnSvg" viewBox="0 0 720 320" role="img" aria-label="Prior, likelihood and posterior Normal densities for a continuous mean."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">prior mean &mu;<sub>0</sub>: <span id="nnMu0val">3.0</span></span><input id="nnMu0" type="range" min="-4" max="4" step="0.1" value="-2"></label>
+    <label><span class="vlabel">prior sd &sigma;<sub>0</sub>: <span id="nnSd0val">1.5</span></span><input id="nnSd0" type="range" min="0.3" max="4" step="0.1" value="1.5"></label>
+    <label><span class="vlabel">data mean x&#772;: <span id="nnXbarval">1.5</span></span><input id="nnXbar" type="range" min="-4" max="4" step="0.1" value="2"></label>
+    <label><span class="vlabel">obs noise &sigma;: <span id="nnSigval">1.5</span></span><input id="nnSig" type="range" min="0.3" max="4" step="0.1" value="1.5"></label>
+    <label><span class="vlabel">n data points: <span id="nnNval">5</span></span><input id="nnN" type="range" min="0" max="60" step="1" value="5"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--prior);padding-left:10px">prior mean = <b id="nnMu0out">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--like);padding-left:10px">data mean = <b id="nnXout">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--post);padding-left:10px">posterior mean = <b id="nnMuPost">—</b></span>
+    <span class="chip">posterior sd = <b id="nnSdPost">—</b></span>
+  </div>
+  <div class="readout">
+    <span class="chip" id="nnWeights" style="background:#f5f3ff">—</span>
+  </div>
+  <div class="key">Set <i>n</i> = 0 and the posterior is the prior exactly — no data, no update. Crank <i>n</i> up and the posterior slides onto the data mean and shrinks, almost ignoring the prior. That is the same convergence MCMC shows: with enough data the choice of (reasonable) prior stops mattering.</div>
+</section>
+
+<!-- ============ TAKEAWAYS ============ -->
+<section id="takeaways">
+  <h2>Takeaways</h2>
+  <ul>
+    <li><b>The posterior is a compromise.</b> It lives between the prior and the likelihood, never outside the tug-of-war between them.</li>
+    <li><b>Data eventually swamp the prior.</b> As <i>n</i> grows the likelihood sharpens and dominates; the posterior converges on the data regardless of a (reasonable) prior.</li>
+    <li><b>A stronger prior pulls harder.</b> A confident prior (Beta with large a+b, or Normal with small &sigma;<sub>0</sub>) holds the estimate near its belief until enough data arrive to move it.</li>
+    <li><b>Priors regularise and encode knowledge.</b> They stop sparse data from implying nonsense and let your epidemiological expertise enter the model explicitly.</li>
+    <li><b>You get a whole distribution, not a point.</b> Credible intervals and "probability of growth" fall straight out of the posterior.</li>
+    <li><b>In practice we sample it.</b> Real models have no closed form, so Stan's MCMC draws thousands of posterior samples — each one a plausible epidemic — and those samples become the forecasts.</li>
+  </ul>
+  <footer>Built as a teaching aid for the NFIDD forecasting-concepts session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- numerics ---------- */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function normCdf(x,mu,sd){return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2)));}
+function normPdf(x,mu,sd){return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function clear(svg){while(svg.firstChild)svg.removeChild(svg.firstChild);}
+
+/* Evaluate an unnormalised log-Beta kernel on a grid, then normalise by trapezoid.
+   Working in logs keeps large a,b stable; we subtract the max before exp. */
+function betaGrid(a,b,grid){
+  const dx=grid[1]-grid[0];
+  const logf=grid.map(t=>{
+    const tt=Math.min(Math.max(t,1e-9),1-1e-9);
+    return (a-1)*Math.log(tt)+(b-1)*Math.log(1-tt);
+  });
+  let mx=-Infinity; for(const v of logf) if(v>mx) mx=v;
+  const raw=logf.map(v=>Math.exp(v-mx));
+  let area=0; for(let i=1;i<raw.length;i++) area+=0.5*(raw[i]+raw[i-1])*dx;
+  if(area<=0) area=1e-9;
+  return raw.map(v=>v/area);
+}
+/* scaled Binomial likelihood kernel theta^k (1-theta)^(n-k), peak-normalised to 1 for display */
+function likeGrid(k,n,grid){
+  const logf=grid.map(t=>{
+    const tt=Math.min(Math.max(t,1e-9),1-1e-9);
+    return k*Math.log(tt)+(n-k)*Math.log(1-tt);
+  });
+  let mx=-Infinity; for(const v of logf) if(v>mx) mx=v;
+  return logf.map(v=>Math.exp(v-mx));
+}
+/* 95% credible interval from a density on a grid via the numerical CDF */
+function gridCrI(dens,grid){
+  const dx=grid[1]-grid[0]; let c=0; const cdf=[0];
+  for(let i=1;i<dens.length;i++){ c+=0.5*(dens[i]+dens[i-1])*dx; cdf.push(c); }
+  const tot=cdf[cdf.length-1]||1e-9;
+  function q(p){
+    const target=p*tot;
+    for(let i=1;i<cdf.length;i++){
+      if(cdf[i]>=target){
+        const f=(target-cdf[i-1])/((cdf[i]-cdf[i-1])||1e-9);
+        return grid[i-1]+f*(grid[i]-grid[i-1]);
+      }
+    }
+    return grid[grid.length-1];
+  }
+  return [q(0.025),q(0.975)];
+}
+
+/* ================= FIGURE 1 : Beta-Binomial updating ================= */
+(function(){
+  const svg=document.getElementById("bbSvg");
+  const W=720, PL=50, PR=18, PW=W-PL-PR;
+  const ayP=26, hP=246, byP=ayP+hP;
+  const sx=t=>PL+t*PW;
+  const aIn=document.getElementById("bbA"), bIn=document.getElementById("bbB");
+  const nIn=document.getElementById("bbN"), kIn=document.getElementById("bbK");
+  const NG=241; const grid=[]; for(let i=0;i<NG;i++) grid.push(i/(NG-1));
+
+  // streaming state
+  let streaming=false, sN=0, sK=0, timer=null;
+  function streamReset(){ streaming=false; sN=0; sK=0; if(timer){clearInterval(timer);timer=null;} document.getElementById("bbPlay").textContent="▶ play"; sync(); }
+
+  function draw(){
+    const a=+aIn.value, b=+bIn.value;
+    let n,k;
+    if(streaming){ n=sN; k=sK; } else { n=+nIn.value; k=Math.min(+kIn.value,n); }
+    aIn.value=a; bIn.value=b;
+    document.getElementById("bbAval").textContent=a.toFixed(1);
+    document.getElementById("bbBval").textContent=b.toFixed(1);
+    document.getElementById("bbNval").textContent=n;
+    document.getElementById("bbKval").textContent=k;
+    document.getElementById("bbStreamN").textContent=sN;
+    document.getElementById("bbStreamK").textContent=sK;
+
+    const prior=betaGrid(a,b,grid);
+    const like=likeGrid(k,n,grid);            // peak-normalised to 1
+    const post=betaGrid(a+k,b+n-k,grid);
+
+    clear(svg);
+    // y scale from prior & posterior densities (likelihood is shown rescaled)
+    let dmax=0; for(let i=0;i<NG;i++){ if(prior[i]>dmax)dmax=prior[i]; if(post[i]>dmax)dmax=post[i]; }
+    dmax=Math.max(dmax,1)*1.1;
+    const sy=d=>byP-(d/dmax)*hP;
+    // scale the (peak=1) likelihood so its peak sits at ~85% of panel height
+    const likeScale=0.85*dmax;
+
+    // gridlines + x axis
+    svg.appendChild(el("line",{x1:PL,y1:byP,x2:W-PR,y2:byP,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:PL,y1:ayP,x2:PL,y2:byP,stroke:"#cbd5e1"}));
+    for(let t=0;t<=1.0001;t+=0.25){
+      svg.appendChild(el("line",{x1:sx(t),y1:ayP,x2:sx(t),y2:byP,stroke:"#f1f5f9"}));
+      svg.appendChild(el("text",{x:sx(t),y:byP+16,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=t.toFixed(2);
+    }
+    svg.appendChild(el("text",{x:(PL+W-PR)/2,y:byP+34,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="probability θ";
+    const yl=el("text",{x:14,y:(ayP+byP)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:"rotate(-90 14 "+((ayP+byP)/2)+")"}); yl.textContent="density"; svg.appendChild(yl);
+
+    function path(dens,scaleArr,col,wd,op,fill){
+      let p="";
+      for(let i=0;i<NG;i++){ const yv=fill? sy(scaleArr(dens[i])) : sy(scaleArr(dens[i])); p+=(i?" L ":"M ")+sx(grid[i]).toFixed(2)+" "+yv.toFixed(2); }
+      if(fill){ p="M "+sx(0)+" "+sy(0)+" "+p.slice(2)+" L "+sx(1)+" "+sy(0)+" Z"; svg.appendChild(el("path",{d:p,fill:col,opacity:op})); }
+      else svg.appendChild(el("path",{d:p,fill:"none",stroke:col,"stroke-width":wd,opacity:op}));
+    }
+    // prior (blue, light fill + line)
+    path(prior,d=>d,"#2563eb",2,.12,true);
+    path(prior,d=>d,"#2563eb",2,.85,false);
+    // likelihood (orange, rescaled) — only meaningful when there is data
+    if(n>0){
+      let p="";
+      for(let i=0;i<NG;i++){ p+=(i?" L ":"M ")+sx(grid[i]).toFixed(2)+" "+sy(like[i]*likeScale).toFixed(2); }
+      svg.appendChild(el("path",{d:p,fill:"none",stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"5 4",opacity:.9}));
+    }
+    // posterior (purple, bold + fill)
+    path(post,d=>d,"#9333ea",3,.13,true);
+    path(post,d=>d,"#9333ea",3.2,1,false);
+
+    // means + CrI
+    const priorMean=a/(a+b);
+    const postMean=(a+k)/(a+b+n);
+    const dataP = n>0 ? k/n : NaN;
+    const crI=gridCrI(post,grid);
+    // posterior mean marker
+    svg.appendChild(el("line",{x1:sx(postMean),y1:ayP,x2:sx(postMean),y2:byP,stroke:"#9333ea","stroke-dasharray":"3 3",opacity:.6}));
+    // CrI bracket along the baseline
+    svg.appendChild(el("line",{x1:sx(crI[0]),y1:byP-4,x2:sx(crI[1]),y2:byP-4,stroke:"#9333ea","stroke-width":3,opacity:.55}));
+
+    document.getElementById("bbPriorMean").textContent=priorMean.toFixed(3);
+    document.getElementById("bbData").textContent = n>0 ? (k+"/"+n+" = "+dataP.toFixed(3)) : "no data";
+    document.getElementById("bbPostMean").textContent=postMean.toFixed(3);
+    document.getElementById("bbCrI").textContent="["+crI[0].toFixed(3)+", "+crI[1].toFixed(3)+"]";
+
+    const hint=document.getElementById("bbHint");
+    const priorStrength=a+b, dataStrength=n;
+    if(n===0) hint.textContent="no data yet → posterior = prior exactly";
+    else if(dataStrength < priorStrength*0.5) hint.textContent="little data vs prior → posterior stays near the prior";
+    else if(dataStrength > priorStrength*4) hint.textContent="data dominate → posterior sits on the likelihood, prior barely matters";
+    else hint.textContent="balanced → posterior is a genuine compromise between prior and data";
+  }
+
+  function sync(){ // refresh slider-derived display when not streaming
+    draw();
+  }
+
+  aIn.addEventListener("input",draw); bIn.addEventListener("input",draw);
+  nIn.addEventListener("input",()=>{ if(streaming) streamReset(); else draw(); });
+  kIn.addEventListener("input",()=>{ if(streaming) streamReset(); else draw(); });
+  document.querySelectorAll("#bbPriorPresets button").forEach(btn=>{
+    btn.addEventListener("click",()=>{ aIn.value=btn.dataset.a; bIn.value=btn.dataset.b; draw(); });
+  });
+
+  // streaming controls
+  function addDraws(m){
+    streaming=true;
+    for(let i=0;i<m;i++){ sN++; if(Math.random()<0.7) sK++; }
+    draw();
+  }
+  document.getElementById("bbAdd1").addEventListener("click",()=>addDraws(1));
+  document.getElementById("bbAdd10").addEventListener("click",()=>addDraws(10));
+  document.getElementById("bbStreamReset").addEventListener("click",streamReset);
+  document.getElementById("bbPlay").addEventListener("click",function(){
+    if(timer){ clearInterval(timer); timer=null; this.textContent="▶ play"; return; }
+    streaming=true; this.textContent="❚❚ pause";
+    timer=setInterval(()=>{ addDraws(1); if(sN>=200){ clearInterval(timer); timer=null; document.getElementById("bbPlay").textContent="▶ play"; } },220);
+  });
+
+  draw();
+})();
+
+/* ================= FIGURE 2 : Normal-Normal updating ================= */
+(function(){
+  const svg=document.getElementById("nnSvg");
+  const W=720, PL=50, PR=18, PW=W-PL-PR;
+  const ayP=26, hP=232, byP=ayP+hP;
+  const x0=-6, x1=6;
+  const sx=v=>PL+(v-x0)/(x1-x0)*PW;
+  const ids=["nnMu0","nnSd0","nnXbar","nnSig","nnN"].map(i=>document.getElementById(i));
+
+  function draw(){
+    const mu0=+ids[0].value, sd0=+ids[1].value, xbar=+ids[2].value, sig=+ids[3].value, n=+ids[4].value;
+    document.getElementById("nnMu0val").textContent=mu0.toFixed(1);
+    document.getElementById("nnSd0val").textContent=sd0.toFixed(1);
+    document.getElementById("nnXbarval").textContent=xbar.toFixed(1);
+    document.getElementById("nnSigval").textContent=sig.toFixed(1);
+    document.getElementById("nnNval").textContent=n;
+
+    // precision-weighted posterior for the mean
+    const precPrior=1/(sd0*sd0);
+    const precData = n>0 ? n/(sig*sig) : 0;
+    const precPost=precPrior+precData;
+    const muPost=(mu0*precPrior + xbar*precData)/precPost;
+    const sdPost=Math.sqrt(1/precPost);
+    // likelihood for the mean ~ N(xbar, sig^2/n); standard error of the mean
+    const seMean = n>0 ? sig/Math.sqrt(n) : Infinity;
+
+    clear(svg);
+    // y scale
+    const N=300;
+    let dmax=0;
+    function pk(sd){ return normPdf(0,0,sd); }
+    dmax=Math.max(pk(sd0), pk(sdPost), n>0?pk(seMean):0)*1.1;
+    const sy=d=>byP-(d/dmax)*hP;
+
+    svg.appendChild(el("line",{x1:PL,y1:byP,x2:W-PR,y2:byP,stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:PL,y1:ayP,x2:PL,y2:byP,stroke:"#cbd5e1"}));
+    for(let v=x0;v<=x1;v+=2){
+      svg.appendChild(el("line",{x1:sx(v),y1:ayP,x2:sx(v),y2:byP,stroke:"#f1f5f9"}));
+      svg.appendChild(el("text",{x:sx(v),y:byP+16,"text-anchor":"middle","font-size":11,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:(PL+W-PR)/2,y:byP+34,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="mean θ";
+    const yl=el("text",{x:14,y:(ayP+byP)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:"rotate(-90 14 "+((ayP+byP)/2)+")"}); yl.textContent="density"; svg.appendChild(yl);
+
+    function curve(mu,sd,col,wd,op,fill){
+      let p="";
+      for(let i=0;i<=N;i++){ const x=x0+(x1-x0)*i/N; p+=(i?" L ":"M ")+sx(x).toFixed(2)+" "+sy(normPdf(x,mu,sd)).toFixed(2); }
+      if(fill){ p="M "+sx(x0)+" "+sy(0)+" "+p.slice(2)+" L "+sx(x1)+" "+sy(0)+" Z"; svg.appendChild(el("path",{d:p,fill:col,opacity:op})); }
+      else svg.appendChild(el("path",{d:p,fill:"none",stroke:col,"stroke-width":wd,opacity:op}));
+    }
+    // prior
+    curve(mu0,sd0,"#2563eb",2,.12,true);
+    curve(mu0,sd0,"#2563eb",2,.85,false);
+    // likelihood for the mean (only with data)
+    if(n>0){
+      let p="";
+      for(let i=0;i<=N;i++){ const x=x0+(x1-x0)*i/N; p+=(i?" L ":"M ")+sx(x).toFixed(2)+" "+sy(normPdf(x,xbar,seMean)).toFixed(2); }
+      svg.appendChild(el("path",{d:p,fill:"none",stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"5 4",opacity:.9}));
+    }
+    // posterior
+    curve(muPost,sdPost,"#9333ea",3.2,.13,true);
+    curve(muPost,sdPost,"#9333ea",3.2,1,false);
+    // posterior mean marker
+    svg.appendChild(el("line",{x1:sx(muPost),y1:ayP,x2:sx(muPost),y2:byP,stroke:"#9333ea","stroke-dasharray":"3 3",opacity:.6}));
+
+    document.getElementById("nnMu0out").textContent=mu0.toFixed(2);
+    document.getElementById("nnXout").textContent = n>0 ? xbar.toFixed(2) : "no data";
+    document.getElementById("nnMuPost").textContent=muPost.toFixed(2);
+    document.getElementById("nnSdPost").textContent=sdPost.toFixed(2);
+    const wPrior=precPrior/precPost, wData=precData/precPost;
+    document.getElementById("nnWeights").textContent =
+      n===0 ? "n = 0 → posterior = prior (weight 100% prior)"
+            : "weight on prior = "+(100*wPrior).toFixed(0)+"%, on data = "+(100*wData).toFixed(0)+"% (by precision)";
+  }
+  ids.forEach(i=>i.addEventListener("input",draw));
+  draw();
+})();
+</script>
+<script>
+/* embed mode: ?embed=sectionId[,id2,...] strips the page chrome AND the
+   explanatory prose/maths from the kept sections, leaving only the interactive
+   figures, for inlining in an <iframe> in the course site. Reports height so the
+   host page can auto-size the iframe. */
+(function(){
+  var q=new URLSearchParams(location.search), e=q.get('embed');
+  var KEEP={fig:1,controls:1,readout:1,legend:1,presets:1,figcap:1};
+  if(e){
+    var keep=e.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    ['header.hero','nav.toc','footer'].forEach(function(sel){
+      Array.prototype.forEach.call(document.querySelectorAll(sel),function(n){n.style.display='none';});
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('body > div'),function(d){
+      if(!d.classList.contains('wrap')) d.style.display='none';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('section'),function(sec){
+      if(keep.indexOf(sec.id)===-1){ sec.style.display='none'; return; }
+      sec.style.margin='0'; sec.style.border='none'; sec.style.boxShadow='none'; sec.style.padding='2px 2px 8px';
+      Array.prototype.forEach.call(sec.children,function(c){
+        var k=false, cl=c.classList; if(cl){ for(var key in KEEP){ if(cl.contains(key)){k=true;break;} } }
+        if(!k) c.style.display='none';
+      });
+    });
+    var wrap=document.querySelector('.wrap'); if(wrap) wrap.style.padding='0 8px 10px';
+    document.body.style.background='#fff'; document.documentElement.style.background='#fff';
+  }
+  function postH(){ try{ parent.postMessage({nfiddEmbedHeight: Math.ceil(document.body.getBoundingClientRect().height)}, '*'); }catch(_){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  document.addEventListener('input', function(){ setTimeout(postH,60); });
+  document.addEventListener('click', function(){ setTimeout(postH,120); });
+  setTimeout(postH,250); setTimeout(postH,1000);
+})();
+</script>
+</body>
+</html>
