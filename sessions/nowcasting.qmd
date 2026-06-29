@@ -176,6 +176,32 @@ Here we assume that the delay distribution is known and that we can use it to no
 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 
 
+::: {.callout-note .optional collapse="true"}
+## Mathematical definition: observed, missing, and the nowcast
+
+Write $n_{t,d}$ for the number of events with reference date $t$ (the day they occurred) that are reported after a delay of $d$ days, and let $p_d$ be the reporting-delay distribution, so that $n_{t,d} \approx N_t\, p_d$ where $N_t$ is the eventual total for date $t$. As of the current date $T$, a report for date $t$ has had time to arrive only if its delay satisfies $d \le T - t$. The count for date $t$ therefore splits into a part we have already observed and a part still to come:
+
+$$
+\underbrace{C^{\mathrm{obs}}_{t} = \sum_{d=0}^{\,T-t} n_{t,d}}_{\text{reports already in}},
+\qquad
+\underbrace{C^{\mathrm{miss}}_{t} = \sum_{d=T-t+1}^{D} n_{t,d}}_{\text{reports still to come}} .
+$$
+
+The two sums meet at the boundary $d = T-t$, so together they recover the eventual total,
+
+$$
+N_t = C^{\mathrm{obs}}_{t} + C^{\mathrm{miss}}_{t} = \sum_{d=0}^{D} n_{t,d}.
+$$
+
+We only ever observe $C^{\mathrm{obs}}_{t}$; nowcasting estimates the missing sum. Writing the delay cumulative distribution function as $F(T-t) = \sum_{d=0}^{T-t} p_d$ (the proportion of date $t$'s reports expected in by now), the simplest scaling nowcast is
+
+$$
+\widehat{N}_t = C^{\mathrm{obs}}_{t} + \widehat{C}^{\mathrm{miss}}_{t} = \frac{C^{\mathrm{obs}}_{t}}{F(T-t)} .
+$$
+
+This is exactly the "divide the most recent counts by the proportion reported" step used below, with the proportion reported being $F(T-t)$.
+:::
+
 We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution up to 15 days, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
 
 ```{r}
