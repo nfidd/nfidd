@@ -204,7 +204,7 @@
     <br>T ~ Lognormal(mean = m, sd = s)&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8">continuous delay</span>
     <br>observed delay d = &#8970;u + T&#8971; &minus; &#8970;u&#8971;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8">both events floored to a day</span></div>
 
-  <p>The <b>left panel</b> shows the most recent individuals as timeline rows: a dot at the primary time <i>u</i>, a continuous delay <i>T</i> running to the secondary time <i>u</i>+<i>T</i>, and the shaded day-cell where that secondary event is floored. The colour of each row is its observed integer delay <i>d</i>. The <b>right panel</b> tallies <i>d</i> over <b>all</b> sampled individuals as a density histogram, with the continuous density and the analytic double-censored PMF overlaid. Add individuals and watch the bars settle onto the <span style="color:var(--pmf);font-weight:600">double-censored PMF</span> — not the smooth curve.</p>
+  <p>The <b>left panel</b> shows individuals as timeline rows. For each one there are <b>two boxes</b>: the <b style="color:#b45309">amber box</b> is the <b>primary</b> interval we actually observe (a day, or a week), and the coloured box is the <b>secondary</b> interval (a day). The two dots are the <i>true, unobserved</i> continuous event times — primary at <i>u</i> and secondary at <i>u</i>+<i>T</i> — joined by the continuous delay <i>T</i>. We never see the dots, only which boxes they land in, so the <b>observed</b> delay <i>d</i> is the gap between the boxes — and <b>both</b> events being boxed is what makes it <i>double</i> censoring. The <b>right panel</b> tallies <i>d</i> over <b>all</b> sampled individuals as a density histogram; add individuals and watch the bars settle onto the <span style="color:var(--pmf);font-weight:600">double-censored PMF</span> — not the smooth continuous curve.</p>
 
   <div class="presets" id="mcWindow">
     <button data-w="1" class="on">Daily (w = 1)</button>
@@ -212,7 +212,9 @@
   </div>
 
   <div class="legend" style="margin-top:10px">
-    <span><i class="swbar" style="background:#f59e0b"></i> primary event u</span>
+    <span><i class="swbar" style="background:#f59e0b;opacity:.5"></i> primary interval (the window we observe)</span>
+    <span><i class="swbar" style="background:#94a3b8;opacity:.5"></i> secondary interval (the day we observe)</span>
+    <span>● true event times, joined by the continuous delay</span>
     <span><i class="swbar" style="background:#ea580c;opacity:.85"></i> realised observed-delay density</span>
     <span><i class="swatch" style="border-color:var(--dens)"></i> continuous density f</span>
     <span><i class="swatch" style="border-color:var(--pmf);border-top-style:dashed"></i> double-censored PMF target</span>
@@ -660,7 +662,7 @@ function pmfSum(p){ return p.reduce((a,b)=>a+b,0); }
     const u=Math.random()*w;                         // primary event time in [0,w)
     const T=Math.exp(mu+sig*normInv(Math.random())); // continuous lognormal delay
     const sec=u+T;                                   // continuous secondary time
-    const d=Math.floor(sec)-Math.floor(u);           // double-censored observed delay
+    const d=Math.floor(sec)-w*Math.floor(u/w);       // observed delay: secondary day minus primary window start
     counts[d]=(counts[d]||0)+1;
     n++; sumObs+=d;
     recent.push({u,T,sec,d});
@@ -684,7 +686,9 @@ function pmfSum(p){ return p.reduce((a,b)=>a+b,0); }
     // shared day range for both panels (cover ~99.5% of u+T)
     const xhi=Math.max(6, Math.ceil(lnQuant(0.995,mu,sig)+w)+1);
     const D=xhi;
-    const pD=pmfDouble(mm,ss,D);
+    // double-censored PMF for the current primary window w: average the F-increment over u in (0,w)
+    const NUw=24, pD=[];
+    for(let d=0; d<D; d++){ let acc=0; for(let j=0;j<NUw;j++){ const uu=(j+0.5)/NUw*w; acc += lnCdf(d+1-uu,mu,sig)-lnCdf(d-uu,mu,sig); } pD.push(Math.max(acc/NUw,0)); }
 
     // ---- layout: two panels side by side within one SVG ----
     const gap=26;
@@ -712,17 +716,20 @@ function pmfSum(p){ return p.reduce((a,b)=>a+b,0); }
     const rh=rows>0 ? Math.min(16, ah/Math.max(rows,1)) : 0;
     const rowTop=ay + (ah - rh*rows)/2;
     recent.forEach((ind,i)=>{
-      const yc=rowTop + i*rh + rh/2;
-      // shade the day-cell where the secondary event lands (the floored day)
-      const fd=Math.floor(ind.sec);
-      svg.appendChild(el("rect",{x:lsx(fd),y:yc-rh*0.42,width:Math.max(lsx(fd+1)-lsx(fd),1),height:rh*0.84,fill:colD(ind.d),opacity:0.13}));
-      svg.appendChild(el("rect",{x:lsx(fd),y:yc-rh*0.42,width:Math.max(lsx(fd+1)-lsx(fd),1),height:rh*0.84,fill:"none",stroke:colD(ind.d),"stroke-width":0.8,opacity:0.5}));
-      // connector: continuous delay T from u to u+T
-      svg.appendChild(el("line",{x1:lsx(ind.u),y1:yc,x2:lsx(ind.sec),y2:yc,stroke:colD(ind.d),"stroke-width":1.6,opacity:0.85}));
-      // primary marker (amber) at u
-      svg.appendChild(el("circle",{cx:lsx(ind.u),cy:yc,r:2.6,fill:"#f59e0b",stroke:"#fff","stroke-width":0.6}));
-      // secondary marker at u+T
-      svg.appendChild(el("circle",{cx:lsx(ind.sec),cy:yc,r:2.6,fill:colD(ind.d),stroke:"#fff","stroke-width":0.6}));
+      const yc=rowTop + i*rh + rh/2, hh=rh*0.42, c=colD(ind.d);
+      const pStart=w*Math.floor(ind.u/w);             // primary window start (the bin we observe)
+      const fd=Math.floor(ind.sec);                   // secondary day (the bin we observe)
+      // PRIMARY interval box — the window [pStart, pStart+w) we actually observe the primary in
+      svg.appendChild(el("rect",{x:lsx(pStart),y:yc-hh,width:Math.max(lsx(pStart+w)-lsx(pStart),1),height:hh*2,fill:"#f59e0b",opacity:0.16}));
+      svg.appendChild(el("rect",{x:lsx(pStart),y:yc-hh,width:Math.max(lsx(pStart+w)-lsx(pStart),1),height:hh*2,fill:"none",stroke:"#f59e0b","stroke-width":0.9,opacity:0.75}));
+      // SECONDARY interval box — the day [fd, fd+1) we observe the secondary in
+      svg.appendChild(el("rect",{x:lsx(fd),y:yc-hh,width:Math.max(lsx(fd+1)-lsx(fd),1),height:hh*2,fill:c,opacity:0.16}));
+      svg.appendChild(el("rect",{x:lsx(fd),y:yc-hh,width:Math.max(lsx(fd+1)-lsx(fd),1),height:hh*2,fill:"none",stroke:c,"stroke-width":0.9,opacity:0.75}));
+      // continuous delay connector between the TRUE (unobserved) event times
+      svg.appendChild(el("line",{x1:lsx(ind.u),y1:yc,x2:lsx(ind.sec),y2:yc,stroke:c,"stroke-width":1.4,opacity:0.8}));
+      // true primary (amber) and true secondary (coloured) event times
+      svg.appendChild(el("circle",{cx:lsx(ind.u),cy:yc,r:2.5,fill:"#f59e0b",stroke:"#fff","stroke-width":0.6}));
+      svg.appendChild(el("circle",{cx:lsx(ind.sec),cy:yc,r:2.5,fill:c,stroke:"#fff","stroke-width":0.6}));
     });
     if(rows===0){
       svg.appendChild(el("text",{x:Lx+Lw/2,y:ay+ah/2,"text-anchor":"middle","font-size":12,fill:"#9ca3af"})).textContent="press +1 / +50 / play to sample";

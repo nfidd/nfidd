@@ -61,19 +61,9 @@ These complement the sessions; they don't replace them. Use them to build intuit
     <div class="iv-links"><a class="iv-open" href="../interactive/nowcasting.html" target="_blank">Open ↗</a><a href="../sessions/nowcasting.html">session →</a></div>
   </div>
   <div class="iv-card">
-    <h3>Forecasting concepts</h3>
-    <div class="iv-desc">Extend a model into the future and watch the uncertainty fan grow with the forecast horizon.</div>
-    <div class="iv-links"><a class="iv-open" href="../interactive/forecasting-concepts.html" target="_blank">Open ↗</a><a href="../sessions/forecasting-concepts.html">session →</a></div>
-  </div>
-  <div class="iv-card">
     <h3>Forecast evaluation</h3>
     <div class="iv-desc">CRPS, the PIT histogram, DSS, WIS, interval coverage, and natural-vs-log-scale scoring — how to score probabilistic forecasts, broken into components.</div>
     <div class="iv-links"><a class="iv-open" href="../interactive/forecast-evaluation.html" target="_blank">Open ↗</a><a href="../sessions/forecast-evaluation.html">session →</a></div>
-  </div>
-  <div class="iv-card">
-    <h3>Forecasting models</h3>
-    <div class="iv-desc">Compare random-walk, statistical and mechanistic forecasts agreeing near-term and diverging across the horizon.</div>
-    <div class="iv-links"><a class="iv-open" href="../interactive/forecasting-models.html" target="_blank">Open ↗</a><a href="../sessions/forecasting-models.html">session →</a></div>
   </div>
 </div>
 ```

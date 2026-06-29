@@ -83,17 +83,6 @@ ggplot(data, aes(x = t, y = R)) +
 
 # Forecasting models as a spectrum
 
-::: {.callout-tip collapse="true"}
-## Interactive: a spectrum of models
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecasting-models.html?embed=headline" title="a spectrum of models interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Compare random-walk, statistical and mechanistic forecasts diverging over the horizon. [Open the full explainer ↗](../interactive/forecasting-models.html){target="_blank"}
-:::
-
 A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
 However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
 The worst case is that we have mistaken beliefs about the underlying mechanisms and use these to make predictions which are systematically wrong and misleading.
