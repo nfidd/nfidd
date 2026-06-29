@@ -182,6 +182,17 @@ See each day's cases split into observed + missing and summed into a nowcast, pl
 
 ## The simplest possible nowcasting model
 
+::: {.callout-tip collapse="true"}
+## Interactive: the simplest nowcast (divide by the CDF)
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=simple" title="the simplest nowcast (divide by the CDF) interactive" loading="lazy" style="width:100%;height:700px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Take the observed counts and divide by the proportion reported F(T − t) to recover the eventual total — the band flares where few reports are in. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
+:::
+
 Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
 
 In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 

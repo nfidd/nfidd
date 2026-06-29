@@ -97,7 +97,7 @@ These complement the sessions; they don't replace them. Use them to build intuit
   <div class="iv-card">
     <h3>Bayesian updating</h3>
     <div class="iv-desc">Posterior ∝ prior × likelihood — watch the posterior form as a compromise between prior belief and data, and the data take over as they accumulate.</div>
-    <div class="iv-links"><a class="iv-open" href="../interactive/bayesian-updating.html" target="_blank">Open ↗</a><a href="../sessions/forecasting-concepts.html">session →</a></div>
+    <div class="iv-links"><a class="iv-open" href="../interactive/bayesian-updating.html" target="_blank">Open ↗</a><a href="../sessions/delay-distributions.html">session →</a></div>
   </div>
 </div>
 ```

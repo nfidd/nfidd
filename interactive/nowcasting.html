@@ -204,6 +204,42 @@
   <div class="key amber"><b>Why the recent edge is so uncertain.</b> When only a small <i>F(T − t)</i> has been seen, the <b style="color:var(--miss)">missing</b> sum dwarfs the <b style="color:var(--obs)">observed</b> one, so the nowcast leans almost entirely on the <i>assumed</i> delay distribution rather than on data. That is why an honest nowcast widens sharply toward the present, and why getting <i>p<sub>d</sub></i> right matters most for the last few days.</div>
 </section>
 
+<!-- ============ SIMPLE CDF NOWCAST ============ -->
+<section id="simple">
+  <h2>The simplest nowcast: divide by the proportion reported</h2>
+  <p class="tagline">Scale the observed count back up by the delay CDF F(T − t)</p>
+  <p>The split above <i>adds</i> the estimated missing reports. The very same nowcast can be written <b>multiplicatively</b>: if a fraction <i>F(T − t)</i> of date <i>t</i>'s reports are expected in by now, the observed count is just a thinned-down version of the eventual total, and we divide it back up. This is the one-liner used in the session (<code>observed / proportion_reported</code>, with <code>proportion_reported = plnorm(...)</code>).</p>
+  <div class="formula">observed<sub>t</sub> &asymp; N<sub>t</sub> &middot; F(T &minus; t)
+    &nbsp;&nbsp;&rarr;&nbsp;&nbsp;
+    nowcast<sub>t</sub> = <span class="frac"><span>observed<sub>t</sub></span><span>F(T &minus; t)</span></span></div>
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--true);opacity:.7"></i> eventual N(t)</span>
+    <span><i class="swatch" style="border-color:var(--obs)"></i> observed so far</span>
+    <span><i class="swatch" style="border-color:var(--fc);border-top-width:4px"></i> nowcast = observed / F</span>
+    <span><i class="swbox" style="background:#bfdbfe;opacity:.65"></i> nowcast uncertainty</span>
+    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T)</span>
+  </div>
+  <div class="fig">
+    <svg id="simpleSvg" viewBox="0 0 720 380" role="img" aria-label="A true epidemic curve, the observed-so-far curve dipping toward now, and the simple nowcast formed by dividing the observed count by the proportion reported F(T-t), with a band that flares at the most recent days."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Reporting delay mean (days): <span id="smMval">4.0</span></span>
+      <input id="smM" type="range" min="1.5" max="8" step="0.1" value="4.0"></label>
+    <label><span class="vlabel">Now — current day T: <span id="smTval">46</span></span>
+      <input id="smT" type="range" min="30" max="60" step="1" value="46"></label>
+    <label><span class="vlabel">Epidemic peak day: <span id="smPval">42</span></span>
+      <input id="smP" type="range" min="30" max="58" step="1" value="42"></label>
+    <label><span class="vlabel">Epidemic width: <span id="smWval">9</span></span>
+      <input id="smW" type="range" min="5" max="16" step="0.5" value="9"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">most recent day reported: <b id="smPct">—</b></span>
+    <span class="chip">scale-up &times; 1/F: <b id="smMult">—</b></span>
+    <span class="chip" id="smHint" style="background:#ecfeff"></span>
+  </div>
+  <div class="key">Dividing by a small <i>F(T − t)</i> multiplies a tiny, noisy observed count by a large number, so the nowcast's uncertainty <b>flares</b> at the most recent days — exactly where we have least data. This scaling nowcast is the baseline the course's Bayesian models build on.</div>
+</section>
+
 <!-- ============ REPORTING TRIANGLE ============ -->
 <section id="triangle">
   <h2>The reporting triangle, filling in over time</h2>
@@ -467,6 +503,60 @@ function trueCurve(t,peak,width,height){
     });
   });
   reset();
+})();
+
+/* ================= FIGURE 3 : the simple CDF-scaling nowcast ================= */
+(function(){
+  const svg=document.getElementById("simpleSvg");
+  const W=720,H=380, m={l:54,r:20,t:24,b:46};
+  const t0=20, t1=64, HEIGHT=100;
+  const sx=v=>m.l+(v-t0)/(t1-t0)*(W-m.l-m.r);
+  const ids={M:document.getElementById("smM"),T:document.getElementById("smT"),
+             P:document.getElementById("smP"),Wd:document.getElementById("smW")};
+  function draw(){
+    const dm=+ids.M.value, T=+ids.T.value, peak=+ids.P.value, width=+ids.Wd.value, s=dm*0.6;
+    document.getElementById("smMval").textContent=dm.toFixed(1);
+    document.getElementById("smTval").textContent=T;
+    document.getElementById("smPval").textContent=peak;
+    document.getElementById("smWval").textContent=width;
+    clear(svg);
+    const ymax=HEIGHT*1.2, sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+    for(let g=0; g<=HEIGHT; g+=25){
+      svg.appendChild(el("line",{x1:m.l,y1:sy(g),x2:W-m.r,y2:sy(g),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:m.l-8,y:sy(g)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=g;
+    }
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    for(let v=t0; v<=t1; v+=4) svg.appendChild(el("text",{x:sx(v),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="reference date t (day the cases occurred)";
+    let pTrue="";
+    for(let t=t0;t<=t1;t+=0.5){ pTrue+=(pTrue?" L ":"M ")+sx(t)+" "+sy(trueCurve(t,peak,width,HEIGHT)); }
+    svg.appendChild(el("path",{d:pTrue,fill:"none",stroke:"#64748b","stroke-width":2,opacity:.45}));
+    const upper=[],lower=[],ncPts=[],obsPts=[];
+    for(let t=t0;t<=T;t++){
+      const N=trueCurve(t,peak,width,HEIGHT);
+      const p=Math.min(delayCdf(T-t+0.5,dm,s),1);
+      const o=N*p, n=o/Math.max(p,1e-3);
+      const half=n*Math.sqrt((1-Math.min(p,0.999))/Math.max(p,1e-3))/Math.sqrt(Math.max(o,1))*6;
+      obsPts.push([t,o]); ncPts.push([t,n]); upper.push([t,n+half]); lower.push([t,Math.max(n-half,0)]);
+    }
+    let band="";
+    upper.forEach((pt,i)=>{ band+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    for(let i=lower.length-1;i>=0;i--){ band+=" L "+sx(lower[i][0])+" "+sy(lower[i][1]); }
+    band+=" Z";
+    svg.appendChild(el("path",{d:band,fill:"#bfdbfe",opacity:.6,stroke:"none"}));
+    let pNc=""; ncPts.forEach((pt,i)=>{ pNc+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    svg.appendChild(el("path",{d:pNc,fill:"none",stroke:"#2563eb","stroke-width":3}));
+    let pObs=""; obsPts.forEach((pt,i)=>{ pObs+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
+    svg.appendChild(el("path",{d:pObs,fill:"none",stroke:"#0891b2","stroke-width":2.6}));
+    svg.appendChild(el("line",{x1:sx(T),y1:m.t-2,x2:sx(T),y2:sy(0),stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"6 4"}));
+    svg.appendChild(el("text",{x:sx(T),y:m.t+8,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#dc2626"})).textContent="now";
+    const pT=Math.min(delayCdf(0.5,dm,s),1);
+    document.getElementById("smPct").textContent=(pT*100).toFixed(0)+"%";
+    document.getElementById("smMult").textContent="×"+(1/Math.max(pT,1e-3)).toFixed(1);
+    document.getElementById("smHint").textContent = pT<0.2 ? "today: barely any reports in → huge ×, wide band"
+      : pT<0.5 ? "today: under half reported → big scale-up" : "today: most reports in → small correction";
+  }
+  Object.values(ids).forEach(i=>i.addEventListener("input",draw)); draw();
 })();
 </script>
 <script>

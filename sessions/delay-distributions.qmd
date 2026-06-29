@@ -180,6 +180,17 @@ ggplot(dfl, aes(x = time)) +
 
 ## Estimating delay distributions from outcome data
 
+::: {.callout-tip collapse="true"}
+## Interactive: Bayesian updating
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/bayesian-updating.html?embed=update" title="Bayesian updating interactive" loading="lazy" style="width:100%;height:730px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Posterior ∝ prior × likelihood — watch the posterior form as a compromise between prior and data, and the data take over as they accumulate. This is the inference we run with Stan here. [Open the full explainer ↗](../interactive/bayesian-updating.html){target="_blank"}
+:::
+
 As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in infectious disease surveillance.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
