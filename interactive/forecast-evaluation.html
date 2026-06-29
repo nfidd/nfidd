@@ -209,13 +209,34 @@
 <section id="pit">
   <h2>PIT histogram <span class="pill diag">diagnostic</span></h2>
   <p class="tagline">Probability Integral Transform — a calibration check, not a score</p>
-  <p>Take each forecast CDF <i>F</i> and evaluate it at the value that actually occurred: <i>u</i> = F(y). This single number says <b>where in the forecast distribution the outcome landed</b>. If the forecasts are perfectly calibrated, these <i>u</i> values are spread evenly across 0–1 — so a histogram of them should be <b>flat</b>. The <i>shape</i> of the departure from flat tells you exactly what is wrong:</p>
+  <p>Evaluate each forecast CDF <i>F</i> at the value that actually occurred: <i>u</i> = F(y) — <b>where in the forecast distribution the outcome landed</b>. Collected over many forecasts, these <i>u</i> values should be spread evenly across 0–1 if the forecasts are calibrated. Let's first <b>build</b> the histogram one forecast at a time, then learn to <b>read</b> its shape.</p>
 
+  <h3>1 · Building the histogram — one forecast at a time</h3>
+  <p>The PIT value is simply where each outcome lands on its <i>own</i> forecast CDF: read up from the observation <i>y</i> to the S-curve, then across to the axis — that height is <i>u</i> = F(y). The histogram is just those heights, from <b>many</b> forecasts, piling up. Pick a scenario, then press <b>play</b> and watch a fresh outcome get drawn, read off the CDF on the left, and dropped into its bin on the right.</p>
+  <div class="presets" id="pitBuildPresets">
+    <button data-mu="0" data-sd="1">Calibrated</button>
+    <button data-mu="0" data-sd="0.6">Overconfident</button>
+    <button data-mu="0" data-sd="1.7">Underconfident</button>
+    <button data-mu="0.7" data-sd="1">Biased high</button>
+  </div>
+  <div class="fig">
+    <svg id="pitBuildSvg" viewBox="0 0 720 300" role="img" aria-label="Left: a forecast CDF with the observation read off as u = F(y). Right: the PIT histogram accumulating those u values."></svg>
+  </div>
+  <div class="presets" style="align-items:center">
+    <button id="pitAdd1">+1 forecast</button>
+    <button id="pitAdd25">+25</button>
+    <button id="pitPlay">▶ play</button>
+    <button id="pitReset">reset</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px">collected n = <b id="pitN">0</b></span>
+    <span class="chip" id="pitBuildDiag" style="background:#ecfeff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px"></span>
+  </div>
+
+  <h3>2 · Reading the shape</h3>
+  <p>Once many outcomes have piled up, the <i>shape</i> of the histogram tells you what is wrong. A perfectly calibrated forecaster gives a <b>flat</b> histogram; the classic departures are:</p>
   <div class="fig">
     <svg id="pitSvg" viewBox="0 0 720 460" role="img" aria-label="Four PIT histograms: calibrated, overconfident, underconfident, biased"></svg>
   </div>
   <p class="figcap">All four forecasters predict a Normal; the truth is also Normal. Only the shape of the predictive distribution differs.</p>
-
   <div class="key green"><b>Flat (uniform)</b> — well calibrated. Outcomes fall everywhere in the predictive distribution as often as they should. This is the target.</div>
   <div class="key orange"><b>U-shape</b> — <b>overconfident / too sharp</b> (under-dispersed). The forecast is too narrow, so the truth keeps landing in the tails (very low or very high <i>u</i>) more often than predicted.</div>
   <div class="key"><b>Dome / hump</b> — <b>underconfident / too wide</b> (over-dispersed). The forecast is too cautious; outcomes cluster in the middle of an over-wide distribution.</div>
@@ -241,26 +262,6 @@
   <div class="readout">
     <span class="chip">&sigma; ratio (forecast &divide; truth) = <b id="pitRatio">—</b></span>
     <span class="chip" id="pitDiag" style="background:#ecfeff"></span>
-  </div>
-
-  <h3>Where the histogram comes from — one forecast at a time</h3>
-  <p>This is the step that trips people up. The histogram above doesn't come from one forecast — it is built from <b>many</b>. Each forecast contributes a <b>single</b> number: <b>where its own outcome landed on its own CDF</b>. Read up from the observation <i>y</i> to the forecast's S-curve, then across to the axis — that height is <i>u</i> = F(y). The histogram is just those heights piling up. Pick a scenario, then press <b>play</b> and watch a fresh outcome get drawn, read off the CDF on the left, and dropped into its bin on the right.</p>
-  <div class="presets" id="pitBuildPresets">
-    <button data-mu="0" data-sd="1">Calibrated</button>
-    <button data-mu="0" data-sd="0.6">Overconfident</button>
-    <button data-mu="0" data-sd="1.7">Underconfident</button>
-    <button data-mu="0.7" data-sd="1">Biased high</button>
-  </div>
-  <div class="fig">
-    <svg id="pitBuildSvg" viewBox="0 0 720 300" role="img" aria-label="Left: a forecast CDF with the observation read off as u = F(y). Right: the PIT histogram accumulating those u values."></svg>
-  </div>
-  <div class="presets" style="align-items:center">
-    <button id="pitAdd1">+1 forecast</button>
-    <button id="pitAdd25">+25</button>
-    <button id="pitPlay">▶ play</button>
-    <button id="pitReset">reset</button>
-    <span class="chip" style="background:#f1f5f9;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px">collected n = <b id="pitN">0</b></span>
-    <span class="chip" id="pitBuildDiag" style="background:#ecfeff;border:1px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:14px"></span>
   </div>
 
   <p style="margin-top:18px"><b>One subtlety for count data.</b> The clean uniform result holds for <i>continuous</i> forecasts. For integer-valued forecasts (case counts!) the PIT is no longer exactly uniform even when calibrated, so the course uses a <b>randomised PIT</b> — it replaces the single step with a uniform draw across the probability jump at <i>y</i> — which restores uniformity under calibration.</p>
