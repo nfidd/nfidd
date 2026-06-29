@@ -285,6 +285,17 @@ There are many ways to assess calibration and bias but one common way is to use 
 Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
 :::
 
+::: {.callout-tip collapse="true"}
+## Interactive: interval coverage
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=coverage" title="interval coverage interactive" loading="lazy" style="width:100%;height:720px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+A calibration check that pairs with the PIT histogram: does a 90% prediction interval actually contain the truth 90% of the time? [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+:::
+
 ::: {.callout-tip}
 ## Interpreting the PIT histogram
 - Ideally PIT histograms should be uniform. 
@@ -408,6 +419,17 @@ Do they look biased?
 :::
 
 ## Scoring on the log scale
+
+::: {.callout-tip collapse="true"}
+## Interactive: natural vs log-scale scoring
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=logscale" title="natural vs log-scale scoring interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See why the natural-scale score is dominated by the peak, while the log scale weights growth, peak and decline more evenly. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+:::
 
 We can also score on the logarithmic scale.
 This can be useful if we are interested in the relative performance of the model at different scales of the data, for example if we are interested in the model's performance at capturing the exponential growth phase of the epidemic.

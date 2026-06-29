@@ -67,7 +67,7 @@ These complement the sessions; they don't replace them. Use them to build intuit
   </div>
   <div class="iv-card">
     <h3>Forecast evaluation</h3>
-    <div class="iv-desc">CRPS, the PIT histogram, DSS and WIS — how to score probabilistic forecasts, broken down into components.</div>
+    <div class="iv-desc">CRPS, the PIT histogram, DSS, WIS, interval coverage, and natural-vs-log-scale scoring — how to score probabilistic forecasts, broken into components.</div>
     <div class="iv-links"><a class="iv-open" href="../interactive/forecast-evaluation.html" target="_blank">Open ↗</a><a href="../sessions/forecast-evaluation.html">session →</a></div>
   </div>
   <div class="iv-card">
@@ -86,6 +86,18 @@ These complement the sessions; they don't replace them. Use them to build intuit
     <h3>Forecast ensembles</h3>
     <div class="iv-desc">Linear opinion pool vs quantile (Vincent) averaging — averaging probabilities vertically vs quantiles horizontally.</div>
     <div class="iv-links"><a class="iv-open" href="../interactive/forecast-ensembles.html" target="_blank">Open ↗</a><a href="../sessions/forecast-ensembles.html">session →</a></div>
+  </div>
+</div>
+```
+
+## Foundations
+
+```{=html}
+<div class="iv-grid">
+  <div class="iv-card">
+    <h3>Bayesian updating</h3>
+    <div class="iv-desc">Posterior ∝ prior × likelihood — watch the posterior form as a compromise between prior belief and data, and the data take over as they accumulate.</div>
+    <div class="iv-links"><a class="iv-open" href="../interactive/bayesian-updating.html" target="_blank">Open ↗</a><a href="../sessions/forecasting-concepts.html">session →</a></div>
   </div>
 </div>
 ```
