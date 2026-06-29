@@ -90,7 +90,6 @@
   <p>How a single number — the time-varying reproduction number <b style="color:var(--rt)">R(t)</b> — drives an epidemic forward. The <b>renewal equation</b> turns today's transmissibility and the <b style="color:var(--gi)">generation interval</b> into tomorrow's cases. Above 1 it grows, below 1 it shrinks, and the epidemic <b style="color:var(--peak)">peaks</b> exactly where R(t) crosses 1. Everything here is live — drag the sliders and watch the outbreak respond.</p>
   <nav class="toc">
     <a href="#intro">The equation</a>
-    <a href="#kernel">Generation interval</a>
     <a href="#sim">Renewal simulator</a>
     <a href="#growth">R, growth &amp; doubling</a>
     <a href="#takeaways">Takeaways</a>
@@ -115,35 +114,6 @@
   </ul>
   <div class="key"><b>The headline.</b> Because <i>g(s)</i> sums to 1, on average each infectious person produces <b>R(t)</b> others. So <b>R(t) &gt; 1 &rarr; growth</b>, <b>R(t) &lt; 1 &rarr; decline</b>, and the epidemic <b>peaks at the moment R(t) crosses 1</b>. This is the single most useful fact about R(t), and the simulator below makes it visible.</div>
   <p>This is more general than the basic reproduction number <i>R<sub>0</sub></i> (secondary infections in a fully susceptible population) and includes the simple SIR model as a special case — there <i>R(t) = R<sub>0</sub> S/N</i>, falling as susceptibles are depleted.</p>
-</section>
-
-<!-- ============ GENERATION INTERVAL ============ -->
-<section id="kernel">
-  <h2>The generation interval sets the clock <span class="pill grow">timescale</span></h2>
-  <p class="tagline">A discretised lognormal kernel g(s), s = 1, 2, 3, …</p>
-  <p>The generation interval decides <i>how fast</i> a given R(t) plays out. A short interval means each generation of infections follows hard on the last, so the same R(t) produces faster growth; a long interval stretches the same R(t) out over more time. We use a <b>lognormal</b> distribution discretised onto whole days, with no same-day transmission (<i>g(0) = 0</i>):</p>
-
-  <div class="formula">&sigma;&sup2; = ln(1 + s<sub>sd</sub>&sup2; / m&sup2;)&nbsp;&nbsp; &mu; = ln(m) &minus; &sigma;&sup2;/2 &nbsp;&nbsp; g(s) &prop; F(s+1) &minus; F(s)</div>
-
-  <p>where <i>F</i> is the lognormal CDF and the raw masses are normalised over <i>s</i> = 1…<i>S<sub>max</sub></i> so that <span style="white-space:nowrap">&Sigma; g(s) = 1</span>. Drag the mean and standard deviation and watch the kernel — a typical respiratory pathogen has a mean of around 5 days.</p>
-
-  <div class="legend">
-    <span><i class="swatch" style="border-color:var(--gi);border-top-width:10px;opacity:.85"></i> generation interval g(s)</span>
-  </div>
-  <div class="fig">
-    <svg id="giSvg" viewBox="0 0 720 300" role="img" aria-label="Discretised lognormal generation interval as a bar chart over days since infection"></svg>
-  </div>
-  <div class="controls">
-    <label><span class="vlabel">Mean m (days): <span id="giMeanVal">5.0</span></span>
-      <input id="giMean" type="range" min="2" max="10" step="0.1" value="5"></label>
-    <label><span class="vlabel">SD s<sub>sd</sub> (days): <span id="giSdVal">2.0</span></span>
-      <input id="giSd" type="range" min="1" max="5" step="0.1" value="2"></label>
-  </div>
-  <div class="readout">
-    <span class="chip">mode at day <b id="giMode">—</b></span>
-    <span class="chip">mass within day <b id="giMass">—</b> = 90%</span>
-    <span class="chip">g<sub>max</sub> = <b id="giMax">—</b> days</span>
-  </div>
 </section>
 
 <!-- ============ RENEWAL AS SELF-CONVOLUTION ============ -->
@@ -370,50 +340,6 @@ function rFromR(R, g){
 }
 // inverse map: R implied by a growth rate r for generation interval g.
 function RFromr(r, g){ return 1/giMoment(g, r); }
-
-/* ================= FIGURE 1 : generation interval kernel ================= */
-(function(){
-  const svg=document.getElementById("giSvg");
-  const W=720,H=300, m={l:52,r:20,t:24,b:46};
-  const meanInp=document.getElementById("giMean"), sdInp=document.getElementById("giSd");
-  const Smax=21;
-  const sx=s=>m.l+(s-0.5)/(Smax)*(W-m.l-m.r);
-  function draw(){
-    const mean=+meanInp.value, sd=+sdInp.value;
-    document.getElementById("giMeanVal").textContent=mean.toFixed(1);
-    document.getElementById("giSdVal").textContent=sd.toFixed(1);
-    const g=genInterval(mean,sd);
-    clear(svg);
-    let gmaxV=0, mode=1, cum=0, mass90=Smax, lastNZ=1;
-    for(let s=1;s<=Smax;s++){ if(g[s]>gmaxV){gmaxV=g[s]; mode=s;} }
-    for(let s=1;s<=Smax;s++){ cum+=g[s]; if(cum<0.9) mass90=s+1; if(g[s]>1e-4) lastNZ=s; }
-    const dmax=gmaxV*1.18;
-    const sy=v=>H-m.b-(v/dmax)*(H-m.t-m.b);
-    // gridlines
-    [0,0.25,0.5,0.75,1].forEach(f=>{
-      const v=f*dmax;
-      svg.appendChild(el("line",{x1:m.l,y1:sy(v),x2:W-m.r,y2:sy(v),stroke:"#eef2f7"}));
-      svg.appendChild(el("text",{x:m.l-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v.toFixed(2);
-    });
-    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
-    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:m.l,y2:m.t,stroke:"#cbd5e1"}));
-    const bw=(W-m.l-m.r)/Smax;
-    for(let s=1;s<=Smax;s++){
-      const h=Math.max(sy(0)-sy(g[s]),0);
-      svg.appendChild(el("rect",{x:m.l+(s-1)*bw+1.5,y:sy(g[s]),width:bw-3,height:h,fill:"#0891b2",opacity:s===mode?0.95:0.72,rx:2}));
-    }
-    for(let s=1;s<=Smax;s+=2) svg.appendChild(el("text",{x:m.l+(s-0.5)*bw,y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=s;
-    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-8,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="days since infection, s";
-    const yl=el("text",{x:14,y:(m.t+H-m.b)/2,"text-anchor":"middle","font-size":12,fill:"#374151",transform:`rotate(-90 14 ${(m.t+H-m.b)/2})`}); yl.textContent="probability g(s)"; svg.appendChild(yl);
-    // mean marker
-    svg.appendChild(el("line",{x1:sx(mean),y1:m.t,x2:sx(mean),y2:sy(0),stroke:"#9333ea","stroke-dasharray":"4 3","stroke-width":1.4}));
-    svg.appendChild(el("text",{x:sx(mean),y:m.t-2,"text-anchor":"middle","font-size":10,fill:"#9333ea","font-weight":600})).textContent="mean";
-    document.getElementById("giMode").textContent=mode;
-    document.getElementById("giMass").textContent=mass90;
-    document.getElementById("giMax").textContent=lastNZ;
-  }
-  meanInp.addEventListener("input",draw); sdInp.addEventListener("input",draw); draw();
-})();
 
 /* ================= FIGURE 2 : step in R -> incidence -> realised growth rate ================= */
 (function(){
@@ -672,7 +598,7 @@ function RFromr(r, g){ return 1/giMoment(g, r); }
 /* ================= FIGURE 0 : the renewal step as a self-convolution ================= */
 (function(){
   const svg=document.getElementById("mechSvg");
-  const W=720,H=380, m={l:46,r:16,t:38,b:50}, tEnd=42, I0=5;
+  const W=720, m={l:46,r:16}, Ttop=46, Th=170, Btop=272, Bh=70, tEnd=42;
   const rInp=document.getElementById("mechR"), giInp=document.getElementById("mechGi"), tInp=document.getElementById("mechT");
   let timer=null;
   function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("mechPlay").textContent="▶ play"; } }
@@ -681,34 +607,39 @@ function RFromr(r, g){ return 1/giMoment(g, r); }
     document.getElementById("mechRval").textContent=R.toFixed(2);
     document.getElementById("mechGival").textContent=giMean.toFixed(1);
     document.getElementById("mechTval").textContent=tstar;
-    const g=genInterval(giMean, giMean*0.65);
-    const I=simulate(()=>R, g, tEnd+1, I0);
+    const g=genInterval(giMean, giMean*0.65), S=g.length-1, r=rFromR(R,g);
+    // seed on the stable exponential (so there is no initial-incidence spike), then renewal
+    const I=new Array(tEnd+1).fill(0);
+    for(let t=0;t<=tEnd;t++){ if(t<S){ I[t]=Math.exp(r*t); } else { let f=0; for(let s=1;s<=S;s++) f+=I[t-s]*g[s]; I[t]=R*f; } }
     clear(svg);
-    const bw=(W-m.l-m.r)/(tEnd+1);
-    let imax=1; for(let t=0;t<=tstar;t++) imax=Math.max(imax,I[t]); imax*=1.18;
-    const bx=t=> m.l + t*bw, sxc=t=> m.l + t*bw + bw/2;
-    const sy=v=> H-m.b - (Math.min(v,imax)/imax)*(H-m.t-m.b);
-    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
-    for(let t=0;t<=tEnd;t+=7) svg.appendChild(el("text",{x:sxc(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
-    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day t";
-    // renewal sum at tstar
+    const bw=(W-m.l-m.r)/(tEnd+1), bx=t=> m.l+t*bw, cx=t=> m.l+t*bw+bw/2;
     let sum=0; const contrib={};
-    for(let s=1;s<g.length && s<=tstar;s++){ const c=I[tstar-s]*g[s]; sum+=c; contrib[tstar-s]=g[s]; }
-    const Itstar=R*sum, gmax=Math.max.apply(null,g)||1;
-    // bars up to tstar (epidemic built so far)
+    for(let s=1;s<=S && s<=tstar;s++){ const c=I[tstar-s]*g[s]; sum+=c; contrib[tstar-s]=g[s]; }
+    const Itstar=R*sum, gmax=Math.max.apply(null,g.slice(1))||1;
+    // ---- TOP panel: incidence + the flipped generation interval over recent days ----
+    let imax=1e-6; for(let t=0;t<=tstar;t++) imax=Math.max(imax,I[t]); imax*=1.2;
+    const tsy=v=> Ttop+Th - (Math.min(v,imax)/imax)*Th;
+    svg.appendChild(el("text",{x:m.l,y:Ttop-26,"font-size":12,"font-weight":700,fill:"#1f2933"})).textContent="incidence I(t)";
+    svg.appendChild(el("text",{x:m.l,y:Ttop-12,"font-size":11,fill:"#0e7490"})).textContent="teal caps = the flipped generation interval sitting over the recent days";
+    svg.appendChild(el("line",{x1:m.l,y1:tsy(0),x2:W-m.r,y2:tsy(0),stroke:"#cbd5e1"}));
     for(let t=0;t<=tstar;t++){
-      const isT=t===tstar, isC=contrib[t]!==undefined, h=Math.max(sy(0)-sy(I[t]),0);
-      svg.appendChild(el("rect",{x:bx(t)+1,y:sy(I[t]),width:Math.max(bw-2,1),height:h,fill:isT?"#f97316":isC?"#60a5fa":"#2563eb",opacity:isT?0.95:isC?0.92:0.78,rx:1}));
-      if(isC){ const capH=(contrib[t]/gmax)*30; svg.appendChild(el("rect",{x:bx(t)+1,y:sy(I[t])-capH-2,width:Math.max(bw-2,1),height:capH,fill:"#0891b2",opacity:0.85,rx:1})); }
+      const isT=t===tstar, isC=contrib[t]!==undefined;
+      svg.appendChild(el("rect",{x:bx(t)+1,y:tsy(I[t]),width:Math.max(bw-2,1),height:Math.max(tsy(0)-tsy(I[t]),0),fill:isT?"#f97316":isC?"#60a5fa":"#2563eb",opacity:isT?0.95:isC?0.9:0.7,rx:1}));
+      if(isC){ const capH=(contrib[t]/gmax)*34; svg.appendChild(el("rect",{x:bx(t)+1,y:tsy(I[t])-capH-2,width:Math.max(bw-2,1),height:capH,fill:"#0891b2",opacity:0.85,rx:1})); }
     }
-    // label the kernel band and the target bar
-    if(tstar>=2){
-      svg.appendChild(el("text",{x:sxc(tstar),y:Math.max(sy(I[tstar])-8,m.t),"text-anchor":"middle","font-size":10,"font-weight":700,fill:"#ea580c"})).textContent="I("+tstar+")";
-      svg.appendChild(el("text",{x:m.l+2,y:m.t-12,"font-size":11,fill:"#0e7490"})).textContent="teal caps = g(s) over the recent days";
-    }
+    if(tstar>=2) svg.appendChild(el("text",{x:cx(tstar),y:Math.max(tsy(I[tstar])-6,Ttop-2),"text-anchor":"middle","font-size":10,"font-weight":700,fill:"#ea580c"})).textContent="I("+tstar+")";
+    for(let t=0;t<=tEnd;t+=7) svg.appendChild(el("text",{x:cx(t),y:Ttop+Th+14,"text-anchor":"middle","font-size":9,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:W-m.r,y:Ttop+Th+14,"text-anchor":"end","font-size":10.5,fill:"#374151"})).textContent="day t";
+    // ---- BOTTOM panel: the generation interval distribution g(s) ----
+    svg.appendChild(el("text",{x:m.l,y:Btop-8,"font-size":12,"font-weight":700,fill:"#1f2933"})).textContent="generation interval g(s) — the distribution we slide";
+    const bbw=(W-m.l-m.r)/(S+1), bsy=v=> Btop+Bh-(v/gmax)*Bh;
+    svg.appendChild(el("line",{x1:m.l,y1:Btop+Bh,x2:W-m.r,y2:Btop+Bh,stroke:"#cbd5e1"}));
+    for(let s=1;s<=S;s++) svg.appendChild(el("rect",{x:m.l+(s-0.5)*bbw,y:bsy(g[s]),width:Math.max(bbw-2,1),height:Math.max(Btop+Bh-bsy(g[s]),0),fill:"#0891b2",opacity:0.8,rx:1}));
+    for(let s=1;s<=S;s+=3) svg.appendChild(el("text",{x:m.l+s*bbw,y:Btop+Bh+14,"text-anchor":"middle","font-size":9,fill:"#6b7280"})).textContent=s;
+    svg.appendChild(el("text",{x:W-m.r,y:Btop+Bh+14,"text-anchor":"end","font-size":10.5,fill:"#374151"})).textContent="days since infection s";
     document.getElementById("mechEq").textContent="I("+tstar+") = "+R.toFixed(2)+" × Σ I(t−s)g(s) = "+R.toFixed(2)+" × "+sum.toFixed(1)+" = "+Itstar.toFixed(1);
   }
-  function step(){ let t=Math.round(+tInp.value)+1; if(t>tEnd) t=3; tInp.value=t; draw(); }
+  function step(){ let t=Math.round(+tInp.value)+1; if(t>tEnd) t=4; tInp.value=t; draw(); }
   [rInp,giInp,tInp].forEach(i=>i.addEventListener("input",()=>{ stop(); draw(); }));
   document.getElementById("mechPlay").addEventListener("click",function(){ if(timer){ stop(); } else { this.textContent="❚❚ pause"; timer=setInterval(step,480); } });
   document.getElementById("mechStep").addEventListener("click",()=>{ stop(); step(); });
