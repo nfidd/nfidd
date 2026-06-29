@@ -146,6 +146,37 @@
   </div>
 </section>
 
+<!-- ============ RENEWAL AS SELF-CONVOLUTION ============ -->
+<section id="mechanic">
+  <h2>The renewal step, as a self-convolution <span class="pill grow">slide · multiply · sum</span></h2>
+  <p class="tagline">Today's cases = R × a weighted sum of recent cases</p>
+  <p>The renewal equation is the <b>same convolution</b> as turning infections into onsets — except the series convolves with <i>itself</i>: each day's cases are built from the recent days' cases, weighted by the <b style="color:var(--gi)">generation interval</b> <i>g(s)</i> and scaled by <b style="color:var(--rt)">R</b>. Step a day forward and watch its bar get assembled from the ones before it.</p>
+  <div class="formula">I(t) = R &middot; &Sigma;<sub>s &ge; 1</sub> I(t &minus; s) g(s)</div>
+  <div class="legend">
+    <span><i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#2563eb;vertical-align:middle"></i> incidence I(t)</span>
+    <span><i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#0891b2;vertical-align:middle"></i> generation-interval weight g(s)</span>
+    <span><i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#f97316;vertical-align:middle"></i> the day being built</span>
+  </div>
+  <div class="fig">
+    <svg id="mechSvg" viewBox="0 0 720 380" role="img" aria-label="Incidence bars built up to the selected day; the generation-interval kernel sits over the preceding days, and their weighted sum times R builds that day's bar."></svg>
+  </div>
+  <div class="presets">
+    <button id="mechPlay">▶ play</button>
+    <button id="mechStep">step ▸</button>
+    <button id="mechReset">reset</button>
+    <span class="chip" id="mechEq" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-variant-numeric:tabular-nums">—</span>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Reproduction number R: <span id="mechRval">1.30</span></span>
+      <input id="mechR" type="range" min="0.7" max="2" step="0.05" value="1.3"></label>
+    <label><span class="vlabel">Generation interval mean: <span id="mechGival">5.0</span></span>
+      <input id="mechGi" type="range" min="2" max="10" step="0.5" value="5"></label>
+    <label><span class="vlabel">Day being built t: <span id="mechTval">20</span></span>
+      <input id="mechT" type="range" min="3" max="42" step="1" value="20"></label>
+  </div>
+  <div class="key">Because the output feeds straight back into the input, a constant R compounds into exponential growth — and the generation interval sets how fast each turn of the sum (one "generation") comes round. This self-convolution is the engine behind every R(t) figure on this page.</div>
+</section>
+
 <!-- ============ RENEWAL SIMULATOR ============ -->
 <section id="sim">
   <h2>A step in R, and the growth rate it produces <span class="pill sim">the centrepiece</span></h2>
@@ -635,6 +666,53 @@ function RFromr(r, g){ return 1/giMoment(g, r); }
   document.querySelectorAll("#growPresets button").forEach(b=>{
     b.addEventListener("click",()=>{ giInp.value=b.dataset.gi; draw(); });
   });
+  draw();
+})();
+
+/* ================= FIGURE 0 : the renewal step as a self-convolution ================= */
+(function(){
+  const svg=document.getElementById("mechSvg");
+  const W=720,H=380, m={l:46,r:16,t:38,b:50}, tEnd=42, I0=5;
+  const rInp=document.getElementById("mechR"), giInp=document.getElementById("mechGi"), tInp=document.getElementById("mechT");
+  let timer=null;
+  function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("mechPlay").textContent="▶ play"; } }
+  function draw(){
+    const R=+rInp.value, giMean=+giInp.value, tstar=Math.round(+tInp.value);
+    document.getElementById("mechRval").textContent=R.toFixed(2);
+    document.getElementById("mechGival").textContent=giMean.toFixed(1);
+    document.getElementById("mechTval").textContent=tstar;
+    const g=genInterval(giMean, giMean*0.65);
+    const I=simulate(()=>R, g, tEnd+1, I0);
+    clear(svg);
+    const bw=(W-m.l-m.r)/(tEnd+1);
+    let imax=1; for(let t=0;t<=tstar;t++) imax=Math.max(imax,I[t]); imax*=1.18;
+    const bx=t=> m.l + t*bw, sxc=t=> m.l + t*bw + bw/2;
+    const sy=v=> H-m.b - (Math.min(v,imax)/imax)*(H-m.t-m.b);
+    svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
+    for(let t=0;t<=tEnd;t+=7) svg.appendChild(el("text",{x:sxc(t),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=t;
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="day t";
+    // renewal sum at tstar
+    let sum=0; const contrib={};
+    for(let s=1;s<g.length && s<=tstar;s++){ const c=I[tstar-s]*g[s]; sum+=c; contrib[tstar-s]=g[s]; }
+    const Itstar=R*sum, gmax=Math.max.apply(null,g)||1;
+    // bars up to tstar (epidemic built so far)
+    for(let t=0;t<=tstar;t++){
+      const isT=t===tstar, isC=contrib[t]!==undefined, h=Math.max(sy(0)-sy(I[t]),0);
+      svg.appendChild(el("rect",{x:bx(t)+1,y:sy(I[t]),width:Math.max(bw-2,1),height:h,fill:isT?"#f97316":isC?"#60a5fa":"#2563eb",opacity:isT?0.95:isC?0.92:0.78,rx:1}));
+      if(isC){ const capH=(contrib[t]/gmax)*30; svg.appendChild(el("rect",{x:bx(t)+1,y:sy(I[t])-capH-2,width:Math.max(bw-2,1),height:capH,fill:"#0891b2",opacity:0.85,rx:1})); }
+    }
+    // label the kernel band and the target bar
+    if(tstar>=2){
+      svg.appendChild(el("text",{x:sxc(tstar),y:Math.max(sy(I[tstar])-8,m.t),"text-anchor":"middle","font-size":10,"font-weight":700,fill:"#ea580c"})).textContent="I("+tstar+")";
+      svg.appendChild(el("text",{x:m.l+2,y:m.t-12,"font-size":11,fill:"#0e7490"})).textContent="teal caps = g(s) over the recent days";
+    }
+    document.getElementById("mechEq").textContent="I("+tstar+") = "+R.toFixed(2)+" × Σ I(t−s)g(s) = "+R.toFixed(2)+" × "+sum.toFixed(1)+" = "+Itstar.toFixed(1);
+  }
+  function step(){ let t=Math.round(+tInp.value)+1; if(t>tEnd) t=3; tInp.value=t; draw(); }
+  [rInp,giInp,tInp].forEach(i=>i.addEventListener("input",()=>{ stop(); draw(); }));
+  document.getElementById("mechPlay").addEventListener("click",function(){ if(timer){ stop(); } else { this.textContent="❚❚ pause"; timer=setInterval(step,480); } });
+  document.getElementById("mechStep").addEventListener("click",()=>{ stop(); step(); });
+  document.getElementById("mechReset").addEventListener("click",()=>{ stop(); tInp.value=20; draw(); });
   draw();
 })();
 </script>

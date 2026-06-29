@@ -62,7 +62,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 ## Interactive: the renewal equation
 
 ```{=html}
-<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=sim" title="the renewal equation interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=mechanic,sim" title="the renewal equation interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
