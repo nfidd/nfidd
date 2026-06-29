@@ -886,11 +886,13 @@ function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
 })();
 </script>
 <script>
-/* embed mode: ?embed=sectionId[,id2,...] strips page chrome and shows only those
-   sections, for inlining a single figure in an <iframe> within the course site.
-   Always reports its height to a hosting page so the iframe can auto-size. */
+/* embed mode: ?embed=sectionId[,id2,...] strips the page chrome AND the
+   explanatory prose/maths from the kept sections, leaving only the interactive
+   figures, for inlining in an <iframe> in the course site. Reports height so the
+   host page can auto-size the iframe. */
 (function(){
   var q=new URLSearchParams(location.search), e=q.get('embed');
+  var KEEP={fig:1,controls:1,readout:1,legend:1,presets:1,figcap:1};
   if(e){
     var keep=e.split(',').map(function(s){return s.trim();}).filter(Boolean);
     ['header.hero','nav.toc','footer'].forEach(function(sel){
@@ -901,9 +903,13 @@ function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
     });
     Array.prototype.forEach.call(document.querySelectorAll('section'),function(sec){
       if(keep.indexOf(sec.id)===-1){ sec.style.display='none'; return; }
-      sec.style.margin='0'; sec.style.border='none'; sec.style.boxShadow='none'; sec.style.padding='4px 2px 10px';
+      sec.style.margin='0'; sec.style.border='none'; sec.style.boxShadow='none'; sec.style.padding='2px 2px 8px';
+      Array.prototype.forEach.call(sec.children,function(c){
+        var k=false, cl=c.classList; if(cl){ for(var key in KEEP){ if(cl.contains(key)){k=true;break;} } }
+        if(!k) c.style.display='none';
+      });
     });
-    var wrap=document.querySelector('.wrap'); if(wrap) wrap.style.padding='0 10px 12px';
+    var wrap=document.querySelector('.wrap'); if(wrap) wrap.style.padding='0 8px 10px';
     document.body.style.background='#fff'; document.documentElement.style.background='#fff';
   }
   function postH(){ try{ parent.postMessage({nfiddEmbedHeight: Math.ceil(document.body.getBoundingClientRect().height)}, '*'); }catch(_){} }

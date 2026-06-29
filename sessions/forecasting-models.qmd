@@ -13,17 +13,6 @@ In this session, we'll start with the renewal model that we've been using and ex
 
 - [Introduction to the spectrum of forecasting models](slides/introduction-to-the-spectrum-of-forecasting-models)
 
-::: {.callout-tip collapse="true"}
-## Interactive: a spectrum of models
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecasting-models.html?embed=headline" title="forecasting models interactive" loading="lazy" style="width:100%;height:1050px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Compare random-walk, statistical and mechanistic forecasts diverging over the horizon. [Open the full explainer ↗](../interactive/forecasting-models.html){target="_blank"}
-:::
-
 ## Objectives
 
 The aim of this session is to introduce some common forecasting models and to evaluate them.
@@ -93,6 +82,17 @@ ggplot(data, aes(x = t, y = R)) +
 :::
 
 # Forecasting models as a spectrum
+
+::: {.callout-tip collapse="true"}
+## Interactive: a spectrum of models
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecasting-models.html?embed=headline" title="a spectrum of models interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Compare random-walk, statistical and mechanistic forecasts diverging over the horizon. [Open the full explainer ↗](../interactive/forecasting-models.html){target="_blank"}
+:::
 
 A large part of this course has been about showing the importance of understanding and modelling the underlying mechanisms of the data generating process.
 However, in many forecasting scenarios, we may not have a good understanding of the underlying mechanisms, or the data may be too noisy to make accurate predictions.
@@ -215,7 +215,6 @@ $$
 log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
 $$
 
-
 ::: {.callout-note collapse="true"}
 ## What behaviour would we expect from this model?
 
@@ -247,7 +246,6 @@ We've coded up a model that uses this differenced AR process as a stan model in 
 stat_mod <- nfidd_cmdstan_model("statistical-r")
 stat_mod
 ```
-
 
 # Forecasting with the mechanistic and statistical models
 
@@ -334,7 +332,6 @@ target_onsets <- onset_df |>
   filter(day > cutoff) |>
   filter(day <= cutoff + horizon)
 ```
-
 
 ```{r plot_forecast}
 forecast |>
@@ -423,7 +420,6 @@ head(onset_df)
 
 ## Visualising your forecast
 
-
 ```{r plot-all-forecasts}
 forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
@@ -436,7 +432,6 @@ forecasts |>
   facet_wrap(~model) +
   lims(y = c(0, 500))
 ```
-
 
 As for the single forecast it is helpful to also plot the forecast on the log scale.
 
@@ -478,7 +473,6 @@ Which do you prefer?
 
 ## Scoring your forecast
 
-
 ```{r convert-forecasts}
 sc_forecasts <- forecasts |>
   left_join(onset_df, by = "day") |>
@@ -493,7 +487,6 @@ sc_forecasts <- forecasts |>
   )
 sc_forecasts
 ```
-
 
 Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
 
@@ -583,7 +576,6 @@ How do the CRPS values change with forecast date?
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
-
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
@@ -655,7 +647,6 @@ log_sc_forecasts <- sc_forecasts |>
 log_sc_scores <- log_sc_forecasts |>
   score()
 ```
-
 
 ::: {.callout-tip}
 Reminder: For more on scoring on the log scale see @bosse2023scorin on scoring forecasts on transformed scales.

@@ -14,17 +14,6 @@ We will see how we can visualise such forecasts, and visually compare them to wh
 
 - [Introduction to forecasting](slides/introduction-to-forecasting)
 
-::: {.callout-tip collapse="true"}
-## Interactive: the forecast fan
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecasting-concepts.html?embed=fan" title="forecasting concepts interactive" loading="lazy" style="width:100%;height:1000px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Extend a model forward and watch the uncertainty fan grow with the horizon. [Open the full explainer ↗](../interactive/forecasting-concepts.html){target="_blank"}
-:::
-
 ## Objectives
 
 The aim of this session is to introduce the concept of forecasting and forecast visualisation using a simple model.
@@ -79,6 +68,17 @@ Note that sharpness is a property of the forecasts themselves, whereas calibrati
 We will return to the forecasting paradigm and how to evaluate forecasts against it in the [forecast evaluation session](forecast-evaluation).
 
 # Extending a model into the future
+
+::: {.callout-tip collapse="true"}
+## Interactive: the forecast fan
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecasting-concepts.html?embed=fan" title="the forecast fan interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Extend a model forward and watch the uncertainty fan grow with the horizon. [Open the full explainer ↗](../interactive/forecasting-concepts.html){target="_blank"}
+:::
 
 The model we introduced in the [renewal equation session](R-estimation-and-the-renewal-equation) the reproduction number using a random walk, then used a discrete renewal process to model the number of infections, and convolved these with a delay distribution to model the number of onsets with Poisson observation error.
 Based on what we found in the [nowcasting session](nowcasting) this seems like a reasonable model for the data and so we might want to use it to forecast into the future.
@@ -272,7 +272,6 @@ long_data <- list(
   h = 0
 )
 
-
 rw_long <- nfidd_sample(mod,
   data = long_data,
   adapt_delta = 0.95,
@@ -365,7 +364,6 @@ rw_forecasts |>
   labs(title = "Weekly forecasts of symptom onsets over an outbreak",
        col = "Forecast start day")
 ```
-
 
 As for the single forecast it may be helpful to also plot the forecast on the log scale.
 

@@ -15,17 +15,6 @@ Correctly capturing this transmission process is crucial to modelling infections
 
 -   [Introduction to the reproduction number](slides/introduction-to-reproduction-number)
 
-::: {.callout-tip collapse="true"}
-## Interactive: the renewal equation
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=sim" title="renewal equation interactive" loading="lazy" style="width:100%;height:1150px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Drive an epidemic with R(t) and a generation interval; it turns over when R crosses 1. [Open the full explainer ↗](../interactive/renewal-equation.html){target="_blank"}
-:::
-
 ## Objectives
 
 The aim of this session is to introduce the renewal equation as an infection generating process, and to show how it can be used to estimate a time-varying reproduction number.
@@ -68,6 +57,17 @@ options(cmdstanr_print_line_numbers = TRUE)
 :::
 
 # The renewal equation as a process model for infectious diseases
+
+::: {.callout-tip collapse="true"}
+## Interactive: the renewal equation
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=sim" title="the renewal equation interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Drive an epidemic with R(t) and a generation interval; it turns over when R crosses 1. [Open the full explainer ↗](../interactive/renewal-equation.html){target="_blank"}
+:::
 
 In this session we introduce modelling the infection process itself, in addition to modelling observation processes.
 

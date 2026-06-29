@@ -18,17 +18,6 @@ However, the length of time between any of these events might be highly variable
 
 - [Introduction to epidemiological delays](slides/introduction-to-epidemiological-delays)
 
-::: {.callout-tip collapse="true"}
-## Interactive: delay distributions
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=discretise" title="delay distributions interactive" loading="lazy" style="width:100%;height:1000px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Discretise a continuous delay into a daily PMF and watch censoring shift it. [Open the full explainer ↗](../interactive/delay-distributions.html){target="_blank"}
-:::
-
 ## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
@@ -59,7 +48,6 @@ library("tidybayes")
 ::: {.callout-tip}
 The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
 :::
-
 
 ## Initialisation
 
@@ -118,6 +106,17 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 :::
 
 ## Working forwards: simulating a sequence of delays after infection
+
+::: {.callout-tip collapse="true"}
+## Interactive: delay distributions
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=discretise" title="delay distributions interactive" loading="lazy" style="width:100%;height:700px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Discretise a continuous delay into a daily PMF and watch censoring shift it. [Open the full explainer ↗](../interactive/delay-distributions.html){target="_blank"}
+:::
 
 We would now like to simulate hospitalisations arising from this outbreak.
 We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:

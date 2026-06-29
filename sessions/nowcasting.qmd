@@ -16,17 +16,6 @@ The aim of nowcasting is to predict what an epidemiological time series will loo
 
 - [Introduction to nowcasting](slides/introduction-to-nowcasting)
 
-::: {.callout-tip collapse="true"}
-## Interactive: nowcasting
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build" title="nowcasting interactive" loading="lazy" style="width:100%;height:1250px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-See each day's cases split into observed + missing and summed into a nowcast. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
-:::
-
 ## Objectives
 
 This session aims to introduce the concept of _nowcasting_, and see how we can perform a nowcast if we know the underlying delay distribution.
@@ -90,7 +79,6 @@ df <- infection_times |>
 ```
 
 We then assume that we're 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
-
 
 ```{r truncate_reports}
 cutoff <- 71
@@ -180,6 +168,17 @@ Estimating the "true curve" (i.e. what we expect to see once the data are comple
 :::
 
 # Nowcasting with a known delay
+
+::: {.callout-tip collapse="true"}
+## Interactive: nowcasting
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build,triangle" title="nowcasting interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See each day's cases split into observed + missing and summed into a nowcast, plus the reporting triangle. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
+:::
 
 ## The simplest possible nowcasting model
 
@@ -332,7 +331,6 @@ rw_nowcast_fit <- nfidd_sample(rw_mod, data = data)
 rw_nowcast_fit
 ```
 
-
 Again we can extract the nowcasted onsets and plot them alongside the observed data:
 
 ```{r rw-nowcast-onsets}
@@ -395,7 +393,6 @@ gamma_nowcast_fit <- nfidd_sample(rw_mod, data = wrong_delay_data)
 ```{r gamma-nowcast-fit-summary}
 gamma_nowcast_fit
 ```
-
 
 Again we can extract the nowcast of symptom onsets and plot it alongside the observed data:
 

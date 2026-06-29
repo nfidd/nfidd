@@ -17,17 +17,6 @@ We can again handle these by including them as uncertain parameters in the model
 
 [Introduction to biases in epidemiological delays](slides/introduction-to-biases-in-epidemiological-delays)
 
-::: {.callout-tip collapse="true"}
-## Interactive: biases in delay distributions
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/biases-in-delay-distributions.html?embed=truncation" title="biases in delay distributions interactive" loading="lazy" style="width:100%;height:1050px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Watch right truncation bias the observed delays short in real time. [Open the full explainer ↗](../interactive/biases-in-delay-distributions.html){target="_blank"}
-:::
-
 ## Objectives
 
 In this session, we'll introduce censoring and right truncation as typical properties of the process that generates infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
@@ -418,6 +407,17 @@ If not, why not?
 :::
 
 # Real-time estimation: truncation
+
+::: {.callout-tip collapse="true"}
+## Interactive: right truncation
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/biases-in-delay-distributions.html?embed=truncation" title="right truncation interactive" loading="lazy" style="width:100%;height:800px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Watch right truncation bias the observed delays short in real time. [Open the full explainer ↗](../interactive/biases-in-delay-distributions.html){target="_blank"}
+:::
 
 The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
 However, information on delay distributions is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.

@@ -34,17 +34,6 @@ Many collaborative forecasting projects and so-called forecasting hubs use quant
 
 - [Introduction to ensembles](slides/introduction-to-ensembles)
 
-::: {.callout-tip collapse="true"}
-## Interactive: opinion pool vs quantile averaging
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-ensembles.html?embed=headtohead" title="forecast ensembles interactive" loading="lazy" style="width:100%;height:1300px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge. [Open the full explainer ↗](../interactive/forecast-ensembles.html){target="_blank"}
-:::
-
 ## Objectives
 
 The aim of this session is to introduce the concept of ensembles of forecasts and to evaluate the performance of ensembles of the models we explored in the [forecasting models](forecasting-models) session.
@@ -138,6 +127,17 @@ head(onset_df)
 We will now move to creating forecasts as a combination of multiple forecasts.
 This procedure is also sometimes called _stacking_, and the resulting forecasts are said to come from _ensembles_ of forecast models.
 
+::: {.callout-tip collapse="true"}
+## Interactive: opinion pool vs quantile averaging
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-ensembles.html?embed=headtohead" title="opinion pool vs quantile averaging interactive" loading="lazy" style="width:100%;height:900px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge. [Open the full explainer ↗](../interactive/forecast-ensembles.html){target="_blank"}
+:::
+
 ## Quantile-based ensembles
 
 We will first consider forecasts based on the individual quantiles of each model.
@@ -194,7 +194,6 @@ However, the mean is preferred when forecasters have more faith in models that d
 The procedure of calculating quantiles of a new distribution as a weighted average of quantiles of constituent distributions (e.g., different measurements) is called a *Vincent average*, after the biologist Stella Vincent who described this as early as 1912 when studying the function of whiskers in the behaviour of white rats.
 
 :::
-
 
 #### Construction
 
@@ -315,7 +314,6 @@ plot_multiple_forecasts +
   scale_y_log10()
 ```
 
-
 ::: {.callout-tip}
 ##### Take 2 minutes
 How do these ensembles compare to the individual models?
@@ -360,7 +358,7 @@ We see it here as we are scoring quantiles and not samples hence we cannot use C
 ## Interactive: WIS → CRPS
 
 ```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:1100px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 

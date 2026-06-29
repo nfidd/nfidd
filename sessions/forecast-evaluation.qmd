@@ -14,11 +14,6 @@ In this session you will get to know several ways of assessing different aspects
 
 - [Forecast evaluation](slides/forecast-evaluation)
 
-::: {.callout-tip}
-## Interactive explainers
-Interactive visualisations are embedded at the **CRPS** and **PIT histogram** definitions below — expand the dropdowns to explore them. They are also collected on the [interactive explainers](../reference/interactive-explainers.qmd) page.
-:::
-
 ## Objectives
 
 The aim of this session is to introduce the concept of forecasting, using a simple model, and forecasting evaluation.
@@ -201,7 +196,7 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 ## Interactive: the CRPS
 
 ```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
@@ -283,7 +278,7 @@ There are many ways to assess calibration and bias but one common way is to use 
 ## Interactive: the PIT histogram
 
 ```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=pit" title="PIT histogram interactive" loading="lazy" style="width:100%;height:1500px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=pit" title="PIT histogram interactive" loading="lazy" style="width:100%;height:1320px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
