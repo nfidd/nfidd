@@ -169,7 +169,7 @@ Estimating the "true curve" (i.e. what we expect to see once the data are comple
 
 # Nowcasting with a known delay
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: nowcasting
 
 ```{=html}
@@ -182,7 +182,7 @@ See each day's cases split into observed + missing and summed into a nowcast, pl
 
 ## The simplest possible nowcasting model
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: the simplest nowcast (divide by the CDF)
 
 ```{=html}

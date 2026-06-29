@@ -65,11 +65,11 @@ options(cmdstanr_warn_inits = FALSE)
 
 # Joint estimation of delay distributions and nowcasting
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: the reporting triangle filling in
 
 ```{=html}
-<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build,triangle" title="the reporting triangle filling in interactive" loading="lazy" style="width:100%;height:1250px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=triangle" title="the reporting triangle filling in interactive" loading="lazy" style="width:100%;height:1250px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 

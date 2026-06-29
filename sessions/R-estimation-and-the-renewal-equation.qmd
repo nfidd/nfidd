@@ -58,7 +58,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 # The renewal equation as a process model for infectious diseases
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: the renewal equation
 
 ```{=html}

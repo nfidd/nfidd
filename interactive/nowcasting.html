@@ -216,11 +216,10 @@
     <span><i class="swatch" style="border-color:var(--true);opacity:.7"></i> eventual N(t)</span>
     <span><i class="swatch" style="border-color:var(--obs)"></i> observed so far</span>
     <span><i class="swatch" style="border-color:var(--fc);border-top-width:4px"></i> nowcast = observed / F</span>
-    <span><i class="swbox" style="background:#bfdbfe;opacity:.65"></i> nowcast uncertainty</span>
     <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T)</span>
   </div>
   <div class="fig">
-    <svg id="simpleSvg" viewBox="0 0 720 380" role="img" aria-label="A true epidemic curve, the observed-so-far curve dipping toward now, and the simple nowcast formed by dividing the observed count by the proportion reported F(T-t), with a band that flares at the most recent days."></svg>
+    <svg id="simpleSvg" viewBox="0 0 720 380" role="img" aria-label="A true epidemic curve, the observed-so-far curve dipping toward now, and the simple point nowcast formed by dividing the observed count by the proportion reported F(T-t)."></svg>
   </div>
   <div class="controls">
     <label><span class="vlabel">Reporting delay mean (days): <span id="smMval">4.0</span></span>
@@ -237,7 +236,7 @@
     <span class="chip">scale-up &times; 1/F: <b id="smMult">—</b></span>
     <span class="chip" id="smHint" style="background:#ecfeff"></span>
   </div>
-  <div class="key">Dividing by a small <i>F(T − t)</i> multiplies a tiny, noisy observed count by a large number, so the nowcast's uncertainty <b>flares</b> at the most recent days — exactly where we have least data. This scaling nowcast is the baseline the course's Bayesian models build on.</div>
+  <div class="key">This scaling nowcast is a <b>point estimate</b> — it has no honest uncertainty of its own. And it is most fragile exactly where it matters: dividing a tiny, noisy observed count by a small <i>F(T − t)</i> blows up at the recent edge. Getting <b>principled uncertainty</b> (and sharing strength across dates) is precisely why the course moves on from this baseline to the Bayesian nowcasting models.</div>
 </section>
 
 <!-- ============ REPORTING TRIANGLE ============ -->
@@ -531,19 +530,13 @@ function trueCurve(t,peak,width,height){
     let pTrue="";
     for(let t=t0;t<=t1;t+=0.5){ pTrue+=(pTrue?" L ":"M ")+sx(t)+" "+sy(trueCurve(t,peak,width,HEIGHT)); }
     svg.appendChild(el("path",{d:pTrue,fill:"none",stroke:"#64748b","stroke-width":2,opacity:.45}));
-    const upper=[],lower=[],ncPts=[],obsPts=[];
+    const ncPts=[],obsPts=[];
     for(let t=t0;t<=T;t++){
       const N=trueCurve(t,peak,width,HEIGHT);
       const p=Math.min(delayCdf(T-t+0.5,dm,s),1);
       const o=N*p, n=o/Math.max(p,1e-3);
-      const half=n*Math.sqrt((1-Math.min(p,0.999))/Math.max(p,1e-3))/Math.sqrt(Math.max(o,1))*6;
-      obsPts.push([t,o]); ncPts.push([t,n]); upper.push([t,n+half]); lower.push([t,Math.max(n-half,0)]);
+      obsPts.push([t,o]); ncPts.push([t,n]);
     }
-    let band="";
-    upper.forEach((pt,i)=>{ band+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
-    for(let i=lower.length-1;i>=0;i--){ band+=" L "+sx(lower[i][0])+" "+sy(lower[i][1]); }
-    band+=" Z";
-    svg.appendChild(el("path",{d:band,fill:"#bfdbfe",opacity:.6,stroke:"none"}));
     let pNc=""; ncPts.forEach((pt,i)=>{ pNc+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
     svg.appendChild(el("path",{d:pNc,fill:"none",stroke:"#2563eb","stroke-width":3}));
     let pObs=""; obsPts.forEach((pt,i)=>{ pObs+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
@@ -553,7 +546,7 @@ function trueCurve(t,peak,width,height){
     const pT=Math.min(delayCdf(0.5,dm,s),1);
     document.getElementById("smPct").textContent=(pT*100).toFixed(0)+"%";
     document.getElementById("smMult").textContent="×"+(1/Math.max(pT,1e-3)).toFixed(1);
-    document.getElementById("smHint").textContent = pT<0.2 ? "today: barely any reports in → huge ×, wide band"
+    document.getElementById("smHint").textContent = pT<0.2 ? "today: barely any reports in → huge ×, very fragile"
       : pT<0.5 ? "today: under half reported → big scale-up" : "today: most reports in → small correction";
   }
   Object.values(ids).forEach(i=>i.addEventListener("input",draw)); draw();

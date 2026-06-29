@@ -107,7 +107,7 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 
 ## Working forwards: simulating a sequence of delays after infection
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: delay distributions
 
 ```{=html}
@@ -180,7 +180,7 @@ ggplot(dfl, aes(x = time)) +
 
 ## Estimating delay distributions from outcome data
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## Interactive: Bayesian updating
 
 ```{=html}
