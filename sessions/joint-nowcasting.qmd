@@ -172,26 +172,6 @@ This is just a **reformulation** of the nowcasting problem we saw in the [nowcas
 
 :::
 
-::: {.callout-note .optional collapse="true"}
-## Mathematical definition: observed, missing, and the nowcast
-
-Write $n_{t,d}$ for the number of events with reference date $t$ (the day they occurred) reported after a delay of $d$ days — this is exactly the `reporting_triangle` above (`reported_onsets` by reference day and delay $d$). With $p_d$ the reporting-delay distribution, $n_{t,d} \approx N_t\, p_d$ where $N_t$ is the eventual total for date $t$. As of the current date $T$ a report for date $t$ has had time to arrive only if $d \le T - t$, so the count splits into a part already observed and a part still to come:
-
-$$
-\underbrace{C^{\mathrm{obs}}_{t} = \sum_{d=0}^{\,T-t} n_{t,d}}_{\text{reports already in}},
-\qquad
-\underbrace{C^{\mathrm{miss}}_{t} = \sum_{d=T-t+1}^{D} n_{t,d}}_{\text{reports still to come}} .
-$$
-
-The two sums meet at the boundary $d = T-t$, so together they recover the eventual total,
-
-$$
-N_t = C^{\mathrm{obs}}_{t} + C^{\mathrm{miss}}_{t} = \sum_{d=0}^{D} n_{t,d}.
-$$
-
-Here $C^{\mathrm{obs}}_{t}$ is the `filtered_reporting_triangle` summed over observed delays (the `available_onsets`), and $C^{\mathrm{miss}}_{t}$ is the lower-right of the triangle we have not yet seen. The simple nowcast of the [concepts session](sessions/nowcasting) divides by the delay CDF, $\widehat{N}_t = C^{\mathrm{obs}}_{t} / F(T-t)$ with $F(T-t) = \sum_{d=0}^{T-t} p_d$. The **joint** model here instead estimates the delay $p_d$ and fills in the missing cells $C^{\mathrm{miss}}_{t}$ at the same time, propagating the uncertainty in both.
-:::
-
 This richer data structure contains information about both the delay distribution and the final expected counts so we can use it to jointly estimate both, which was not possible with the simpler data structure we used in the [nowcasting concepts session](sessions/nowcasting).
 
 ## Mathematical formulation
@@ -227,14 +207,16 @@ We now have two main modelling options:
 We will explore these in the next section.
 :::
 
-A key insight is that we can split each $n_{t,d}$ into observed and unobserved components:
+A key insight is that, at the current day $T$, each reference day's reports split into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
 
-$$n_{t,d} = n_{t,d}^{obs} + n_{t,d}^{miss}$$
+$$
+N_{t} = \underbrace{\sum_{d=0}^{T-t} n_{t,d}}_{N_t^{\text{obs}}\ \text{(reports already in)}} \; + \; \underbrace{\sum_{d=T-t+1}^{D} n_{t,d}}_{N_t^{\text{miss}}\ \text{(to be estimated)}}
+$$
 
 where:
 
-- $n_{t,d}^{obs}$ is what we observe (when $t+d \leq$ current day)
-- $n_{t,d}^{miss}$ is what we need to estimate (when $t+d >$ current day)
+- $N_t^{\text{obs}}$ is what we have observed by the current day $T$ (the cells with $t+d \leq T$)
+- $N_t^{\text{miss}}$ is what we still need to estimate (the cells with $t+d > T$)
 
 The joint model uses the observed data to estimate both the delay distribution and the underlying onset counts, which then allows us to predict the missing entries.
 
@@ -251,7 +233,6 @@ Nowcasting aims to complete this triangle by estimating the missing entries ($n_
 
 Once completed, we sum across the rows to get our nowcast of the true onset counts.
 :::
-
 
 ## Fitting the joint model
 
@@ -357,7 +338,6 @@ This may not be a good assumption in a rapidly changing epidemic (where the repr
 - In addition, whilst we say it is "quite simple" as should be clear from the code, it is quite complex and computationally intensive.
 This is because we are fitting a model to the reporting triangle, which is a much larger data set and so the model is relatively quite slow to fit.
 :::
-
 
 # Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions {.optional}
 
