@@ -13,7 +13,6 @@ authors:
 license: MIT
 repository-code: "https://github.com/nfidd/nfidd"
 url: "https://nfidd.github.io/nfidd/"
-version: 1.2.0
-date-released: "2026-02-13"
-# After the first Zenodo-archived release, add the concept DOI here, e.g.:
-# doi: 10.5281/zenodo.XXXXXXXX
+version: 1.3.1
+date-released: "2026-06-30"
+doi: 10.5281/zenodo.21063961
