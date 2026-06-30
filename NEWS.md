@@ -1,6 +1,6 @@
 # nfidd 1.3.1
 
-- removed an unused `init_r` argument from the renewal model (#652)
+- removed an unused `init_R` argument from the renewal model (#652)
 - clarified the joint nowcasting session (#659)
 - updated the return link to point to the forecasting concepts session (#656)
 - renamed the mpox figure and credited its sources on the nowcasting slides (#665)
