@@ -207,7 +207,7 @@ We now have two main modelling options:
 We will explore these in the next section.
 :::
 
-A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ split into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
+A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
 
 $$
 N_{t} = \underbrace{\sum_{d=0}^{T-t} n_{t,d}}_{N_t^{\text{obs}}\ \text{(reports already in)}} \; + \; \underbrace{\sum_{d=T-t+1}^{D} n_{t,d}}_{N_t^{\text{miss}}\ \text{(to be estimated)}}
