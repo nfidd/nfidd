@@ -33,7 +33,10 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rmarkdown, any::allcontributors
+          # Use the development version of allcontributors until the fix for
+          # spurious blank-line changes is released (currently only on the
+          # default branch, post-0.2.3).
+          extra-packages: any::rmarkdown, github::ropensci/allcontributors
 
       - name: Update contributors
         if: github.ref == 'refs/heads/main'
