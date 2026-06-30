@@ -29,6 +29,8 @@ Data after the dashed line are marked as uncertain. What, if anything, do they t
 
 (figure courtesy of Johannes Bracher)
 
+See also: [Wolffram et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011394)
+
 ### second example {.smaller}
 
 ... or like this
