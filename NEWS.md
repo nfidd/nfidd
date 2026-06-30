@@ -1,4 +1,28 @@
-# nfidd (development version)
+# nfidd 1.3.1
+
+- removed an unused `init_R` argument from the renewal model (#652)
+- clarified the joint nowcasting session (#659)
+- updated the return link to point to the forecasting concepts session (#656)
+- renamed the mpox figure and credited its sources on the nowcasting slides (#665)
+
+# nfidd 1.3.0
+
+- restructured the course to start with delay distributions, moving the probability and Stan introduction to reference and self-study material (#621)
+- dropped the unused `gen_time_pmf` argument from `simulate_onsets()` (#607)
+- replaced superseded `transmute()` with `mutate()` + `select()` (#606)
+- used `N` for the sample size in `lognormal.stan` to match `gamma.stan` (#605)
+- used the `quantile_level` column for the QRA weights filter (#603)
+- added a Stan model index reference page (#612)
+- enabled site search (#614)
+- added a real-time Rt exercise and callout to the renewal session (#615)
+- plotted the forecast reproduction number over the forecast horizon (#639)
+- added an optional dropdown on baselines to the forecasting concepts session (#641)
+- added missing ensemble forecasting citations and cited Bracher et al. 2021 for over/underprediction (#648, #604)
+- marked optional content consistently across the sessions and the timetable (#623, #625)
+- updated learning outcomes to match course content (#611)
+- corrected an overstated bias claim for ad-hoc censoring fixes (#634)
+- highlighted printed Stan models in rendered output (#643)
+- fixed broken LaTeX in the CRPS formula (#642)
 
 # nfidd 1.2.0
 

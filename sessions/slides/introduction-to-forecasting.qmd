@@ -74,4 +74,4 @@ However:
 
 #
 
-[Return to the session](../forecast-visualisation)
+[Return to the session](../forecasting-concepts)

@@ -25,7 +25,7 @@ Hans Rosling, Liberia, 2014
 
 ### Aggregated data can look like this {.smaller}
 
-![](figures/monkeypox_delayed.png)
+![](figures/mpox_delayed.png)
 
 [UKHSA, 2022](https://www.gov.uk/government/publications/monkeypox-outbreak-technical-briefings/investigation-into-monkeypox-outbreak-in-england-technical-briefing-1) <br>
 [Overton et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011463)

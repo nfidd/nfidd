@@ -1,3 +1,30 @@
 element.style {
   margin-bottom: 1em;
 }
+
+/* Optional / "going deeper" callouts.
+   Add the `.optional` class to a callout to mark it as skippable on a first
+   pass, e.g. ::: {.callout-note .optional collapse="true"}
+   The label and muted border signal that the box is not part of the main thread. */
+.callout.optional {
+  border-left-color: #9aa0a6;
+}
+.callout.optional .callout-title-container::after,
+.callout.optional .callout-title::after {
+  content: " · optional";
+  font-style: italic;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+/* Optional whole sections: add the `.optional` class to the heading,
+   e.g. ## Going deeper {.optional} */
+section.optional > h1::after, section.optional > h2::after,
+section.optional > h3::after, section.optional > h4::after,
+h1.optional::after, h2.optional::after,
+h3.optional::after, h4.optional::after {
+  content: " · optional";
+  font-style: italic;
+  font-weight: normal;
+  opacity: 0.7;
+}

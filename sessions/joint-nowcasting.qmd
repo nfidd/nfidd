@@ -124,7 +124,7 @@ tail(reporting_triangle)
 
 We also apply the Poisson observation error to the reported onsets to capture our uncertainty in the reporting process (remember we have lost uncertainty in the onsets as we are not individually simulating the reporting delays).
 
-To recover the onsets onsets by day we group by day and then sum reported onsets across report days.
+To recover the onsets by day we group by day and then sum reported onsets across report days.
 
 ```{r update-simulated-onset}
 noisy_onsets_df <- reporting_triangle |>
@@ -133,13 +133,13 @@ noisy_onsets_df <- reporting_triangle |>
 tail(noisy_onsets_df)
 ```
 
-As we only observed reported cases up to the current day we need to filter it to only include the data we have observed:
+As we only observed reported onsets up to the current day we need to filter it to only include the data we have observed:
 
 ```{r filter-reporting-triangle}
 filtered_reporting_triangle <- reporting_triangle |>
   filter(reported_day <= max(day))
 
-tail(noisy_onsets_df)
+tail(filtered_reporting_triangle)
 ```
 
 Finally, we sum this to get the counts we actually observe. This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
@@ -160,19 +160,19 @@ Notice how this simulation creates a similar, but different, data structure than
 
 So far we've worked with data that has two dimensions. Such as:
 
-- **Onset day**: when symptoms began
-- **Onset counts**: the number of cases that occurred on each day
+- **Onset day**: the day that each infected case saw symptoms begin
+- **Onset counts**: the number of cases with symptoms that began on each day
 
 Now we are introducing a third dimension:
 
-- **Report day**: when the case enters our surveillance system
+- **Report day**: when the symptomatic case enters our surveillance reporting system
 
-This means that to recover the true onset counts we need to sum across the third dimension and we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
+This means that to recover the true onset counts we need to sum across the third dimension, but we may not be able to do this if all the data has not been reported yet (i.e. we have right truncation in our data).
 This is just a **reformulation** of the nowcasting problem we saw in the [nowcasting concepts session](sessions/nowcasting).
 
 :::
 
-This richer data structure contains information about both the delay distribution and the final expected counts so we can use it to jointly estimate both which was not possible with the simpler data structure we used in the [nowcasting concepts session](sessions/nowcasting).
+This richer data structure contains information about both the delay distribution and the final expected counts so we can use it to jointly estimate both, which was not possible with the simpler data structure we used in the [nowcasting concepts session](sessions/nowcasting).
 
 ## Mathematical formulation
 
@@ -218,7 +218,7 @@ where:
 
 The joint model uses the observed data to estimate both the delay distribution and the underlying onset counts, which then allows us to predict the missing entries.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 ## The reporting triangle
 
 This data structure is sometimes called the "reporting triangle" in the literature because when visualised as a matrix (with onset days as rows and reporting days as columns), the observed data ($n_{t,d}^{obs}$) creates a triangular shape.
@@ -252,6 +252,10 @@ For now, it is important that you understand the concept, but as the models get 
 One thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
 This is different from earlier when we had to pass the initial number of infections (`I0`) as data.
 In most situations, this number would be unknown, so what we do here is closer to what one would do in the real world.
+
+Another new feature is the `generated quantities` block.
+This block runs once per posterior draw to compute quantities derived from the fitted parameters, rather than contributing to the likelihood.
+Here we use it to produce the nowcast: we reconstruct the complete reporting triangle (onsets by all delays, including those not yet observed) and combine the observed counts with model predictions for the not-yet-reported parts to estimate the true onsets.
 :::
 
 ::: {.callout-note}
@@ -278,7 +282,7 @@ joint_data <- list(
    mutate(d = d + 1) |>
    pull(d),            # number of observations per day
   obs = filtered_reporting_triangle$reported_onsets,   # observed symptom onsets
-  d = 16               # number of reporting delays
+  d = 16               # max number of days that we know have some reporting delay
 )
 joint_nowcast_fit <- nfidd_sample(joint_mod, data = joint_data)
 ```
@@ -340,11 +344,11 @@ This is because we are fitting a model to the reporting triangle, which is a muc
 ::: {.callout-note collapse="true"}
 ## Key learning points
 
-- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data.
-- When reporting delays, don't provide enough information to identify recent trends, the underlying generative model (renewal process) prevents bias
+- The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data
+- When reporting delays don't provide enough information to identify recent trends, using the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
-- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment. 
-They avoid issues of passing estimates between the nowcast and the reproduction number estimation model.
+- Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment.
+They avoid issues of passing fixed estimates between the nowcast and the reproduction number estimation model.
 :::
 
 ::: {.callout-note}
@@ -355,8 +359,8 @@ In the previous sessions, we have seen how to estimate the reproduction number a
 We can now put these two pieces together to estimate the reproduction number and nowcast the data jointly.
 This should allow us to produce more accurate nowcasts as we can use the information from the reproduction number to inform the nowcast and vice versa.
 
-As in the [renewal session](R-estimation-and-the-renewal-equation), we need to define the generation time distribution and an incubation period distribution.
-We will use the same distributions as in the [renewal session](R-estimation-and-the-renewal-equation) for simplicity.
+As in the [renewal session](sessions/R-estimation-and-the-renewal-equation), we need to define the generation time distribution and an incubation period distribution.
+We will use the same distributions as in the [renewal session](sessions/R-estimation-and-the-renewal-equation) for simplicity.
 These are:
 
 ```{r gt}
@@ -385,9 +389,9 @@ Can you suggest how you swap in the simple nowcasting model whilst keeping the e
 
 ::: {.callout-note collapse="true"}
 ## Solution
-Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as a data.
+Essentially rather than using `observe_onsets_with_delay.stan` we would use `condition_onsets_by_report.stan` and pass in the proportion reported as data.
 This would allow us to use the simple nowcasting model whilst still estimating the reproduction number.
-We would also remove the `generated quantities` block as we are not nowcasting the data, and simplify the observations to just the number of onsets.
+We would also remove the `generated quantities` block as we no longer reconstruct unobserved onsets via the reporting-delay model; we are not nowcasting the data, so simplify the observations to just the number of onsets.
 :::
 
 Now let's fit the final model for this session!
@@ -458,7 +462,7 @@ What about the reproduction number?
 ## Solution
 
 - Whilst the majority of the nowcast is similar we see that the nowcast for days nearer to the present is more accurate as this model can capture the trend in infections and account for delays from infection to onset and onset to report.
-- The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](R-estimation-and-the-renewal-equation).
+- The key takeaway from the reproduction number plot is that it looks similar to the one we estimated in the [renewal session](sessions/R-estimation-and-the-renewal-equation).
 This is because we have accounted for the truncation (otherwise it would be spuriously decreasing towards the end of the timeseries).
 :::
 

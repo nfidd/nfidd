@@ -13,7 +13,7 @@ One way to attempt to draw strength from a diversity of approaches is the creati
 In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
 We will then compare the performance of these ensembles to the individual models and to each other.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 ## Representations of probabilistic forecasts
 
 Probabilistic predictions can be described as coming from a probabilistic probability distributions.
@@ -99,7 +99,7 @@ forecasts <- bind_rows(
 forecasts
 ```
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 ## How did we generate these forecasts?
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took before for a single forecast date but generalises it to many forecast dates.
 
@@ -162,7 +162,7 @@ quantile_forecasts <- sample_forecasts |>
 quantile_forecasts
 ```
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip .optional collapse="true"}
 #### What is happening here?
 
 - Internally `scoringutils` is calculating the quantiles of the sample-based forecasts.
@@ -177,7 +177,7 @@ A good place to start when building ensembles is to take the mean or median of t
 Typically, the median is preferred when outlier forecasts are likely to be present as it is less sensitive to these.
 However, the mean is preferred when forecasters have more faith in models that diverge from the median performance and want to represent this in the ensemble.
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 #### Vincent average
 
 The procedure of calculating quantiles of a new distribution as a weighted average of quantiles of constituent distributions (e.g., different measurements) is called a *Vincent average*, after the biologist Stella Vincent who described this as early as 1912 when studying the function of whiskers in the behaviour of white rats.

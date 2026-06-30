@@ -101,7 +101,7 @@ ggplot(infection_times, aes(x = infection_time)) +
        title = "Infections during an outbreak")
 ```
 
-::: {.callout-tip}
+::: {.callout-tip .optional}
 In reality, data from infectious disease surveillance will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
 For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
 :::
@@ -212,7 +212,7 @@ The lognormal Stan model has three main blocks:
 
 :::
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 ## Stan reference materials
 
 For more information on the Stan based tools used in this session:
@@ -242,7 +242,7 @@ res <- nfidd_sample(
 )
 ```
 
-::: {.callout-note}
+::: {.callout-note .optional}
 ## What is sampling?
 
 Stan has used Markov Chain Monte Carlo (MCMC) to generate samples from the posterior distribution of our parameters. 
@@ -353,7 +353,7 @@ With real data, of course, we don't have this information available.
   df_small <- df_onset_to_hosp |> slice_sample(n = 100)
   ```
 
-- **Different delay lengths**: The updated `add_delays()` function now allows you to change the delay parameters. 
+- **Different delay lengths**: The `add_delays()` function allows you to change the delay parameters.
   
   Try longer delays and see how this affects your parameter recovery:
   ```{r, eval = FALSE}

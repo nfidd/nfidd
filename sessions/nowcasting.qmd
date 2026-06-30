@@ -155,7 +155,7 @@ ggplot(combined_cutoffs, aes(x = day, y = onsets, colour = cutoff)) +
 As we can see, even though it may much seem like the epidemic curve is going down, in fact in the final data set one can see that at the time symptom onsets were still increasing.
 The apparent decline towards the present (indicated by a dashed vertical line) was caused by the delay in reporting.
 
-::: {.callout-note}
+::: {.callout-note .optional}
 ## Plotting and analysing data by report date
 Looking at the plots one might suggest plotting and analysing the data by date of reporting which correctly showed the data to be still increasing and which should, by definition, not be subject to future changes.
 
@@ -282,7 +282,7 @@ The points in this plot represent the data available when the nowcast was made (
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
-::: {.callout-important}
+::: {.callout-important .optional}
 ## Simple multiplicative nowcasting methods
 
 Before moving to more complex models, it's worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 
@@ -354,12 +354,7 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 :::
 
-## What happens if we get the delay distribution wrong? {.optional}
-
-::: {.callout-note}
-## Optional section
-This section can be skipped if time is limited. It demonstrates the importance of accurate delay distribution estimation.
-:::
+## What happens if we get the delay distribution wrong?
 
 In practice, we often do not know the delay distribution and so need to estimate it using the data at hand. 
 In the [session on biases in delay distributions](sessions/biases-in-delay-distributions) we saw how we could do this using individual-level records.

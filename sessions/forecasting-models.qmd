@@ -365,8 +365,8 @@ What do you notice about the forecasts from the more mechanistic and more statis
 - Neither model simply extend the trend in the way the random walk model did in the [forecasting concepts session](forecasting-concepts).
 :::
 
-::: {.callout-note collapse="true"}
-As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing. 
+::: {.callout-note .optional collapse="true"}
+As these models are still renewal processes we can still plot the time-varying reproduction number which can be a helpful way of reasoning about how the models are performing.
 
 ```{r plot-stat-rt}
 stat_forecast_fit |>
@@ -376,51 +376,6 @@ stat_forecast_fit |>
   ggplot(aes(y = .value, x = day)) +
   geom_hline(yintercept = 1, linetype = "dashed") +
   geom_line(aes(group = .draw), alpha = 0.1)
-```
-:::
-
-::: {.callout-tip}
-## What happens when you are very wrong about the population size? (optional)
-
-In the above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
-
-:::
-
-::: {.callout-note collapse="true"}
-## Solution
-
-```{r very-wrong, results = 'hide', message = FALSE}
-data <- list(
-  n = nrow(filtered_onset_df),
-  I0 = 1,
-  obs = filtered_onset_df$onsets,
-  gen_time_max = length(gen_time_pmf),
-  gen_time_pmf = gen_time_pmf,
-  ip_max = length(ip_pmf) - 1,
-  ip_pmf = ip_pmf,
-  h = horizon, # Here we set the number of days to forecast into the future
-  N_prior = c(100, 20) # the prior for the population size
-)
-
-mech_forecast_fit_diff <- nfidd_sample(
-  mech_mod, data = data
-)
-
-mech_forecast_diff <- mech_forecast_fit_diff |>
-  gather_draws(forecast[day]) |>
-  ungroup() |>
-  mutate(day = day + cutoff)
-```
-
-```{r very-wrong-plot}
-mech_forecast_diff |>
-  filter(.draw %in% sample(.draw, 100)) |>
-  ggplot(aes(y = .value, x = day)) +
-  geom_line(alpha = 0.1, aes(group = .draw)) +
-  geom_point(
-    data = target_onsets, aes(x = day, y = onsets),
-    color = "black"
-  )
 ```
 :::
 
@@ -437,7 +392,7 @@ forecasts <- bind_rows(
 )
 ```
 
-::: {.callout-tip}
+::: {.callout-tip .optional}
 ## How did we estimate these forecasts?
 We generated these forecasts using the code in `data-raw/generate-example-forecasts.r` which uses the same approach we just took for a single forecast date but generalises it to many forecast dates.
 
@@ -538,7 +493,7 @@ sc_scores <- sc_forecasts |>
 sc_scores
 ```
 
-::: {.callout-note collapse="true"}
+::: {.callout-note .optional collapse="true"}
 ## Learning more about the output of `score()`
 
 See the documentation for `?get_metrics.forecast_sample` for information on the default sample metrics.
@@ -736,6 +691,48 @@ How do the CRPS values on the log scale compare to the scores on the original sc
 :::
 
 # Going further
+
+## What happens when you are very wrong about the population size?
+
+In the forecasts above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r very-wrong, results = 'hide', message = FALSE}
+data <- list(
+  n = nrow(filtered_onset_df),
+  I0 = 1,
+  obs = filtered_onset_df$onsets,
+  gen_time_max = length(gen_time_pmf),
+  gen_time_pmf = gen_time_pmf,
+  ip_max = length(ip_pmf) - 1,
+  ip_pmf = ip_pmf,
+  h = horizon, # Here we set the number of days to forecast into the future
+  N_prior = c(100, 20) # the prior for the population size
+)
+
+mech_forecast_fit_diff <- nfidd_sample(
+  mech_mod, data = data
+)
+
+mech_forecast_diff <- mech_forecast_fit_diff |>
+  gather_draws(forecast[day]) |>
+  ungroup() |>
+  mutate(day = day + cutoff)
+```
+
+```{r very-wrong-plot}
+mech_forecast_diff |>
+  filter(.draw %in% sample(.draw, 100)) |>
+  ggplot(aes(y = .value, x = day)) +
+  geom_line(alpha = 0.1, aes(group = .draw)) +
+  geom_point(
+    data = target_onsets, aes(x = day, y = onsets),
+    color = "black"
+  )
+```
+:::
 
 ## Challenge
 
