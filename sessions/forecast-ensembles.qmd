@@ -887,6 +887,17 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles. Why might this be the case?
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: interval coverage
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=coverage" title="interval coverage interactive" loading="lazy" style="width:100%;height:720px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+A calibration check for quantile forecasts: does a 90% prediction interval actually contain the truth 90% of the time?
+:::
+
 # Going further
 
 ## Challenge

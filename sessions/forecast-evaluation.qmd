@@ -273,8 +273,11 @@ As well as the CRPS we can also look at the calibration and bias of the model [@
 There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
 
 ::: {.callout-tip}
-
-::: {.callout-tip .optional collapse="true"}
+## Interpreting the PIT histogram
+- Ideally PIT histograms should be uniform.
+- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident.
+- If it is skewed then the model is biased towards the direction of the skew.
+:::
 
 ::: {.callout-tip .optional collapse="true"}
 ## Interactive: the PIT histogram
@@ -285,22 +288,6 @@ There are many ways to assess calibration and bias but one common way is to use 
 ```
 
 Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you.
-:::
-
-## Interactive: interval coverage
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=coverage" title="interval coverage interactive" loading="lazy" style="width:100%;height:720px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-A calibration check that pairs with the PIT histogram: does a 90% prediction interval actually contain the truth 90% of the time?
-:::
-
-## Interpreting the PIT histogram
-- Ideally PIT histograms should be uniform. 
-- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
-- If it is skewed then the model is biased towards the direction of the skew.
 :::
 
 ::: {.callout-tip .optional collapse="true"}
