@@ -79,3 +79,10 @@ While examples often use outbreak scenarios for clarity, participants should con
 - ability to create a predictive ensemble of forecasts in R
 - familiarity with weighted ensembles, including inverse-WIS weighting and quantile regression averaging
 
+## Evaluation with controlled comparison
+
+- ability to distinguish the three dimensions of model evaluation (qualification, verification, validation) and say what each one asks
+- understanding of why a controlled comparison is needed to attribute a change in estimates to a specific cause
+- ability to run a controlled comparison in R by varying one modelling choice at a time and scoring its effect
+- ability to interpret which choices move forecast performance most, and relate this to whether a model is adequate for a specific use
+

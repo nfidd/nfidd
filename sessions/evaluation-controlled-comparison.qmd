@@ -1,0 +1,308 @@
+---
+title: "Evaluation with controlled comparison"
+order: 9.5
+bibliography: ../nfidd.bib
+---
+
+# Introduction
+
+In the [forecast evaluation](forecast-evaluation) session we scored a single model: we asked whether its predictions were calibrated, sharp, and unbiased.
+That is one part of a larger question.
+In practice the questions you face are usually comparative.
+Why is my estimate of the reproduction number different from someone else's?
+Does this choice of generation time actually matter for the forecast?
+Which of these models should I trust for next week's decision?
+
+You cannot answer any of these by looking at one model on its own.
+You answer them by comparison, and a comparison is only informative if it is controlled: hold everything fixed except the one thing you want to learn about.
+
+It helps to separate what we mean by evaluation into three dimensions [@schlesinger1979].
+
+- **Qualification** asks how plausible the assumptions are. Is the generation time you used well evidenced? Would a different but equally defensible choice change your answer?
+- **Verification** asks how robust the implementation is. Does the code do what the maths says? Would another correct implementation of the same model agree?
+- **Validation** asks how calibrated the estimates are. This is the scoring you already did: do the forecasts match what actually happened?
+
+None of these work without a controlled comparison.
+To learn whether an assumption matters, you vary that assumption and hold the rest fixed.
+To learn whether an implementation is robust, you compare implementations of the same model.
+To learn whether estimates are calibrated, you compare them against observed data.
+This session gives you the frame and then has you run a controlled comparison yourself.
+
+## Slides
+
+- [Evaluation with controlled comparison](slides/evaluation-with-controlled-comparison.pdf)
+
+## Objectives
+
+By the end of this session you will be able to:
+
+- distinguish the three dimensions of model evaluation (qualification, verification, validation) and say what each one asks
+- explain why a controlled comparison is needed to attribute a change in estimates to a specific cause
+- run a controlled comparison in R by varying one modelling choice at a time and scoring its effect
+- interpret which choices move forecast performance most, and relate this to whether a model is adequate for a specific use
+
+::: {.callout-note collapse="true"}
+
+# Setup
+
+## Source file
+
+The source file of this session is located at `sessions/evaluation-controlled-comparison.qmd`.
+
+## Libraries used
+
+In this session we will use the `nfidd` package to load a data set of forecasts and helper functions, the `dplyr` package for data wrangling, `ggplot2` for plotting, and the `scoringutils` package for evaluating forecasts.
+These are the same libraries you used in the [forecast evaluation](forecast-evaluation) session.
+
+```{r libraries, message = FALSE}
+library("nfidd")
+library("dplyr")
+library("ggplot2")
+library("scoringutils")
+```
+
+::: {.callout-tip}
+The best way to interact with the material is via the [Visual Editor](https://docs.posit.co/ide/user/ide/guide/documents/visual-editor.html) of RStudio.
+:::
+
+## Initialisation
+
+We set a random seed for reproducibility.
+Setting this ensures that you should get exactly the same results on your computer as we do.
+
+```{r}
+set.seed(12345)
+```
+
+:::
+
+# Three dimensions of evaluation
+
+Before writing any code, it helps to be able to name what you are evaluating.
+The same word, "evaluation", can mean quite different things, and the three dimensions above give you a way to keep them apart.
+
+One reason the frame is useful is that it maps onto how official statistics are judged for public use.
+The UK Office for Statistics Regulation asks three questions of any statistic used in decisions [@osr2023]: is the process appropriate (trustworthiness), can I rely on the results (quality), and is the output relevant (value).
+These line up with verification, qualification, and validation.
+A model that is well calibrated but built on an assumption nobody can source is not yet fit for use.
+
+::: {.callout-tip}
+## Which dimension is this?
+
+For each of the following, decide whether it is a question of qualification, verification, or validation.
+
+1. Two teams estimate $R_t$ from the same case data but get different answers. One used a generation time with a mean of 4 days, the other used 6 days.
+2. Two teams write code for the same renewal-equation model. One is in Stan, the other in a hand-written sampler. They disagree at the third decimal place.
+3. A model predicted a 50% chance that cases would exceed 200 next week. Over many such weeks, the threshold was exceeded 70% of the time.
+:::
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. Qualification. The teams differ in an assumption (the generation time), so this is about how plausible that assumption is and how sensitive the estimate is to it.
+2. Verification. The teams share the model but differ in implementation, so the question is whether the code is correct and robust.
+3. Validation. This compares forecast probabilities against observed frequencies, which is a question of calibration.
+:::
+
+# Why we need controlled comparison
+
+Early in the COVID-19 pandemic, several groups estimated $R_t$ for the same country at the same time and got visibly different answers [@sherratt2021].
+The estimates differed, but so did almost everything behind them: the data source (test-positive cases, hospital admissions, or deaths), the assumed delays, the reference dates, and the estimation method.
+When everything varies at once, you have an *uncontrolled* comparison.
+You can see that the answers differ, but you cannot say *why*, because no single cause is isolated.
+
+The way out is to change one thing at a time.
+A later study did exactly this for eight German $R_t$ models: starting from the published estimates, the authors progressively aligned the models on one choice after another (the input data, the smoothing window, the generation time) and watched the estimates converge [@brockhausWhyAreDifferent2023].
+By the end, models that had looked very different agreed closely, and the exercise showed that surrounding analytical choices mattered as much as the statistical method.
+
+You will now do a small version of the same thing.
+We have a set of forecasts that share everything except one choice, so any difference in their scores can be attributed to that choice.
+
+# Worked example: score the baseline
+
+We start from the forecasts you already met in the [forecast evaluation](forecast-evaluation) session: repeated 14-day forecasts from a random walk model, made every 7 days across a simulated outbreak.
+
+```{r load-baseline}
+data(rw_forecasts)
+rw_forecasts
+```
+
+To score them we need the observed onsets to compare against.
+These come from the same simulated outbreak used to fit the models.
+
+```{r simulate-onsets}
+gen_time_pmf <- make_gen_time_pmf()
+ip_pmf <- make_ip_pmf()
+onset_df <- simulate_onsets(
+  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+)
+```
+
+We convert the forecasts into a `scoringutils` object and score them, exactly as before.
+
+```{r score-baseline}
+sc_baseline <- rw_forecasts |>
+  left_join(onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast_sample(
+    forecast_unit = c("origin_day", "horizon", "model"),
+    observed = "onsets",
+    predicted = ".value",
+    sample_id = ".draw"
+  )
+
+sc_baseline |>
+  score() |>
+  summarise_scores(by = "model")
+```
+
+This is our reference point.
+Every comparison from here on changes exactly one thing and re-scores, so we can read any change in the CRPS as the effect of that one change.
+
+# Your turn: vary the model, hold the data fixed
+
+The `nfidd` package ships two more sets of forecasts made in the same way as the random walk forecasts: the same outbreak data, the same delays, the same forecast dates and horizon.
+The only thing that differs is how each model lets the reproduction number evolve over time.
+
+- `stat_forecasts`: a more statistical model (a differenced autoregressive process)
+- `mech_forecasts`: a more mechanistic model (susceptible depletion)
+
+Because everything else is held fixed, this is a controlled comparison of *model structure*.
+
+Load the two extra models, combine them with the baseline, and score all three together.
+Fill in the blank to score by model.
+
+```{r vary-model, eval = FALSE}
+data(stat_forecasts, mech_forecasts)
+
+all_forecasts <- bind_rows(
+  rw_forecasts,
+  mutate(stat_forecasts, model = "More statistical"),
+  mutate(mech_forecasts, model = "More mechanistic")
+)
+
+sc_models <- all_forecasts |>
+  left_join(onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast_sample(
+    forecast_unit = c("origin_day", "horizon", "model"),
+    observed = "onsets",
+    predicted = ".value",
+    sample_id = ".draw"
+  )
+
+sc_models |>
+  score() |>
+  summarise_scores(by = ______)
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r vary-model-solution}
+data(stat_forecasts, mech_forecasts)
+
+all_forecasts <- bind_rows(
+  rw_forecasts,
+  mutate(stat_forecasts, model = "More statistical"),
+  mutate(mech_forecasts, model = "More mechanistic")
+)
+
+sc_models <- all_forecasts |>
+  left_join(onset_df, by = "day") |>
+  filter(!is.na(.value)) |>
+  as_forecast_sample(
+    forecast_unit = c("origin_day", "horizon", "model"),
+    observed = "onsets",
+    predicted = ".value",
+    sample_id = ".draw"
+  )
+
+sc_models |>
+  score() |>
+  summarise_scores(by = "model")
+```
+
+The three models differ only in how they let $R_t$ change over time, so the difference in CRPS is due to model structure alone.
+:::
+
+::: {.callout-tip}
+## Check your answer
+
+Your table should have one row per model and a CRPS for each.
+Because the comparison is controlled, you can now say which model structure scores best on this outbreak, and mean it, rather than wondering whether the data or delays were also different.
+:::
+
+# Independent exercise: does the comparison hold everywhere?
+
+A single average score can hide a lot.
+A model that wins on average may lose at long horizons, or near the peak.
+The point of a controlled comparison is not just to crown a winner but to see *where* one choice helps and where it does not.
+
+Take the scored object from the exercise above and summarise it by both model and horizon, then plot CRPS against horizon with one line per model.
+
+```{r by-horizon, eval = FALSE}
+sc_models |>
+  score() |>
+  summarise_scores(by = c("model", "horizon")) |>
+  ggplot(aes(x = horizon, y = crps, colour = model)) +
+  ______ +
+  labs(title = "CRPS by forecast horizon, one line per model")
+```
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r by-horizon-solution}
+sc_models |>
+  score() |>
+  summarise_scores(by = c("model", "horizon")) |>
+  ggplot(aes(x = horizon, y = crps, colour = model)) +
+  geom_line() +
+  labs(title = "CRPS by forecast horizon, one line per model")
+```
+
+The ranking need not be the same at every horizon.
+A model can be hard to separate from the others at short horizons, where all models do well, and only pull apart as the horizon grows and the differences in structure start to matter.
+:::
+
+::: {.callout-tip}
+## Take 5 minutes
+
+Looking at your plot, which model would you choose, and for what?
+If you needed a forecast one or two days ahead, does the choice matter?
+If you needed 14 days ahead, does it matter more?
+
+This is the difference between "which model is best" and "which model is adequate for a specific use".
+:::
+
+# Going further
+
+## Challenge
+
+- You compared model structure with the data and delays held fixed. Now try a comparison in the other direction: a *sensitivity analysis* on an assumption. Refit is out of scope here, but you can explore the idea by scoring the baseline against onsets generated under a slightly different generation time, using `make_gen_time_pmf(shape = ...)` with a few values, and plotting how the score moves as the assumption changes. What does the shape of that curve tell you about how sensitive your conclusion is?
+- We compared using CRPS on the natural scale. Does the ranking of models change if you score on the log scale (as in the [forecast evaluation](forecast-evaluation) session)? If it does, that is itself worth reporting: the "best" model can depend on the scale you care about.
+
+## Methods in practice
+
+- Deciding a model is good enough is deciding it is adequate for *some specific use* [@schlesinger1979]. The same model can be adequate for spotting a change in trend and inadequate for predicting an exact case count.
+- Real-world forecast comparisons are run at scale through forecasting hubs, which collect predictions in a common format so that models can be scored on equal footing [@sherrattPredictivePerformanceMultimodel2023]. Even then, apparent differences between models can shrink once you adjust for what they were forecasting and when [@sherratt2025]: a controlled comparison, one covariate at a time.
+- For the public-statistics view of trustworthiness, quality, and value, see the UK Office for Statistics Regulation's code of practice [@osr2023].
+
+# Wrap up
+
+You can now:
+
+- name the three dimensions of evaluation (qualification, verification, validation) and the question each asks
+- explain why an uncontrolled comparison cannot tell you *why* two estimates differ, and how varying one thing at a time fixes this
+- run a controlled comparison in R: you scored three models that differed only in structure and read the score difference as the effect of that structure
+- interpret where one choice helps and where it does not, and connect that to whether a model is adequate for a specific use
+
+Review what you've learned in this session with the [learning objectives](../reference/learning_objectives).
+
+Share your [questions and thoughts](../reference/help).
+
+## References
+
+::: {#refs}
+:::
