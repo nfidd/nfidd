@@ -343,17 +343,6 @@ The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] 
 We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
 :::
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: WIS → CRPS
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Add prediction intervals and watch the WIS converge to the CRPS, with the same dispersion / over / under split. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
-:::
-
 Again we start with a high level overview of the scores by model.
 
 ```{r score-overview}
@@ -377,6 +366,17 @@ What do you think the scores are telling you? Which model do you think is best?
 What other scoring breakdowns might you want to look at?
 
 - There might be variation over forecast dates or horizons between the different ensemble methods
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: WIS → CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Add prediction intervals and watch the WIS converge to the CRPS, with the same dispersion / over / under split.
 :::
 
 ### Unweighted ensembles of filtered models
@@ -727,7 +727,7 @@ lop_ensembles <- lop_ensembles_obj |>
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
-Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge. [Open the full explainer ↗](../interactive/forecast-ensembles.html){target="_blank"}
+Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge.
 :::
 
 ## Compare the different ensembles

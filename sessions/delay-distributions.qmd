@@ -107,17 +107,6 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 
 ## Working forwards: simulating a sequence of delays after infection
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: delay distributions
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=discretise" title="delay distributions interactive" loading="lazy" style="width:100%;height:700px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Discretise a continuous delay into a daily PMF and watch censoring shift it. [Open the full explainer ↗](../interactive/delay-distributions.html){target="_blank"}
-:::
-
 We would now like to simulate hospitalisations arising from this outbreak.
 We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:
 
@@ -131,6 +120,18 @@ We will start with our data on infection times, and work forwards to symptom ons
 Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
 
 ::: {.callout-tip}
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: a delay is a distribution
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=spread" title="delay distributions interactive" loading="lazy" style="width:100%;height:700px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+A delay is a distribution, not a single number — see how the spread, not just the mean, shapes what we observe.
+:::
+
 ## Take a few minutes
 Throughout the course, we repeatedly use some small chunks of code.
 Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
@@ -180,17 +181,6 @@ ggplot(dfl, aes(x = time)) +
 
 ## Estimating delay distributions from outcome data
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: Bayesian updating
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/bayesian-updating.html?embed=update" title="Bayesian updating interactive" loading="lazy" style="width:100%;height:730px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Posterior ∝ prior × likelihood — watch the posterior form as a compromise between prior and data, and the data take over as they accumulate. This is the inference we run with Stan here. [Open the full explainer ↗](../interactive/bayesian-updating.html){target="_blank"}
-:::
-
 As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in infectious disease surveillance.
 In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
@@ -201,6 +191,18 @@ This might be an important delay to know about, for example when modelling and f
 To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
 
 ::: {.callout-tip}
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: Bayesian updating
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/bayesian-updating.html?embed=update" title="Bayesian updating interactive" loading="lazy" style="width:100%;height:730px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Posterior ∝ prior × likelihood — watch the posterior form as a compromise between prior and data, and the data take over as they accumulate. This is the inference we run with Stan here.
+:::
+
 ## Take a few minutes
 This is where we apply the Bayesian inference concepts from the slides. 
 We're using Stan to estimate the parameters of a lognormal distribution (meanlog and sdlog) from our observed delay data. 

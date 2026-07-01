@@ -58,17 +58,6 @@ options(cmdstanr_print_line_numbers = TRUE)
 
 # The renewal equation as a process model for infectious diseases
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: the renewal equation
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=mechanic,sim" title="the renewal equation interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Drive an epidemic with R(t) and a generation interval; it turns over when R crosses 1. [Open the full explainer ↗](../interactive/renewal-equation.html){target="_blank"}
-:::
-
 In this session we introduce modelling the infection process itself, in addition to modelling observation processes.
 
 Recall that in the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we tried to estimate the number of infections.
@@ -118,6 +107,17 @@ Another example of a definition is the *case* reproduction number, where changes
 The version of the discrete renewal equation we wrote above is deterministic, i.e. knowing the number of infections up to a certain time point and the reproduction number we can work out exactly how many new infections we will see.
 Sometimes stochasticity is added where the equation above gives the *expectation* of $I_t$ but there exists random variation around it.
 In this course we will only deal with the deterministic renewal equation.
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: the renewal equation
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/renewal-equation.html?embed=mechanic" title="the renewal equation interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Drive an epidemic with R(t) and a generation interval; it turns over when R crosses 1.
 :::
 
 # Simulating an epidemic using the renewal equation

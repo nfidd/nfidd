@@ -190,6 +190,8 @@ The CRPS can be thought about as the combination of two key aspects of forecasti
 
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
+::: {.callout-tip}
+
 ::: {.callout-tip .optional collapse="true"}
 ## Interactive: the CRPS
 
@@ -198,10 +200,9 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
-Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown.
 :::
 
-::: {.callout-tip}
 ## Key things to note about the CRPS
   - Small values are better
   - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
@@ -271,6 +272,10 @@ As well as the CRPS we can also look at the calibration and bias of the model [@
 
 There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
 
+::: {.callout-tip}
+
+::: {.callout-tip .optional collapse="true"}
+
 ::: {.callout-tip .optional collapse="true"}
 ## Interactive: the PIT histogram
 
@@ -279,10 +284,9 @@ There are many ways to assess calibration and bias but one common way is to use 
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
-Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you.
 :::
 
-::: {.callout-tip .optional collapse="true"}
 ## Interactive: interval coverage
 
 ```{=html}
@@ -290,10 +294,9 @@ Build the histogram one forecast at a time — reading u = F(y) off each CDF —
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
-A calibration check that pairs with the PIT histogram: does a 90% prediction interval actually contain the truth 90% of the time? [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+A calibration check that pairs with the PIT histogram: does a 90% prediction interval actually contain the truth 90% of the time?
 :::
 
-::: {.callout-tip}
 ## Interpreting the PIT histogram
 - Ideally PIT histograms should be uniform. 
 - If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
@@ -491,7 +494,7 @@ What does this tell you about the model?
 <script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
 ```
 
-See why the natural-scale score is dominated by the peak, while the log scale weights growth, peak and decline more evenly. [Open the full explainer ↗](../interactive/forecast-evaluation.html){target="_blank"}
+See why the natural-scale score is dominated by the peak, while the log scale weights growth, peak and decline more evenly.
 :::
 
 # Going further

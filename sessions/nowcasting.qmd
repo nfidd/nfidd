@@ -169,29 +169,7 @@ Estimating the "true curve" (i.e. what we expect to see once the data are comple
 
 # Nowcasting with a known delay
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: nowcasting
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build,triangle" title="nowcasting interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-See each day's cases split into observed + missing and summed into a nowcast, plus the reporting triangle. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
-:::
-
 ## The simplest possible nowcasting model
-
-::: {.callout-tip .optional collapse="true"}
-## Interactive: the simplest nowcast (divide by the CDF)
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=simple" title="the simplest nowcast (divide by the CDF) interactive" loading="lazy" style="width:100%;height:700px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Take the observed counts and divide by the proportion reported F(T − t) to recover the eventual total — the band flares where few reports are in. [Open the full explainer ↗](../interactive/nowcasting.html){target="_blank"}
-:::
 
 Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
 
@@ -205,6 +183,7 @@ plot(proportion_reported)
 ```
 
 ::: {.callout-tip}
+
 ## The `plnorm` function
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 :::
@@ -432,6 +411,17 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 - The nowcast now looks very different to the observed data. This is because the model is using the wrong delay distribution to nowcast the data.
 - If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
 - In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: nowcasting
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build" title="nowcasting interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See each day's cases split into observed + missing and summed into a nowcast, plus the reporting triangle.
 :::
 
 # Going further

@@ -107,11 +107,6 @@
 </head>
 <body>
 
-<div style="background:#0f172a;color:#e2e8f0;font:14px/1 system-ui;padding:9px 16px;display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-  <a href="../sessions/forecast-evaluation.html" style="color:#93c5fd;text-decoration:none;font-weight:600">← Forecast evaluation session</a>
-  <a href="../reference/interactive-explainers.html" style="color:#93c5fd;text-decoration:none">All interactives</a>
-</div>
-
 <header class="hero">
   <h1>Evaluating probabilistic forecasts</h1>
   <p>Three tools you meet in the NFIDD forecast-evaluation session — the <b>CRPS</b> and the <b>DSS</b> score how good a forecast is, while the <b>PIT histogram</b> diagnoses <i>why</i>. The guiding principle throughout: <i>maximise sharpness subject to calibration</i>.</p>
@@ -169,13 +164,13 @@
     <svg id="crpsSvg" viewBox="0 0 720 360" role="img" aria-label="CRPS as the area between the forecast CDF and the observation step"></svg>
   </div>
   <div class="controls">
-    <label><span class="vlabel">Observation <i>y</i>: <span id="crpsYval">7.0</span></span>
-      <input id="crpsY" type="range" min="1" max="11" step="0.1" value="7.0"></label>
+    <label><span class="vlabel">Forecast mean &mu;: <span id="crpsMuVal">6.0</span></span>
+      <input id="crpsMu" type="range" min="1" max="11" step="0.1" value="6.0"></label>
     <label><span class="vlabel">Forecast spread &sigma; (sharpness): <span id="crpsSval">1.6</span></span>
       <input id="crpsS" type="range" min="0.5" max="3.5" step="0.1" value="1.6"></label>
   </div>
   <div class="readout">
-    <span class="chip">forecast mean &mu; = <b>6.0</b></span>
+    <span class="chip">observation <i>y</i> = <b>7.0</b></span>
     <span class="chip">CRPS = <b id="crpsVal">—</b></span>
     <span class="chip" id="crpsHint" style="background:#ecfeff"></span>
   </div>
@@ -543,14 +538,14 @@ function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
 (function(){
   const svg=document.getElementById("crpsSvg");
   const W=720,H=360, m={l:54,r:24,t:20,b:46};
-  const x0=1, x1=11, MU=6;
+  const x0=1, x1=11, Y=7;
   const sx=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r);
   const sy=p=>H-m.b-p*(H-m.t-m.b);
-  const yInp=document.getElementById("crpsY"), sInp=document.getElementById("crpsS");
+  const muInp=document.getElementById("crpsMu"), sInp=document.getElementById("crpsS");
 
   function draw(){
-    const y=+yInp.value, sd=+sInp.value;
-    document.getElementById("crpsYval").textContent=y.toFixed(1);
+    const MU=+muInp.value, sd=+sInp.value, y=Y;
+    document.getElementById("crpsMuVal").textContent=MU.toFixed(1);
     document.getElementById("crpsSval").textContent=sd.toFixed(1);
     clear(svg);
     // axes + gridlines
@@ -611,7 +606,7 @@ function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
     document.getElementById("cUnder").textContent=p.under.toFixed(3);
     document.getElementById("cSum").textContent=(p.disp+p.over+p.under).toFixed(3);
   }
-  yInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
+  muInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
 })();
 
 /* ================= FIGURE 2 : PIT histograms ================= */
