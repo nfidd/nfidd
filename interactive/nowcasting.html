@@ -201,37 +201,43 @@
 
 <!-- ============ SIMPLE CDF NOWCAST ============ -->
 <section id="simple">
-  <h2>The simplest nowcast: divide by the proportion reported</h2>
-  <p class="tagline">Scale the observed count back up by the delay CDF F(T − t)</p>
-  <p>The split above <i>adds</i> the estimated missing reports. The very same nowcast can be written <b>multiplicatively</b>: if a fraction <i>F(T − t)</i> of date <i>t</i>'s reports are expected in by now, the observed count is just a thinned-down version of the eventual total, and we divide it back up. This is the one-liner used in the session (<code>observed / proportion_reported</code>, with <code>proportion_reported = plnorm(...)</code>).</p>
-  <div class="formula">observed<sub>t</sub> &asymp; N<sub>t</sub> &middot; F(T &minus; t)
+  <h2>The simplest nowcast: spread each day forward, then divide back up</h2>
+  <p class="tagline">One reference date's reports smeared over the delay PMF — the "now" line cuts off the tail</p>
+  <p>Reporting is a <b>forward convolution</b>: the <b style="color:var(--true)">N<sub>t</sub></b> cases on a reference date don't all land at once — they get <b>spread forward</b> over report-days <i>t, t+1, t+2, …</i> in the proportions of the reporting-delay PMF <i>p<sub>d</sub></i>. Pick a recent reference date <i>t*</i> and watch its reports fan out: the caps sitting on each report-day are <i>N<sub>t*</sub> · p<sub>d</sub></i>.</p>
+  <p>The red <b>now</b> line at day <i>T</i> is the truncation boundary. Report-days at or before it (delay <i>d ≤ T − t*</i>) have arrived — colour them <b style="color:var(--obs)">teal</b>; report-days beyond it (<i>d &gt; T − t*</i>) are <b style="color:var(--miss)">still in the post</b> — amber, hatched. So we only ever see a fraction <i>F(T − t*)</i> of the day's cases. The simplest nowcast just <b>divides the observed count back up</b> by that fraction, which exactly recovers <i>N<sub>t*</sub></i>.</p>
+  <div class="formula">observed<sub>t</sub> = N<sub>t</sub> &middot; <span class="obs">F(T &minus; t)</span>
     &nbsp;&nbsp;&rarr;&nbsp;&nbsp;
-    nowcast<sub>t</sub> = <span class="frac"><span>observed<sub>t</sub></span><span>F(T &minus; t)</span></span></div>
+    nowcast<sub>t</sub> = <span class="frac"><span>observed<sub>t</sub></span><span class="obs">F(T &minus; t)</span></span></div>
   <div class="legend">
-    <span><i class="swatch" style="border-color:var(--true);opacity:.7"></i> eventual N(t)</span>
-    <span><i class="swatch" style="border-color:var(--obs)"></i> observed so far</span>
-    <span><i class="swatch" style="border-color:var(--fc);border-top-width:4px"></i> nowcast = observed / F</span>
-    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T)</span>
+    <span><i class="swbox" style="background:var(--true);opacity:.35"></i> onsets N(t) by reference date</span>
+    <span><i class="swbox" style="background:var(--obs)"></i> reports already in (d ≤ T − t*)</span>
+    <span><i class="swbox" style="background:var(--miss);opacity:.85"></i> reports still to come (d &gt; T − t*)</span>
+    <span><i class="swatch" style="border-color:var(--now);border-top-style:dashed"></i> now (T) — truncation cut</span>
   </div>
   <div class="fig">
-    <svg id="simpleSvg" viewBox="0 0 720 380" role="img" aria-label="A true epidemic curve, the observed-so-far curve dipping toward now, and the simple point nowcast formed by dividing the observed count by the proportion reported F(T-t)."></svg>
+    <svg id="simpleSvg" viewBox="0 0 720 380" role="img" aria-label="Faint onset bars by reference date, with the highlighted recent date t* spreading its reports forward over the reporting-delay PMF. Report-days up to the red now line are observed (teal); later ones are still to come (amber, hatched). Chips show the proportion reported and the divide-back-up nowcast."></svg>
   </div>
   <div class="controls">
     <label><span class="vlabel">Reporting delay mean (days): <span id="smMval">4.0</span></span>
       <input id="smM" type="range" min="1.5" max="8" step="0.1" value="4.0"></label>
     <label><span class="vlabel">Now — current day T: <span id="smTval">46</span></span>
-      <input id="smT" type="range" min="30" max="60" step="1" value="46"></label>
-    <label><span class="vlabel">Epidemic peak day: <span id="smPval">42</span></span>
-      <input id="smP" type="range" min="30" max="58" step="1" value="42"></label>
-    <label><span class="vlabel">Epidemic width: <span id="smWval">9</span></span>
-      <input id="smW" type="range" min="5" max="16" step="0.5" value="9"></label>
+      <input id="smT" type="range" min="34" max="60" step="1" value="46"></label>
+    <label><span class="vlabel">Highlighted date t* = T − <span id="smKval">3</span></span>
+      <input id="smK" type="range" min="0" max="10" step="1" value="3"></label>
+  </div>
+  <div class="presets">
+    <button id="smPlay">▶ play — sweep t* → T</button>
+    <button id="smStep">step ▸</button>
+    <button id="smReset">reset</button>
   </div>
   <div class="readout">
-    <span class="chip">most recent day reported: <b id="smPct">—</b></span>
-    <span class="chip">scale-up &times; 1/F: <b id="smMult">—</b></span>
-    <span class="chip" id="smHint" style="background:#ecfeff"></span>
+    <span class="chip">date t* = <b id="smTstar">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--obs);padding-left:10px">F(T − t*) reported = <b id="smPct">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--obs);padding-left:10px">observed<sub>t*</sub> = <b id="smObs">—</b></span>
+    <span class="chip">scale-up &times; 1/F = <b id="smMult">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--fc);padding-left:10px">nowcast<sub>t*</sub> = <b id="smNow">—</b></span>
   </div>
-  <div class="key">This scaling nowcast is a <b>point estimate</b> — it has no honest uncertainty of its own. And it is most fragile exactly where it matters: dividing a tiny, noisy observed count by a small <i>F(T − t)</i> blows up at the recent edge. Getting <b>principled uncertainty</b> (and sharing strength across dates) is precisely why the course moves on from this baseline to the Bayesian nowcasting models.</div>
+  <div class="key">Sweep <b>t* → T</b> (or drag <b>T</b> back) and watch the now line eat into the kernel: at <i>t* = T</i> only the delay-0 cap is teal, so <i>F</i> is tiny and the <b>scale-up 1/F</b> explodes. This nowcast is a <b>point estimate</b> — no honest uncertainty of its own — and dividing a small, noisy observed count by a small <i>F(T − t)</i> is most fragile exactly at the recent edge, where we care most. Getting <b>principled uncertainty</b> (and sharing strength across dates) is precisely why the course moves on from this baseline to the Bayesian nowcasting models.</div>
 </section>
 
 <!-- ============ REPORTING TRIANGLE ============ -->
@@ -499,52 +505,109 @@ function trueCurve(t,peak,width,height){
   reset();
 })();
 
-/* ================= FIGURE 3 : the simple CDF-scaling nowcast ================= */
+/* ================= FIGURE 3 : forward-spread "slide-multiply-sum" nowcast ================= */
 (function(){
   const svg=document.getElementById("simpleSvg");
-  const W=720,H=380, m={l:54,r:20,t:24,b:46};
-  const t0=20, t1=64, HEIGHT=100;
+  const W=720,H=380, m={l:54,r:20,t:30,b:52};
+  const t0=20, t1=64, HEIGHT=100, Dmax=12, PEAK=44, WIDTH=9;
   const sx=v=>m.l+(v-t0)/(t1-t0)*(W-m.l-m.r);
   const ids={M:document.getElementById("smM"),T:document.getElementById("smT"),
-             P:document.getElementById("smP"),Wd:document.getElementById("smW")};
+             K:document.getElementById("smK")};
+  let timer=null;
+
+  function hatch(){
+    // one-time hatch pattern for the "still to come" caps
+    if(document.getElementById("smHatch")) return;
+    const defs=el("defs",{});
+    const p=el("pattern",{id:"smHatch",width:5,height:5,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"});
+    p.appendChild(el("rect",{width:5,height:5,fill:"#f59e0b","fill-opacity":0.28}));
+    p.appendChild(el("line",{x1:0,y1:0,x2:0,y2:5,stroke:"#b45309","stroke-width":1.4}));
+    defs.appendChild(p); svg.appendChild(defs);
+  }
+
   function draw(){
-    const dm=+ids.M.value, T=+ids.T.value, peak=+ids.P.value, width=+ids.Wd.value, s=dm*0.6;
+    const dm=+ids.M.value, s=dm*0.6;
+    let T=+ids.T.value;
+    let k=+ids.K.value; k=Math.min(k, T-(t0+1));               // keep t* on-axis
+    const tStar=T-k;
     document.getElementById("smMval").textContent=dm.toFixed(1);
     document.getElementById("smTval").textContent=T;
-    document.getElementById("smPval").textContent=peak;
-    document.getElementById("smWval").textContent=width;
-    clear(svg);
-    const ymax=HEIGHT*1.2, sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+    document.getElementById("smKval").textContent=k;
+    document.getElementById("smTstar").textContent=tStar;
+    clear(svg); hatch();
+
+    const pmf=pmfArr(dm,s,Dmax);
+    const ymax=HEIGHT*1.22, sy=v=>H-m.b-(v/ymax)*(H-m.t-m.b);
+    // gridlines + axes
     for(let g=0; g<=HEIGHT; g+=25){
       svg.appendChild(el("line",{x1:m.l,y1:sy(g),x2:W-m.r,y2:sy(g),stroke:"#eef2f7"}));
       svg.appendChild(el("text",{x:m.l-8,y:sy(g)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=g;
     }
     svg.appendChild(el("line",{x1:m.l,y1:sy(0),x2:W-m.r,y2:sy(0),stroke:"#cbd5e1"}));
     for(let v=t0; v<=t1; v+=4) svg.appendChild(el("text",{x:sx(v),y:H-m.b+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
-    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="reference date t (day the cases occurred)";
-    let pTrue="";
-    for(let t=t0;t<=t1;t+=0.5){ pTrue+=(pTrue?" L ":"M ")+sx(t)+" "+sy(trueCurve(t,peak,width,HEIGHT)); }
-    svg.appendChild(el("path",{d:pTrue,fill:"none",stroke:"#64748b","stroke-width":2,opacity:.45}));
-    const ncPts=[],obsPts=[];
+    svg.appendChild(el("text",{x:(m.l+W-m.r)/2,y:H-8,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="calendar day  (reference date = when cases occurred, report-day = when they arrive)";
+    svg.appendChild(el("text",{x:m.l,y:m.t-12,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Spread date t*'s N cases forward over the delay PMF, then divide by what's in by now";
+
+    const bw=(W-m.l-m.r)/(t1-t0)*0.62;
+    // faint onset bars N(t) by reference date
     for(let t=t0;t<=T;t++){
-      const N=trueCurve(t,peak,width,HEIGHT);
-      const p=Math.min(delayCdf(T-t+0.5,dm,s),1);
-      const o=N*p, n=o/Math.max(p,1e-3);
-      obsPts.push([t,o]); ncPts.push([t,n]);
+      const N=trueCurve(t,PEAK,WIDTH,HEIGHT);
+      if(N>0.3) svg.appendChild(el("rect",{x:sx(t)-bw/2,y:sy(N),width:bw,height:Math.max(sy(0)-sy(N),0),
+        fill:"#64748b",opacity: t===tStar?0.14:0.3, rx:1.5}));
     }
-    let pNc=""; ncPts.forEach((pt,i)=>{ pNc+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
-    svg.appendChild(el("path",{d:pNc,fill:"none",stroke:"#2563eb","stroke-width":3}));
-    let pObs=""; obsPts.forEach((pt,i)=>{ pObs+=(i?" L ":"M ")+sx(pt[0])+" "+sy(pt[1]); });
-    svg.appendChild(el("path",{d:pObs,fill:"none",stroke:"#0891b2","stroke-width":2.6}));
-    svg.appendChild(el("line",{x1:sx(T),y1:m.t-2,x2:sx(T),y2:sy(0),stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"6 4"}));
-    svg.appendChild(el("text",{x:sx(T),y:m.t+8,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"#dc2626"})).textContent="now";
-    const pT=Math.min(delayCdf(0.5,dm,s),1);
-    document.getElementById("smPct").textContent=(pT*100).toFixed(0)+"%";
-    document.getElementById("smMult").textContent="×"+(1/Math.max(pT,1e-3)).toFixed(1);
-    document.getElementById("smHint").textContent = pT<0.2 ? "today: barely any reports in → huge ×, very fragile"
-      : pT<0.5 ? "today: under half reported → big scale-up" : "today: most reports in → small correction";
+
+    // highlight the chosen reference date t*
+    const Nstar=trueCurve(tStar,PEAK,WIDTH,HEIGHT);
+    const boundary=T-tStar;                                     // observed delays d = 0..boundary
+    svg.appendChild(el("line",{x1:sx(tStar),y1:sy(0),x2:sx(tStar),y2:sy(Nstar),stroke:"#334155","stroke-width":1.4,"stroke-dasharray":"3 3",opacity:.7}));
+    svg.appendChild(el("text",{x:sx(tStar),y:sy(Nstar)-6,"text-anchor":"middle","font-size":10.5,"font-weight":700,fill:"#334155"})).textContent="t*";
+
+    // spread t*'s reports FORWARD: cap of height Nstar*p_d sits on report-day t*+d
+    for(let d=0; d<=Dmax; d++){
+      const rt=tStar+d; if(rt>t1) break;
+      const h=Nstar*pmf[d]; if(h<=0.05) continue;
+      const obs = d<=boundary;                                 // report-day arrived by now?
+      svg.appendChild(el("rect",{x:sx(rt)-bw/2,y:sy(h),width:bw,height:Math.max(sy(0)-sy(h),0),
+        fill: obs?"#0891b2":"url(#smHatch)", stroke: obs?"none":"#b45309", "stroke-width": obs?0:0.8,
+        opacity: obs?0.92:1, rx:1.5}));
+      // small cap tick on top to read the kernel weight
+      svg.appendChild(el("line",{x1:sx(rt)-bw/2,y1:sy(h),x2:sx(rt)+bw/2,y2:sy(h),
+        stroke: obs?"#0e7490":"#b45309","stroke-width":1.6}));
+    }
+    // flipped/forward kernel outline over the report-days (visual "slide" cue)
+    let kp="", started=false; const kmax=Math.max.apply(null,pmf)||1;
+    for(let d=0; d<=Dmax; d++){ const rt=tStar+d; if(rt>t1) break;
+      const yy=sy(Nstar*kmax) + (1-pmf[d]/kmax)*(sy(0)-sy(Nstar*kmax));
+      kp+=(started?" L ":"M ")+sx(rt)+" "+yy; started=true; }
+    if(started) svg.appendChild(el("path",{d:kp,fill:"none",stroke:"#0e7490","stroke-width":1.6,"stroke-dasharray":"5 3",opacity:.75}));
+
+    // nowcast marker: divide observed back up recovers N(t*)  → hollow blue cap at t*
+    svg.appendChild(el("circle",{cx:sx(tStar),cy:sy(Nstar),r:5.5,fill:"#fff",stroke:"#2563eb","stroke-width":2.4}));
+
+    // now line = truncation boundary
+    svg.appendChild(el("line",{x1:sx(T)+bw/2+2,y1:m.t-2,x2:sx(T)+bw/2+2,y2:sy(0),stroke:"#dc2626","stroke-width":2,"stroke-dasharray":"6 4"}));
+    svg.appendChild(el("text",{x:sx(T)+bw/2+2,y:m.t-4,"text-anchor":"end","font-size":11,"font-weight":700,fill:"#dc2626"})).textContent="now T ";
+
+    /* ---- readouts ---- */
+    const F=Fdisc(boundary,pmf);
+    const observed=Nstar*F;
+    const nowcast=observed/Math.max(F,1e-3);
+    document.getElementById("smPct").textContent=(F*100).toFixed(0)+"%";
+    document.getElementById("smObs").textContent=observed.toFixed(0);
+    document.getElementById("smMult").textContent="×"+(1/Math.max(F,1e-3)).toFixed(1);
+    document.getElementById("smNow").textContent=nowcast.toFixed(0);
   }
-  Object.values(ids).forEach(i=>i.addEventListener("input",draw)); draw();
+
+  function stop(){ if(timer){ clearInterval(timer); timer=null; document.getElementById("smPlay").textContent="▶ play — sweep t* → T"; } }
+  function step(){ let k=+ids.K.value; k=(k-1); if(k<0) k=10; ids.K.value=k; draw(); }
+  Object.values(ids).forEach(i=>i.addEventListener("input",()=>{ stop(); draw(); }));
+  document.getElementById("smStep").addEventListener("click",()=>{ stop(); step(); });
+  document.getElementById("smReset").addEventListener("click",()=>{ stop(); ids.K.value=3; draw(); });
+  document.getElementById("smPlay").addEventListener("click",function(){
+    if(timer){ stop(); }
+    else { this.textContent="❚❚ pause"; timer=setInterval(step,600); }
+  });
+  draw();
 })();
 </script>
 <script>
