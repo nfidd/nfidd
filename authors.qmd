@@ -12,17 +12,17 @@ The NFIDD course was developed by the **NFIDD course contributors**:
 
 If you use materials from this course in your work, please cite:
 
-> NFIDD course contributors (2025). NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics. Version [VERSION]. DOI: [PLACEHOLDER - Zenodo DOI will be added upon release]
+> Abbott S, Sherratt K, Funk S (2026). NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics. Version 1.3.1. <https://doi.org/10.5281/zenodo.21063961>
 
 ### BibTeX Entry
 
 ```bibtex
-@misc{nfidd2025,
+@misc{nfidd2026,
   author = {{Sam Abbott, Katherine Sherratt, Sebastian Funk}},
   title = {{NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics}},
-  year = {2025},
-  version = {[VERSION]},
-  doi = {[PLACEHOLDER - Zenodo DOI]},
+  year = {2026},
+  version = {1.3.1},
+  doi = {10.5281/zenodo.21063961},
   url = {https://nfidd.github.io/nfidd/}
 }
 ```

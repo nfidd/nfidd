@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use these materials, please cite them as below."
+title: "NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics"
+abstract: "A course and living resource for learning about nowcasting and forecasting infectious disease dynamics."
+type: software
+authors:
+  - given-names: Sam
+    family-names: Abbott
+  - given-names: Katherine
+    family-names: Sherratt
+  - given-names: Sebastian
+    family-names: Funk
+license: MIT
+repository-code: "https://github.com/nfidd/nfidd"
+url: "https://nfidd.github.io/nfidd/"
+version: 1.3.1
+date-released: "2026-06-30"
+doi: 10.5281/zenodo.21063961
