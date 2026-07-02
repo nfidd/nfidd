@@ -168,17 +168,6 @@ For accurate delay estimation, we need to account for both components as we do i
 
 ::: {.callout-note .optional collapse="true"}
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: double interval censoring
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=montecarlo" title="double interval censoring interactive" loading="lazy" style="width:100%;height:740px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Sample a primary time within its interval, add a continuous delay, floor to the day, repeat — and watch the realised (double-censored) distribution build up next to the individuals.
-:::
-
 ## Why are we so worried?
 
 We'll be spending a lot of time thinking about a potentially "short" 24 hour time interval. In this session, we'll start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
@@ -418,6 +407,17 @@ Is it the same as when we just simulated the data?
 If not, why not?
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: double interval censoring
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/delay-distributions.html?embed=montecarlo" title="double interval censoring interactive" loading="lazy" style="width:100%;height:740px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Sample a primary time within its interval, add a continuous delay, floor to the day, repeat — and watch the realised (double-censored) distribution build up next to the individuals.
+:::
+
 # Real-time estimation: truncation
 
 The data set we have looked at so far in this session is a "final" data set representing an outbreak that has come and gone.
@@ -427,17 +427,6 @@ However, information on delay distributions is often important during ongoing ou
 For the truncation demonstration, we'll switch back to longer delays:
 
 ```{r truncation-data}
-
-::: {.callout-tip .optional collapse="true"}
-## Interactive: right truncation
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/biases-in-delay-distributions.html?embed=truncation" title="right truncation interactive" loading="lazy" style="width:100%;height:800px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Watch right truncation bias the observed delays short in real time.
-:::
 
 # Resimulate with longer delays for truncation demonstration
 set.seed(123)
@@ -645,6 +634,17 @@ tres |>
 ## Take 10 minutes
 Try estimating the delays at different times (i.e. varying the observation cut-off) and also try re-simulating the delays using different parameters of the delay distribution.
 Can you establish under which conditions the bias in estimation gets worse?
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: right truncation
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/biases-in-delay-distributions.html?embed=truncation" title="right truncation interactive" loading="lazy" style="width:100%;height:800px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Watch right truncation bias the observed delays short in real time.
 :::
 
 # Going further

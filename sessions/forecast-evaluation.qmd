@@ -192,17 +192,6 @@ By balancing these two aspects, the CRPS provides a comprehensive measure of the
 
 ::: {.callout-tip}
 
-::: {.callout-tip .optional collapse="true"}
-## Interactive: the CRPS
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown.
-:::
-
 ## Key things to note about the CRPS
   - Small values are better
   - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
@@ -264,6 +253,17 @@ What does this tell you about the model?
   - The CRPS scores increase with forecast horizon.
   - As the CRPS is an absolute measure it is hard to immediately know if the CRPS increasing with forecast date indicates that the model is performing worse.
   - However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: the CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown.
 :::
 
 ### PIT histograms
