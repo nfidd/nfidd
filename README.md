@@ -22,7 +22,9 @@ quarto::quarto_render()
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+
 <!-- prettier-ignore-start -->
+
 <!-- markdownlint-disable -->
 
 All contributions to this project are gratefully acknowledged using the
@@ -49,5 +51,7 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/nfidd/nfidd/issues?q=is%3Aissue+author%3Aepiforecasts-workflows">epiforecasts-workflows</a>
 
 <!-- markdownlint-enable -->
+
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
