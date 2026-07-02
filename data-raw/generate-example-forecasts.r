@@ -12,7 +12,7 @@ set.seed(12345)
 gen_time_pmf <- make_gen_time_pmf()
 ip_pmf <- make_ip_pmf()
 onset_df <- simulate_onsets(
-  make_daily_infections(infection_times), gen_time_pmf, ip_pmf
+  make_daily_infections(infection_times), ip_pmf
 )
 
 # define a function to fit and forecast for a single date
