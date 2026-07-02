@@ -390,7 +390,7 @@ With real data, of course, we don't have this information available.
   ```
 See the [Using our Stan models guide](../reference/using-our-stan-models) for more available models
 
-- **Impact of priors**: The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they barely affect the estimates. You can check this yourself by copying the model, changing its priors, and refitting.
+- The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they barely affect the estimates. You can check this yourself by copying the model, changing its priors, and refitting.
 
   Following the [Using our Stan models guide](../reference/using-our-stan-models), write the model to a local file you can edit:
   ```{r, eval = FALSE}
