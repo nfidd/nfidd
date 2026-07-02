@@ -234,6 +234,17 @@ Nowcasting aims to complete this triangle by estimating the missing cells (those
 Once completed, we sum across the rows to get our nowcast of the true onset counts.
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: nowcasting
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build" title="nowcasting interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See each day's cases split into observed + missing and summed into a nowcast, plus the reporting triangle.
+:::
+
 ## Fitting the joint model
 
 For fitting the joint model specification follows our data simulation approach but we have to make choices about how to model the expected number of onsets $\lambda_{t}$ and the probability of reporting $p_{t,d}$.
@@ -337,17 +348,6 @@ In particular, the prior model for the geometric random walk assumes that onsets
 This may not be a good assumption in a rapidly changing epidemic (where the reproduction number is not near 1).
 - In addition, whilst we say it is "quite simple" as should be clear from the code, it is quite complex and computationally intensive.
 This is because we are fitting a model to the reporting triangle, which is a much larger data set and so the model is relatively quite slow to fit.
-:::
-
-::: {.callout-tip .optional collapse="true"}
-## Interactive: the reporting triangle filling in
-
-```{=html}
-<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=triangle" title="the reporting triangle filling in interactive" loading="lazy" style="width:100%;height:1250px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
-<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
-```
-
-The reporting triangle and fill-in from the nowcasting session — here the delay itself must also be estimated from the same data.
 :::
 
 # Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions {.optional}
