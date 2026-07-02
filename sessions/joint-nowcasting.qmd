@@ -234,6 +234,17 @@ Nowcasting aims to complete this triangle by estimating the missing cells (those
 Once completed, we sum across the rows to get our nowcast of the true onset counts.
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: nowcasting
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=build" title="nowcasting interactive" loading="lazy" style="width:100%;height:1200px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See each day's cases split into observed + missing and summed into a nowcast, plus the reporting triangle.
+:::
+
 ## Fitting the joint model
 
 For fitting the joint model specification follows our data simulation approach but we have to make choices about how to model the expected number of onsets $\lambda_{t}$ and the probability of reporting $p_{t,d}$.

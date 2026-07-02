@@ -143,6 +143,18 @@ censored_delay_pmf
 ```
 
 ::: callout-note
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: convolutions
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/convolutions.html?embed=sum" title="convolutions interactive" loading="lazy" style="width:100%;height:750px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Slide the flipped delay kernel across the infections, multiply, and sum — tracing out the observed curve point by point.
+:::
+
 ## Take 3 minutes
 
 Try to understand the `censored_delay_pmf()` function above.

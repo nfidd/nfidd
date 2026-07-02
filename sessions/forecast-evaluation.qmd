@@ -74,7 +74,6 @@ The general principle underlying forecast evaluation is to **maximise *sharpness
 This means that statements about the future should be **correct** (calibration) and should aim to have **narrow uncertainty** (sharpness).
 :::
 
-
 # Evaluate your forecast
 
 In order to properly evaluate forecasts from this model we really need to forecast over a period of time, ideally capturing different epidemic dynamics.
@@ -139,7 +138,6 @@ sc_forecasts
 
 As you can see this has created a `forecast` object which has a print method that summarises the forecasts.
 
-
 ::: {.callout-tip}
 ## Take 2 minutes
 What important information is in the `forecast` object?
@@ -193,11 +191,11 @@ The CRPS can be thought about as the combination of two key aspects of forecasti
 By balancing these two aspects, the CRPS provides a comprehensive measure of the quality of probabilistic forecasts.
 
 ::: {.callout-tip}
+
 ## Key things to note about the CRPS
   - Small values are better
   - As it is an absolute scoring rule it can be difficult to use to compare forecasts across scales.
 :::
-
 
 ::: {.callout-tip .optional collapse="true"}
 #### Mathematical Definition
@@ -257,6 +255,17 @@ What does this tell you about the model?
   - However, the CRPS increasing with forecast horizon is a sign that the model is struggling to capture the longer term dynamics of the epidemic.
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: the CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=crps" title="CRPS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Drag the observation and the forecast spread to watch the CRPS area — and its dispersion / over-prediction / under-prediction breakdown.
+:::
+
 ### PIT histograms
 
 As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019]. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
@@ -265,9 +274,20 @@ There are many ways to assess calibration and bias but one common way is to use 
 
 ::: {.callout-tip}
 ## Interpreting the PIT histogram
-- Ideally PIT histograms should be uniform. 
-- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident. 
+- Ideally PIT histograms should be uniform.
+- If is a U shape then the model is overconfident and if it is an inverted U shape then the model is underconfident.
 - If it is skewed then the model is biased towards the direction of the skew.
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: the PIT histogram
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=pit" title="PIT histogram interactive" loading="lazy" style="width:100%;height:1320px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Build the histogram one forecast at a time — reading u = F(y) off each CDF — and see what U-shapes and domes are telling you.
 :::
 
 ::: {.callout-tip .optional collapse="true"}
@@ -451,6 +471,17 @@ What does this tell you about the model?
 ## Solution
 - As for the natural scale CRPS scores increase with forecast horizon but now the increase appears to be linear vs exponential.
 - There has been a reduction in the CRPS scores for forecast dates near the outbreak peak compared to other forecast dates but this is still the period where the model is performing worst.
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: natural vs log-scale scoring
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=logscale" title="natural vs log-scale scoring interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+See why the natural-scale score is dominated by the peak, while the log scale weights growth, peak and decline more evenly.
 :::
 
 # Going further

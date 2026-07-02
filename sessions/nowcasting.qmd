@@ -183,6 +183,7 @@ plot(proportion_reported)
 ```
 
 ::: {.callout-tip}
+
 ## The `plnorm` function
 The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 :::
@@ -204,6 +205,7 @@ tail(reported_onset_df)
 ```
 
 ::: {.callout-tip}
+
 ## Take 3 minutes
 Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
 :::
@@ -281,7 +283,19 @@ The points in this plot represent the data available when the nowcast was made (
 As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: the simplest nowcast
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/nowcasting.html?embed=simple" title="the simplest nowcast interactive" loading="lazy" style="width:100%;height:720px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Spread each recent day's reports forward by the delay, cut them off at "now", and scale the observed part back up by the proportion reported.
+:::
+
 ::: {.callout-important .optional}
+
 ## Simple multiplicative nowcasting methods
 
 Before moving to more complex models, it's worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 

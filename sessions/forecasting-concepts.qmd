@@ -261,7 +261,6 @@ long_data <- list(
   h = 0
 )
 
-
 rw_long <- nfidd_sample(mod,
   data = long_data,
   adapt_delta = 0.95,
@@ -354,7 +353,6 @@ rw_forecasts |>
   labs(title = "Weekly forecasts of symptom onsets over an outbreak",
        col = "Forecast start day")
 ```
-
 
 As for the single forecast it may be helpful to also plot the forecast on the log scale.
 

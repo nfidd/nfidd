@@ -1,0 +1,5 @@
+# The repository root ignores *.html (rendered Quarto output). The interactive
+# explainers in this directory are hand-written source, not rendered output, so
+# re-include them here. They are published to the site via the `resources:`
+# entry in _quarto.yml.
+!*.html

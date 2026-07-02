@@ -204,7 +204,6 @@ $$
 log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
 $$
 
-
 ::: {.callout-note collapse="true"}
 ## What behaviour would we expect from this model?
 
@@ -236,7 +235,6 @@ We've coded up a model that uses this differenced AR process as a stan model in 
 stat_mod <- nfidd_cmdstan_model("statistical-r")
 stat_mod
 ```
-
 
 # Forecasting with the mechanistic and statistical models
 
@@ -323,7 +321,6 @@ target_onsets <- onset_df |>
   filter(day > cutoff) |>
   filter(day <= cutoff + horizon)
 ```
-
 
 ```{r plot_forecast}
 forecast |>
@@ -412,7 +409,6 @@ head(onset_df)
 
 ## Visualising your forecast
 
-
 ```{r plot-all-forecasts}
 forecasts |>
   filter(.draw %in% sample(.draw, 100)) |>
@@ -425,7 +421,6 @@ forecasts |>
   facet_wrap(~model) +
   lims(y = c(0, 500))
 ```
-
 
 As for the single forecast it is helpful to also plot the forecast on the log scale.
 
@@ -467,7 +462,6 @@ Which do you prefer?
 
 ## Scoring your forecast
 
-
 ```{r convert-forecasts}
 sc_forecasts <- forecasts |>
   left_join(onset_df, by = "day") |>
@@ -482,7 +476,6 @@ sc_forecasts <- forecasts |>
   )
 sc_forecasts
 ```
-
 
 Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
 
@@ -572,7 +565,6 @@ How do the CRPS values change with forecast date?
 - If it is skewed then the model is biased towards the direction of the skew.
 :::
 
-
 Let's first look at the overall PIT histogram.
 
 ```{r pit-histogram}
@@ -644,7 +636,6 @@ log_sc_forecasts <- sc_forecasts |>
 log_sc_scores <- log_sc_forecasts |>
   score()
 ```
-
 
 ::: {.callout-tip}
 Reminder: For more on scoring on the log scale see @bosse2023scorin on scoring forecasts on transformed scales.

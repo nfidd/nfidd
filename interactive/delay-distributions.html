@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Delay distributions — from a continuous density to a discrete daily PMF</title>
+<style>
+  :root{
+    --dens:#2563eb;   /* continuous density / blue */
+    --pmf:#ea580c;    /* discretised PMF bars / orange */
+    --naive:#0891b2;  /* naive single-censored PMF / teal */
+    --mean:#475569;   /* mean markers / slate */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#eff6ff 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+  }
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    margin:22px auto 0; max-width:760px;
+  }
+  nav.toc a{
+    text-decoration:none; color:var(--dens); font-weight:600; font-size:14px;
+    border:1px solid #bfdbfe; background:#fff; padding:6px 13px; border-radius:999px;
+  }
+  nav.toc a:hover{background:#eff6ff}
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .lower{font-weight:600}
+  .fig{
+    border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px;
+    margin:18px 0 6px; background:#fff;
+  }
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{
+    display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center;
+    margin:8px 4px 2px; padding:12px 14px; background:#f8fafc;
+    border:1px solid var(--line); border-radius:10px; font-size:14px;
+  }
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:180px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:185px; accent-color:var(--pmf)}
+  .readout{
+    display:inline-flex; gap:18px; flex-wrap:wrap; margin:10px 4px 0;
+    font-variant-numeric:tabular-nums;
+  }
+  .readout .chip{
+    background:#f1f5f9; border:1px solid var(--line); border-radius:8px;
+    padding:6px 12px; font-size:14px;
+  }
+  .readout .chip b{font-size:16px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0; align-items:center}
+  .presets button{
+    font:600 13px inherit; border:1px solid #bfdbfe; background:#fff; color:var(--dens);
+    padding:6px 13px; border-radius:8px; cursor:pointer;
+  }
+  .presets button:hover{background:#eff6ff}
+  .presets button.on{background:var(--dens); color:#fff; border-color:var(--dens)}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 0}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .swbar{width:14px; height:14px; border-radius:3px; display:inline-block}
+  .key{background:#eff6ff; border-left:4px solid var(--dens); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.orange{background:#fff7ed; border-color:var(--pmf)}
+  .key.teal{background:#ecfeff; border-color:var(--naive)}
+  .formula{
+    background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    font-size:15px; overflow-x:auto; margin:14px 0;
+  }
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.cont{background:#dbeafe; color:#1e40af}
+  .pill.disc{background:#ffedd5; color:#9a3412}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--dens)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Delay distributions</h1>
+  <p>An epidemiological delay — incubation period, reporting delay, generation interval — is a whole <b>distribution</b>, not a single number. And because we observe events by the <b>day</b>, a continuous delay distribution has to be turned into a discrete daily <b>probability mass function</b>. Doing that honestly means accounting for <b>double interval censoring</b>. This page shows both steps, live.</p>
+  <nav class="toc">
+    <a href="#intro">Big picture</a>
+    <a href="#discretise">Density → daily PMF</a>
+    <a href="#montecarlo">One individual at a time</a>
+    <a href="#censoring">Double censoring</a>
+    <a href="#spread">Why a distribution?</a>
+    <a href="#remember">Things to remember</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>The big picture</h2>
+  <p class="tagline">From "about a week" to a probability for every possible delay</p>
+  <p>In the delay-distributions session we simulate the path from infection to hospital admission as a chain of <b>delays</b>: an incubation period from infection to symptom onset, then a further delay from onset to admission. None of these is a fixed length — they vary between people and are uncertain across the population — so each is described by a <b>probability distribution</b>.</p>
+  <p>The session models the onset-to-hospitalisation delay as <b>lognormal</b> with <code>meanlog = 1.75</code>, <code>sdlog = 0.5</code> (a mean of about a week). Throughout this page we work with that same <b>lognormal</b> shape, but parameterised by its more interpretable <b>mean</b> <i>m</i> and <b>standard deviation</b> <i>s</i> in days:</p>
+
+  <div class="formula">&sigma;&sup2; = ln(1 + s&sup2;/m&sup2;)&nbsp;&nbsp;&nbsp;&nbsp;&mu; = ln(m) &minus; &sigma;&sup2;/2
+    <br>F(x) = &Phi;( (ln x &minus; &mu;) / &sigma; )&nbsp;&nbsp;for x &gt; 0,&nbsp;&nbsp;F(x) = 0 otherwise</div>
+
+  <p>Here &Phi; is the standard Normal CDF, and <i>F</i> is the lognormal CDF. Two things then have to happen before this can meet real surveillance data:</p>
+  <ul>
+    <li><b>Discretisation</b> — data arrive by <b>day</b>, so we need the probability of a delay of exactly 0 days, 1 day, 2 days, … : a discrete <b>PMF</b> <i>P(d)</i>, not a smooth density.</li>
+    <li><b>Censoring</b> — we usually don't know either event to better than the day it happened. The primary event (infection / onset) and the secondary event (onset / admission) are <i>both</i> rounded to a day. That is <b>double interval censoring</b>, and ignoring it subtly biases the delay.</li>
+  </ul>
+  <div class="key">The goal: turn a continuous delay distribution into the <b>daily PMF</b> you can actually convolve with case counts — and do it without quietly shifting the delay. The figures below build that PMF a day at a time, and show what the naive shortcut gets wrong.</div>
+  <table>
+    <tr><th>Step</th><th>What it produces</th><th>Why it matters</th></tr>
+    <tr><td class="metric">Continuous density</td><td><span class="pill cont">f(x)</span> over all x &gt; 0</td><td>The underlying biology/behaviour of the delay</td></tr>
+    <tr><td class="metric">Naive discretisation</td><td><span class="pill disc">F(d+1) &minus; F(d)</span></td><td>Quick, but assumes the primary event is at the day boundary</td></tr>
+    <tr><td class="metric">Double-censored PMF</td><td><span class="pill disc">P(d)</span> averaged over the primary event's offset</td><td>What the data actually generate — the honest daily PMF</td></tr>
+  </table>
+</section>
+
+<!-- ============ DISCRETISE ============ -->
+<section id="discretise">
+  <h2>Continuous density → discrete daily PMF <span class="pill cont">step 1</span></h2>
+  <p class="tagline">Overlay the smooth lognormal density with the bars you actually use</p>
+  <p>The smooth <span style="color:var(--dens);font-weight:600">blue density</span> is the lognormal delay. The <span style="color:var(--pmf);font-weight:600">orange bars</span> are the discretised daily PMF: one number per integer delay <i>d</i> = 0, 1, 2, …, giving the probability that the rounded delay equals exactly <i>d</i> days. Drag the mean and sd and watch the smooth curve and the bars move together. Notice the bar at <i>d</i> = 0: a non-trivial share of "same-day" delays appears whenever the distribution has mass below one day.</p>
+
+  <p>The bars here use the <b>double-censored</b> construction (the honest one, derived in the next section). Toggle the naive shortcut on to see how much it differs:</p>
+
+  <div class="presets" id="discMode">
+    <button data-mode="double" class="on">Double-censored PMF (correct)</button>
+    <button data-mode="naive">Naive PMF&nbsp; F(d+1) &minus; F(d)</button>
+    <button data-mode="both">Show both</button>
+  </div>
+
+  <div class="legend" style="margin-top:10px">
+    <span><i class="swatch" style="border-color:var(--dens)"></i> continuous density f(x)</span>
+    <span><i class="swbar" style="background:var(--pmf);opacity:.85"></i> double-censored PMF P(d)</span>
+    <span><i class="swbar" style="background:var(--naive);opacity:.7"></i> naive PMF F(d+1)−F(d)</span>
+    <span><i class="swatch" style="border-color:var(--mean);border-top-style:dashed"></i> mean</span>
+  </div>
+
+  <div class="fig">
+    <svg id="discSvg" viewBox="0 0 720 380" role="img" aria-label="Continuous lognormal delay density overlaid with the discretised daily probability mass function as bars"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Delay mean <i>m</i> (days): <span id="discMval">7.0</span></span>
+      <input id="discM" type="range" min="1" max="15" step="0.1" value="7.0"></label>
+    <label><span class="vlabel">Delay sd <i>s</i> (days): <span id="discSval">3.0</span></span>
+      <input id="discS" type="range" min="0.5" max="8" step="0.1" value="3.0"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">continuous mean = <b id="discContMean">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--pmf);padding-left:10px">discretised mean = <b id="discDiscMean">—</b></span>
+    <span class="chip">&Sigma; P(d) = <b id="discSum">—</b></span>
+    <span class="chip" id="discShift" style="background:#fff7ed"></span>
+  </div>
+
+  <div class="key orange">The discretised PMF should sum to <b>1</b> (we carry enough days to capture the tail). Its mean is <i>not</i> exactly the continuous mean <i>m</i>: rounding to days, plus the censoring offset, nudges it. That small <b>shift</b> is exactly what the double-censoring correction keeps under control — the naive shortcut shifts more.</p></div>
+</section>
+
+<!-- ============ MONTE CARLO ============ -->
+<section id="montecarlo">
+  <h2>Double censoring, one individual at a time <span class="pill disc">the generative view</span></h2>
+  <p class="tagline">Watch continuous delays get floored into day bins, one person at a time</p>
+  <p>The PMF above is the <i>average</i> over a whole population. Here is the same thing from the ground up — the <b>generative process</b> for a single individual. Each person carries a true, continuous delay, but we only ever see whole days. Sampling many individuals and tallying their observed delays rebuilds the double-censored PMF, bar by bar.</p>
+
+  <p>For one individual:</p>
+  <div class="formula">u ~ Uniform(0, w)&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8">primary event lands somewhere in its window</span>
+    <br>T ~ Lognormal(mean = m, sd = s)&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8">continuous delay</span>
+    <br>observed delay d = &#8970;u + T&#8971; &minus; &#8970;u&#8971;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8">both events floored to a day</span></div>
+
+  <p>The <b>left panel</b> shows individuals as timeline rows. For each one there are <b>two boxes</b>: the <b style="color:#b45309">amber box</b> is the <b>primary</b> interval we actually observe (a day, or a week), and the coloured box is the <b>secondary</b> interval (a day). The two dots are the <i>true, unobserved</i> continuous event times — primary at <i>u</i> and secondary at <i>u</i>+<i>T</i> — joined by the continuous delay <i>T</i>. We never see the dots, only which boxes they land in, so the <b>observed</b> delay <i>d</i> is the gap between the boxes — and <b>both</b> events being boxed is what makes it <i>double</i> censoring. The <b>right panel</b> tallies <i>d</i> over <b>all</b> sampled individuals as a density histogram; add individuals and watch the bars settle onto the <span style="color:var(--pmf);font-weight:600">double-censored PMF</span> — not the smooth continuous curve.</p>
+
+  <div class="presets" id="mcWindow">
+    <button data-w="1" class="on">Daily (w = 1)</button>
+    <button data-w="7">Weekly (w = 7)</button>
+  </div>
+
+  <div class="legend" style="margin-top:10px">
+    <span><i class="swbar" style="background:#f59e0b;opacity:.5"></i> primary interval (the window we observe)</span>
+    <span><i class="swbar" style="background:#94a3b8;opacity:.5"></i> secondary interval (the day we observe)</span>
+    <span>● true event times, joined by the continuous delay</span>
+    <span><i class="swbar" style="background:#ea580c;opacity:.85"></i> realised observed-delay density</span>
+    <span><i class="swatch" style="border-color:var(--dens)"></i> continuous density f</span>
+    <span><i class="swatch" style="border-color:var(--pmf);border-top-style:dashed"></i> double-censored PMF target</span>
+  </div>
+
+  <div class="fig">
+    <svg id="mcSvg" viewBox="0 0 720 380" role="img" aria-label="Left: individual sampled delays drawn as timeline rows with the continuous secondary time floored to a day. Right: density histogram of observed integer delays converging to the double-censored PMF."></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Delay mean <i>m</i> (days): <span id="mcMval">4.0</span></span>
+      <input id="mcM" type="range" min="1" max="12" step="0.1" value="4.0"></label>
+    <label><span class="vlabel">Delay sd <i>s</i> (days): <span id="mcSval">1.5</span></span>
+      <input id="mcS" type="range" min="0.5" max="6" step="0.1" value="1.5"></label>
+  </div>
+  <div class="presets" id="mcRun">
+    <button data-act="one">+1 individual</button>
+    <button data-act="fifty">+50</button>
+    <button data-act="play">▶ play</button>
+    <button data-act="reset">reset</button>
+    <span class="chip" style="background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:6px 12px">sampled n = <b id="mcN">0</b></span>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--pmf);padding-left:10px">realised mean delay = <b id="mcMeanObs">—</b></span>
+    <span class="chip">continuous mean = <b id="mcMeanCont">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--naive);padding-left:10px">naive single-censored mean = <b id="mcMeanNaive">—</b></span>
+    <span class="chip" id="mcShift" style="background:#fff7ed"></span>
+  </div>
+
+  <div class="key orange"><b>Double interval censoring</b> = the primary event is uncertain <i>within its interval</i> (it could be anywhere in the day, or week), <i>and</i> the secondary event is <i>floored to a day</i>. So the realised observed-delay distribution — the bars on the right — is the <b>double-censored PMF</b>, not the underlying continuous density. The gap between the bars and the smooth curve <i>is</i> the censoring. Widen the window <i>w</i> to "weekly" and the primary uncertainty grows, smearing the realised PMF further from the continuous shape.</p></div>
+</section>
+
+<!-- ============ CENSORING ============ -->
+<section id="censoring">
+  <h2>Why double interval censoring? <span class="pill disc">step 1, done right</span></h2>
+  <p class="tagline">Both ends of the delay are only known to the day</p>
+  <p>Suppose the true (continuous) delay is <i>x</i> days. We never see <i>x</i>. We see the <b>day</b> the primary event fell in and the <b>day</b> the secondary event fell in, and report their difference in whole days. Two roundings, not one — hence <b>double</b> censoring.</p>
+
+  <p>Picture the primary event landing at a uniformly random time within its day: an offset <i>u</i> ~ Uniform(0, 1) past the start of the day. The continuous delay then runs from that offset, and we record <i>d</i> whole days have elapsed when the secondary event's day boundary is crossed. Averaging the single-censored probability over where the primary event sat gives the double-censored daily PMF:</p>
+
+  <div class="formula">P(delay = d) = &#8747;<sub>0</sub><sup>1</sup> [ F(d + 1 &minus; u) &minus; F(d &minus; u) ] du&nbsp;&nbsp;&nbsp;&nbsp;d = 0, 1, 2, …</div>
+
+  <p>We evaluate that integral numerically (a 24-point average over <i>u</i>), clamping <i>F</i> to 0 for any negative argument. The <b>naive</b> single-censored PMF skips the averaging and just fixes the primary event at the day boundary, <i>u</i> = 0:</p>
+
+  <div class="formula">P<sub>naive</sub>(d) = F(d + 1) &minus; F(d)</div>
+
+  <p>The figure overlays the two. Watch the gap below: the naive bars (teal) are systematically shifted relative to the double-censored bars (orange) — most visibly at the short delays where the rounding matters most. Tighten the sd and the discrepancy grows in relative terms; widen the delay and it washes out.</p>
+
+  <div class="legend">
+    <span><i class="swbar" style="background:var(--pmf);opacity:.85"></i> double-censored P(d)</span>
+    <span><i class="swbar" style="background:var(--naive);opacity:.7"></i> naive P(d) = F(d+1)−F(d)</span>
+    <span><i class="swatch" style="border-color:var(--mean);border-top-style:dashed"></i> means</span>
+  </div>
+
+  <div class="fig">
+    <svg id="censSvg" viewBox="0 0 720 340" role="img" aria-label="Double-censored and naive daily PMFs drawn side by side for each delay, with their means marked"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Delay mean <i>m</i> (days): <span id="censMval">4.0</span></span>
+      <input id="censM" type="range" min="1" max="15" step="0.1" value="4.0"></label>
+    <label><span class="vlabel">Delay sd <i>s</i> (days): <span id="censSval">1.5</span></span>
+      <input id="censS" type="range" min="0.5" max="8" step="0.1" value="1.5"></label>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--pmf);padding-left:10px">mean (double) = <b id="censMeanD">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--naive);padding-left:10px">mean (naive) = <b id="censMeanN">—</b></span>
+    <span class="chip">naive &minus; double = <b id="censDiff">—</b> days</span>
+    <span class="chip" id="censHint" style="background:#ecfeff"></span>
+  </div>
+
+  <div class="key teal">The naive PMF assumes the primary event always sits exactly at the start of its day. Real events sit <i>somewhere</i> in the day, so the naive version over-counts short delays and runs slightly low. The double-censored PMF averages over that hidden offset and gives the daily probabilities the data really imply — the version <code>scoringutils</code>-style discretisation and modern nowcasting/forecasting pipelines use.</p></div>
+</section>
+
+<!-- ============ SPREAD ============ -->
+<section id="spread">
+  <h2>Why a distribution, not a point estimate? <span class="pill cont">the spread matters</span></h2>
+  <p class="tagline">The mean alone throws away the variation that drives everything downstream</p>
+  <p>It is tempting to collapse a delay to its mean — "onset to admission is about a week" — and move on. But the <b>spread</b> is doing real work. The panel below fixes the <b>mean</b> at <i>m</i> and lets you change only the <b>sd</b>. The blue density stretches and squashes while its mean marker stays put; the shaded band is the central 90% of the delay (the 5th to 95th percentile), obtained from the lognormal quantile function:</p>
+
+  <div class="formula">q(p) = exp( &mu; + &sigma; &middot; &Phi;<sup>&minus;1</sup>(p) )&nbsp;&nbsp;&nbsp;&nbsp;band = [ q(0.05), q(0.95) ]</div>
+
+  <p>Two delays can share a mean yet imply very different things: a tight delay means yesterday's onsets almost all show up as admissions within a day or two; a wide delay smears them over a fortnight. When you <b>convolve</b> this PMF with case counts (to go from infections to onsets to admissions), or run it inside a <b>nowcast</b> to fill in not-yet-reported events, it is the <i>whole shape</i> — not the mean — that determines the answer and its uncertainty.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--dens)"></i> delay density (fixed mean)</span>
+    <span><i class="swbar" style="background:#bfdbfe;opacity:.9"></i> central 90% band</span>
+    <span><i class="swatch" style="border-color:var(--mean);border-top-style:dashed"></i> mean (fixed)</span>
+  </div>
+
+  <div class="fig">
+    <svg id="spreadSvg" viewBox="0 0 720 320" role="img" aria-label="Lognormal delay density with a fixed mean and an adjustable standard deviation, with the central 90 percent band shaded"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">Delay mean <i>m</i> (fixed shape anchor): <span id="sprMval">7.0</span></span>
+      <input id="sprM" type="range" min="2" max="14" step="0.1" value="7.0"></label>
+    <label><span class="vlabel">Delay sd <i>s</i> (days): <span id="sprSval">3.0</span></span>
+      <input id="sprS" type="range" min="0.5" max="8" step="0.1" value="3.0"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">mean = <b id="sprMean">—</b> days</span>
+    <span class="chip">median = <b id="sprMedian">—</b> days</span>
+    <span class="chip" style="border-left:4px solid var(--dens);padding-left:10px">central 90% = <b id="sprBand">—</b></span>
+    <span class="chip" id="sprWidth" style="background:#eff6ff"></span>
+  </div>
+
+  <div class="key">Same mean, different story. A lognormal is <b>right-skewed</b>, so its mean sits above its median — most delays are a bit shorter than the average, with a long tail of slow ones. Reporting only the mean hides both the skew and the spread, and any downstream estimate that uses it inherits a delay that is too certain.</div>
+</section>
+
+<!-- ============ REMEMBER ============ -->
+<section id="remember">
+  <h2>Things to remember</h2>
+  <ul>
+    <li>An epidemiological delay is a <b>distribution</b>. Carry its shape, not just its mean — the spread and skew matter downstream.</li>
+    <li>Data are observed by <b>day</b>, so a continuous delay density must be turned into a discrete daily <b>PMF</b> <i>P(d)</i> before it can meet case counts.</li>
+    <li>Both the primary and secondary events are only known to the day, so discretisation is a <b>double interval censoring</b> problem — average the single-censored probability over the primary event's within-day offset <i>u</i> ~ Uniform(0, 1).</li>
+    <li>The <b>naive</b> shortcut <i>F(d+1) − F(d)</i> fixes <i>u</i> = 0 and quietly shifts the delay (over-counting short delays). The bias is largest for <b>short, tight</b> delays.</li>
+    <li>The lognormal is parameterised in the course by <code>meanlog</code> / <code>sdlog</code>; here we use the interpretable mean <i>m</i> and sd <i>s</i>, with &sigma;&sup2; = ln(1 + s&sup2;/m&sup2;) and &mu; = ln m − &sigma;&sup2;/2.</li>
+    <li>A discretised PMF should <b>sum to 1</b> — always carry enough days to capture the tail before you normalise.</li>
+  </ul>
+  <footer>Built as a teaching aid for the NFIDD delay-distributions session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- small numerics library ---------- */
+function erf(x){
+  const s = x<0 ? -1 : 1; x = Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCdf(x,mu=0,sd=1){ return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2))); }
+function normPdf(x,mu=0,sd=1){ return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); }
+function normInv(p){
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const plow=0.02425, phigh=1-plow; let q,r;
+  if(p<plow){ q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p<=phigh){ q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1); }
+  q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+// generic stacked horizontal bar renderer (kept from the exemplar helper library)
+function stackedBar(svg, segs, W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14, h=34, fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>74){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(3);
+    }
+    x+=w;
+  });
+}
+
+/* ---------- lognormal delay helpers ---------- */
+// parameterise lognormal by mean m and sd s in days
+function lnPars(m,s){
+  const sig2 = Math.log(1 + (s*s)/(m*m));
+  const mu   = Math.log(m) - sig2/2;
+  return {mu, sig:Math.sqrt(sig2)};
+}
+// lognormal CDF F(x); F(x)=0 for x<=0
+function lnCdf(x,mu,sig){ return x>0 ? normCdf((Math.log(x)-mu)/sig) : 0; }
+// lognormal density f(x); 0 for x<=0
+function lnPdf(x,mu,sig){ return x>0 ? Math.exp(-0.5*((Math.log(x)-mu)/sig)**2)/(x*sig*Math.sqrt(2*Math.PI)) : 0; }
+// lognormal quantile q(p)
+function lnQuant(p,mu,sig){ return Math.exp(mu + sig*normInv(p)); }
+
+// naive single-censored daily PMF: P(d) = F(d+1) - F(d)
+function pmfNaive(m,s,D){
+  const {mu,sig}=lnPars(m,s); const out=[];
+  for(let d=0; d<D; d++){ out.push(Math.max(lnCdf(d+1,mu,sig)-lnCdf(d,mu,sig),0)); }
+  return out;
+}
+// double interval censored daily PMF:
+// P(d) = average over u~U(0,1) of [ F(d+1-u) - F(d-u) ], integrated with NU points
+function pmfDouble(m,s,D){
+  const {mu,sig}=lnPars(m,s); const NU=24; const out=[];
+  for(let d=0; d<D; d++){
+    let acc=0;
+    for(let j=0;j<NU;j++){
+      const u=(j+0.5)/NU;                       // midpoint rule over u in (0,1)
+      acc += lnCdf(d+1-u,mu,sig) - lnCdf(d-u,mu,sig);
+    }
+    out.push(Math.max(acc/NU,0));
+  }
+  return out;
+}
+function pmfMean(p){ let s=0; for(let d=0;d<p.length;d++) s+=d*p[d]; return s; }
+function pmfSum(p){ return p.reduce((a,b)=>a+b,0); }
+
+/* ================= FIGURE 1 : density -> discrete daily PMF ================= */
+(function(){
+  const svg=document.getElementById("discSvg");
+  const W=720,H=380, m={l:54,r:20,t:24,b:46};
+  const mInp=document.getElementById("discM"), sInp=document.getElementById("discS");
+  let mode="double";
+
+  function draw(){
+    const mm=+mInp.value, ss=+sInp.value;
+    document.getElementById("discMval").textContent=mm.toFixed(1);
+    document.getElementById("discSval").textContent=ss.toFixed(1);
+    clear(svg);
+    const {mu,sig}=lnPars(mm,ss);
+
+    // choose x range to cover ~99.5% of the delay
+    const xhi=Math.max(6, Math.ceil(lnQuant(0.995,mu,sig))+1);
+    const D=xhi; // number of daily bins 0..D-1
+    const pD=pmfDouble(mm,ss,D), pN=pmfNaive(mm,ss,D);
+
+    const ax=m.l, aw=W-m.l-m.r, ay=m.t, ah=H-m.t-m.b;
+    const sx=v=>ax+(v/xhi)*aw;
+    // density max & pmf max share the y-axis after scaling bars to "per-day" prob compare to density
+    let dmax=0;
+    const NF=260;
+    for(let i=0;i<=NF;i++){ const xv=xhi*i/NF; const f=lnPdf(xv,mu,sig); if(f>dmax) dmax=f; }
+    const pmax=Math.max(...pD,...pN,1e-6);
+    const top=Math.max(dmax,pmax)*1.1;
+    const sy=v=>ay+ah-(v/top)*ah;
+
+    // gridlines (y)
+    const yticks=4;
+    for(let i=0;i<=yticks;i++){
+      const v=top*i/yticks;
+      svg.appendChild(el("line",{x1:ax,y1:sy(v),x2:ax+aw,y2:sy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:ax-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v.toFixed(2);
+    }
+    // axes
+    svg.appendChild(el("line",{x1:ax,y1:sy(0),x2:ax+aw,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:ay,x2:ax,y2:sy(0),stroke:"#cbd5e1"}));
+    const xstep = xhi>20?4 : xhi>10?2 : 1;
+    for(let v=0; v<=xhi; v+=xstep){
+      svg.appendChild(el("text",{x:sx(v),y:sy(0)+18,"text-anchor":"middle","font-size":10.5,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:ax+aw/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="delay (days)";
+    const yl=el("text",{x:14,y:(ay+sy(0))/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(ay+sy(0))/2})`}); yl.textContent="probability"; svg.appendChild(yl);
+
+    const bw=aw/xhi; // width of one day on the axis
+    // draw bars for each integer day d in [d, d+1)
+    function bars(p,col,opacity,shrink,offset){
+      for(let d=0; d<D; d++){
+        if(p[d]<=1e-6) continue;
+        const x0=sx(d), w=bw*shrink;
+        svg.appendChild(el("rect",{x:x0+offset+1, y:sy(p[d]), width:Math.max(w-2,1), height:Math.max(sy(0)-sy(p[d]),0), fill:col, opacity, rx:2}));
+      }
+    }
+    if(mode==="double"){ bars(pD,"#ea580c",0.85,1,0); }
+    else if(mode==="naive"){ bars(pN,"#0891b2",0.7,1,0); }
+    else { bars(pD,"#ea580c",0.8,0.5,0); bars(pN,"#0891b2",0.62,0.5,bw*0.5); }
+
+    // continuous density curve on top
+    let fp="";
+    for(let i=0;i<=NF;i++){ const xv=xhi*i/NF; fp+=(i?" L ":"M ")+sx(xv)+" "+sy(lnPdf(xv,mu,sig)); }
+    svg.appendChild(el("path",{d:fp,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // mean marker
+    svg.appendChild(el("line",{x1:sx(mm),y1:ay,x2:sx(mm),y2:sy(0),stroke:"#475569","stroke-width":1.6,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("text",{x:sx(mm),y:ay+10,"text-anchor":"middle","font-size":10.5,fill:"#475569","font-weight":600})).textContent="mean "+mm.toFixed(1);
+
+    // readouts
+    const activeP = (mode==="naive") ? pN : pD;
+    document.getElementById("discContMean").textContent=mm.toFixed(2);
+    document.getElementById("discDiscMean").textContent=pmfMean(activeP).toFixed(2);
+    document.getElementById("discSum").textContent=pmfSum(activeP).toFixed(3);
+    const shift=pmfMean(activeP)-mm;
+    const sc=document.getElementById("discShift");
+    sc.textContent="censoring shift = "+(shift>=0?"+":"")+shift.toFixed(2)+" days";
+  }
+  mInp.addEventListener("input",draw); sInp.addEventListener("input",draw);
+  document.querySelectorAll("#discMode button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      mode=b.dataset.mode;
+      document.querySelectorAll("#discMode button").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+      draw();
+    });
+  });
+  draw();
+})();
+
+/* ================= FIGURE 2 : double vs naive censoring ================= */
+(function(){
+  const svg=document.getElementById("censSvg");
+  const W=720,H=340, m={l:54,r:20,t:24,b:46};
+  const mInp=document.getElementById("censM"), sInp=document.getElementById("censS");
+
+  function draw(){
+    const mm=+mInp.value, ss=+sInp.value;
+    document.getElementById("censMval").textContent=mm.toFixed(1);
+    document.getElementById("censSval").textContent=ss.toFixed(1);
+    clear(svg);
+    const {mu,sig}=lnPars(mm,ss);
+    const xhi=Math.max(6, Math.ceil(lnQuant(0.99,mu,sig))+1);
+    const D=xhi;
+    const pD=pmfDouble(mm,ss,D), pN=pmfNaive(mm,ss,D);
+
+    const ax=m.l, aw=W-m.l-m.r, ay=m.t, ah=H-m.t-m.b;
+    const sx=v=>ax+(v/xhi)*aw;
+    const top=Math.max(...pD,...pN,1e-6)*1.12;
+    const sy=v=>ay+ah-(v/top)*ah;
+
+    const yticks=4;
+    for(let i=0;i<=yticks;i++){
+      const v=top*i/yticks;
+      svg.appendChild(el("line",{x1:ax,y1:sy(v),x2:ax+aw,y2:sy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:ax-8,y:sy(v)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=v.toFixed(2);
+    }
+    svg.appendChild(el("line",{x1:ax,y1:sy(0),x2:ax+aw,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:ay,x2:ax,y2:sy(0),stroke:"#cbd5e1"}));
+    const xstep = xhi>20?4 : xhi>10?2 : 1;
+    for(let v=0; v<=xhi; v+=xstep){
+      svg.appendChild(el("text",{x:sx(v),y:sy(0)+18,"text-anchor":"middle","font-size":10.5,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:ax+aw/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="delay (days)";
+    const yl=el("text",{x:14,y:(ay+sy(0))/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(ay+sy(0))/2})`}); yl.textContent="P(delay = d)"; svg.appendChild(yl);
+
+    const bw=aw/xhi;
+    // paired bars per day: double (orange) left, naive (teal) right
+    for(let d=0; d<D; d++){
+      const x0=sx(d), half=bw*0.46;
+      if(pD[d]>1e-6) svg.appendChild(el("rect",{x:x0+bw*0.04, y:sy(pD[d]), width:Math.max(half-1,1), height:Math.max(sy(0)-sy(pD[d]),0), fill:"#ea580c", opacity:0.85, rx:2}));
+      if(pN[d]>1e-6) svg.appendChild(el("rect",{x:x0+bw*0.5,  y:sy(pN[d]), width:Math.max(half-1,1), height:Math.max(sy(0)-sy(pN[d]),0), fill:"#0891b2", opacity:0.7,  rx:2}));
+    }
+
+    // means
+    const meanD=pmfMean(pD), meanN=pmfMean(pN);
+    svg.appendChild(el("line",{x1:sx(meanD),y1:ay,x2:sx(meanD),y2:sy(0),stroke:"#ea580c","stroke-width":1.6,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("line",{x1:sx(meanN),y1:ay,x2:sx(meanN),y2:sy(0),stroke:"#0891b2","stroke-width":1.6,"stroke-dasharray":"5 4"}));
+
+    document.getElementById("censMeanD").textContent=meanD.toFixed(3);
+    document.getElementById("censMeanN").textContent=meanN.toFixed(3);
+    const diff=meanN-meanD;
+    document.getElementById("censDiff").textContent=(diff>=0?"+":"")+diff.toFixed(3);
+    const hint=document.getElementById("censHint");
+    if(ss<1.2) hint.textContent="tight delay → naive shift is most visible";
+    else if(mm>9) hint.textContent="long delay → rounding washes out";
+    else hint.textContent="naive over-counts short delays";
+  }
+  mInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
+})();
+
+/* ================= FIGURE 3 : why a distribution, not a point ================= */
+(function(){
+  const svg=document.getElementById("spreadSvg");
+  const W=720,H=320, m={l:54,r:20,t:24,b:46};
+  const mInp=document.getElementById("sprM"), sInp=document.getElementById("sprS");
+
+  function draw(){
+    const mm=+mInp.value, ss=+sInp.value;
+    document.getElementById("sprMval").textContent=mm.toFixed(1);
+    document.getElementById("sprSval").textContent=ss.toFixed(1);
+    clear(svg);
+    const {mu,sig}=lnPars(mm,ss);
+    const median=Math.exp(mu);
+    const qlo=lnQuant(0.05,mu,sig), qhi=lnQuant(0.95,mu,sig);
+
+    // fixed x range so changing sd visibly stretches the curve within a stable frame
+    const xhi=Math.max(mm*3.2, qhi*1.15, 12);
+    const ax=m.l, aw=W-m.l-m.r, ay=m.t, ah=H-m.t-m.b;
+    const sx=v=>ax+(v/xhi)*aw;
+    let dmax=0; const N=300;
+    for(let i=0;i<=N;i++){ const xv=xhi*i/N; const f=lnPdf(xv,mu,sig); if(f>dmax) dmax=f; }
+    const top=dmax*1.12;
+    const sy=v=>ay+ah-(v/top)*ah;
+
+    // gridlines
+    const yticks=4;
+    for(let i=0;i<=yticks;i++){
+      const v=top*i/yticks;
+      svg.appendChild(el("line",{x1:ax,y1:sy(v),x2:ax+aw,y2:sy(v),stroke:"#eef2f7"}));
+    }
+    svg.appendChild(el("line",{x1:ax,y1:sy(0),x2:ax+aw,y2:sy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:ax,y1:ay,x2:ax,y2:sy(0),stroke:"#cbd5e1"}));
+    const xstep = xhi>30?5 : xhi>16?2 : 1;
+    for(let v=0; v<=xhi; v+=xstep){
+      svg.appendChild(el("text",{x:sx(v),y:sy(0)+18,"text-anchor":"middle","font-size":10.5,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:ax+aw/2,y:H-6,"text-anchor":"middle","font-size":12.5,fill:"#374151"})).textContent="delay (days)";
+    const yl=el("text",{x:14,y:(ay+sy(0))/2,"text-anchor":"middle","font-size":12.5,fill:"#374151",transform:`rotate(-90 14 ${(ay+sy(0))/2})`}); yl.textContent="density"; svg.appendChild(yl);
+
+    // shaded central-90% band
+    let band="M "+sx(qlo)+" "+sy(0);
+    const NB=160;
+    for(let i=0;i<=NB;i++){ const xv=qlo+(qhi-qlo)*i/NB; band+=" L "+sx(xv)+" "+sy(lnPdf(xv,mu,sig)); }
+    band+=" L "+sx(qhi)+" "+sy(0)+" Z";
+    svg.appendChild(el("path",{d:band,fill:"#bfdbfe",opacity:0.85}));
+
+    // density curve
+    let fp="";
+    for(let i=0;i<=N;i++){ const xv=xhi*i/N; fp+=(i?" L ":"M ")+sx(xv)+" "+sy(lnPdf(xv,mu,sig)); }
+    svg.appendChild(el("path",{d:fp,fill:"none",stroke:"#2563eb","stroke-width":2.6}));
+
+    // mean marker (fixed) and median marker
+    svg.appendChild(el("line",{x1:sx(mm),y1:ay,x2:sx(mm),y2:sy(0),stroke:"#475569","stroke-width":1.8,"stroke-dasharray":"5 4"}));
+    svg.appendChild(el("text",{x:sx(mm),y:ay+10,"text-anchor":"middle","font-size":10.5,fill:"#475569","font-weight":600})).textContent="mean "+mm.toFixed(1);
+    svg.appendChild(el("line",{x1:sx(median),y1:sy(0),x2:sx(median),y2:sy(lnPdf(median,mu,sig)),stroke:"#1d4ed8","stroke-width":1.2,"stroke-dasharray":"2 3"}));
+    svg.appendChild(el("text",{x:sx(median),y:sy(0)+32,"text-anchor":"middle","font-size":10,fill:"#1d4ed8"})).textContent="median";
+
+    // band endpoint ticks
+    [qlo,qhi].forEach(qv=>{
+      svg.appendChild(el("line",{x1:sx(qv),y1:sy(0)-4,x2:sx(qv),y2:sy(0)+4,stroke:"#2563eb","stroke-width":1.5}));
+    });
+
+    document.getElementById("sprMean").textContent=mm.toFixed(2);
+    document.getElementById("sprMedian").textContent=median.toFixed(2);
+    document.getElementById("sprBand").textContent="["+qlo.toFixed(1)+", "+qhi.toFixed(1)+"]";
+    document.getElementById("sprWidth").textContent="90% width = "+(qhi-qlo).toFixed(1)+" days";
+  }
+  mInp.addEventListener("input",draw); sInp.addEventListener("input",draw); draw();
+})();
+
+/* ================= FIGURE 4 : double censoring, one individual at a time ================= */
+(function(){
+  const svg=document.getElementById("mcSvg");
+  const W=720,H=380;
+  const mInp=document.getElementById("mcM"), sInp=document.getElementById("mcS");
+  let w=1;                 // primary censoring window (days)
+  let counts=[];           // histogram of observed integer delays d, indexed by d
+  let n=0;                 // total individuals sampled
+  let sumObs=0;            // running sum of observed d
+  let recent=[];           // most-recent individuals {u,T,d} for the timeline panel
+  const MAXROWS=22;        // number of timeline rows to display
+  let timer=null;
+
+  // small categorical palette for observed-delay colour
+  const PAL=["#0891b2","#2563eb","#7c3aed","#db2777","#ea580c","#16a34a","#ca8a04","#dc2626","#0d9488","#9333ea"];
+  const colD=d=>PAL[((d%PAL.length)+PAL.length)%PAL.length];
+
+  function reset(){
+    counts=[]; n=0; sumObs=0; recent=[];
+    document.getElementById("mcN").textContent="0";
+  }
+
+  // draw one individual: returns observed integer delay d
+  function sampleOne(mm,ss){
+    const {mu,sig}=lnPars(mm,ss);
+    const u=Math.random()*w;                         // primary event time in [0,w)
+    const T=Math.exp(mu+sig*normInv(Math.random())); // continuous lognormal delay
+    const sec=u+T;                                   // continuous secondary time
+    const d=Math.floor(sec)-w*Math.floor(u/w);       // observed delay: secondary day minus primary window start
+    counts[d]=(counts[d]||0)+1;
+    n++; sumObs+=d;
+    recent.push({u,T,sec,d});
+    if(recent.length>MAXROWS) recent.shift();
+    return d;
+  }
+  function addMany(k){
+    const mm=+mInp.value, ss=+sInp.value;
+    for(let i=0;i<k;i++) sampleOne(mm,ss);
+    document.getElementById("mcN").textContent=n;
+    draw();
+  }
+
+  function draw(){
+    const mm=+mInp.value, ss=+sInp.value;
+    document.getElementById("mcMval").textContent=mm.toFixed(1);
+    document.getElementById("mcSval").textContent=ss.toFixed(1);
+    clear(svg);
+    const {mu,sig}=lnPars(mm,ss);
+
+    // shared day range for both panels (cover ~99.5% of u+T)
+    const xhi=Math.max(6, Math.ceil(lnQuant(0.995,mu,sig)+w)+1);
+    const D=xhi;
+    // double-censored PMF for the current primary window w: average the F-increment over u in (0,w)
+    const NUw=24, pD=[];
+    for(let d=0; d<D; d++){ let acc=0; for(let j=0;j<NUw;j++){ const uu=(j+0.5)/NUw*w; acc += lnCdf(d+1-uu,mu,sig)-lnCdf(d-uu,mu,sig); } pD.push(Math.max(acc/NUw,0)); }
+
+    // ---- layout: two panels side by side within one SVG ----
+    const gap=26;
+    const Lx=50, Lw=(W-gap)/2 - Lx - 8;        // left panel plot area
+    const Rx=(W+gap)/2 + 36, Rw=W-20-Rx;       // right panel plot area
+    const ay=26, ah=H-26-46;                    // shared vertical plot area
+
+    // ===== LEFT PANEL: individual timelines =====
+    const lsx=v=>Lx+(v/xhi)*Lw;
+    // panel title
+    svg.appendChild(el("text",{x:Lx,y:14,"font-size":12,fill:"#374151","font-weight":700})).textContent="individuals (most recent)";
+    // day gridlines (vertical, light)
+    for(let dd=0; dd<=xhi; dd++){
+      svg.appendChild(el("line",{x1:lsx(dd),y1:ay,x2:lsx(dd),y2:ay+ah,stroke:"#eef2f7","stroke-width":1}));
+    }
+    // x axis ticks
+    const lstep=xhi>20?4:xhi>10?2:1;
+    for(let v=0; v<=xhi; v+=lstep){
+      svg.appendChild(el("text",{x:lsx(v),y:ay+ah+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:Lx+Lw/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="continuous time (days)";
+
+    // rows: oldest at top, newest at bottom
+    const rows=recent.length;
+    const rh=rows>0 ? Math.min(16, ah/Math.max(rows,1)) : 0;
+    const rowTop=ay + (ah - rh*rows)/2;
+    recent.forEach((ind,i)=>{
+      const yc=rowTop + i*rh + rh/2, hh=rh*0.42, c=colD(ind.d);
+      const pStart=w*Math.floor(ind.u/w);             // primary window start (the bin we observe)
+      const fd=Math.floor(ind.sec);                   // secondary day (the bin we observe)
+      // PRIMARY interval box — the window [pStart, pStart+w) we actually observe the primary in
+      svg.appendChild(el("rect",{x:lsx(pStart),y:yc-hh,width:Math.max(lsx(pStart+w)-lsx(pStart),1),height:hh*2,fill:"#f59e0b",opacity:0.16}));
+      svg.appendChild(el("rect",{x:lsx(pStart),y:yc-hh,width:Math.max(lsx(pStart+w)-lsx(pStart),1),height:hh*2,fill:"none",stroke:"#f59e0b","stroke-width":0.9,opacity:0.75}));
+      // SECONDARY interval box — the day [fd, fd+1) we observe the secondary in
+      svg.appendChild(el("rect",{x:lsx(fd),y:yc-hh,width:Math.max(lsx(fd+1)-lsx(fd),1),height:hh*2,fill:c,opacity:0.16}));
+      svg.appendChild(el("rect",{x:lsx(fd),y:yc-hh,width:Math.max(lsx(fd+1)-lsx(fd),1),height:hh*2,fill:"none",stroke:c,"stroke-width":0.9,opacity:0.75}));
+      // continuous delay connector between the TRUE (unobserved) event times
+      svg.appendChild(el("line",{x1:lsx(ind.u),y1:yc,x2:lsx(ind.sec),y2:yc,stroke:c,"stroke-width":1.4,opacity:0.8}));
+      // true primary (amber) and true secondary (coloured) event times
+      svg.appendChild(el("circle",{cx:lsx(ind.u),cy:yc,r:2.5,fill:"#f59e0b",stroke:"#fff","stroke-width":0.6}));
+      svg.appendChild(el("circle",{cx:lsx(ind.sec),cy:yc,r:2.5,fill:c,stroke:"#fff","stroke-width":0.6}));
+    });
+    if(rows===0){
+      svg.appendChild(el("text",{x:Lx+Lw/2,y:ay+ah/2,"text-anchor":"middle","font-size":12,fill:"#9ca3af"})).textContent="press +1 / +50 / play to sample";
+    }
+
+    // ===== RIGHT PANEL: realised density histogram + overlays =====
+    const rsx=v=>Rx+(v/xhi)*Rw;
+    // density of histogram: counts[d]/n (already per unit day since bins are 1 day wide)
+    const hist=[];
+    for(let d=0; d<D; d++){ hist[d]= n>0 ? (counts[d]||0)/n : 0; }
+    // continuous density max for scaling
+    let dmax=0; const NF=240;
+    for(let i=0;i<=NF;i++){ const xv=xhi*i/NF; const f=lnPdf(xv,mu,sig); if(f>dmax) dmax=f; }
+    const top=Math.max(dmax,Math.max(...pD,1e-6),Math.max(...hist,1e-6))*1.12;
+    const rsy=v=>ay+ah-(v/top)*ah;
+
+    svg.appendChild(el("text",{x:Rx,y:14,"font-size":12,fill:"#374151","font-weight":700})).textContent="realised observed-delay density";
+    // y gridlines + ticks
+    const yticks=4;
+    for(let i=0;i<=yticks;i++){
+      const v=top*i/yticks;
+      svg.appendChild(el("line",{x1:Rx,y1:rsy(v),x2:Rx+Rw,y2:rsy(v),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:Rx-6,y:rsy(v)+4,"text-anchor":"end","font-size":9.5,fill:"#6b7280"})).textContent=v.toFixed(2);
+    }
+    // axes
+    svg.appendChild(el("line",{x1:Rx,y1:rsy(0),x2:Rx+Rw,y2:rsy(0),stroke:"#cbd5e1"}));
+    svg.appendChild(el("line",{x1:Rx,y1:ay,x2:Rx,y2:rsy(0),stroke:"#cbd5e1"}));
+    const rstep=xhi>20?4:xhi>10?2:1;
+    for(let v=0; v<=xhi; v+=rstep){
+      svg.appendChild(el("text",{x:rsx(v),y:rsy(0)+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    }
+    svg.appendChild(el("text",{x:Rx+Rw/2,y:H-6,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="observed delay d (days)";
+
+    const bw=Rw/xhi;
+    // histogram bars (density of realised d)
+    for(let d=0; d<D; d++){
+      if(hist[d]<=0) continue;
+      svg.appendChild(el("rect",{x:rsx(d)+1,y:rsy(hist[d]),width:Math.max(bw-2,1),height:Math.max(rsy(0)-rsy(hist[d]),0),fill:"#ea580c",opacity:0.55,rx:2}));
+    }
+    // continuous density (faint line)
+    let fp="";
+    for(let i=0;i<=NF;i++){ const xv=xhi*i/NF; fp+=(i?" L ":"M ")+rsx(xv)+" "+rsy(lnPdf(xv,mu,sig)); }
+    svg.appendChild(el("path",{d:fp,fill:"none",stroke:"#2563eb","stroke-width":1.6,opacity:0.55}));
+    // analytic double-censored PMF as stepped outline target
+    let sp="";
+    for(let d=0; d<D; d++){
+      const x0=rsx(d), x1=rsx(d+1), yv=rsy(pD[d]);
+      sp+=(d?" L ":"M ")+x0+" "+yv+" L "+x1+" "+yv;
+    }
+    svg.appendChild(el("path",{d:sp,fill:"none",stroke:"#ea580c","stroke-width":2,"stroke-dasharray":"5 3"}));
+
+    // ===== readouts =====
+    const meanObs= n>0 ? sumObs/n : 0;
+    const pN=pmfNaive(mm,ss,D);
+    document.getElementById("mcMeanObs").textContent= n>0 ? meanObs.toFixed(2) : "—";
+    document.getElementById("mcMeanCont").textContent=mm.toFixed(2);
+    document.getElementById("mcMeanNaive").textContent=pmfMean(pN).toFixed(2);
+    const sh=document.getElementById("mcShift");
+    if(n>0){
+      const shift=meanObs-mm;
+      sh.textContent="realised − continuous = "+(shift>=0?"+":"")+shift.toFixed(2)+" days";
+    } else {
+      sh.textContent="sample to see the shift";
+    }
+  }
+
+  // controls
+  mInp.addEventListener("input",()=>{ reset(); draw(); });
+  sInp.addEventListener("input",()=>{ reset(); draw(); });
+  document.querySelectorAll("#mcWindow button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      w=+b.dataset.w;
+      document.querySelectorAll("#mcWindow button").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+      reset(); draw();
+    });
+  });
+  const playBtn=document.querySelector('#mcRun button[data-act="play"]');
+  function stopPlay(){ if(timer){ clearInterval(timer); timer=null; playBtn.textContent="▶ play"; playBtn.classList.remove("on"); } }
+  document.querySelectorAll("#mcRun button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const act=b.dataset.act;
+      if(act==="one"){ stopPlay(); addMany(1); }
+      else if(act==="fifty"){ stopPlay(); addMany(50); }
+      else if(act==="reset"){ stopPlay(); reset(); draw(); }
+      else if(act==="play"){
+        if(timer){ stopPlay(); }
+        else { playBtn.textContent="❚❚ pause"; playBtn.classList.add("on"); timer=setInterval(()=>addMany(5),120); }
+      }
+    });
+  });
+  draw();
+})();
+</script>
+<script>
+/* embed mode: ?embed=sectionId[,id2,...] strips the page chrome AND the
+   explanatory prose/maths from the kept sections, leaving only the interactive
+   figures, for inlining in an <iframe> in the course site. Reports height so the
+   host page can auto-size the iframe. */
+(function(){
+  var q=new URLSearchParams(location.search), e=q.get('embed');
+  var KEEP={fig:1,controls:1,readout:1,legend:1,presets:1,figcap:1};
+  if(e){
+    var keep=e.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    ['header.hero','nav.toc','footer'].forEach(function(sel){
+      Array.prototype.forEach.call(document.querySelectorAll(sel),function(n){n.style.display='none';});
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('body > div'),function(d){
+      if(!d.classList.contains('wrap')) d.style.display='none';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('section'),function(sec){
+      if(keep.indexOf(sec.id)===-1){ sec.style.display='none'; return; }
+      sec.style.margin='0'; sec.style.border='none'; sec.style.boxShadow='none'; sec.style.padding='2px 2px 8px';
+      Array.prototype.forEach.call(sec.children,function(c){
+        var k=false, cl=c.classList; if(cl){ for(var key in KEEP){ if(cl.contains(key)){k=true;break;} } }
+        if(!k) c.style.display='none';
+      });
+    });
+    var wrap=document.querySelector('.wrap'); if(wrap) wrap.style.padding='0 8px 10px';
+    document.body.style.background='#fff'; document.documentElement.style.background='#fff';
+  }
+  function postH(){ try{ parent.postMessage({nfiddEmbedHeight: Math.ceil(document.body.getBoundingClientRect().height)}, '*'); }catch(_){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  document.addEventListener('input', function(){ setTimeout(postH,60); });
+  document.addEventListener('click', function(){ setTimeout(postH,120); });
+  setTimeout(postH,250); setTimeout(postH,1000);
+})();
+</script>
+</body>
+</html>

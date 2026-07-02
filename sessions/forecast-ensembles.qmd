@@ -184,7 +184,6 @@ The procedure of calculating quantiles of a new distribution as a weighted avera
 
 :::
 
-
 #### Construction
 
 We can calculate the mean quantile ensemble by taking the mean of the forecasts at each quantile level.
@@ -304,7 +303,6 @@ plot_multiple_forecasts +
   scale_y_log10()
 ```
 
-
 ::: {.callout-tip}
 ##### Take 2 minutes
 How do these ensembles compare to the individual models?
@@ -368,6 +366,17 @@ What do you think the scores are telling you? Which model do you think is best?
 What other scoring breakdowns might you want to look at?
 
 - There might be variation over forecast dates or horizons between the different ensemble methods
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: WIS → CRPS
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=wis" title="WIS interactive" loading="lazy" style="width:100%;height:760px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Add prediction intervals and watch the WIS converge to the CRPS, with the same dispersion / over / under split.
 :::
 
 ### Unweighted ensembles of filtered models
@@ -710,6 +719,17 @@ lop_ensembles <- lop_ensembles_obj |>
 
 ```
 
+::: {.callout-tip .optional collapse="true"}
+## Interactive: opinion pool vs quantile averaging
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-ensembles.html?embed=headtohead" title="opinion pool vs quantile averaging interactive" loading="lazy" style="width:100%;height:900px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+Average probabilities (opinion pool) vs quantiles (Vincent) — and watch them diverge.
+:::
+
 ## Compare the different ensembles
 
 We have created a number of ensembles which we can now compare.
@@ -865,6 +885,17 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 ::: {.callout-note collapse="true"}
 #### Solution
 The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles. Why might this be the case?
+:::
+
+::: {.callout-tip .optional collapse="true"}
+## Interactive: interval coverage
+
+```{=html}
+<iframe class="nfidd-embed" src="../interactive/forecast-evaluation.html?embed=coverage" title="interval coverage interactive" loading="lazy" style="width:100%;height:720px;border:1px solid #e5e7eb;border-radius:10px;background:#fff"></iframe>
+<script>(function(){if(window.__nfiddEmbedInit)return;window.__nfiddEmbedInit=1;window.addEventListener('message',function(ev){var h=ev&&ev.data&&ev.data.nfiddEmbedHeight;if(!h)return;document.querySelectorAll('iframe.nfidd-embed').forEach(function(f){if(f.contentWindow===ev.source)f.style.height=(h+24)+'px';});});})();</script>
+```
+
+A calibration check for quantile forecasts: does a 90% prediction interval actually contain the truth 90% of the time?
 :::
 
 # Going further

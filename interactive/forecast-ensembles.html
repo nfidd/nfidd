@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Combining forecasts — linear opinion pools vs quantile averaging</title>
+<style>
+  :root{
+    --a:#2563eb;      /* component A / blue */
+    --b:#ea580c;      /* component B / orange */
+    --c:#0891b2;      /* component C / teal */
+    --lop:#9333ea;    /* linear opinion pool / purple */
+    --vin:#16a34a;    /* Vincent / quantile average / green */
+    --ink:#1f2933;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --bg:#fbfbfd;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{padding:54px 22px 30px; text-align:center;
+    background:linear-gradient(180deg,#f5f3ff 0%, var(--bg) 100%); border-bottom:1px solid var(--line);}
+  header.hero h1{font-size:30px; margin:0 0 8px; letter-spacing:-.4px}
+  header.hero p{max-width:700px; margin:0 auto; color:var(--muted)}
+  nav.toc{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:22px auto 0; max-width:780px}
+  nav.toc a{text-decoration:none; color:var(--lop); font-weight:600; font-size:14px;
+    border:1px solid #ddd6fe; background:#fff; padding:6px 13px; border-radius:999px}
+  nav.toc a:hover{background:#f5f3ff}
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:26px 28px; margin:30px 0; box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  section > h2{margin:0 0 4px; font-size:23px; letter-spacing:-.3px}
+  .tagline{color:var(--muted); margin:0 0 18px; font-size:15px}
+  h3{margin:26px 0 8px; font-size:17px}
+  p{margin:10px 0}
+  .fig{border:1px solid var(--line); border-radius:12px; padding:16px 14px 10px; margin:18px 0 6px; background:#fff}
+  .fig svg{display:block; width:100%; height:auto}
+  .figcap{font-size:13.5px; color:var(--muted); margin:8px 4px 2px}
+  .controls{display:flex; flex-wrap:wrap; gap:16px 24px; align-items:center; margin:8px 4px 2px;
+    padding:12px 14px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; font-size:14px}
+  .controls label{display:flex; flex-direction:column; gap:2px; min-width:150px}
+  .controls .vlabel{font-weight:600}
+  .controls input[type=range]{width:160px; accent-color:var(--lop)}
+  .readout{display:inline-flex; gap:14px; flex-wrap:wrap; margin:10px 4px 0; font-variant-numeric:tabular-nums}
+  .readout .chip{background:#f1f5f9; border:1px solid var(--line); border-radius:8px; padding:6px 12px; font-size:14px}
+  .readout .chip b{font-size:16px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px; margin:4px 4px 8px}
+  .legend span{display:inline-flex; align-items:center; gap:7px}
+  .swatch{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .key{background:#f5f3ff; border-left:4px solid var(--lop); padding:12px 16px; border-radius:0 8px 8px 0; margin:16px 0}
+  .key.green{background:#f0fdf4; border-color:var(--vin)}
+  .key.blue{background:#eff6ff; border-color:var(--a)}
+  .formula{background:#0f172a; color:#e2e8f0; border-radius:10px; padding:14px 18px;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; font-size:15px; overflow-x:auto; margin:14px 0}
+  .frac{display:inline-flex; flex-direction:column; text-align:center; vertical-align:middle; margin:0 .25em}
+  .frac > span:first-child{border-bottom:1px solid currentColor; padding:0 .35em}
+  .frac > span:last-child{padding:0 .35em}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:14.5px}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#f8fafc}
+  td.metric{font-weight:600; white-space:nowrap}
+  ul{margin:10px 0; padding-left:22px}
+  li{margin:5px 0}
+  .pill{display:inline-block; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .pill.prob{background:#ede9fe; color:#5b21b6}
+  .pill.quant{background:#dcfce7; color:#166534}
+  code{background:#f1f5f9; padding:1px 6px; border-radius:5px; font-size:14px}
+  .presets{display:flex; gap:8px; flex-wrap:wrap; margin:14px 4px 0}
+  .presets button{font:600 13px inherit; border:1px solid #ddd6fe; background:#fff; color:var(--lop);
+    padding:6px 13px; border-radius:8px; cursor:pointer}
+  .presets button:hover{background:#f5f3ff}
+  .twoaxis{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0}
+  .twoaxis .box{border:1px solid var(--line); border-radius:12px; padding:14px 16px}
+  .twoaxis .box h4{margin:0 0 6px; font-size:15px}
+  .twoaxis .prob h4{color:var(--lop)} .twoaxis .quant h4{color:var(--vin)}
+  footer{text-align:center; color:var(--muted); font-size:13px; margin-top:40px}
+  a{color:var(--lop)}
+  @media(max-width:620px){ .twoaxis{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Combining forecasts into ensembles</h1>
+  <p>Several models, one forecast. The deep question is <b>what</b> you average. Average the <b style="color:var(--lop)">probabilities</b> and you get a <b>linear opinion pool</b> (a mixture). Average the <b style="color:var(--vin)">quantiles</b> and you get a <b>Vincent average</b> (the mean/median ensembles). They can look strikingly different — this page shows why, with the maths and live figures.</p>
+  <nav class="toc">
+    <a href="#intro">Two philosophies</a>
+    <a href="#vincent">Quantile averaging</a>
+    <a href="#lop">Linear opinion pool</a>
+    <a href="#headtohead">See the difference</a>
+    <a href="#weights">Weighting</a>
+    <a href="#compare">Side by side</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+<!-- ============ INTRO ============ -->
+<section id="intro">
+  <h2>Two philosophies for combining forecasts</h2>
+  <p class="tagline">It comes down to what you think the disagreement between models <i>means</i></p>
+  <p>Different models disagree. How you combine them should depend on <b>why</b> you think they differ (Howerton et al., 2023):</p>
+  <div class="twoaxis">
+    <div class="box quant">
+      <h4>"One truth, noisy estimates"</h4>
+      <p style="margin:6px 0 0; font-size:14.5px">Each model is a slightly-off measurement of the <i>same</i> underlying predictive distribution. Averaging should <b>sharpen</b> the estimate, cancelling noise — like averaging repeated readings. → <b>quantile / Vincent averaging</b>.</p>
+    </div>
+    <div class="box prob">
+      <h4>"Which model is right?"</h4>
+      <p style="margin:6px 0 0; font-size:14.5px">The models represent genuinely different stories about the system, and we are <i>uncertain which one holds</i>. We should keep all their possibilities on the table. → <b>linear opinion pool</b> (a probability mixture).</p>
+    </div>
+  </div>
+  <p>These are two <b>independent choices</b>, not one. A second, separate axis is <b>weighting</b> — do you trust every model equally, prune the worst, or optimise the weights?</p>
+  <table>
+    <tr><th>What you average →<br>Weights ↓</th><th style="color:var(--vin)">Quantiles (Vincent)</th><th style="color:var(--lop)">Probabilities (LOP)</th></tr>
+    <tr><td class="metric">Equal</td><td>Mean / median ensemble</td><td>Unweighted opinion pool</td></tr>
+    <tr><td class="metric">Pruned</td><td>Filtered mean ensemble</td><td>Filtered opinion pool</td></tr>
+    <tr><td class="metric">Optimised</td><td>Inverse-WIS, QRA</td><td>CRPS-tuned opinion pool</td></tr>
+  </table>
+  <div class="key">The rest of this page focuses on the <b>top axis</b> — quantiles vs probabilities — because that is where the mathematics (and the surprises) live. Weighting is revisited at the end.</div>
+</section>
+
+<!-- ============ VINCENT ============ -->
+<section id="vincent">
+  <h2>Quantile averaging <span class="pill quant">the mean / median ensemble</span></h2>
+  <p class="tagline">Average the forecasts <i>horizontally</i> — line up the quantiles and average them</p>
+  <p>Take each model's value at a given quantile level <i>p</i> — say every model's 90th percentile — and average those numbers. Do it for every level and you have the ensemble's quantiles. Writing <i>Q<sub>i</sub></i> for model <i>i</i>'s quantile function:</p>
+
+  <div class="formula">Q<sub>ens</sub>(p) = &Sigma;<sub>i</sub> w<sub>i</sub> Q<sub>i</sub>(p)
+    <span style="color:#64748b">&nbsp;&nbsp;// average the inverse-CDFs, level by level</span></div>
+
+  <p>This is the <b>Vincent average</b> (Stella Vincent, 1912). Two flavours appear in the course:</p>
+  <ul>
+    <li><b>Mean ensemble</b> — the plain average above. Smoothly blends all models.</li>
+    <li><b>Median ensemble</b> — take the <i>median</i> across models at each quantile level instead of the mean. More robust: a single wild model barely moves it.</li>
+  </ul>
+  <div class="key green"><b>Key property — it preserves shape and stays sharp.</b> Averaging quantiles of models that share a shape returns that same shape, recentred. Average two Normals this way and you get a single Normal whose spread is the <i>average</i> of the inputs' spreads — never wider. It assumes the models are really estimating one common distribution.</div>
+</section>
+
+<!-- ============ LOP ============ -->
+<section id="lop">
+  <h2>Linear opinion pool <span class="pill prob">the mixture</span></h2>
+  <p class="tagline">Average the forecasts <i>vertically</i> — average the probabilities at each value</p>
+  <p>Instead of averaging the quantiles, average the <b>distribution functions</b> themselves. At every value <i>x</i>, take each model's cumulative probability <i>F<sub>i</sub>(x)</i> and average them. The word "linear" refers to this <b>linear combination of the distributions</b>:</p>
+
+  <div class="formula">F<sub>pool</sub>(x) = &Sigma;<sub>i</sub> w<sub>i</sub> F<sub>i</sub>(x)
+    &nbsp;&nbsp;&nbsp; f<sub>pool</sub>(x) = &Sigma;<sub>i</sub> w<sub>i</sub> f<sub>i</sub>(x)</div>
+
+  <p>The clearest way to picture it is as a <b>sampling recipe</b> — exactly what <code>lopensemble</code> does with the posterior samples:</p>
+  <div class="key"><b>To draw one sample from the pool:</b> (1) pick a model at random, choosing model <i>i</i> with probability <i>w<sub>i</sub></i>; (2) draw a value from that model. Repeat. The pool is a <b>mixture</b>: every model's samples survive, simply diluted by its weight.</div>
+
+  <p>Because each model keeps its own samples, a pool is <b>at least as wide as its members and can be multi-modal</b>. The law of total variance makes the cost precise:</p>
+
+  <div class="formula">Var<sub>pool</sub> =
+    <u>&Sigma;<sub>i</sub> w<sub>i</sub> &sigma;<sub>i</sub>&sup2;</u><sub style="font-size:11px">&nbsp;within-model (avg spread)</sub>
+    + <u>&Sigma;<sub>i</sub> w<sub>i</sub>(&mu;<sub>i</sub> &minus; &mu;&#772;)&sup2;</u><sub style="font-size:11px">&nbsp;between-model (disagreement)</sub></div>
+
+  <p>The first term is the models' own uncertainty; the second is an <b>extra</b> chunk of variance the pool adds simply because the models disagree. Quantile averaging has no such term — that single equation is the whole difference between the two methods.</p>
+</section>
+
+<!-- ============ HEAD TO HEAD ============ -->
+<section id="headtohead">
+  <h2>See the difference</h2>
+  <p class="tagline">Two component forecasts, combined both ways at once</p>
+  <p>Two models, <b style="color:var(--a)">A</b> and <b style="color:var(--b)">B</b>, each a Normal. The <b style="color:var(--lop)">opinion pool</b> averages them vertically; the <b style="color:var(--vin)">Vincent average</b> averages them horizontally. Pull the two means apart and watch the pool split into two humps while the Vincent average stays a single sharp peak — even though <b>both share the exact same mean</b>.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--a)"></i> model A (&times; weight)</span>
+    <span><i class="swatch" style="border-color:var(--b)"></i> model B (&times; weight)</span>
+    <span><i class="swatch" style="border-color:var(--lop);border-top-width:4px"></i> linear opinion pool</span>
+    <span><i class="swatch" style="border-color:var(--vin);border-top-width:4px"></i> Vincent (quantile) average</span>
+  </div>
+
+  <div class="fig">
+    <svg id="ensSvg" viewBox="0 0 720 560" role="img" aria-label="Top: densities of two components with the opinion pool and the Vincent average. Bottom: the same as CDFs, showing vertical vs horizontal averaging."></svg>
+  </div>
+  <p class="figcap">Top: densities. Bottom: the same forecasts as CDFs — the pool (purple) is the curves averaged <b>↕ vertically</b>; the Vincent average (green) is the curves averaged <b>↔ horizontally</b>.</p>
+
+  <div class="controls">
+    <label><span class="vlabel">A mean: <span id="muAval">4.0</span></span><input id="muA" type="range" min="1" max="11" step="0.1" value="4"></label>
+    <label><span class="vlabel">A spread &sigma;<sub>A</sub>: <span id="sdAval">1.2</span></span><input id="sdA" type="range" min="0.6" max="3" step="0.1" value="1.2"></label>
+    <label><span class="vlabel">B mean: <span id="muBval">8.0</span></span><input id="muB" type="range" min="1" max="11" step="0.1" value="8"></label>
+    <label><span class="vlabel">B spread &sigma;<sub>B</sub>: <span id="sdBval">1.2</span></span><input id="sdB" type="range" min="0.6" max="3" step="0.1" value="1.2"></label>
+    <label><span class="vlabel">weight on A: <span id="wAval">0.50</span></span><input id="wA" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+  </div>
+  <div class="readout">
+    <span class="chip">shared mean = <b id="ensMean">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--vin);padding-left:10px">SD Vincent = <b id="ensSdVin">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--lop);padding-left:10px">SD pool = <b id="ensSdLop">—</b></span>
+    <span class="chip" id="ensShape" style="background:#f5f3ff"></span>
+  </div>
+
+  <h3>Where the pool's extra width comes from</h3>
+  <p>The pool's variance is the models' average spread <b style="color:var(--c)">plus</b> their disagreement. Drag the means together and the orange (between-model) part vanishes — only then do the two methods nearly coincide.</p>
+  <div class="fig" style="padding-bottom:6px">
+    <svg id="ensVarBar" viewBox="0 0 720 62" role="img" aria-label="Stacked bar: pool variance split into within-model and between-model parts"></svg>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--c);padding-left:10px">within-model var = <b id="ensWithin">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--b);padding-left:10px">between-model var = <b id="ensBetween">—</b></span>
+    <span class="chip">pool var = <b id="ensTotVar">—</b></span>
+  </div>
+</section>
+
+<!-- ============ WEIGHTS ============ -->
+<section id="weights">
+  <h2>Weighting — the other axis</h2>
+  <p class="tagline">Trust the models equally, prune the worst, or optimise</p>
+  <p>Weighting is orthogonal to <i>what</i> you average: you can weight either a quantile average or an opinion pool. The course covers three schemes:</p>
+  <ul>
+    <li><b>Inverse-WIS</b> — set <i>w<sub>i</sub> &prop; 1 / WIS<sub>i</sub></i> over a recent window, then normalise. Simple and transparent; better models get more weight, but the weights aren't tuned to the ensemble's own score.</li>
+    <li><b>Quantile regression averaging (QRA)</b> — directly optimise the quantile weights to minimise past WIS. More powerful, needs training data, can over-fit.</li>
+    <li><b>CRPS-tuned opinion pool</b> — the mixture-weight analogue, with weights chosen to minimise CRPS on past forecasts (what <code>lopensemble</code> does).</li>
+  </ul>
+  <p>Below: three component models pooled with weights you control. Watch how re-weighting slides the opinion pool between its humps, while the Vincent average just glides along — and how an "optimised" winner-take-all weighting collapses both onto a single model.</p>
+
+  <div class="legend">
+    <span><i class="swatch" style="border-color:var(--a)"></i> model 1</span>
+    <span><i class="swatch" style="border-color:var(--b)"></i> model 2</span>
+    <span><i class="swatch" style="border-color:var(--c)"></i> model 3</span>
+    <span><i class="swatch" style="border-color:var(--lop);border-top-width:4px"></i> opinion pool</span>
+    <span><i class="swatch" style="border-color:var(--vin);border-top-width:4px"></i> Vincent average</span>
+  </div>
+  <div class="presets">
+    <button data-w="1,1,1">Equal weights</button>
+    <button data-w="0.2,0.55,0.25">Inverse-WIS (favour best)</button>
+    <button data-w="0,1,0">Optimised (winner-take-all)</button>
+  </div>
+  <div class="fig">
+    <svg id="w3Svg" viewBox="0 0 720 300" role="img" aria-label="Three component models pooled with adjustable weights"></svg>
+  </div>
+  <div class="controls">
+    <label><span class="vlabel">weight 1: <span id="w1val">0.33</span></span><input id="w1" type="range" min="0" max="1" step="0.05" value="0.33"></label>
+    <label><span class="vlabel">weight 2: <span id="w2val">0.33</span></span><input id="w2" type="range" min="0" max="1" step="0.05" value="0.34"></label>
+    <label><span class="vlabel">weight 3: <span id="w3val">0.33</span></span><input id="w3" type="range" min="0" max="1" step="0.05" value="0.33"></label>
+  </div>
+  <div class="fig" style="padding-bottom:6px">
+    <svg id="w3Bar" viewBox="0 0 720 50" role="img" aria-label="Normalised weight bar"></svg>
+  </div>
+  <div class="readout">
+    <span class="chip" style="border-left:4px solid var(--vin);padding-left:10px">SD Vincent = <b id="w3SdVin">—</b></span>
+    <span class="chip" style="border-left:4px solid var(--lop);padding-left:10px">SD pool = <b id="w3SdLop">—</b></span>
+    <span class="chip" id="w3Shape" style="background:#f5f3ff"></span>
+  </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section id="compare">
+  <h2>Side by side</h2>
+  <table>
+    <tr><th></th><th style="color:var(--vin)">Quantile averaging (Vincent)</th><th style="color:var(--lop)">Linear opinion pool</th></tr>
+    <tr><td class="metric">You average…</td><td>Quantiles (horizontally ↔)</td><td>Probabilities (vertically ↕)</td></tr>
+    <tr><td class="metric">Result is a…</td><td>Single re-centred distribution</td><td>Mixture of the components</td></tr>
+    <tr><td class="metric">Spread vs members</td><td>Average of their spreads — stays sharp</td><td>Average spread <b>+</b> disagreement — wider</td></tr>
+    <tr><td class="metric">Can be multi-modal?</td><td>No (shape preserved)</td><td>Yes, if models disagree</td></tr>
+    <tr><td class="metric">Built from</td><td>Quantile forecasts</td><td>Samples (a mixture draw)</td></tr>
+    <tr><td class="metric">Assumes models are…</td><td>Noisy estimates of one truth</td><td>Rival candidates for the truth</td></tr>
+    <tr><td class="metric">In the course</td><td>Mean / median ensemble, inverse-WIS, QRA</td><td><code>lopensemble</code> mixture</td></tr>
+    <tr><td class="metric">Watch out for</td><td>Over-confidence if models genuinely disagree</td><td>Under-confidence / fat tails; multi-modality may be unrealistic</td></tr>
+  </table>
+  <div class="key">Rule of thumb (Howerton et al., 2023): treat between-model differences as <b>noise</b> → average the quantiles to sharpen; treat them as <b>structural uncertainty</b> → pool the probabilities to keep every possibility alive. And remember the course's empirical punchline: well-built <b>simple, equally-weighted</b> ensembles are hard to beat.</div>
+  <footer>Built as a teaching aid for the NFIDD forecast-ensembles session · all figures are interactive and self-contained.</footer>
+</section>
+
+</div>
+
+<script>
+/* ---------- numerics ---------- */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function normCdf(x,mu,sd){return 0.5*(1+erf((x-mu)/(sd*Math.SQRT2)));}
+function normPdf(x,mu,sd){return Math.exp(-0.5*((x-mu)/sd)**2)/(sd*Math.sqrt(2*Math.PI));}
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function clear(svg){while(svg.firstChild)svg.removeChild(svg.firstChild);}
+function countModes(vals){let m=0;for(let i=1;i<vals.length-1;i++){if(vals[i]>vals[i-1]&&vals[i]>=vals[i+1])m++;}return m;}
+function stackedBar(svg,segs,W){
+  clear(svg);
+  const total=segs.reduce((s,p)=>s+p.v,0)||1e-9;
+  let x=4; const y=14,h=34,fullW=W-8;
+  segs.forEach(p=>{
+    const w=(p.v/total)*fullW;
+    svg.appendChild(el("rect",{x,y,width:Math.max(w-2,0),height:h,fill:p.color,rx:4,opacity:.9}));
+    if(w>78){
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2-1,"text-anchor":"middle","font-size":12,fill:"#fff","font-weight":700})).textContent=p.label;
+      svg.appendChild(el("text",{x:x+w/2,y:y+h/2+13,"text-anchor":"middle","font-size":10.5,fill:"#fff",opacity:.92})).textContent=p.v.toFixed(2);
+    }
+    x+=w;
+  });
+}
+
+/* ================= FIGURE 1 : LOP vs Vincent (PDF + CDF) ================= */
+(function(){
+  const svg=document.getElementById("ensSvg");
+  const W=720, x0=0, x1=12, PL=52, PR=16, PW=W-PL-PR;
+  const sx=v=>PL+(v-x0)/(x1-x0)*PW;
+  const ids=["muA","sdA","muB","sdB","wA"].map(i=>document.getElementById(i));
+  // PDF panel
+  const ayP=30,hP=200,byP=ayP+hP;
+  // CDF panel
+  const ayC=300,hC=200,byC=ayC+hC;
+  const syC=p=>byC-p*hC;
+
+  function draw(){
+    const muA=+ids[0].value, sdA=+ids[1].value, muB=+ids[2].value, sdB=+ids[3].value, wA=+ids[4].value, wB=1-wA;
+    document.getElementById("muAval").textContent=muA.toFixed(1);
+    document.getElementById("sdAval").textContent=sdA.toFixed(1);
+    document.getElementById("muBval").textContent=muB.toFixed(1);
+    document.getElementById("sdBval").textContent=sdB.toFixed(1);
+    document.getElementById("wAval").textContent=wA.toFixed(2);
+    clear(svg);
+    const muV=wA*muA+wB*muB, sdV=wA*sdA+wB*sdB;
+    const within=wA*sdA*sdA+wB*sdB*sdB, between=wA*wB*(muA-muB)**2;
+    const sdLOP=Math.sqrt(within+between);
+
+    const N=260;
+    // density max
+    let dmax=0; const lopVals=[];
+    for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N;
+      const fL=wA*normPdf(x,muA,sdA)+wB*normPdf(x,muB,sdB); lopVals.push(fL);
+      const fVn=normPdf(x,muV,sdV);
+      if(fL>dmax)dmax=fL; if(fVn>dmax)dmax=fVn;
+    }
+    dmax*=1.08;
+    const syP=d=>byP-(d/dmax)*hP;
+
+    /* ---- PDF panel ---- */
+    svg.appendChild(el("text",{x:PL,y:16,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Densities";
+    svg.appendChild(el("line",{x1:PL,y1:byP,x2:W-PR,y2:byP,stroke:"#cbd5e1"}));
+    for(let v=0;v<=12;v+=2) svg.appendChild(el("text",{x:sx(v),y:byP+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    // filled weighted components
+    function area(mu,sd,w,col){
+      let p="M "+sx(x0)+" "+syP(0);
+      for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; p+=" L "+sx(x)+" "+syP(w*normPdf(x,mu,sd));}
+      p+=" L "+sx(x1)+" "+syP(0)+" Z";
+      svg.appendChild(el("path",{d:p,fill:col,opacity:.16}));
+      let pl="";
+      for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pl+=(i?" L ":"M ")+sx(x)+" "+syP(w*normPdf(x,mu,sd));}
+      svg.appendChild(el("path",{d:pl,fill:"none",stroke:col,"stroke-width":1.3,opacity:.7}));
+    }
+    area(muA,sdA,wA,"#2563eb");
+    area(muB,sdB,wB,"#ea580c");
+    // Vincent density
+    let pv="";
+    for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pv+=(i?" L ":"M ")+sx(x)+" "+syP(normPdf(x,muV,sdV));}
+    svg.appendChild(el("path",{d:pv,fill:"none",stroke:"#16a34a","stroke-width":2.8}));
+    // LOP density
+    let pl2="";
+    for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pl2+=(i?" L ":"M ")+sx(x)+" "+syP(lopVals[i]);}
+    svg.appendChild(el("path",{d:pl2,fill:"none",stroke:"#9333ea","stroke-width":2.8}));
+    // shared mean marker
+    svg.appendChild(el("line",{x1:sx(muV),y1:ayP,x2:sx(muV),y2:byP,stroke:"#94a3b8","stroke-dasharray":"3 3"}));
+    svg.appendChild(el("text",{x:sx(muV),y:ayP-2,"text-anchor":"middle","font-size":10,fill:"#64748b"})).textContent="shared mean";
+
+    /* ---- CDF panel ---- */
+    svg.appendChild(el("text",{x:PL,y:286,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="The same forecasts as CDFs";
+    [0,.25,.5,.75,1].forEach(p=>{
+      svg.appendChild(el("line",{x1:PL,y1:syC(p),x2:W-PR,y2:syC(p),stroke:"#eef2f7"}));
+      svg.appendChild(el("text",{x:PL-8,y:syC(p)+4,"text-anchor":"end","font-size":10,fill:"#6b7280"})).textContent=p.toFixed(2);
+    });
+    svg.appendChild(el("line",{x1:PL,y1:byC,x2:W-PR,y2:byC,stroke:"#cbd5e1"}));
+    for(let v=0;v<=12;v+=2) svg.appendChild(el("text",{x:sx(v),y:byC+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    svg.appendChild(el("text",{x:(PL+W-PR)/2,y:byC+34,"text-anchor":"middle","font-size":12,fill:"#374151"})).textContent="value x";
+    function cdf(mu,sd,col,wd,op){let p="";for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; p+=(i?" L ":"M ")+sx(x)+" "+syC(normCdf(x,mu,sd));}
+      svg.appendChild(el("path",{d:p,fill:"none",stroke:col,"stroke-width":wd,opacity:op}));}
+    cdf(muA,sdA,"#2563eb",1.4,.55);
+    cdf(muB,sdB,"#ea580c",1.4,.55);
+    // LOP cdf (vertical average)
+    let pc="";for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pc+=(i?" L ":"M ")+sx(x)+" "+syC(wA*normCdf(x,muA,sdA)+wB*normCdf(x,muB,sdB));}
+    svg.appendChild(el("path",{d:pc,fill:"none",stroke:"#9333ea","stroke-width":2.6}));
+    cdf(muV,sdV,"#16a34a",2.6,1);
+
+    // annotation: horizontal averaging at p=0.5 (Vincent medians)
+    const pRef=0.5;
+    svg.appendChild(el("line",{x1:PL,y1:syC(pRef),x2:W-PR,y2:syC(pRef),stroke:"#16a34a","stroke-dasharray":"2 3",opacity:.6}));
+    svg.appendChild(el("circle",{cx:sx(muA),cy:syC(pRef),r:3.5,fill:"#2563eb"}));
+    svg.appendChild(el("circle",{cx:sx(muB),cy:syC(pRef),r:3.5,fill:"#ea580c"}));
+    svg.appendChild(el("circle",{cx:sx(muV),cy:syC(pRef),r:5,fill:"#16a34a",stroke:"#fff","stroke-width":1.3}));
+    svg.appendChild(el("text",{x:sx(Math.max(muA,muB))+6,y:syC(pRef)-5,"font-size":10.5,fill:"#16a34a","font-weight":600})).textContent="↔ average quantiles (Vincent)";
+    // annotation: vertical averaging at x=muV (LOP)
+    const xRef=muV, FA=normCdf(xRef,muA,sdA), FB=normCdf(xRef,muB,sdB), FL=wA*FA+wB*FB;
+    svg.appendChild(el("line",{x1:sx(xRef),y1:ayC,x2:sx(xRef),y2:byC,stroke:"#9333ea","stroke-dasharray":"2 3",opacity:.5}));
+    svg.appendChild(el("circle",{cx:sx(xRef),cy:syC(FA),r:3.5,fill:"#2563eb"}));
+    svg.appendChild(el("circle",{cx:sx(xRef),cy:syC(FB),r:3.5,fill:"#ea580c"}));
+    svg.appendChild(el("circle",{cx:sx(xRef),cy:syC(FL),r:5,fill:"#9333ea",stroke:"#fff","stroke-width":1.3}));
+    svg.appendChild(el("text",{x:sx(xRef)+7,y:syC(0.12),"font-size":10.5,fill:"#9333ea","font-weight":600})).textContent="↕ average probs (pool)";
+
+    /* ---- readouts ---- */
+    document.getElementById("ensMean").textContent=muV.toFixed(2);
+    document.getElementById("ensSdVin").textContent=sdV.toFixed(2);
+    document.getElementById("ensSdLop").textContent=sdLOP.toFixed(2);
+    const bimodal=countModes(lopVals)>=2;
+    document.getElementById("ensShape").textContent = bimodal
+      ? "pool is bimodal — models disagree → mixture keeps both"
+      : "pool ≈ unimodal (models overlap)";
+    stackedBar(document.getElementById("ensVarBar"),[
+      {v:within, color:"#0891b2", label:"within-model"},
+      {v:between,color:"#ea580c", label:"between-model"},
+    ],720);
+    document.getElementById("ensWithin").textContent=within.toFixed(2);
+    document.getElementById("ensBetween").textContent=between.toFixed(2);
+    document.getElementById("ensTotVar").textContent=(within+between).toFixed(2);
+  }
+  ids.forEach(i=>i.addEventListener("input",draw)); draw();
+})();
+
+/* ================= FIGURE 2 : three-model weighting ================= */
+(function(){
+  const svg=document.getElementById("w3Svg");
+  const W=720, x0=0, x1=12, PL=52, PR=16, PW=W-PL-PR;
+  const sx=v=>PL+(v-x0)/(x1-x0)*PW;
+  const ayP=28,hP=210,byP=ayP+hP;
+  const MU=[3.5,6,8.5], SD=[1.3,1.0,1.6], COL=["#2563eb","#ea580c","#0891b2"];
+  const w=[document.getElementById("w1"),document.getElementById("w2"),document.getElementById("w3")];
+
+  function draw(){
+    let raw=w.map(s=>+s.value); let sum=raw.reduce((a,b)=>a+b,0); if(sum<1e-6){raw=[1,1,1];sum=3;}
+    const wn=raw.map(r=>r/sum);
+    w.forEach((s,i)=>document.getElementById("w"+(i+1)+"val").textContent=wn[i].toFixed(2));
+    clear(svg);
+    const muV=wn.reduce((a,_,i)=>a+wn[i]*MU[i],0);
+    const sdV=wn.reduce((a,_,i)=>a+wn[i]*SD[i],0);
+    const within=wn.reduce((a,_,i)=>a+wn[i]*SD[i]*SD[i],0);
+    const between=wn.reduce((a,_,i)=>a+wn[i]*(MU[i]-muV)**2,0);
+    const sdLOP=Math.sqrt(within+between);
+
+    const N=260; let dmax=0; const lopVals=[];
+    for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N;
+      let fL=0; for(let k=0;k<3;k++) fL+=wn[k]*normPdf(x,MU[k],SD[k]);
+      lopVals.push(fL); const fVn=normPdf(x,muV,sdV);
+      if(fL>dmax)dmax=fL; if(fVn>dmax)dmax=fVn;
+    }
+    dmax*=1.08; const syP=d=>byP-(d/dmax)*hP;
+    svg.appendChild(el("text",{x:PL,y:16,"font-size":13,"font-weight":700,fill:"#1f2933"})).textContent="Pooling three models";
+    svg.appendChild(el("line",{x1:PL,y1:byP,x2:W-PR,y2:byP,stroke:"#cbd5e1"}));
+    for(let v=0;v<=12;v+=2) svg.appendChild(el("text",{x:sx(v),y:byP+16,"text-anchor":"middle","font-size":10,fill:"#6b7280"})).textContent=v;
+    // weighted components
+    for(let k=0;k<3;k++){
+      let p="M "+sx(x0)+" "+syP(0);
+      for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; p+=" L "+sx(x)+" "+syP(wn[k]*normPdf(x,MU[k],SD[k]));}
+      p+=" L "+sx(x1)+" "+syP(0)+" Z";
+      svg.appendChild(el("path",{d:p,fill:COL[k],opacity:.15}));
+    }
+    // Vincent
+    let pv="";for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pv+=(i?" L ":"M ")+sx(x)+" "+syP(normPdf(x,muV,sdV));}
+    svg.appendChild(el("path",{d:pv,fill:"none",stroke:"#16a34a","stroke-width":2.8}));
+    // LOP
+    let pl="";for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N; pl+=(i?" L ":"M ")+sx(x)+" "+syP(lopVals[i]);}
+    svg.appendChild(el("path",{d:pl,fill:"none",stroke:"#9333ea","stroke-width":2.8}));
+
+    // weight bar
+    stackedBar(document.getElementById("w3Bar"),[
+      {v:wn[0],color:COL[0],label:"model 1"},
+      {v:wn[1],color:COL[1],label:"model 2"},
+      {v:wn[2],color:COL[2],label:"model 3"},
+    ],720);
+    document.getElementById("w3SdVin").textContent=sdV.toFixed(2);
+    document.getElementById("w3SdLop").textContent=sdLOP.toFixed(2);
+    const modes=countModes(lopVals);
+    document.getElementById("w3Shape").textContent = modes>=2 ? ("pool has "+modes+" modes") : "pool is unimodal";
+  }
+  w.forEach(s=>s.addEventListener("input",draw));
+  document.querySelectorAll("#weights .presets button").forEach(b=>{
+    b.addEventListener("click",()=>{ const v=b.dataset.w.split(",").map(Number); w.forEach((s,i)=>s.value=v[i]); draw(); });
+  });
+  draw();
+})();
+</script>
+<script>
+/* embed mode: ?embed=sectionId[,id2,...] strips the page chrome AND the
+   explanatory prose/maths from the kept sections, leaving only the interactive
+   figures, for inlining in an <iframe> in the course site. Reports height so the
+   host page can auto-size the iframe. */
+(function(){
+  var q=new URLSearchParams(location.search), e=q.get('embed');
+  var KEEP={fig:1,controls:1,readout:1,legend:1,presets:1,figcap:1};
+  if(e){
+    var keep=e.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    ['header.hero','nav.toc','footer'].forEach(function(sel){
+      Array.prototype.forEach.call(document.querySelectorAll(sel),function(n){n.style.display='none';});
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('body > div'),function(d){
+      if(!d.classList.contains('wrap')) d.style.display='none';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('section'),function(sec){
+      if(keep.indexOf(sec.id)===-1){ sec.style.display='none'; return; }
+      sec.style.margin='0'; sec.style.border='none'; sec.style.boxShadow='none'; sec.style.padding='2px 2px 8px';
+      Array.prototype.forEach.call(sec.children,function(c){
+        var k=false, cl=c.classList; if(cl){ for(var key in KEEP){ if(cl.contains(key)){k=true;break;} } }
+        if(!k) c.style.display='none';
+      });
+    });
+    var wrap=document.querySelector('.wrap'); if(wrap) wrap.style.padding='0 8px 10px';
+    document.body.style.background='#fff'; document.documentElement.style.background='#fff';
+  }
+  function postH(){ try{ parent.postMessage({nfiddEmbedHeight: Math.ceil(document.body.getBoundingClientRect().height)}, '*'); }catch(_){} }
+  window.addEventListener('load', postH);
+  window.addEventListener('resize', postH);
+  document.addEventListener('input', function(){ setTimeout(postH,60); });
+  document.addEventListener('click', function(){ setTimeout(postH,120); });
+  setTimeout(postH,250); setTimeout(postH,1000);
+})();
+</script>
+</body>
+</html>
