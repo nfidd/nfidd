@@ -58,6 +58,10 @@ options(cmdstanr_print_line_numbers = TRUE)
 # Introduction to forecast evaluation
 
 An important aspect of making forecasts is that we can later confront the forecasts with what really happened and use this to assess whether our forecast model makes good predictions, or which of multiple models work best in which situation.
+One option is to evaluate a single point prediction against a single observation: error = point prediction - observation.
+You may have seen these kinds of metrics: for example, mean absolute error, percentage error, root mean square error...
+However, as in the rest of this course, we're focusing on probabilistic forecasts.
+This means that what we really need to evaluate is whether we forecast an appropriate range of uncertainty.
 
 ::: {.callout-tip}
 ## What do we look for in a good forecast? Some food for thought:
