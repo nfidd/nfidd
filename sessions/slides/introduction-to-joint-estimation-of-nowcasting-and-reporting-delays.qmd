@@ -4,7 +4,6 @@ format:
   revealjs:
     footer: "Introduction to joint estimation of nowcasting and reporting delays"
     slide-level: 3
-    chalkboard: true
 ---
 
 ### Motivating example

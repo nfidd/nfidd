@@ -3,7 +3,6 @@ title: "Introduction to the time-varying reproduction number"
 format:
   revealjs:
     footer: "Introduction to the time-varying reproduction number"
-    chalkboard: true
 execute:
   echo: true
 ---

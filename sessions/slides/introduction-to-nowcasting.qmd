@@ -3,7 +3,6 @@ title: "Introduction to nowcasting"
 format:
   revealjs:
     footer: "Introduction to nowcasting"
-    chalkboard: true
     slide-level: 3
 ---
 

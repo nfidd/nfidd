@@ -3,7 +3,6 @@ title: "Introduction to the spectrum of forecasting models"
 format:
   revealjs:
     footer: "Introduction to the spectrum of forecasting models"
-    chalkboard: true
     slide-level: 3
 ---
 

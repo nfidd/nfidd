@@ -3,7 +3,6 @@ title: "Delay distributions at the population level"
 format:
   revealjs:
     footer: "Delay distributions at the population level"
-    chalkboard: true
 ---
 
 ## Individual delay distributions {.smaller}

@@ -4,7 +4,6 @@ bibliography: ../../nfidd.bib
 format:
   revealjs:
     footer: "Multi-model ensembles"
-    chalkboard: true
 ---
 
 ## Ensembles: many forecasts into one

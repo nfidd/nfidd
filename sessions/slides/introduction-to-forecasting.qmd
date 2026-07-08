@@ -4,7 +4,6 @@ format:
   revealjs:
     footer: "Introduction to forecasting"
     slide-level: 3
-    chalkboard: true
 ---
 
 ### Forecasting in infectious disease epidemiology

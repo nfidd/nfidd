@@ -3,7 +3,6 @@ title: "Introduction to the course and the instructors"
 format:
   revealjs:
     footer: "Introduction to the course and the instructors"
-    chalkboard: true
 ---
 
 ```{r instructors}

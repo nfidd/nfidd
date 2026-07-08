@@ -3,7 +3,6 @@ title: "Introduction to biases in epidemiological delays"
 format:
   revealjs:
     footer: "Introduction to biases in epidemiological delays"
-    chalkboard: true
 ---
 
 ```{r seed}
