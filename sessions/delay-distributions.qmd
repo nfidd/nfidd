@@ -390,6 +390,29 @@ With real data, of course, we don't have this information available.
   ```
 See the [Using our Stan models guide](../reference/using-our-stan-models) for more available models
 
+- The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they barely affect the estimates. You can check this yourself by copying the model, changing its priors, and refitting.
+
+  Following the [Using our Stan models guide](../reference/using-our-stan-models), write the model to a local file you can edit:
+  ```{r, eval = FALSE}
+  mod_local <- nfidd_cmdstan_model("lognormal", compile = FALSE)
+  writeLines(mod_local$code(), "local-lognormal.stan")
+  ```
+  Open `local-lognormal.stan` and replace the priors with something tight and deliberately wrong:
+  ```stan
+  meanlog ~ normal(0, 0.1);
+  sdlog ~ normal(0, 0.1) T[0, ];
+  ```
+  then recompile and refit:
+  ```{r, eval = FALSE}
+  mod_prior <- nfidd_cmdstan_model(model_file = "local-lognormal.stan")
+  res_prior <- nfidd_sample(
+    mod_prior,
+    data = list(N = nrow(df_onset_to_hosp), y = df_onset_to_hosp$onset_to_hosp)
+  )
+  res_prior$summary()
+  ```
+  With the full data set the estimates barely move, even though the prior sits far from the true values. Now combine this with the sample-size challenge above and refit the same tight prior to `df_small` (100 observations). With little data the prior pulls the estimates towards it, and that is when priors start to matter.
+
 - Try using one of the methods in practice below to fit a distribution to the data.
 
 ## Methods in practice
