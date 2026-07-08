@@ -207,31 +207,32 @@ We now have two main modelling options:
 We will explore these in the next section.
 :::
 
-A key insight is that we can split each $n_{t,d}$ into observed and unobserved components:
+A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
 
-$$n_{t,d} = n_{t,d}^{obs} + n_{t,d}^{miss}$$
+$$
+N_{t} = \underbrace{\sum_{d=0}^{T-t} n_{t,d}}_{N_t^{\text{obs}}\ \text{(reports already in)}} \; + \; \underbrace{\sum_{d=T-t+1}^{D} n_{t,d}}_{N_t^{\text{miss}}\ \text{(to be estimated)}}
+$$
 
 where:
 
-- $n_{t,d}^{obs}$ is what we observe (when $t+d \leq$ current day)
-- $n_{t,d}^{miss}$ is what we need to estimate (when $t+d >$ current day)
+- $N_t^{\text{obs}}$ is what we have observed by the current day $T$ (the cells with $t+d \leq T$)
+- $N_t^{\text{miss}}$ is what we still need to estimate (the cells with $t+d > T$)
 
 The joint model uses the observed data to estimate both the delay distribution and the underlying onset counts, which then allows us to predict the missing entries.
 
 ::: {.callout-note .optional collapse="true"}
 ## The reporting triangle
 
-This data structure is sometimes called the "reporting triangle" in the literature because when visualised as a matrix (with onset days as rows and reporting days as columns), the observed data ($n_{t,d}^{obs}$) creates a triangular shape.
+This data structure is sometimes called the "reporting triangle" in the literature because when visualised as a matrix (with onset days as rows and reporting days as columns), the observed cells (those with $t + d \leq T$) create a triangular shape.
 
 ![Reporting triangle visualisation (by Johannes Bracher)](slides/figures/reporting_triangle.png)
 
-Nowcasting aims to complete this triangle by estimating the missing entries ($n_{t,d}^{miss}$).
+Nowcasting aims to complete this triangle by estimating the missing cells (those with $t + d > T$), and so the missing sum $N_t^{\text{miss}}$ that completes each row's total $N_t$.
 
 ![Completed reporting triangle (by Johannes Bracher)](slides/figures/complete_reporting_triangle.png)
 
 Once completed, we sum across the rows to get our nowcast of the true onset counts.
 :::
-
 
 ## Fitting the joint model
 
@@ -337,7 +338,6 @@ This may not be a good assumption in a rapidly changing epidemic (where the repr
 - In addition, whilst we say it is "quite simple" as should be clear from the code, it is quite complex and computationally intensive.
 This is because we are fitting a model to the reporting triangle, which is a much larger data set and so the model is relatively quite slow to fit.
 :::
-
 
 # Putting it all together: Estimating the reproduction number, nowcasting, and joint estimation of delay distributions {.optional}
 

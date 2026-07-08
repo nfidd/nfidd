@@ -22,22 +22,18 @@
 # #' @references
 # nolint start: object_name_linter
 renewal <- function(I0, R, gen_time) {
-  ## set the maximum generation time
-  max_gen_time <- length(gen_time)
-  ## number of time points
-  times <- length(R)
-  I <- c(I0, rep(0, times)) ## set up vector holding number of infected
-  ## iterate over time points
-  for (t in 1:times) {
-    ## calculate convolution
-    first_index <- max(1, t - max_gen_time + 1)
-    I_segment <- I[seq(first_index, t)]
-    ## iterate over generation times
-    ## take reverse of pmf and reverse if needed
-    gen_pmf <- rev(gen_time[seq_len(t - first_index + 1)])
-    ## convolve infections with generation time
-    I[t + 1] <- sum(I_segment * gen_pmf) * R[t]
+  max_gen_time <- length(gen_time) ## gen_time starts at day 1
+  I <- c(I0, rep(0, length(R))) ## infections, with I0 prepended at index 1
+  for (i in seq_along(R)) {
+    ## window of past infections contributing to the current time point
+    first_index <- max(1, i - max_gen_time + 1)
+    len <- i - first_index + 1
+    segment <- I[seq(first_index, i)]
+    ## reverse the (possibly truncated) generation time to align with the segment
+    gen_pmf <- rev(gen_time[seq_len(len)])
+    ## renewal equation: convolve past infections with the generation time, scale by R
+    I[i + 1] <- sum(segment * gen_pmf) * R[i]
   }
-  I[-1] ## remove I0 from time series
+  I[-1] ## drop the prepended I0
 }
 # nolint end

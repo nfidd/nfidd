@@ -1,0 +1,20 @@
+{
+  "title": "NFIDD: Nowcasting and Forecasting Infectious Disease Dynamics",
+  "description": "A course and living resource for learning about nowcasting and forecasting infectious disease dynamics.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    { "name": "Abbott, Sam" },
+    { "name": "Sherratt, Katherine" },
+    { "name": "Funk, Sebastian" }
+  ],
+  "keywords": [
+    "nowcasting",
+    "forecasting",
+    "infectious disease epidemiology",
+    "reproduction number",
+    "Bayesian inference",
+    "Stan"
+  ]
+}
