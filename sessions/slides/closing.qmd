@@ -3,10 +3,9 @@ title: "End of course summary"
 format:
   revealjs:
     footer: "End of course summary"
-    slide-level: 3
 ---
 
-### Aim of this course:
+## Aim of this course:
 
 How can we use data typically collected in an outbreak to answer questions like
 
@@ -16,7 +15,7 @@ How can we use data typically collected in an outbreak to answer questions like
 
 in real time.
 
-### Timeline
+## Timeline
 
 - delay distributions and how to estimate them (day 1)
 - $R_t$ estimation and the generation interval (day 1)
@@ -26,7 +25,7 @@ in real time.
 
 # Key takeaways
 
-### Day 1: Delay distributions {.smaller}
+## Day 1: Delay distributions {.smaller}
 
 - delays play a fundamental role in nowcasting/forecasting
 - we characterise them with probability distributions
@@ -36,7 +35,7 @@ in real time.
   
 ![](figures/truncation_final.png)
 
-### Day 1 (cont.): Convolutions {.smaller}
+## Day 1 (cont.): Convolutions {.smaller}
 
 - we can use **convolutions** to model delays at the population scale
 - when doing so we need to make sure to account for **double interval censoring**
@@ -45,7 +44,7 @@ in real time.
 
 ![](figures/r_convolution_sketch.png)
 
-### Day 2: Nowcasting {.smaller}
+## Day 2: Nowcasting {.smaller}
 
 - **nowcasting** is the task of predicting what data will look once delays have resolved
 - it is a **right truncation problem** (same as discussed before)
@@ -53,7 +52,7 @@ in real time.
 
 ![](figures/complete_reporting_triangle.png)
 
-### Day 2 (cont.): Forecasting {.smaller}
+## Day 2 (cont.): Forecasting {.smaller}
 
 - **forecasting** is the task of making unconditional statements about the future
 - meaningful forecasts are **probabilistic**
@@ -63,12 +62,12 @@ in real time.
 
 ![](figures/pit-log-scale.png)
 
-### Day 3: Applications {.smaller}
+## Day 3: Applications {.smaller}
 
 - the methods introduced here have **wide applications** in infectious disease epidemiology
 - **open-source tools** are available to make this task easier in practice
 
-### Outlook {.smaller}
+## Outlook {.smaller}
 
 - it is worth trying some of these methods here in practice to learn more about typical nowcast/forecast performance and intricacies of infectious disease data
 - one way of doing so is by contributing to forecast hubs
@@ -77,7 +76,7 @@ in real time.
 
 [https://respicast.ecdc.europa.eu/](https://respicast.ecdc.europa.eu/)
 
-### Feedback {.smaller}
+## Feedback {.smaller}
 
 - please tell us if you enjoyed the course, what worked / didn't work etc.
 - we will send out a survey for feedback

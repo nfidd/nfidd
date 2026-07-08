@@ -3,16 +3,15 @@ title: "Introduction to forecasting"
 format:
   revealjs:
     footer: "Introduction to forecasting"
-    slide-level: 3
 ---
 
-### Forecasting in infectious disease epidemiology
+## Forecasting in infectious disease epidemiology
 
 ![](figures/metcalf_lessler_fraught.png){width=50%}
 
 [Metcalf & Lessler, *Science*, 2017](https://doi.org/10.1126/science.aam8335)
 
-### Using models for statements about the future {.smaller}
+## Using models for statements about the future {.smaller}
 
 Modelling the future can help decision making:
 
@@ -25,7 +24,7 @@ However:
 - not all modelling is prediction
 - not all modelling of the future is forecasting
 
-### Different ways of modelling the future {.smaller}
+## Different ways of modelling the future {.smaller}
 
 - **Nowcasts** make statements about current trends based on partial data
 
@@ -33,37 +32,37 @@ However:
 
 - **Scenarios** state what *would* happen under certain conditions
 
-### Why nowcast/forecast? {.smaller}
+## Why nowcast/forecast? {.smaller}
 
 - to create **situational awareness**
   - nowcast: where are we now?
   - forecast: where are we heading?
 
-### CDC use of influenza forecasts
+## CDC use of influenza forecasts
 
 ![](figures/cdc_flu_forecast_use.png)
 
 [CDC: About Flu Forecasting](https://www.cdc.gov/flu/weekly/flusight/how-flu-forecasting.htm)
 
-### Relationship with $R_t$ estimation {.smaller}
+## Relationship with $R_t$ estimation {.smaller}
 
 - In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
 - Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
 - In that sense, predicting infections comes down to **predicting $R_t$**
 - Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
 
-### Relationship with nowcasting {.smaller}
+## Relationship with nowcasting {.smaller}
 
 - Nowcast: we have **some** data from the dates we're predicting
 - Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
 
-### Forecasts are usually *probabilistic* {.smaller}
+## Forecasts are usually *probabilistic* {.smaller}
 
 - Because the future is uncertain, it is natural to express predictions in probabilities, e.g. there is a X% chance of exceeding Y hospital admissions.
 
 ![](figures/weather_forecast.png)
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Load some forecasts we have generated and visualise them alongside the data.
 2. Explore different ways of visualising forecasts to assess how good the model performs at forecasting.

@@ -5,3 +5,5 @@ engine: knitr
 format:
   revealjs:
     chalkboard: true
+    # Slides are level-2 headings (##); level-1 (#) headings are section dividers.
+    slide-level: 2

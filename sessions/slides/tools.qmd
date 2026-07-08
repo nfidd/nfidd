@@ -3,10 +3,9 @@ title: "Examples of tools"
 format:
   revealjs:
     footer: "Examples of tools"
-    slide-level: 3
 ---
 
-### Timeline so far
+## Timeline so far
 
 - delay distributions and how to estimate them (day 1)
 - $R_t$ estimation and the generation interval (day 1)
@@ -14,17 +13,17 @@ format:
 - forecasting and evaluation, ensemble methods (day 2)
 - applications (day 3)
 
-### Available tools or custom implementation?
+## Available tools or custom implementation?
 
 A few open-source tools implement some or all of the methods we have encountered in the course.
 
-### Available tools or custom implementation?
+## Available tools or custom implementation?
 
 - Loses flexibility of custom approaches
 
   - different epidemiological problems, different data - different methods?
 
-### Available tools or custom implementation?
+## Available tools or custom implementation?
 
 - Value of using - and contributing
 
@@ -34,7 +33,7 @@ A few open-source tools implement some or all of the methods we have encountered
   
   - helps discussing and ultimately enforcing best practice
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 How does each tool relate to key concepts in the course?
 

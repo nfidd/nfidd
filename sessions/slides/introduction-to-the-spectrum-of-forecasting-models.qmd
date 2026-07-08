@@ -3,10 +3,9 @@ title: "Introduction to the spectrum of forecasting models"
 format:
   revealjs:
     footer: "Introduction to the spectrum of forecasting models"
-    slide-level: 3
 ---
 
-## Different types of models {.smaller}
+# Different types of models {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -31,7 +30,7 @@ format:
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism1.png){width="70%"}
 
@@ -55,7 +54,7 @@ Conceptually probably the closest to meteorological forecasting, if with much le
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism2.png){width="70%"}
 
@@ -79,7 +78,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism3.png){width="70%"}
 
@@ -105,7 +104,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism4.png){width="70%"}
 
@@ -128,7 +127,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -154,7 +153,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {.smaller background-color="#447099" transition="fade-in"}
+# `r fontawesome::fa("laptop-code", "white")` Your Turn {.smaller background-color="#447099" transition="fade-in"}
 
 1. Review the performance of the random walk model
 2. Motivate a mechanism to order to address some of the issues

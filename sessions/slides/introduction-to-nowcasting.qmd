@@ -3,10 +3,9 @@ title: "Introduction to nowcasting"
 format:
   revealjs:
     footer: "Introduction to nowcasting"
-    slide-level: 3
 ---
 
-### Motivating example {.smaller}
+## Motivating example {.smaller}
 
 Often we see data like this
 
@@ -17,7 +16,7 @@ Data after the dashed line are marked as uncertain. What, if anything, do they t
 [UKHSA, 2022](https://www.gov.uk/government/publications/monkeypox-outbreak-technical-briefings/investigation-into-monkeypox-outbreak-in-england-technical-briefing-1) <br>
 [Overton et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011463)
 
-### second example {.smaller}
+## second example {.smaller}
 
 ... or like this
 
@@ -27,7 +26,7 @@ Data after the dashed line are marked as uncertain. What, if anything, do they t
 
 See also: [Wolffram et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/journal.pcbi.1011394)
 
-### second example {.smaller}
+## second example {.smaller}
 
 ... or like this
 
@@ -35,7 +34,7 @@ See also: [Wolffram et al., *PLOS Comp Biol*, 2023](https://doi.org/10.1371/jour
 
 [RKI COVID-19 Situation Report, 8 March 2020](https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Situationsberichte/2020-03-08-en.pdf?__blob=publicationFile)
 
-### 
+## 
 
 These patterns arise because:
 
@@ -44,7 +43,7 @@ These patterns arise because:
 - There is a *delay* between this date, and the events showing up in the data
 - This leads to an "articifial" *dip* in the most recent data
 
-### Nowcasting as right truncation
+## Nowcasting as right truncation
 
 Remember from [biases in delay estimation](../biases-in-delay-distributions):
 
@@ -52,7 +51,7 @@ Remember from [biases in delay estimation](../biases-in-delay-distributions):
 
 ![](figures/truncation_final.png)
 
-### Nowcasting as right truncation
+## Nowcasting as right truncation
 
 **Right truncation**
 
@@ -61,7 +60,7 @@ Remember from [biases in delay estimation](../biases-in-delay-distributions):
 
 Nowcasting is exactly this!
 
-### The aim of nowcasting
+## The aim of nowcasting
 
 Predict what an epidemiological time series will look like *after all delayed reports* are in.
 
@@ -69,7 +68,7 @@ Predict what an epidemiological time series will look like *after all delayed re
 
 (slide courtesy of Johannes Bracher)
 
-### A simple approach to nowcasting
+## A simple approach to nowcasting
 
 1. Estimate the delay distribution from other data
 2. Specify a model for the epidemic dynamics
@@ -77,7 +76,7 @@ Predict what an epidemiological time series will look like *after all delayed re
 4. Fit the model to the truncated data
 5. Use the untruncated estimates from the model as the nowcast
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 
 1. Perform nowcast with a known reporting delay distribution
 2. Perform a nowcast using a more realistic data generating process
