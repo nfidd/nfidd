@@ -1,11 +1,8 @@
 ---
 title: "Multi-model ensembles"
-author: "Nowcasting and forecasting of infectious disease dynamics"
 bibliography: ../../nfidd.bib
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-ensembles.html
     footer: "Multi-model ensembles"
     chalkboard: true
 ---

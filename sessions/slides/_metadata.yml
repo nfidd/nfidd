@@ -1,0 +1,4 @@
+# Shared front matter for all slide decks in this directory.
+# Per-deck files set only their title, footer, and any deck-specific options.
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr

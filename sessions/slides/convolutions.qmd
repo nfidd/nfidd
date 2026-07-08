@@ -1,10 +1,7 @@
 ---
 title: "Delay distributions at the population level"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-biases-in-epidemiological-delays.html
     footer: "Delay distributions at the population level"
     chalkboard: true
 ---
