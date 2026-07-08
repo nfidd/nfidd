@@ -100,7 +100,7 @@ head(inf_ts)
 
 Now we can convolve the time series with a delay distribution to get a time series of outcomes as suggested above.
 
-#### Discretising a delay distribution
+### Discretising a delay distribution
 
 In our first session, we decided to assume the delay from infection to symptom onset had a gamma distribution.
 However, if we want to use the gamma distribution with shape 5 and rate 1 as before, we face a familiar issue.
@@ -156,7 +156,7 @@ plot(gamma_pmf)
 ```
 :::
 
-#### Applying a convolution
+### Applying a convolution
 
 Next we apply a convolution with the discretised incubation period distribution to the time series of infections, to generate a time series of symptom onsets.
 The function we have written to do this is called `convolve_with_delay`

@@ -5,7 +5,7 @@ order: 0
 
 [From an epidemiological line list to informing decisions in real-time](slides/from-line-list-to-decisions)
 
-### Aim of the course
+# Aim of the course
 
 In this course we will address how can we use data typically collected in an outbreak, or in routine surveillance, to answer questions like
 
@@ -32,13 +32,13 @@ In this course, we first focus on making sense of the delays and biases in the d
 We'll combine this with the process of infectious disease transmission, with the reproduction number as a key component.
 With that, we can start to interpret the present (nowcasting) and predict the future (forecasting).
 
-### Why this course?
+# Why this course?
 
 -   These are common questions in outbreak response and disease surveillance
 -   Accounting for underlying processes can get surprisingly complicated quickly ^[Time travel is [messy stuff](https://youtu.be/q2nNzNo_Xps)], and it's easy to make mistakes
 -   There's currently (at the time of devising this course) no comprehensive training resource that links these common questions and challenges
 
-### Approach
+# Approach
 
 Throughout the course we will
 
@@ -60,7 +60,7 @@ For those attending the in-person version the course also:
 - pauses at several points during each session to discuss observations and learnings together and address any questions;
 - ends with a wrap-up and discussion where we review the sessions material.
 
-### Timeline for the course
+# Timeline for the course
 
 The course was created to be taught in-person for 2.5 days but of course if you are studying this on your own using the web site you can go through the material at your own pace and in your own time.
 Broadly, the intended timeline is:
