@@ -63,7 +63,7 @@ One option is to evaluate a single point prediction against a single observation
 $$
 \text{error} = \text{prediction} - \text{observation}
 $$
-You may have seen these kinds of metrics: for example, mean absolute error, percentage error, root mean square error...
+You may have seen these kinds of metrics: such as mean absolute error, mean percentage error, or root mean square error.
 However, as in the rest of this course, we're focusing on probabilistic forecasts.
 This means that what we really need to evaluate is whether we forecast an appropriate range of uncertainty.
 
