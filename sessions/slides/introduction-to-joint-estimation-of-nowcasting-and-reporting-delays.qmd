@@ -30,7 +30,8 @@ Predict what an epidemiological time series will look like *after all delayed re
 
 ## Jointly estimating reporting delays and nowcasting
 
-One potential solution is to jointly estimate the reporting delays and the nowcast. We can do this if we have multiple snapshots of the data.
+One potential solution is to jointly estimate the reporting delays and the nowcast.
+We can do this if we have multiple snapshots of the data.
 
 ![](figures/germany_historical.png)
 
