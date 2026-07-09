@@ -174,7 +174,7 @@ In infectious disease epidemiology, this would only be expected for endemic dise
 The random walk model we used in the [forecasting concepts](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
 The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise.
-This becomes a random walk when the multipled value is 0.
+This becomes a random walk when the multiplied value is 0.
 
  For the log-transformed reproduction number ($log(R_t)$), the model is:
 
