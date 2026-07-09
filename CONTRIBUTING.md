@@ -45,17 +45,40 @@ the main flow or in an optional box.
 See also the [learning objectives](reference/learning_objectives.qmd) for what each
 session should leave participants able to do.
 
+## Headings
+
+Sessions use `#` for major sections (`# Introduction`, `# Setup`, …) and `##` for
+subsections. Do not start a session at `###`, and do not skip levels (no `##`
+jumping straight to `####`). Every session ends with one `# Going further` section.
+
+## Prose style
+
+- **One sentence per line.** Write each sentence on its own line, with a blank line
+  between paragraphs. Line breaks within a paragraph render as spaces, so this does
+  not change the output. It just keeps diffs readable: one edited sentence is one
+  changed line.
+- **No contractions in prose.** Spell them out: "do not" not "don't", "we will" not
+  "we'll", "let us" not "let's". Code and code comments are exempt.
+- **British English**: "modelling", "summarise", "behaviour".
+
 ## Slides
 
 Slide decks live in `sessions/slides/` and render with reveal.js at a fixed
 960×700 logical size. Content taller than 700px is clipped in the presentation.
 
+### Structure and shared config
+
+Common front matter (author, `engine`, `chalkboard`, `slide-level`) lives in
+`sessions/slides/_metadata.yml`; per-deck files set only their `title`, `footer`,
+and any deck-specific options. Slides are `##` headings; `#` headings are section
+dividers (`slide-level: 2`).
+
 ### `{.smaller}`
 
 Decks set no `smaller` default. Add `{.smaller}` to a slide **iff its content at
-normal size exceeds 90% of the slide height (> 630px of 700px)** — a 10% safety
-margin that absorbs measurement noise and later content or translation edits.
-Below that, leave it off. `{.smaller}` shrinks text only, so a slide whose height
+normal size exceeds 90% of the slide height (> 630px of 700px)**. The 10% margin
+absorbs measurement noise and later edits to a slide's content. Below that, leave
+it off. `{.smaller}` shrinks text only, so a slide whose height
 comes from a plot or image needs its figure resized, not the class.
 
 ### Testing it
