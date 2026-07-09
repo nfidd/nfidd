@@ -78,7 +78,7 @@ in real time.
 
 ## Feedback {.smaller}
 
-- please tell us if you enjoyed the course, what worked / didn't work etc.
+- please tell us if you enjoyed the course, what worked / did not work etc.
 - we will send out a survey for feedback
 
 # Thank you for attending!

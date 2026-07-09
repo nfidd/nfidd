@@ -62,7 +62,7 @@ An important aspect of making forecasts is that we can later confront the foreca
 ::: {.callout-tip}
 ## What do we look for in a good forecast? Some food for thought:
 1. **Calibration**: The forecast should be well calibrated. This means that the forecasted probabilities should match the observed frequencies. For example, if the model predicts a 50% probability of an event occurring, then the event should occur approximately 50% of the time.
-2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It shouldn't consistently over- or underpredict.
+2. **Unbiasedness**: The forecast should be unbiased. This means that the average forecasted value should be equal to the average observed value. It should not consistently over- or underpredict.
 3. **Accuracy**: The forecast should be accurate. This means that the forecasted values should be close to the observed values.
 4. **Sharpness**: As long as the other conditions are fulfilled we want prediction intervals to be as narrow as possible. Predicting that "anything can happen" might be correct but not very useful.
 
@@ -114,8 +114,8 @@ We now summarise performance quantitatively by using scoring metrics.
 Whilst some of these metrics are more useful for comparing models, many can be also be useful for understanding the performance of a single model.
 
 ::: {.callout-tip}
-In this session, we'll use "proper" scoring rules: these are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
-Of course we usually don't know this (as we don't know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
+In this session, we will use "proper" scoring rules: these are scoring rules that make sure no model can get better scores than the *true* model, i.e. the model used to generate the data.
+Of course we usually do not know this (as we do not know the "true model" for real-world data) but proper scoring rules incentivise forecasters to make their best attempt at reproducing its behaviour.
 For a comprehensive text on proper scoring rules and their mathematical properties, we recommend the classic paper by @gneiting2007.
 :::
 
@@ -172,7 +172,7 @@ See the documentation for `?get_metrics.forecast_sample` for information on the 
 ### At a glance
 
 Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores (by default calculating a mean across all forecasts).
-Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+Do not worry if you do not understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
 
 ```{r}
 sc_scores |>
@@ -348,7 +348,7 @@ Again, the transformed G(u) is uniformly distributed on $[0, 1]$ if the predicti
 
 :::
 
-Let's first look at the overall PIT histogram.
+Let us first look at the overall PIT histogram.
 
 ```{r pit-histogram}
 sc_forecasts |>
@@ -488,7 +488,7 @@ The [documentation](https://epiforecasts.io/scoringutils/dev/articles/metric-det
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ::: {#refs}

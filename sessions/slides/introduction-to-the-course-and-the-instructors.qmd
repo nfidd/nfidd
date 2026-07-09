@@ -50,7 +50,7 @@ Introduce yourself with:
 
 - name
 - where you travelled from
-- why you're here
+- why you are here
 
 # How the course works
 

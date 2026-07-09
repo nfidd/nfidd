@@ -6,8 +6,8 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-We've now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak.
-So far, we've been working with individual line-list data.
+We have now developed a good idea of how epidemiological time delays affect our understanding of an evolving outbreak.
+So far, we have been working with individual line-list data.
 However, we usually want to model how an outbreak evolves through a whole population.
 The aim of this session is to introduce how delay distributions can be used to model population-level data generating process during an epidemic. 
 
@@ -15,7 +15,7 @@ This means working with aggregated count data.
 This creates some new issues in correctly accounting for uncertainty.
 We handle population-level data using *convolutions* as a way of combining count data with a distribution of individual probabilities.
 We will have to adjust our continuous probability distributions to work with this using *discretisation*.
-We'll then need to re-introduce additional uncertainty to account for the observation process at a population level.
+We will then need to re-introduce additional uncertainty to account for the observation process at a population level.
 
 ## Slides
 
@@ -23,10 +23,10 @@ We'll then need to re-introduce additional uncertainty to account for the observ
 
 ## Objectives
 
-In this session, we'll focus on the delay from infection to symptom onset at a population level.
+In this session, we will focus on the delay from infection to symptom onset at a population level.
 First, we will introduce the techniques of convolution and discretisation.
-We'll apply these to an aggregated time series of infections in order to simulate observed symptom onsets.
-Then, we'll use those simulated symptom onsets to try and reconstruct a time series of infections.
+We will apply these to an aggregated time series of infections in order to simulate observed symptom onsets.
+Then, we will use those simulated symptom onsets to try and reconstruct a time series of infections.
 
 ::: {.callout-note collapse="true"}
 
@@ -69,8 +69,8 @@ options(cmdstanr_print_line_numbers = TRUE)
 # Simulating observations from a time series of infections
 
 As before we first simulate the process that generates the data we typically observe.
-In this session, we'll focus on the process from infection to symptom onset.
-Then we'll use the same model to conduct inference.
+In this session, we will focus on the process from infection to symptom onset.
+Then we will use the same model to conduct inference.
 
 ## Delay distributions and convolutions
 
@@ -188,7 +188,7 @@ How would you create the time series of symptom onsets from infections, using th
 onsets <- convolve_with_delay(inf_ts$infections, gamma_pmf)
 ```
 
-Let's examine the convolution result to understand how it works.
+Let us examine the convolution result to understand how it works.
 First, we look at the infections and delay distribution:
 
 ```{r convolution_example}
@@ -196,13 +196,13 @@ head(inf_ts$infections)
 head(gamma_pmf)
 ```
 
-Now let's look at the resulting onsets:
+Now let us look at the resulting onsets:
 
 ```{r head_onsets}
 head(onsets)
 ```
 
-To understand what's happening, let's work through the first few rows.
+To understand what's happening, let us work through the first few rows.
 
 For day 1, only infections from day 1 can contribute:
 
@@ -269,9 +269,9 @@ ggplot(combined, aes(x = time, y = reported_onsets)) +
 
 # Estimating a time series of infections
 
-As in previous sessions, we don't usually have data on infections.
+As in previous sessions, we do not usually have data on infections.
 We now create a model that uses symptom onsets to estimate the number of infections over time.
-We'll base the model on an uninformed prior and work forward from what we know about the observation process.
+We will base the model on an uninformed prior and work forward from what we know about the observation process.
 
 ```{r stan_estimate_infections}
 mod <- nfidd_cmdstan_model("estimate-infections")
@@ -312,12 +312,12 @@ inf_fit <- nfidd_sample(mod, data = data)
 ::: callout-caution
 Note that this code might take a few minutes to run.
 We have added the `parallel_chains` option to make use of any parallel hardware you may have.
-If you don't have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 250, iter_sampling = 250`).
+If you do not have 4 computing cores and/or the code runs very slowly, you could try only running 2 chains (`chains = 2`) and/or fewer samples (`iter_warmup = 250, iter_sampling = 250`).
 :::
 
 ::: {.callout-tip .optional}
 In this model, we have estimated many more parameters than in the previous models: instead of e.g. 2 parameters of a probability distribution, we now have a total of `r nrow(onsets)` time points for which we estimate the number of infections.
-This is because we don't have a model for the *process* that generates infections.
+This is because we do not have a model for the *process* that generates infections.
 How would this be different if we e.g. used an SIR model here?
 :::
 
@@ -373,7 +373,7 @@ This is particularly useful when dealing with arrays such as `inference` because
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

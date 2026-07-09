@@ -10,7 +10,7 @@ As we saw in the [session on different forecasting models](forecast-models), dif
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach.
 One way to attempt to draw strength from a diversity of approaches is the creation of so-called *forecast ensembles* from the forecasts produced by different models.
 
-In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
+In this session, we will start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
 We will then compare the performance of these ensembles to the individual models and to each other.
 
 ::: {.callout-note .optional collapse="true"}
@@ -88,7 +88,7 @@ These were:
 
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
 
-As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
+As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you do not have to wait for the models to fit.
 
 ```{r load_forecasts}
 data(rw_forecasts, stat_forecasts, mech_forecasts)
@@ -826,7 +826,7 @@ How do the weights change over time?
 
 Are you surprised by the results given what you know about the models performance?
 
-- As the random walk model is performing poorly, you would expect it to have low weights but actually it often doesn't.
+- As the random walk model is performing poorly, you would expect it to have low weights but actually it often does not.
   This implies that its poor performance is restricted to certain parts of the outbreak.
 - The mechanistic model performs really well overall and dominates the final optimised ensemble.
 :::
@@ -882,7 +882,7 @@ Why might this be the case?
 
 ## Challenge
 
-- Throughout the course we've been carefully building models from our understanding of the underlying data generating process.
+- Throughout the course we have been carefully building models from our understanding of the underlying data generating process.
 What might be the implications of combining models from different modellers, with different assumptions about this process?
 Think about the reliability and validity of the resulting ensemble forecast. 
 - Would it change how you approach communicating the forecast?
@@ -895,7 +895,7 @@ Think about the reliability and validity of the resulting ensemble forecast.
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

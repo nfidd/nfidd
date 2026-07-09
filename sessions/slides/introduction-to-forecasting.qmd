@@ -47,14 +47,14 @@ However:
 ## Relationship with $R_t$ estimation {.smaller}
 
 - In infectious disease epidemiology, many relevant interventions and other changes affect the strength of **transmission**
-- Things that affect transmission don't affect the predicted outcomes directly, but via $R_t$
+- Things that affect transmission do not affect the predicted outcomes directly, but via $R_t$
 - In that sense, predicting infections comes down to **predicting $R_t$**
 - Commonly, forecast models assume **no change** in $R_t$. Is this a good assumption?
 
 ## Relationship with nowcasting {.smaller}
 
-- Nowcast: we have **some** data from the dates we're predicting
-- Forecast: we have **no** data from the dates we're predicting (usually: because they're in the future)
+- Nowcast: we have **some** data from the dates we are predicting
+- Forecast: we have **no** data from the dates we are predicting (usually: because they are in the future)
 
 ## Forecasts are usually *probabilistic* {.smaller}
 

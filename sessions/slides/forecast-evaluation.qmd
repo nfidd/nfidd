@@ -34,13 +34,13 @@ format:
 2. *Scores*: Measure the forecast accuracy. Different scores will measure important different facets of performance.
 3. *Testing and validation*: Design an experiment that evaluates forecasts made at different times, without "data leakage".
 
-## Don't let the model cheat: cross-validation {.smaller}
+## Do not let the model cheat: cross-validation {.smaller}
 
 Picking a **cross-validation scheme that is specific to time-series data** ensures that your model only sees data in the past.
 
 ![Time-series cross-validation schematic](figures/time-series-cross-validation.png)
 
-## Don't let yourself cheat: prospective validation {.smaller}
+## Do not let yourself cheat: prospective validation {.smaller}
 
 **Prospective validation** is when you "register" one (or a small number) of forecasts as your "best" prediction of the future, before the eventual data are observed.
 If you know what the held-out data looks like, you might make subconscious decisions about which model to choose, biasing the final results.
@@ -53,7 +53,7 @@ It can be really hard to keep track of what version of epi surveillance data was
 
 This makes prospective evaluation even more important.
 
-For any retrospective experiment, you should always look for evidence that an analyst didn't let the model cheat!
+For any retrospective experiment, you should always look for evidence that an analyst did not let the model cheat!
 
 # `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 

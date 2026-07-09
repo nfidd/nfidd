@@ -24,7 +24,7 @@ Predict what an epidemiological time series will look like *after all delayed re
 ## The limitations of simple nowcasting methods
 
   - Hard to propagate uncertainty
-  - Doesn't account for observation error in the primary events
+  - Does not account for observation error in the primary events
   - Not a generative model of the data reporting process (hard to add complex reporting patterns)
   - If we get the delay wrong, we can get the nowcast wrong
 
@@ -40,7 +40,7 @@ The joint model has three key components:
 
 1. **Model for underlying counts** (what will end up being reported)
 2. **Model for delay distribution** (how long the reporting process will be)
-3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we don't take the sum)))
+3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we do not take the sum)))
 
 # `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
 

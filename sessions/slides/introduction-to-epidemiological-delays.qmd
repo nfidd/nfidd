@@ -168,7 +168,7 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 
 ## Statistical inference for delays
 
-- We observe delay data but don't know true distribution parameters
+- We observe delay data but do not know true distribution parameters
 - Need to estimate parameters from incomplete, noisy data
 - **Bayesian approach**: prior knowledge + observed data → posterior estimates
 

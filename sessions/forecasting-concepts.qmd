@@ -106,7 +106,7 @@ Do you see any limitations of this approach?
 Before we can forecast we need some data to fit the model to.
 In order to assess the quality of the forecasts we will also need some future (or hold-out) data that we can compare the forecasts to.
 We will use the same simulated data as in the renewal and nowcasting sessions.
-We will try to make a forecast on day 71 (assuming we don't know what the data looks like after that day) as in the nowcasting session.
+We will try to make a forecast on day 71 (assuming we do not know what the data looks like after that day) as in the nowcasting session.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -441,15 +441,15 @@ Which of these, if any, does the random walk renewal model we just fitted satisf
 
 ::: {.callout-note collapse="true"}
 ## Solution
-- Interpretable reference point: yes, it's just a naive extrapolation of the recent trend in $R_t$.
-- Cheap to fit and robust: not really. It's a full Bayesian latent-state model that takes appreciably longer to fit than a naive baseline, and we had to raise `adapt_delta` and supply initial values to sample it cleanly.
+- Interpretable reference point: yes, it is just a naive extrapolation of the recent trend in $R_t$.
+- Cheap to fit and robust: not really. It is a full Bayesian latent-state model that takes appreciably longer to fit than a naive baseline, and we had to raise `adapt_delta` and supply initial values to sample it cleanly.
 - Revealing unnecessary complexity: yes, if competing models are compared against it fairly.
 
 Stapper & Funk [@stapperMindBaseline2025] set out five criteria for a good baseline (capturing key epidemiological dynamics, producing the required output format, using only commonly available data, simplicity, and calibrated uncertainty), and find that no single baseline meets all of them.
 :::
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

@@ -106,7 +106,7 @@ We are trying to estimate an incubation period. Each arrow represents one person
 
 ![](figures/truncation_final.png)
 
-We need to account for infections with longer delays that we haven't yet observed. We can best do this by using a **lognormal distribution** for the delays that we do have data on.
+We need to account for infections with longer delays that we have not yet observed. We can best do this by using a **lognormal distribution** for the delays that we do have data on.
 
 ## Censoring and right truncation {.smaller}
 

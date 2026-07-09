@@ -22,9 +22,9 @@ We capture this variability using probability distributions, which is the focus 
 ## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
-First we'll look at this working forwards from infections in an outbreak.
-We'll use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations.
-Then we'll work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
+First we will look at this working forwards from infections in an outbreak.
+We will use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations.
+Then we will work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
 
 ::: {.callout-note collapse="true"}
 
@@ -75,14 +75,14 @@ The outbreak lasted 140 days after the first infection, with new infections peak
 
 ::: callout-note
 For now we will not concern ourselves with the model used to generate the epidemic.
-This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we don't necessarily know how well this corresponds to what really happened.
+This represents a typical situation in the real world, where we may have a model of how an infection has spread, but we do not necessarily know how well this corresponds to what really happened.
 :::
 
 We will later deal with modelling the infectious process.
 For now, we will focus on modelling how infections get reported in data - the *observation* process.
 Using infectious disease data for analysis comes with three common challenges:
 
-1.  We don't normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other events.
+1.  We do not normally observe infections directly, but their *outcomes* as symptomatic cases, hospitalisations or other events.
 2.  These observations are an *incomplete* representation of total infections (e.g. not every infection leads to hospitalisation, and so focusing on hospitalisations will leave some infections unaccounted for).
 3.  These observations happen with a *delay* after the infection occurs (e.g. from infection to symptom).
 
@@ -106,29 +106,29 @@ ggplot(infection_times, aes(x = infection_time)) +
 
 ::: {.callout-tip .optional}
 In reality, data from infectious disease surveillance will usually be given as dates, not decimals; and those will usually not represent infection, but an observed outcome such as symptom onset or hospital admission.
-For now we don't want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
+For now we do not want to spend too much time manipulating dates in R, but we will get back to working with more realistic surveillance data later.
 :::
 
 ## Working forwards: simulating a sequence of delays after infection
 
 We would now like to simulate hospitalisations arising from this outbreak.
 We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations.
-We'll make the following assumptions about the process from infection to hospital admission:
+We will make the following assumptions about the process from infection to hospital admission:
 
 -   Infection to symptoms:
-    -   We'll assume all infections cause symptoms.
+    -   We will assume all infections cause symptoms.
     -   *Time from infection to symptom onset (incubation period):* We assume that the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days.
 -   Symptoms to hospital admission:
-    -   We'll assume that 30% of symptomatic cases become hospitalised.
+    -   We will assume that 30% of symptomatic cases become hospitalised.
     -   *Time from symptom onset to hospital admission*: We assume that this delay is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
 
-Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times.
-We'll use random values for each infection from the probability distributions we've assumed above.
+Let us put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times.
+We will use random values for each infection from the probability distributions we have assumed above.
 
 ::: {.callout-tip}
 ## Take a few minutes
 Throughout the course, we repeatedly use some small chunks of code.
-Instead of copying these between sessions, we've put them into functions in the `nfidd` R package that we can use when needed.
+Instead of copying these between sessions, we have put them into functions in the `nfidd` R package that we can use when needed.
 To see exactly what the function does, just type the function name, e.g. `add_delays` for the function below.
 :::
 
@@ -176,10 +176,10 @@ ggplot(dfl, aes(x = time)) +
 ## Estimating delay distributions from outcome data
 
 As mentioned above, our data set of infection, symptom onset and hospitalisation times is not the typical data set we encounter in infectious disease surveillance.
-In reality, we don't have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
+In reality, we do not have infection dates, and we also have to deal with missing data, incomplete observations, data entry errors etc.
 For now, let us just assume we have a data set only including symptom onset times and some hospitalisation times. 
 
-Let's look at a specific problem: we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
+Let us look at a specific problem: we would like to estimate how long it takes for people to become hospitalised after becoming symptomatic.
 This might be an important delay to know about, for example when modelling and forecasting hospitalisations, or more generally for estimating required hospital capacity.
 
 To do this we can use our data with *stan* to model the delay from symptom onset to hospitalisation, with the same assumption that it follows a lognormal distribution.
@@ -187,7 +187,7 @@ To do this we can use our data with *stan* to model the delay from symptom onset
 ::: {.callout-tip}
 ## Take a few minutes
 This is where we apply the Bayesian inference concepts from the slides. 
-We're using Stan to estimate the parameters of a lognormal distribution (meanlog and sdlog) from our observed delay data. 
+We are using Stan to estimate the parameters of a lognormal distribution (meanlog and sdlog) from our observed delay data. 
 The `nfidd_cmdstan_model()` function loads a pre-written Stan model for this purpose.
 :::
 
@@ -227,7 +227,7 @@ For more information on the Stan based tools used in this session:
 
 :::
 
-Let's estimate the onset-to-hospitalisation delay using the simulated data set we created above.
+Let us estimate the onset-to-hospitalisation delay using the simulated data set we created above.
 Do we recover the parameters used for simulation?
 
 We can do this by *sampling* from the model's posterior distribution by feeding it our simulated data set.
@@ -305,8 +305,8 @@ We can plot the resulting probability density functions.
 
 ::: {.callout-note}
 Every time we sample from the model posterior, we create 4000 iterations.
-That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations.
-You'll see this throughout the course.
+That is a lot of data to plot, so instead, when we produce plots we will use a random sample of 100 iterations.
+You will see this throughout the course.
 :::
 
 ```{r plot_onset_hospitalisation}
@@ -343,11 +343,11 @@ What does this tell us about our uncertainty in the delay distribution?
 The plot shows multiple semi-transparent lines, each representing a different plausible delay distribution:
 
 - **Multiple lines**: Each line represents one possible lognormal distribution based on a different sample from the posterior
-- **Uncertainty visualisation**: The spread of lines shows our uncertainty about the true delay distribution - we're not certain about the exact shape
+- **Uncertainty visualisation**: The spread of lines shows our uncertainty about the true delay distribution - we are not certain about the exact shape
 - **Limited data**: This uncertainty comes from having limited data - with more data, the lines would cluster more tightly together
 - **Parameter trade-offs**: Different combinations of meanlog and sdlog can produce very similar-looking distributions, making it hard to pin down exact parameter values
 - **Right-skewed shape**: All curves show the characteristic right-skewed shape of lognormal distributions, appropriate for delays
-- **Most likely region**: Where lines cluster together shows where we're most confident about the distribution shape
+- **Most likely region**: Where lines cluster together shows where we are most confident about the distribution shape
 
 This visualisation captures both our estimate of the delay distribution and our uncertainty about it.
 :::
@@ -357,7 +357,7 @@ This visualisation captures both our estimate of the delay distribution and our 
 ## Challenge
 
 - In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
-With real data, of course, we don't have this information available. 
+With real data, of course, we do not have this information available. 
 
 - **Impact of sample size**: Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. 
   
@@ -412,7 +412,7 @@ For example, we could implement a regression approach in e.g. [brms](https://cra
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

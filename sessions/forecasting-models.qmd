@@ -7,8 +7,8 @@ bibliography: ../nfidd.bib
 # Introduction
 
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
-In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model.
-We'll again evaluate these models to see what effect these different approaches might have.
+In this session, we will start with the renewal model that we have been using and explore adding both more mechanistic structure and then more statistical structure to the model.
+We will again evaluate these models to see what effect these different approaches might have.
 
 ## Slides
 
@@ -151,9 +151,9 @@ The key assumptions we are making here are:
 - The reproduction number only changes due to susceptible depletion
 - The number of new cases at each time is proportional to the number of susceptibles in the population.
 
-We've coded this up as a stan model in `stan/mechanistic-r.stan`.
+We have coded this up as a stan model in `stan/mechanistic-r.stan`.
 See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number.
-Let's load the model:
+Let us load the model:
 
 ```{r}
 mech_mod <- nfidd_cmdstan_model("mechanistic-r")
@@ -162,7 +162,7 @@ mech_mod
 
 ## Adding more statistical structure to the renewal model
 
-Adding more mechanistic structure is not always possible and, if we don't specify mechanisms correctly, might make forecasts worse.
+Adding more mechanistic structure is not always possible and, if we do not specify mechanisms correctly, might make forecasts worse.
 Rather than adding more mechanistic structure to the renewal model, we could add more statistical structure with the aim of improving performance.
 Before we do this, we need to think about what we want from a forecasting model.
 As we identified above, we want a model which is unbiased and which has good short-term forecasting properties.
@@ -207,7 +207,7 @@ ggplot(data, aes(x = t, y = R)) +
 ```
 :::
 
-However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour).
+However, we probably do not want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour).
 So what should we do?
 
 Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary.
@@ -244,7 +244,7 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`.
+We have coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`.
 See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number.
 Lets load the model:
 
@@ -398,7 +398,7 @@ stat_forecast_fit |>
 
 # Evaluating forecasts from our models
 
-As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit.
+As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you do not have to wait for the models to fit.
 We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
@@ -480,7 +480,7 @@ How do these forecasts compare?
 Which do you prefer?
 
 - The more mechanistic model seems to be the best at capturing the downturn in the data and the uncertainty in the forecasts seems reasonable.
-- If we weren't confident in the effective susceptible population the AR model might be preferable.
+- If we were not confident in the effective susceptible population the AR model might be preferable.
 :::
 
 ## Scoring your forecast
@@ -520,7 +520,7 @@ See the documentation for `?get_metrics.forecast_sample` for information on the 
 
 ### At a glance
 
-Let's summarise the scores by model first.
+Let us summarise the scores by model first.
 
 ```{r}
 sc_scores |>
@@ -593,7 +593,7 @@ How do the CRPS values change with forecast date?
 :::
 
 
-Let's first look at the overall PIT histogram.
+Let us first look at the overall PIT histogram.
 
 ```{r pit-histogram}
 sc_forecasts |>
@@ -604,7 +604,7 @@ sc_forecasts |>
   labs(x = "Predicted quantiles")
 ```
 
-As before let's look at the PIT histogram by forecast horizon (to save space we will group horizons)
+As before let us look at the PIT histogram by forecast horizon (to save space we will group horizons)
 
 ```{r pit-histogram-horizon}
 sc_forecasts |>
@@ -766,7 +766,7 @@ mech_forecast_diff |>
 
 ## Methods in practice
 
-- The statistical models we've discussed here represent just a subset of available forecasting approaches.
+- The statistical models we have discussed here represent just a subset of available forecasting approaches.
 For a comprehensive treatment of time series forecasting models, including ARIMA models as a generalisation of autoregressive approaches with additional features for differencing and moving averages, see @hyndmanForecastingPrinciplesPractice2021. 
 These models offer a different workflow for thinking about forecasting.
 Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
@@ -776,7 +776,7 @@ Something to think about!
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References
