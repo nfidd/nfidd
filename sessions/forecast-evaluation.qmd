@@ -261,7 +261,7 @@ What does this tell you about the model?
 ## Probabilistic scoring without samples
 Not all probabilistic forecasting models produce samples.
 The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the CRPS, by considering a weighted sum of multiple prediction intervals. 
-As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
+This makes it the standard choice when forecasts are shared as quantiles or prediction intervals rather than samples, as is often done in collaborative forecasting hubs [@reichCollaborativeHubsMaking2022].
 :::
 
 ### PIT histograms
