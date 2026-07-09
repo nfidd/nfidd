@@ -12,7 +12,8 @@ Instead, we typically collect epidemiological data from events that occur after 
 We often then need to understand how much time has passed between these events.
 For example, the incubation period might be used to determine the appropriate length of quarantine. 
 We also need to have some estimate for these delays when interpreting new data, in order to understand what is happening now ^[Much like Alice through the Looking Glass, it often seems like we are [running to stay in the same place](https://en.wikipedia.org/wiki/Red_Queen%27s_race)!] and predict what might happen in the future.
-However, the length of time between any of these events might be highly variable (between individuals) and fundamentally uncertain (across the population as a whole). We capture this variability using probability distributions, which is the focus of this session.
+However, the length of time between any of these events might be highly variable (between individuals) and fundamentally uncertain (across the population as a whole).
+We capture this variability using probability distributions, which is the focus of this session.
 
 ## Slides
 
@@ -21,7 +22,9 @@ However, the length of time between any of these events might be highly variable
 ## Objectives
 
 The aim of this session is for you to familiarise yourself with the concept of delay distributions used to describe reporting in infectious disease epidemiology.
-First we'll look at this working forwards from infections in an outbreak. We'll use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations. Then we'll work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
+First we'll look at this working forwards from infections in an outbreak.
+We'll use `R` to probabilistically simulate delays from infection to reporting symptoms and hospitalisations.
+Then we'll work only from this set of outcome data and use a stan model to estimate the parameters of one specific delay (in this example, symptom onset to hospitalisation).
 
 ::: {.callout-note collapse="true"}
 
@@ -109,7 +112,8 @@ For now we don't want to spend too much time manipulating dates in R, but we wil
 ## Working forwards: simulating a sequence of delays after infection
 
 We would now like to simulate hospitalisations arising from this outbreak.
-We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations. We'll make the following assumptions about the process from infection to hospital admission:
+We will start with our data on infection times, and work forwards to symptom onsets and then hospitalisations.
+We'll make the following assumptions about the process from infection to hospital admission:
 
 -   Infection to symptoms:
     -   We'll assume all infections cause symptoms.
@@ -118,7 +122,8 @@ We will start with our data on infection times, and work forwards to symptom ons
     -   We'll assume that 30% of symptomatic cases become hospitalised.
     -   *Time from symptom onset to hospital admission*: We assume that this delay is **lognormally** distributed, with **meanlog 1.75** and **sdlog 0.5**, corresponding to a mean delay of about a week.
 
-Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times. We'll use random values for each infection from the probability distributions we've assumed above.
+Let's put these assumptions into practice by simulating some data, adding onset and hospitalisation times (in decimal number of days after the first infection) to the infection times.
+We'll use random values for each infection from the probability distributions we've assumed above.
 
 ::: {.callout-tip}
 ## Take a few minutes
@@ -222,7 +227,8 @@ For more information on the Stan based tools used in this session:
 
 :::
 
-Let's estimate the onset-to-hospitalisation delay using the simulated data set we created above. Do we recover the parameters used for simulation?
+Let's estimate the onset-to-hospitalisation delay using the simulated data set we created above.
+Do we recover the parameters used for simulation?
 
 We can do this by *sampling* from the model's posterior distribution by feeding it our simulated data set.
 
@@ -261,7 +267,9 @@ res$summary() ## could also simply type `res`
 
 ::: {.callout-tip}
 ## Take a few minutes
-Look at the summary output above. What do the columns mean? What are the values of `meanlog` and `sdlog`?
+Look at the summary output above.
+What do the columns mean?
+What are the values of `meanlog` and `sdlog`?
 How do they compare to the true values we used in simulation (meanlog = 1.75, sdlog = 0.5)?
 :::
 
@@ -296,7 +304,9 @@ This shows us the mean and standard deviation of the onset-to-hospitalisation de
 We can plot the resulting probability density functions.
 
 ::: {.callout-note}
-Every time we sample from the model posterior, we create 4000 iterations. That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations. You'll see this throughout the course.
+Every time we sample from the model posterior, we create 4000 iterations.
+That is a lot of data to plot, so instead, when we produce plots we'll use a random sample of 100 iterations.
+You'll see this throughout the course.
 :::
 
 ```{r plot_onset_hospitalisation}
@@ -321,7 +331,10 @@ ggplot(res_df, aes(x = x, y = density, group = .draw)) +
 
 ::: {.callout-tip}
 ## Take a few minutes
-Look at the plot above. What do you see? Why are there multiple lines? What does this tell us about our uncertainty in the delay distribution?
+Look at the plot above.
+What do you see?
+Why are there multiple lines?
+What does this tell us about our uncertainty in the delay distribution?
 :::
 
 ::: {.callout-note collapse="true"}

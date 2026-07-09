@@ -59,7 +59,8 @@ options(cmdstanr_print_line_numbers = TRUE)
 Forecasting is the process of making predictions about the future based on past and present data.
 In the context of infectious disease epidemiology, forecasting is usually the process of predicting the future course of some metric of infectious disease incidence or prevalence based on past and present data.
 Here we focus on forecasting observed data (the number of individuals with new symptom onset) but forecasts can also be made for other quantities of interest such as the number of infections, the reproduction number, or the number of deaths.
-Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number. In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number.
+Epidemiological forecasting is closely related to nowcasting and, when using mechanistic approaches, estimation of the reproduction number.
+In fact, the model we will use for forecasting is the same as the model we used for nowcasting and estimation of the reproduction number.
 The only difference is that we will extend the model into the future.
 In order to make things simpler we will remove the nowcasting part of the model, but in principle all these approaches could be combined in a single model.
 
@@ -75,7 +76,8 @@ Based on what we found in the [nowcasting session](nowcasting) this seems like a
 We can do this by simulating the generative model forward in time. 
 To do this we use the same model as in the renewal equation session but add a `generated quantities` block to create the forecasts.
 This is used in a stan model for any calculations that only depend on other parameter estimates but are not themselves constrained by the data.
-So what does this look like in code? Lets load in the model again and take a look.
+So what does this look like in code?
+Lets load in the model again and take a look.
 
 ```{r load_model}
 mod <- nfidd_cmdstan_model("estimate-inf-and-r-rw-forecast")
@@ -244,7 +246,9 @@ This is a common pattern in forecasting where a model is good at capturing the s
 
 As our forecasting model is based on the reproduction number, we can also visualise the forecast of the reproduction number.
 This can be helpful for understanding why our forecasts of symptom onsets look the way they do and for understanding the uncertainty in the forecasts.
-We can also compare this to the "true" reproduction number, estimated once all relevant data is available. To do this, we will fit the model again but with a later cutoff. Then we can compare the reproduction numbers produced as *forecasts* at the earlier time, with *estimates* at the later time that used more of the data.
+We can also compare this to the "true" reproduction number, estimated once all relevant data is available.
+To do this, we will fit the model again but with a later cutoff.
+Then we can compare the reproduction numbers produced as *forecasts* at the earlier time, with *estimates* at the later time that used more of the data.
 
 ```{r fit_model_long, results = 'hide', message = FALSE}
 long_onset_df <- onset_df |>
@@ -313,7 +317,8 @@ forecast_r |>
 ```
 
 ::: {.callout-note}
-The horizontal dashed line at 1 represents the threshold for epidemic growth. If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
+The horizontal dashed line at 1 represents the threshold for epidemic growth.
+If the reproduction number is above 1 then the epidemic is growing, if it is below 1 then the epidemic is shrinking.
 The vertical dashed line represents the point at which we started forecasting.
 :::
 
@@ -332,7 +337,9 @@ Can you use this plot to explain why the forecast of onsets looks the way it doe
 - The performance we are seeing here makes sense given that random walks are defined to have a constant mean and increasing variance.
 :::
 
-We managed to learn quite a lot about our model's forecasting limitations just looking at a single forecast using visualisations. However, what if we wanted to quantify how well the model is doing? In order to do that we need to look at multiple forecasts from the model.
+We managed to learn quite a lot about our model's forecasting limitations just looking at a single forecast using visualisations.
+However, what if we wanted to quantify how well the model is doing?
+In order to do that we need to look at multiple forecasts from the model.
 
 ## Visualising multiple forecasts from a single model
 

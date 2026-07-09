@@ -7,7 +7,8 @@ bibliography: ../nfidd.bib
 # Introduction
 
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach. 
-In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model. We'll again evaluate these models to see what effect these different approaches might have.
+In this session, we'll start with the renewal model that we've been using and explore adding both more mechanistic structure and then more statistical structure to the model.
+We'll again evaluate these models to see what effect these different approaches might have.
 
 ## Slides
 
@@ -91,20 +92,26 @@ In our work, we have found that a combination of mechanistic and statistical mod
 
 ## Adding more mechanistic structure to the renewal model
 
-One way to potentially improve the renewal model is to add more mechanistic structure. In the [forecast evaluation](forecast-evaluation) session, we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
+One way to potentially improve the renewal model is to add more mechanistic structure.
+In the [forecast evaluation](forecast-evaluation) session, we saw that the renewal model was making unbiased forecasts when the reproduction number was constant but that it overestimated the number of cases when the reproduction number was reducing due to susceptible depletion.
 
 ::: {.callout-warning}
-This is slightly cheating as we know the future of this outbreak and so can make a model to match. This is easy to do and important to watch for if wanting to make generalisable methods.
+This is slightly cheating as we know the future of this outbreak and so can make a model to match.
+This is easy to do and important to watch for if wanting to make generalisable methods.
 :::
 
-This suggests that we should add a term to the renewal model which captures the depletion of susceptibles. One way to do this is to add a term which is proportional to the number of susceptibles in the population. This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission. If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
+This suggests that we should add a term to the renewal model which captures the depletion of susceptibles.
+One way to do this is to add a term which is proportional to the number of susceptibles in the population.
+This is the idea behind the _SIR model_ which is a simple compartmental model of infectious disease transmission.
+If we assume that susceptible depletion is the only mechanism which is causing the reproduction number to change, we can write the reproduction model as:
 
 $$
 R_t = \frac{S_{t-1}}{N} R_0
 $$
 
 ::: {.callout-note}
-This approximates susceptible depletion as a linear function of the number of susceptibles in the population. This is a simplification but it is a good starting point.
+This approximates susceptible depletion as a linear function of the number of susceptibles in the population.
+This is a simplification but it is a good starting point.
 :::
 
 ::: {.callout-note collapse="true"}
@@ -144,7 +151,9 @@ The key assumptions we are making here are:
 - The reproduction number only changes due to susceptible depletion
 - The number of new cases at each time is proportional to the number of susceptibles in the population.
 
-We've coded this up as a stan model in `stan/mechanistic-r.stan`. See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number. Let's load the model:
+We've coded this up as a stan model in `stan/mechanistic-r.stan`.
+See `stan/functions/pop_bounded_renewal.stan` for the function which calculates the reproduction number.
+Let's load the model:
 
 ```{r}
 mech_mod <- nfidd_cmdstan_model("mechanistic-r")
@@ -164,7 +173,8 @@ In infectious disease epidemiology, this would only be expected for endemic dise
 
 The random walk model we used in the [forecasting concepts](forecasting-concepts) session is a special case of a more general class of models called _autoregressive (AR) models_. 
 AR models are a class of models which predict the next value in a time series as a linear combination of the previous values in the time series.
-The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise. This becomes a random walk when the multipled value is 0.
+The random walk model is specifically a special case of an AR(1) model where the next value in the time series is predicted as the previous value, multiplied by a value between 1 and -1 , plus some noise.
+This becomes a random walk when the multipled value is 0.
 
  For the log-transformed reproduction number ($log(R_t)$), the model is:
 
@@ -172,7 +182,8 @@ $$
 log(R_t) = \phi log(R_{t-1}) + \epsilon_t
 $$
 
-where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1. If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
+where $\epsilon_t$ is a normally distributed error term with mean 0 and standard deviation $\sigma$ and $\phi$ is a parameter between -1 and 1.
+If we restrict $\phi$ to be between 0 and 1, we get a model which is biased towards a reproduction number of 1 but which can still capture trends in the data that decay over time.
 
 ::: {.callout-note collapse="true"}
 ## What behaviour would we expect from this model?
@@ -196,9 +207,12 @@ ggplot(data, aes(x = t, y = R)) +
 ```
 :::
 
-However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour). So what should we do?
+However, we probably don't want a model which is biased towards a reproduction number of 1 (unless we have good reason to believe that is the expected behaviour).
+So what should we do?
 
-Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary. This involves taking the difference between consecutive values in the time series. For the log-transformed reproduction number, this would be:
+Returning to the idea that the reproduction number is a _non-stationary_ time series, as we expect to have a trend in the reproduction numbers we want to capture, we can use a method from the field of time series analysis called _differencing_ to make the time series stationary.
+This involves taking the difference between consecutive values in the time series.
+For the log-transformed reproduction number, this would be:
 
 $$
 log(R_t) - log(R_{t-1}) = \phi (log(R_{t-1}) - log(R_{t-2})) + \epsilon_t
@@ -230,7 +244,9 @@ ggplot(data, aes(x = t, y = R)) +
 
 :::
 
-We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`. See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number. Lets load the model:
+We've coded up a model that uses this differenced AR process as a stan model in `stan/statistical-r.stan`.
+See `stan/functions/geometic_diff_ar.stan` for the function which calculates the reproduction number.
+Lets load the model:
 
 ```{r}
 stat_mod <- nfidd_cmdstan_model("statistical-r")
@@ -240,7 +256,8 @@ stat_mod
 
 # Forecasting with the mechanistic and statistical models
 
-We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts](forecasting-concepts) session. We will first load in the data and filter for a forecast origin date.
+We will now use the mechanistic and statistical models to forecast the number of cases in the future using data simulated in the same way as we did in the [forecasting concepts](forecasting-concepts) session.
+We will first load in the data and filter for a forecast origin date.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -381,7 +398,8 @@ stat_forecast_fit |>
 
 # Evaluating forecasts from our models
 
-As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit. We will now evaluate the forecasts from the mechanistic and statistical models.
+As in the [forecast evaluation session](forecast-evaluation), we have fit these models to a range of forecast dates so you don't have to wait for the models to fit.
+We will now evaluate the forecasts from the mechanistic and statistical models.
 
 ```{r load_forecasts}
 data(rw_forecasts, stat_forecasts, mech_forecasts)
@@ -484,7 +502,8 @@ sc_forecasts
 ```
 
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
+Everything seems to be in order.
+We can now use the `scoringutils` package to calculate some metrics as we did in the [forecasting evaluation session](forecast-evaluation).
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
@@ -510,7 +529,8 @@ sc_scores |>
 
 ::: {.callout-tip}
 ## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
+Before we look in detail at the scores, what do you think the scores are telling you?
+Which model do you think is best?
 :::
 
 ### Continuous ranked probability score
@@ -659,7 +679,8 @@ log_sc_scores |>
 
 ::: {.callout-tip}
 ## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? Which model do you think is best?
+Before we look in detail at the scores, what do you think the scores are telling you?
+Which model do you think is best?
 :::
 
 ### CRPS
@@ -694,7 +715,9 @@ How do the CRPS values on the log scale compare to the scores on the original sc
 
 ## What happens when you are very wrong about the population size?
 
-In the forecasts above we assumed that we knew the population size roughly. In practice, we may not. Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
+In the forecasts above we assumed that we knew the population size roughly.
+In practice, we may not.
+Refit the more mechanistic model with different priors for the population size and see how the forecasts change.
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -747,7 +770,8 @@ mech_forecast_diff |>
 For a comprehensive treatment of time series forecasting models, including ARIMA models as a generalisation of autoregressive approaches with additional features for differencing and moving averages, see @hyndmanForecastingPrinciplesPractice2021. 
 These models offer a different workflow for thinking about forecasting.
 Whilst Bayesian approaches work forward from domain knowledge to specify data-generating processes, traditional time series methods work backward from observed patterns using standard toolkits (transformations, differencing, residual analysis) to achieve stationarity and improve predictions.
-Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives. Something to think about!
+Both approaches ultimately aim to capture the same underlying data-generating process but from different perspectives.
+Something to think about!
 - Gaussian process models (as implemented in [EpiNow2](https://github.com/epiforecasts/EpiNow2)) provide another flexible approach that can generalise many of these statistical models depending on kernel choice.
 
 # Wrap up

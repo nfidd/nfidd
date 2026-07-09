@@ -78,7 +78,8 @@ This means that statements about the future should be **correct** (calibration) 
 # Evaluate your forecast
 
 In order to properly evaluate forecasts from this model we really need to forecast over a period of time, ideally capturing different epidemic dynamics.
-This will also give us more to work with when using scoring metrics. We will now load in some forecasts we made earlier and evaluate them.
+This will also give us more to work with when using scoring metrics.
+We will now load in some forecasts we made earlier and evaluate them.
 
 ```{r load_forecasts}
 data(rw_forecasts)
@@ -151,7 +152,9 @@ What important information is in the `forecast` object?
  - The type of forecast which is a sample forecast
 :::
 
-Everything seems to be in order. We can now use the `scoringutils` package to calculate some metrics. We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
+Everything seems to be in order.
+We can now use the `scoringutils` package to calculate some metrics.
+We will use the default sample metrics (as our forecasts are in sample format) and score our forecasts.
 
 ```{r score-forecasts}
 sc_scores <- sc_forecasts |>
@@ -168,7 +171,8 @@ See the documentation for `?get_metrics.forecast_sample` for information on the 
 
 ### At a glance
 
-Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores (by default calculating a mean across all forecasts). Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
+Before we look in detail at the scores, we can use `summarise_scores` to get a quick overview of the scores (by default calculating a mean across all forecasts).
+Don't worry if you don't understand all the scores yet, we will go some of them in more detail in the next section and you can find more information in the [`{scoringutils}` documentation](https://epiforecasts.io/scoringutils/dev).
 
 ```{r}
 sc_scores |>
@@ -184,7 +188,10 @@ Before we look in detail at the scores, what do you think the scores are telling
 
 #### What is the Continuous Ranked Probability Score (CRPS)?
 
-For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values. For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours), we can use the Continuous Ranked Probability Score (CRPS). The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts. Note that for deterministic forecasts, CRPS reduces to MAE.
+For point forecasts (single value predictions), forecast accuracy is commonly measured using the Mean Absolute Error (MAE), which calculates the average (mean) absolute difference between predicted and observed values.
+For probabilistic forecasts, where the forecast is a distribution rather than a single point estimate (i.e. like ours), we can use the Continuous Ranked Probability Score (CRPS).
+The CRPS is a proper scoring rule that generalises MAE to probabilistic forecasts.
+Note that for deterministic forecasts, CRPS reduces to MAE.
 
 The CRPS can be thought about as the combination of two key aspects of forecasting:
 1. The accuracy of the forecast in terms of how close the predicted values are to the observed value.
@@ -216,11 +223,14 @@ $$
 CRPS(F, y) = \mathbb{E}_{X \sim F}[|X - y|] - \frac{1}{2} \mathbb{E}_{X, X' \sim F}[|X - X'|]
 $$
 
-where $X$ and $X'$ are independent random variables sampled from the distribution $F$. To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
+where $X$ and $X'$ are independent random variables sampled from the distribution $F$.
+To calculate this we simply replace $X$ and $X'$ by samples from our posterior distribution and sum over all possible combinations.
 
 :::
 
-Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation. It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions. For example, lets compare the CRPS across different forecast horizons.
+Whilst the CRPS is a very useful metric it can be difficult to interpret in isolation.
+It is often useful to compare the CRPS of different models or to compare the CRPS of the same model under different conditions.
+For example, lets compare the CRPS across different forecast horizons.
 
 ```{r}
 sc_scores |>
@@ -259,9 +269,12 @@ What does this tell you about the model?
 
 ### PIT histograms
 
-As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019]. Calibration is the agreement between the forecast probabilities and the observed frequencies. Bias is a measure of how likely the model is to over or under predict the observed values.
+As well as the CRPS we can also look at the calibration and bias of the model [@funkAssessingPerformanceRealtime2019].
+Calibration is the agreement between the forecast probabilities and the observed frequencies.
+Bias is a measure of how likely the model is to over or under predict the observed values.
 
-There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram. This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
+There are many ways to assess calibration and bias but one common way is to use a probability integral transform (PIT) histogram.
+This is a histogram of the cumulative distribution of function of a forecast evaluated at the observed value.
 
 ::: {.callout-tip}
 ## Interpreting the PIT histogram
@@ -345,7 +358,8 @@ sc_forecasts |>
   labs(title = "PIT histogram", x = "Predicted quantiles", y = "Density")
 ```
 
-As before lets look at the PIT histogram by forecast horizon. To save space we will group horizons into a few days each:
+As before lets look at the PIT histogram by forecast horizon.
+To save space we will group horizons into a few days each:
 
 ```{r pit-histogram-horizon}
 sc_forecasts |>
@@ -417,7 +431,8 @@ log_scores |>
 
 ::: {.callout-tip}
 ## Take 2 minutes
-Before we look in detail at the scores, what do you think the scores are telling you? How do you think they will differ from the scores on the natural scale?
+Before we look in detail at the scores, what do you think the scores are telling you?
+How do you think they will differ from the scores on the natural scale?
 :::
 
 ### CRPS

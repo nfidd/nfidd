@@ -78,7 +78,9 @@ set.seed(123)
 
 # Individual forecast models
 
-In this session we will use the forecasts from the models we explored in the session on [forecasting models](forecasting-models). There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time. These were:
+In this session we will use the forecasts from the models we explored in the session on [forecasting models](forecasting-models).
+There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time.
+These were:
 
 - A random walk model
 - A differenced autoregressive model referred to as "More statistical"
@@ -225,7 +227,8 @@ simple_ensembles <- bind_rows(
 
 #### Visualisation
 
-How do these ensembles visually differ from the individual models? Lets start by plotting a single forecast from each model and comparing them.
+How do these ensembles visually differ from the individual models?
+Lets start by plotting a single forecast from each model and comparing them.
 
 ```{r plot-single-forecasts}
 plot_ensembles <- function(data, obs_data) {
@@ -340,7 +343,8 @@ ensemble_scores <- simple_ensembles |>
 ```
 
 ::: {.callout-note}
-The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
+The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals.
+As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
 
 We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
 :::
@@ -354,13 +358,15 @@ ensemble_scores |>
 
 ::: {.callout-tip}
 ##### Take 5 minutes
-What do you think the scores are telling you? Which model do you think is best?
+What do you think the scores are telling you?
+Which model do you think is best?
 What other scoring breakdowns might you want to look at?
 :::
 
 ::: {.callout-note collapse="true"}
 ##### Solution
-What do you think the scores are telling you? Which model do you think is best?
+What do you think the scores are telling you?
+Which model do you think is best?
 
 - The mean ensemble appears to be the best performing ensemble model overall.
 - However, the more mechanistic model appears to be the best performing model overall.
@@ -393,7 +399,8 @@ filtered_models <- quantile_forecasts |>
   filter(model != "Random walk")
 ```
 
-We then need to recalculate the ensembles. First the mean ensemble,
+We then need to recalculate the ensembles.
+First the mean ensemble,
 
 ```{r recalculate-ensembles}
 filtered_mean_ensembles <- filtered_models |>
@@ -539,7 +546,8 @@ Quantile regression averaging (QRA), on the other hand, optimises the weights di
 
 ##### Inverse WIS weighting
 
-In order to perform inverse WIS weighting we first need to calculate the WIS for each model. We already have this from the previous evaluation so we can reuse this.
+In order to perform inverse WIS weighting we first need to calculate the WIS for each model.
+We already have this from the previous evaluation so we can reuse this.
 
 ```{r calc-wis}
 model_scores <- quantile_forecasts |>
@@ -565,7 +573,8 @@ weights_per_model |>
   pivot_wider(names_from = model, values_from = weight)
 ```
 
-Now lets apply the weights to the forecast models. As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
+Now lets apply the weights to the forecast models.
+As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
 
 ```{r apply-weights}
 inverse_wis_ensemble <- quantile_forecasts |>
@@ -769,7 +778,8 @@ plot_multiple_weighted_forecasts +
 ##### Take 2 minutes
 How do the weighted ensembles compare to the simple ensembles?
 Which do you think is best?
-Are you surprised by the results? Can you think of any reasons that would explain them?
+Are you surprised by the results?
+Can you think of any reasons that would explain them?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -864,7 +874,8 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 
 ::: {.callout-note collapse="true"}
 #### Solution
-The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles. Why might this be the case?
+The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles.
+Why might this be the case?
 :::
 
 # Going further

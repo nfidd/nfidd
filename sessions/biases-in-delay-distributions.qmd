@@ -6,7 +6,9 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-So far, we've looked at the uncertainty of the time delays between epidemiological events. The next challenge is that our information on these delays is usually biased, especially when we're analysing data in real time. We'll consider two types of biases that commonly occur in reported infectious disease data: 
+So far, we've looked at the uncertainty of the time delays between epidemiological events.
+The next challenge is that our information on these delays is usually biased, especially when we're analysing data in real time.
+We'll consider two types of biases that commonly occur in reported infectious disease data: 
 
 - *Censoring*: when we know an event occurred at some time, but not exactly when.
 - *Truncation*: when not enough time has passed for all the relevant epidemiological events to occur or be observed.
@@ -169,7 +171,8 @@ For accurate delay estimation, we need to account for both components as we do i
 ::: {.callout-note .optional collapse="true"}
 ## Why are we so worried?
 
-We'll be spending a lot of time thinking about a potentially "short" 24 hour time interval. In this session, we'll start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
+We'll be spending a lot of time thinking about a potentially "short" 24 hour time interval.
+In this session, we'll start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
 The concepts and techniques that we use here also apply to longer time intervals that we might find in surveillance data, for example, reported case counts aggregated by week.
 :::
 
@@ -426,7 +429,8 @@ df <- add_delays(infection_times,
 Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
 We call this incompleteness *right truncation*.
 This is a problem if we try to use an incomplete set of data about one type of event to infer the pattern of a previous epidemiological event. 
-For example, our target might be to infer the "primary" event of infections. We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
+For example, our target might be to infer the "primary" event of infections.
+We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
 However, we are still in the middle of an outbreak.
 Some infected cases haven't yet presented with symptoms. 
 So we only have a partial, incomplete count to work with.
@@ -513,7 +517,8 @@ This figure shows how truncation systematically underestimates the mean delay (d
 
 :::
 
-This bias also changes throughout an outbreak. If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
+This bias also changes throughout an outbreak.
+If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections that have in fact already occurred.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 So among a cohort of people with symptom onset at the same time, those with shorter delays to onset would be over-represented.
@@ -671,7 +676,8 @@ During stable or declining epidemic phases, truncation bias is likely to be smal
 
 ## Decision framework for bias correction
 
-When faced with real epidemiological data, it can be challenging to decide which bias corrections to apply. The flowchart below provides practical guidance for making these decisions [@charnigaBestPracticesEstimating2024]:
+When faced with real epidemiological data, it can be challenging to decide which bias corrections to apply.
+The flowchart below provides practical guidance for making these decisions [@charnigaBestPracticesEstimating2024]:
 
 ![Decision framework for bias adjustment](figures/delay-biases/bias-correction-decision-flowchart.png){fig-alt="Flowchart showing decision process for choosing appropriate bias correction methods when estimating delay distributions"}
 

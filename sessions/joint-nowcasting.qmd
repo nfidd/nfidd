@@ -142,7 +142,8 @@ filtered_reporting_triangle <- reporting_triangle |>
 tail(filtered_reporting_triangle)
 ```
 
-Finally, we sum this to get the counts we actually observe. This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
+Finally, we sum this to get the counts we actually observe.
+This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
 
 ```{r counts-observed}
 available_onsets <- filtered_reporting_triangle |>
@@ -158,7 +159,8 @@ Notice how this simulation creates a similar, but different, data structure than
 ::: {.callout-note}
 ## Three-dimensional epidemiological data
 
-So far we've worked with data that has two dimensions. Such as:
+So far we've worked with data that has two dimensions.
+Such as:
 
 - **Onset day**: the day that each infected case saw symptoms begin
 - **Onset counts**: the number of cases with symptoms that began on each day
@@ -207,7 +209,8 @@ We now have two main modelling options:
 We will explore these in the next section.
 :::
 
-A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
+A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$).
+Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
 
 $$
 N_{t} = \underbrace{\sum_{d=0}^{T-t} n_{t,d}}_{N_t^{\text{obs}}\ \text{(reports already in)}} \; + \; \underbrace{\sum_{d=T-t+1}^{D} n_{t,d}}_{N_t^{\text{miss}}\ \text{(to be estimated)}}
@@ -323,7 +326,10 @@ Reminder: The points in this plot represent the data available when the nowcast 
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Look back at the last three nowcasts. How do they compare? What are the advantages and disadvantages of each? Could we improve the nowcasts further?
+Look back at the last three nowcasts.
+How do they compare?
+What are the advantages and disadvantages of each?
+Could we improve the nowcasts further?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -352,7 +358,9 @@ They avoid issues of passing fixed estimates between the nowcast and the reprodu
 :::
 
 ::: {.callout-note}
-This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together.
+This section contains a lot of code and is quite complex.
+It is not necessary to understand all of it to get the main points of the session.
+We recommend reading through it to get a sense of how all the pieces fit together.
 :::
 
 In the previous sessions, we have seen how to estimate the reproduction number and how to nowcast the data.
@@ -415,7 +423,9 @@ joint_rt_fit <- nfidd_sample(
 ```
 
 ::: {.callout-tip}
-We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult-to-explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
+We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult-to-explore posterior.
+Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior.
+The downside is that fitting then takes longer.
 :::
 
 ```{r joint-nowcast-rt-fit-summary}
