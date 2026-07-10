@@ -102,7 +102,10 @@ const PAGE_FN = `async () => {
     const idx = Reveal.getIndices(s);
     Reveal.slide(idx.h, idx.v);
     await new Promise((r) => setTimeout(r, 60));
-    const cur = document.querySelector('section.present') || s;
+    // Use the leaf slide element directly. Do NOT querySelector('.present'):
+    // in a vertical stack the parent stack section also carries .present and
+    // matches first, so we would measure the whole stack instead of this slide.
+    const cur = s;
     const smallEls = [cur, ...cur.querySelectorAll('.smaller')]
       .filter((el) => el.classList.contains('smaller'));
     const hasSmaller = smallEls.length > 0;
