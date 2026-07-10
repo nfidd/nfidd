@@ -50,7 +50,7 @@ Average of multiple predictions is often (not always) more performant than any i
       - lots of uncertainty in weight estimation!
       - put a "strong prior" on equal weights, both in your mental and statistical models
 
-## Collaborative modelling "hubs"
+## Collaborative modelling "hubs" {.smaller}
 
 :::: {.columns}
 
@@ -68,7 +68,7 @@ Average of multiple predictions is often (not always) more performant than any i
 
 ::: {.column width="50%"}
 
-![[Hubverse](https://hubverse.io/)](figures/hub-modeler-flow.png)
+![[Hubverse](https://hubverse.io/)](figures/hub-modeler-flow.png){width="80%"}
 
 :::
 
@@ -101,6 +101,6 @@ Average of multiple predictions is often (not always) more performant than any i
 
 ## References
 
-::: {#refs}
+::: {#refs style="font-size: 0.55em;"}
 :::
 

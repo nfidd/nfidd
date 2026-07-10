@@ -91,19 +91,19 @@ hospital *admission* to *discharge*
 
 ## Key parameters in mathematical models {.smaller}
 
-![](figures/ferguson2020.png)
+![](figures/ferguson2020.png){width="80%"}
 
 [Ferguson et al., 2020](https://doi.org/10.25561/77482)
 
 ## Key parameters in mathematical models {.smaller}
 
-![](figures/ward2022.png)
+![](figures/ward2022.png){width="80%"}
 
 [Ward et al., 2020](https://doi.org/10.25561/77482)
 
 ## Key elements of infectious disease epidemiology {.smaller}
 
-![](figures/nishiura2007.png)
+![](figures/nishiura2007.png){width="80%"}
 [Nishiura et al., 2007](https://doi.org/10.1186/1742-7622-4-2)
 
 ## Why do we want to know these?
