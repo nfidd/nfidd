@@ -77,7 +77,7 @@ $$
 
 We can estimate $R_t$ from a time series of infections using the renewal equation.
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 -   Simulate infections using the renewal equation
 -   Estimate reproduction numbers using a time series of infections

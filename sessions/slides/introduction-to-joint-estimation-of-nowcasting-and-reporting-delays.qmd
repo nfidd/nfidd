@@ -43,7 +43,7 @@ The joint model has three key components:
 2. **Model for delay distribution** (how long the reporting process will be)
 3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we do not take the sum)))
 
-# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Simulate data with delayed reporting
 2. Perform a joint estimation of the delay and nowcast

@@ -178,7 +178,7 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 - We specify: data structure, parameters to estimate, model relationships
 - Stan returns parameter estimates with proper uncertainty quantification
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 - Simulate epidemiological delays
 - Estimate parameters of a delay distribution

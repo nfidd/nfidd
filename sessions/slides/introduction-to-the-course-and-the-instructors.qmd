@@ -20,7 +20,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 })
 ```
 
-# Why this course?
+## Why this course?
 
 ::: {.incremental}
 - common questions in outbreak response
@@ -28,7 +28,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 - no comprehensive training resource
 :::
 
-# Who are we?
+## Who are we?
 
 ```{r whoarewe, results='asis'}
 cat(":::: {.columns}\n")
@@ -44,7 +44,7 @@ for (instructor in seq_along(whoarewe)) {
 cat("::::\n")
 ```
 
-# Who are you?
+## Who are you?
 
 Introduce yourself with:
 
@@ -52,7 +52,7 @@ Introduce yourself with:
 - where you travelled from
 - why you are here
 
-# How the course works
+## How the course works
 
 ::: {.incremental}
 - each session opens with a short introduction

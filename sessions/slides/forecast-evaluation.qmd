@@ -55,7 +55,7 @@ This makes prospective evaluation even more important.
 
 For any retrospective experiment, you should always look for evidence that an analyst did not let the model cheat!
 
-# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Load forecasts from the model we have visualised previously.
 2. Evaluate the forecasts using proper scoring rules.

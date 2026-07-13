@@ -62,7 +62,7 @@ However:
 
 ![](figures/weather_forecast.png)
 
-# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Load some forecasts we have generated and visualise them alongside the data.
 2. Explore different ways of visualising forecasts to assess how good the model performs at forecasting.

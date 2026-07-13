@@ -33,7 +33,7 @@ A few open-source tools implement some or all of the methods we have encountered
   
   - helps discussing and ultimately enforcing best practice
 
-# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 How does each tool relate to key concepts in the course?
 

@@ -77,7 +77,7 @@ Predict what an epidemiological time series will look like *after all delayed re
 4. Fit the model to the truncated data
 5. Use the untruncated estimates from the model as the nowcast
 
-# `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Perform nowcast with a known reporting delay distribution
 2. Perform a nowcast using a more realistic data generating process

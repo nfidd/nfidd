@@ -70,8 +70,13 @@ Slide decks live in `sessions/slides/` and render with reveal.js at a fixed
 
 Common front matter (author, `engine`, `chalkboard`, `slide-level`) lives in
 `sessions/slides/_metadata.yml`; per-deck files set only their `title`, `footer`,
-and any deck-specific options. Slides are `##` headings; `#` headings are section
-dividers (`slide-level: 2`).
+and any deck-specific options.
+
+Slides are `##` headings; `#` headings are **title-only** section dividers
+(`slide-level: 2`). Any slide that carries content — bullets, a figure, an
+exercise prompt — is a `##`, even when it is a visual break. The recurring
+"Your Turn" exercise slide is a shared include so its icon, colour, and level stay
+consistent: `{{< include _your-turn.qmd >}}`.
 
 ### `{.smaller}`
 

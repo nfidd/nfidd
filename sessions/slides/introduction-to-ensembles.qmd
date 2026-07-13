@@ -90,7 +90,7 @@ Average of multiple predictions is often (not always) more performant than any i
 ## ... ... Multi-model ensemble {.smaller}
 ![](figures/respicast-comparison.png)
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Create unweighted and weighted ensembles using forecasts from multiple models.
 2. Evaluate the forecasts from ensembles compared to their constituent models.
