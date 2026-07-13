@@ -5,7 +5,9 @@ format:
     footer: "Introduction to the spectrum of forecasting models"
 ---
 
-# Different types of models {.smaller}
+# Different types of models
+
+## {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -14,7 +16,7 @@ format:
 ::: {.column}
 
 - We can classify models by the level of mechanism they include
-- All of the model types we will introduce in the next few slides have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
+- All of these model types have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
 
 **NOTE:**  level of mechanism $\neq$ model complexity
 
