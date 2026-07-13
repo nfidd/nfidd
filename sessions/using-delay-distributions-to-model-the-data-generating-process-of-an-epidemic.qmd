@@ -202,7 +202,7 @@ Now let us look at the resulting onsets:
 head(onsets)
 ```
 
-To understand what's happening, let us work through the first few rows.
+To understand what is happening, let us work through the first few rows.
 
 For day 1, only infections from day 1 can contribute:
 
