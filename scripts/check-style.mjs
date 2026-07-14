@@ -70,16 +70,28 @@ for (const file of slideFiles) {
 }
 
 // --- 3. Prose: no contractions, British spelling, one sentence per line.
-const CONTRACTION = /\b[A-Za-z]+n't\b|\b(?:we|you|they|i|it|that|there|here|what|who|how|let|he|she|one)'(?:ve|ll|re|d|s|m)\b/i;
-const AMERICAN = /\b(?:modeling|modeled|summariz\w+|behavior|behaviors|neighbor\w*|analyz\w+|visualiz\w+|optimiz\w+|organiz\w+|recogniz\w+|labeled|favor|favored|catalog)\b|(?<!-)\bcolor\b/i;
+// ['’] matches both the straight and typographic apostrophe.
+const CONTRACTION = /\b[A-Za-z]+n['’]t\b|\b(?:we|you|they|i|it|that|there|here|what|who|how|let|he|she|one)['’](?:ve|ll|re|d|s|m)\b/i;
+const AMERICAN = /\b(?:model(?:ing|ed)|summariz\w+|behavior\w*|neighbor\w*|analyz\w+|visualiz\w+|optimiz\w+|organiz\w+|recogniz\w+|labeled|favor(?:ed|able|ite|s)?|catalog(?:ed|ing|s)?)\b|(?<!-)\bcolor(?:ed|ing|s|ful)?\b/i;
 const SENTENCE_END = /[.!?]["')\]]?\s+[A-Z]/;
-const ABBR = /\b([eE]\.g|[iI]\.e|etc|et al|vs|cf|Fig|Eq|no|approx|Dr|Prof)\.\s+[A-Z]|\d\.\s*[A-Z]/;
+// Mask abbreviations and enumerated-list markers (globally — a line can hold more
+// than one) so an internal "." after them is not read as a sentence boundary.
+const ABBR = /\b(?:e\.g|i\.e|etc|et al|vs|cf|Fig|Eq|no|approx|Dr|Prof|Mr|Mrs|Ms|St|U\.S|U\.K)\.(?=\s+[A-Z])|^\s*\d+\.\s+[A-Z]/gi;
+
+// Check heading text (minus the marker and reveal {…} attributes) for
+// contractions and American spellings — the one-sentence rule does not apply.
+const checkHeadingText = (file, n, line) => {
+  const text = stripCode(line.replace(/^#+\s*/, "").replace(/\s*\{[^}]*\}\s*$/, ""));
+  if (CONTRACTION.test(text)) report(file, n, `contraction in heading: ${text.slice(0, 70)}`);
+  if (AMERICAN.test(text)) report(file, n, `American spelling in heading: ${text.slice(0, 70)}`);
+};
 
 for (const file of allFiles) {
   const text = readFileSync(file, "utf8");
   walk(text, (line, n) => {
     const s = line.trim();
-    if (!s || /^#/.test(s)) return;                 // headings handled above
+    if (!s) return;
+    if (/^#/.test(s)) { checkHeadingText(file, n, line); return; }
     const prose = stripCode(line);
     if (CONTRACTION.test(prose)) report(file, n, `contraction: ${s.slice(0, 70)}`);
     if (AMERICAN.test(prose)) report(file, n, `American spelling: ${s.slice(0, 70)}`);
