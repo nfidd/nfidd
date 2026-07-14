@@ -3,6 +3,7 @@
   "private": true,
   "description": "Development tooling for the NFIDD course (not the course itself).",
   "scripts": {
+    "check-style": "node scripts/check-style.mjs",
     "check-slides": "node scripts/check-slide-overflow.mjs"
   },
   "devDependencies": {

@@ -1,0 +1,10 @@
+# Run `pre-commit install` once to enable. See https://pre-commit.com.
+repos:
+  - repo: local
+    hooks:
+      - id: nfidd-style
+        name: NFIDD style conventions
+        entry: node scripts/check-style.mjs
+        language: system
+        files: \.qmd$
+        pass_filenames: false

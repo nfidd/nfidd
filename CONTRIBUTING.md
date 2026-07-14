@@ -101,3 +101,16 @@ reports advisory warnings for slides that run tight without `{.smaller}` or carr
 an idle one. Add `--strict` to also fail on the tight buffer band. The check
 needs a Chromium binary; set `CHROMIUM_PATH` if it is not auto-detected (and, for
 snap Chromium, `CHROMIUM_PROFILE` to a non-hidden `$HOME` directory).
+
+## Checking your work
+
+Two scripts check the conventions above:
+
+```sh
+npm run check-style   # headings, prose, shared slide config — fast, no deps
+npm run check-slides  # slide overflow — needs a rendered site and Chromium
+```
+
+`check-style` runs on every pull request (the Style workflow) and, if you install
+[pre-commit](https://pre-commit.com), on every commit (`pre-commit install`). The
+slower overflow check runs alongside the site render.
