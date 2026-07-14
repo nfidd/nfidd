@@ -73,8 +73,8 @@ Common front matter (author, `engine`, `chalkboard`, `slide-level`) lives in
 and any deck-specific options.
 
 Slides are `##` headings; `#` headings are **title-only** section dividers
-(`slide-level: 2`). Any slide that carries content — bullets, a figure, an
-exercise prompt — is a `##`, even when it is a visual break. The recurring
+(`slide-level: 2`). Any slide that carries content (bullets, a figure, an
+exercise prompt) is a `##`, even when it is a visual break. The recurring
 "Your Turn" exercise slide is a shared include so its icon, colour, and level stay
 consistent: `{{< include _your-turn.qmd >}}`.
 
@@ -83,8 +83,8 @@ consistent: `{{< include _your-turn.qmd >}}`.
 Decks set no `smaller` default. Add `{.smaller}` to a slide **iff its content at
 normal size exceeds 90% of the slide height (> 630px of 700px)**. The 10% margin
 absorbs measurement noise and later edits to a slide's content. Below that, leave
-it off. `{.smaller}` shrinks text only, so a slide whose height
-comes from a plot or image needs its figure resized, not the class.
+it off. `{.smaller}` shrinks text only, so a slide whose height comes from a plot
+or image needs its figure resized instead.
 
 ### Testing it
 
