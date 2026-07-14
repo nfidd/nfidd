@@ -1,1 +1,1 @@
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+## {{< fa laptop-code >}} Your Turn {background-color="#447099" transition="fade-in"}
