@@ -27,9 +27,9 @@
 // Exit code: non-zero if any slide overflows the box or breaks the rule
 // (a missing {.smaller}). Idle {.smaller} markers are reported as warnings only.
 
-import { readdirSync, existsSync, mkdtempSync } from "node:fs";
+import { readdirSync, existsSync, mkdtempSync, rmSync } from "node:fs";
 import { join, resolve, basename } from "node:path";
-import { tmpdir } from "node:os";
+import { tmpdir, homedir } from "node:os";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -45,6 +45,10 @@ const args = process.argv.slice(2).filter((a) => a !== "--strict");
 const STRICT = process.argv.includes("--strict");
 const DIR = resolve(args[0] || "_site/sessions/slides");
 const MARGIN = Number(process.env.SLIDE_BOX_MARGIN || 0.9);
+if (!Number.isFinite(MARGIN) || MARGIN <= 0 || MARGIN > 1) {
+  console.error(`SLIDE_BOX_MARGIN must be a number in (0, 1]; got "${process.env.SLIDE_BOX_MARGIN}"`);
+  process.exit(2);
+}
 
 function findChromium() {
   if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
@@ -120,12 +124,26 @@ const PAGE_FN = `async () => {
   return out;
 }`;
 
-const browser = await puppeteer.launch({
-  executablePath: exe,
-  headless: "new",
-  userDataDir: process.env.CHROMIUM_PROFILE || mkdtempSync(join(tmpdir(), "slidecheck-")),
-  args: ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
-});
+// snap Chromium is confined: it cannot use /tmp or hidden dirs, so give it a
+// throwaway profile under a non-hidden $HOME path instead.
+const profileBase = exe.includes("snap") ? homedir() : tmpdir();
+const ownProfile = !process.env.CHROMIUM_PROFILE;
+const userDataDir = process.env.CHROMIUM_PROFILE || mkdtempSync(join(profileBase, "nfidd-slidecheck-"));
+
+let browser;
+try {
+  browser = await puppeteer.launch({
+    executablePath: exe,
+    headless: "new",
+    userDataDir,
+    args: ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
+  });
+} catch (e) {
+  console.error(`Could not launch Chromium (${exe}): ${e.message}`);
+  if (exe.includes("snap")) console.error("For snap Chromium, set CHROMIUM_PROFILE to a non-hidden $HOME directory.");
+  if (ownProfile) rmSync(userDataDir, { recursive: true, force: true });
+  process.exit(2);
+}
 
 // A slide that overflows the box (> 700px) is a hard failure: it is clipped in
 // the deck and must be fixed. A slide in the buffer band (natural height between
@@ -139,7 +157,11 @@ for (const deck of decks) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 720 });
   try {
-    await page.goto("file://" + join(DIR, deck), { waitUntil: "networkidle0", timeout: 60000 });
+    // Wait for the page to load, but don't let a slow or unreachable external
+    // image (some decks reference off-site figures) hang or fail the run — cap
+    // the wait and measure with whatever loaded.
+    await page.goto("file://" + join(DIR, deck), { waitUntil: "load", timeout: 30000 })
+      .catch((e) => console.warn(`  ${deck}: continuing after slow load (${e.message})`));
     await page.waitForFunction("window.Reveal && Reveal.isReady && Reveal.isReady()", { timeout: 30000 });
     const rows = await page.evaluate(`(${PAGE_FN})()`);
     const name = basename(deck, ".html");
@@ -156,12 +178,13 @@ for (const deck of decks) {
       }
     }
   } catch (e) {
-    problems.push({ name: basename(deck, ".html"), head: "", kind: "RENDER", note: e.message });
+    problems.push({ name: basename(deck, ".html"), i: "?", head: "", kind: "RENDER", note: e.message });
   } finally {
     await page.close();
   }
 }
 await browser.close();
+if (ownProfile) rmSync(userDataDir, { recursive: true, force: true });
 
 const fmt = (r) => `  ${r.kind.padEnd(9)} ${r.name}  — slide ${r.i} "${r.head}"\n             ${r.note}`;
 if (problems.length) {
