@@ -63,7 +63,7 @@ Average of multiple predictions is often (not always) more performant than any i
   - data validation
   - ensemble-building
   - model evaluation
-  - visualization
+  - visualisation
 ::: 
 
 ::: {.column width="50%"}
