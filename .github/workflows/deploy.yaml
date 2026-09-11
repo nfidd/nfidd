@@ -63,6 +63,17 @@ jobs:
       - name: Render site
         run: quarto render
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The overflow check needs the rendered decks (above) and a browser; the
+      # ubuntu runner ships google-chrome, which the script auto-detects.
+      - name: Check slide overflow
+        run: |
+          npm ci
+          node scripts/check-slide-overflow.mjs _site/sessions/slides
+
       - name: Upload website
         uses: actions/upload-artifact@v7
         if: github.event_name == 'pull_request'

@@ -10,7 +10,7 @@ As we saw in the [session on different forecasting models](forecast-models), dif
 We can classify models along a spectrum by how much they include an understanding of underlying processes, or mechanisms; or whether they emphasise drawing from the data using a statistical approach.
 One way to attempt to draw strength from a diversity of approaches is the creation of so-called *forecast ensembles* from the forecasts produced by different models.
 
-In this session, we'll start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
+In this session, we will start with forecasts from the models we explored in the [forecasting models](forecasting-models) session and build ensembles of these models. 
 We will then compare the performance of these ensembles to the individual models and to each other.
 
 ::: {.callout-note .optional collapse="true"}
@@ -78,7 +78,9 @@ set.seed(123)
 
 # Individual forecast models
 
-In this session we will use the forecasts from the models we explored in the session on [forecasting models](forecasting-models). There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time. These were:
+In this session we will use the forecasts from the models we explored in the session on [forecasting models](forecasting-models).
+There all shared the same basic renewal with delays structure but used different models for the evolution of the effective reproduction number over time.
+These were:
 
 - A random walk model
 - A differenced autoregressive model referred to as "More statistical"
@@ -86,7 +88,7 @@ In this session we will use the forecasts from the models we explored in the ses
 
 For the purposes of this session the precise details of the models are not critical to the concepts we are exploring.
 
-As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you don't have to wait for the models to fit.
+As in the session on [forecast evaluation](forecast-evaluation), we have fitted these models to a range of forecast dates so you do not have to wait for the models to fit.
 
 ```{r load_forecasts}
 data(rw_forecasts, stat_forecasts, mech_forecasts)
@@ -225,7 +227,8 @@ simple_ensembles <- bind_rows(
 
 #### Visualisation
 
-How do these ensembles visually differ from the individual models? Lets start by plotting a single forecast from each model and comparing them.
+How do these ensembles visually differ from the individual models?
+Lets start by plotting a single forecast from each model and comparing them.
 
 ```{r plot-single-forecasts}
 plot_ensembles <- function(data, obs_data) {
@@ -340,7 +343,8 @@ ensemble_scores <- simple_ensembles |>
 ```
 
 ::: {.callout-note}
-The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals. As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
+The **weighted interval score (WIS)** [@bracherEvaluatingEpidemicForecasts2021] is a proper scoring rule for quantile forecasts that approximates the **Continuous Ranked Probability Score (CRPS)** by considering a weighted sum of multiple prediction intervals.
+As the number of intervals increases, the WIS converges to the CRPS, combining sharpness and penalties for over- and under-prediction.
 
 We see it here as we are scoring quantiles and not samples hence we cannot use CRPS as we did before.
 :::
@@ -354,13 +358,15 @@ ensemble_scores |>
 
 ::: {.callout-tip}
 ##### Take 5 minutes
-What do you think the scores are telling you? Which model do you think is best?
+What do you think the scores are telling you?
+Which model do you think is best?
 What other scoring breakdowns might you want to look at?
 :::
 
 ::: {.callout-note collapse="true"}
 ##### Solution
-What do you think the scores are telling you? Which model do you think is best?
+What do you think the scores are telling you?
+Which model do you think is best?
 
 - The mean ensemble appears to be the best performing ensemble model overall.
 - However, the more mechanistic model appears to be the best performing model overall.
@@ -393,7 +399,8 @@ filtered_models <- quantile_forecasts |>
   filter(model != "Random walk")
 ```
 
-We then need to recalculate the ensembles. First the mean ensemble,
+We then need to recalculate the ensembles.
+First the mean ensemble,
 
 ```{r recalculate-ensembles}
 filtered_mean_ensembles <- filtered_models |>
@@ -539,7 +546,8 @@ Quantile regression averaging (QRA), on the other hand, optimises the weights di
 
 ##### Inverse WIS weighting
 
-In order to perform inverse WIS weighting we first need to calculate the WIS for each model. We already have this from the previous evaluation so we can reuse this.
+In order to perform inverse WIS weighting we first need to calculate the WIS for each model.
+We already have this from the previous evaluation so we can reuse this.
 
 ```{r calc-wis}
 model_scores <- quantile_forecasts |>
@@ -565,7 +573,8 @@ weights_per_model |>
   pivot_wider(names_from = model, values_from = weight)
 ```
 
-Now lets apply the weights to the forecast models. As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
+Now lets apply the weights to the forecast models.
+As we can only use information that was available at the time of the forecast to perform the weighting, we use weights from two weeks prior to the forecast date to inform each ensemble.
 
 ```{r apply-weights}
 inverse_wis_ensemble <- quantile_forecasts |>
@@ -769,7 +778,8 @@ plot_multiple_weighted_forecasts +
 ##### Take 2 minutes
 How do the weighted ensembles compare to the simple ensembles?
 Which do you think is best?
-Are you surprised by the results? Can you think of any reasons that would explain them?
+Are you surprised by the results?
+Can you think of any reasons that would explain them?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -816,7 +826,7 @@ How do the weights change over time?
 
 Are you surprised by the results given what you know about the models performance?
 
-- As the random walk model is performing poorly, you would expect it to have low weights but actually it often doesn't.
+- As the random walk model is performing poorly, you would expect it to have low weights but actually it often does not.
   This implies that its poor performance is restricted to certain parts of the outbreak.
 - The mechanistic model performs really well overall and dominates the final optimised ensemble.
 :::
@@ -864,14 +874,15 @@ How do the weighted ensembles compare to the simple ensembles on the natural and
 
 ::: {.callout-note collapse="true"}
 #### Solution
-The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles. Why might this be the case?
+The best ensembles slightly outperform some of the simple ensembles but there is no obvious benefit from using weighted ensembles.
+Why might this be the case?
 :::
 
 # Going further
 
 ## Challenge
 
-- Throughout the course we've been carefully building models from our understanding of the underlying data generating process.
+- Throughout the course we have been carefully building models from our understanding of the underlying data generating process.
 What might be the implications of combining models from different modellers, with different assumptions about this process?
 Think about the reliability and validity of the resulting ensemble forecast. 
 - Would it change how you approach communicating the forecast?
@@ -884,7 +895,7 @@ Think about the reliability and validity of the resulting ensemble forecast.
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

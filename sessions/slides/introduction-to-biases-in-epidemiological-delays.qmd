@@ -1,12 +1,8 @@
 ---
 title: "Introduction to biases in epidemiological delays"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-biases-in-epidemiological-delays.html
     footer: "Introduction to biases in epidemiological delays"
-    chalkboard: true
 ---
 
 ```{r seed}
@@ -31,25 +27,29 @@ Why might our estimates of epidemiological delays be biased?
 
 ## Double censoring: example {.smaller}
 
-We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+We are trying to estimate an incubation period.
+For person A we know exposure happened on day 1 and symptom onset on day 3.
 
 ![](figures/censoring_1.png)
 
 ## Double censoring: example {.smaller}
 
-We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+We are trying to estimate an incubation period.
+For person A we know exposure happened on day 1 and symptom onset on day 3.
 
 ![](figures/censoring_2.png)
 
 ## Double censoring: example {.smaller}
 
-We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+We are trying to estimate an incubation period.
+For person A we know exposure happened on day 1 and symptom onset on day 3.
 
 ![](figures/censoring_final.png)
 
 ## Double censoring: example {.smaller}
 
-We are trying to estimate an incubation period. For person A we know exposure happened on day 1 and symptom onset on day 3.
+We are trying to estimate an incubation period.
+For person A we know exposure happened on day 1 and symptom onset on day 3.
 
 ![](figures/censoring_final.png)
 
@@ -80,44 +80,52 @@ A common mistake is to only account for secondary event censoring while ignoring
 
 ## Example: right truncation {.smaller}
 
-We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+We are trying to estimate an incubation period.
+Each arrow represents one person with an associated pair of events (infection and symptom onset).
 
 ![](figures/truncation_1.png)
 
 ## Example: right truncation {.smaller}
 
-We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+We are trying to estimate an incubation period.
+Each arrow represents one person with an associated pair of events (infection and symptom onset).
 
 ![](figures/truncation_prefinal.png)
 
 ## Example: right truncation {.smaller}
 
-We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset).
+We are trying to estimate an incubation period.
+Each arrow represents one person with an associated pair of events (infection and symptom onset).
 
 ![](figures/truncation_final.png)
 
 ## Example: right truncation {.smaller}
 
-We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset)
+We are trying to estimate an incubation period.
+Each arrow represents one person with an associated pair of events (infection and symptom onset)
 
 ![](figures/truncation_final.png)
 
-On the day of analysis we have not observed some onsets yet. The delay from infection to onset for these delays tended to be **longer**. This is made worse during periods of **exponential growth**. 
+On the day of analysis we have not observed some onsets yet.
+The delay from infection to onset for these delays tended to be **longer**.
+This is made worse during periods of **exponential growth**. 
 
 ## Example: right truncation {.smaller}
 
-We are trying to estimate an incubation period. Each arrow represents one person with an associated pair of events (infection and symptom onset)
+We are trying to estimate an incubation period.
+Each arrow represents one person with an associated pair of events (infection and symptom onset)
 
 ![](figures/truncation_final.png)
 
-We need to account for infections with longer delays that we haven't yet observed. We can best do this by using a **lognormal distribution** for the delays that we do have data on.
+We need to account for infections with longer delays that we have not yet observed.
+We can best do this by using a **lognormal distribution** for the delays that we do have data on.
 
 ## Censoring and right truncation {.smaller}
 
 - When analysing data from an outbreak in real time, we are likely to have double censoring **and** right truncation, making things worse
 - In the practical we will only look at the two separately to keep things simple
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Simulate epidemiological delays with biases
 2. Estimate parameters of a delay distribution, correcting for biases

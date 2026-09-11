@@ -1,0 +1,12 @@
+{
+  "name": "nfidd-tooling",
+  "private": true,
+  "description": "Development tooling for the NFIDD course (not the course itself).",
+  "scripts": {
+    "check-style": "node scripts/check-style.mjs",
+    "check-slides": "node scripts/check-slide-overflow.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

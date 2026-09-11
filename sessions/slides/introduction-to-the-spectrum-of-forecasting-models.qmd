@@ -1,16 +1,13 @@
 ---
 title: "Introduction to the spectrum of forecasting models"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-the-spectrum-of-forecasting-models.html
     footer: "Introduction to the spectrum of forecasting models"
-    chalkboard: true
-    slide-level: 3
 ---
 
-## Different types of models {.smaller}
+# Different types of models
+
+## {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -19,7 +16,7 @@ format:
 ::: {.column}
 
 - We can classify models by the level of mechanism they include
-- All of the model types we will introduce in the next few slides have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
+- All of these model types have been used for COVID-19 forecasting (the US and/or European COVID-19 forecast hub)
 
 **NOTE:**  level of mechanism $\neq$ model complexity
 
@@ -35,7 +32,7 @@ format:
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism1.png){width="70%"}
 
@@ -59,7 +56,7 @@ Conceptually probably the closest to meteorological forecasting, if with much le
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism2.png){width="70%"}
 
@@ -83,7 +80,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism3.png){width="70%"}
 
@@ -109,7 +106,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism4.png){width="70%"}
 
@@ -119,7 +116,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 **Statistical models**
 
-- Models that don't include any epidemiological background e.g. ARIMA; also called *time-series models*
+- Models that do not include any epidemiological background e.g. ARIMA; also called *time-series models*
 - The random walk model when used on its own (without going via $R_t$) is called a [stochastic volatility model](https://mc-stan.org/docs/stan-users-guide/time-series.html#stochastic-volatility-models)
 
 :::
@@ -132,7 +129,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-### {.smaller}
+## {.smaller}
 
 ![](figures/mechanism.png){width="70%"}
 
@@ -158,7 +155,7 @@ Aim to capture relevant mechanisms but without going to the individual level.
 
 ::::
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {.smaller background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Review the performance of the random walk model
 2. Motivate a mechanism to order to address some of the issues

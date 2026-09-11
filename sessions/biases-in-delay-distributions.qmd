@@ -6,7 +6,9 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-So far, we've looked at the uncertainty of the time delays between epidemiological events. The next challenge is that our information on these delays is usually biased, especially when we're analysing data in real time. We'll consider two types of biases that commonly occur in reported infectious disease data: 
+So far, we have looked at the uncertainty of the time delays between epidemiological events.
+The next challenge is that our information on these delays is usually biased, especially when we are analysing data in real time.
+We will consider two types of biases that commonly occur in reported infectious disease data: 
 
 - *Censoring*: when we know an event occurred at some time, but not exactly when.
 - *Truncation*: when not enough time has passed for all the relevant epidemiological events to occur or be observed.
@@ -19,7 +21,7 @@ We can again handle these by including them as uncertain parameters in the model
 
 ## Objectives
 
-In this session, we'll introduce censoring and right truncation as typical properties of the process that generates infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
+In this session, we will introduce censoring and right truncation as typical properties of the process that generates infectious disease data sets, using the delay from symptom onset to hospitalisation as an example.
 
 ::: {.callout-note collapse="true"}
 
@@ -66,7 +68,7 @@ options(cmdstanr_print_line_numbers = TRUE)
 We will use a modified version of the simulated data set from the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data).
 
 ::: callout-note
-For this session, we'll use **shorter delays** to better demonstrate censoring effects:
+For this session, we will use **shorter delays** to better demonstrate censoring effects:
 
 -   the incubation period is **gamma**-distributed with **shape 5** and **rate 1**, i.e. a mean of 5 days
 -   the time from onset to hospital admission is **lognormally**-distributed, with **meanlog 1.0** and **sdlog 0.5**, i.e. a mean delay of about 3 days
@@ -74,7 +76,7 @@ For this session, we'll use **shorter delays** to better demonstrate censoring e
 Using shorter delays makes the 24-hour censoring interval more impactful relative to the delay length, making bias effects more visible.
 :::
 
-We'll use the `add_delays` function with shorter parameters for the censoring demonstration:
+We will use the `add_delays` function with shorter parameters for the censoring demonstration:
 
 ```{r inf_hosp_solution}
 df <- add_delays(
@@ -91,7 +93,7 @@ head(df)
 
 # Dates, not days: censoring
 
-So far, the data we've been using has represented time as a *continuous* variable: a numeric time since a given starting point.
+So far, the data we have been using has represented time as a *continuous* variable: a numeric time since a given starting point.
 Data on health outcomes are usually not recorded in this way.
 Instead, we usually deal with *dates*: a discrete interval.
 We refer to this restriction of the data, where we only know that an event has occurred within a given time period (e.g. a day) but not when exactly within that period, as *interval censoring*.
@@ -130,7 +132,7 @@ This rounds values down to the nearest interval boundary, which is useful for ex
 
 ::: {.callout-note}
 As before, we are still not working with dates but numbers.
-This makes handling the data easier - we don't have to make any conversions before using the data in stan.
+This makes handling the data easier - we do not have to make any conversions before using the data in stan.
 :::
 
 Each of the numbers now represent the number of days that have passed since the start of the outbreak.
@@ -146,10 +148,10 @@ In statistical terms, we call the data *double interval censored*:
 
 ### Primary vs Secondary Event Censoring
 
-It's important to understand that **double interval censoring** can be decomposed into two distinct components:
+It is important to understand that **double interval censoring** can be decomposed into two distinct components:
 
 **Primary event censoring**: Uncertainty about when the first event (symptom onset) occurred within its reported day. 
-Even if we know someone developed symptoms "on 20 June", we don't know if this was at 00:01 or 23:59.
+Even if we know someone developed symptoms "on 20 June", we do not know if this was at 00:01 or 23:59.
 
 **Secondary event censoring**: Uncertainty about when the second event (hospitalisation) occurred within its reported day. 
 Similarly, "admitted on 22 June" could mean any time during those 24 hours.
@@ -169,13 +171,14 @@ For accurate delay estimation, we need to account for both components as we do i
 ::: {.callout-note .optional collapse="true"}
 ## Why are we so worried?
 
-We'll be spending a lot of time thinking about a potentially "short" 24 hour time interval. In this session, we'll start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
+We will be spending a lot of time thinking about a potentially "short" 24 hour time interval.
+In this session, we will start to get a sense for how variation, uncertainty, and bias within this interval might combine to impact daily outbreak estimates.
 The concepts and techniques that we use here also apply to longer time intervals that we might find in surveillance data, for example, reported case counts aggregated by week.
 :::
 
 ## Implementing bias correction for double interval censoring
 
-Let's estimate the time from symptom onset to hospitalisation with the censored data.
+Let us estimate the time from symptom onset to hospitalisation with the censored data.
 
 A naive approach to estimating the delay would be to ignore the fact that the data are censored.
 To estimate the delay from onset to hospitalisation, we could just use the difference between the censored times, which is an integer (the number of days).
@@ -188,7 +191,7 @@ df_dates <- df_dates |>
   )
 ```
 
-To help us think about this, let's summarise the original time-based incubation period
+To help us think about this, let us summarise the original time-based incubation period
 
 ```{r}
 summary(df$onset_time - df$infection_time)
@@ -246,13 +249,13 @@ There are many ad-hoc solutions to this problem that, for example, introduce a s
 These approximations vary in quality, and some can be more biased than doing nothing as above, so rather than relying on them we recommend the principled double interval censoring approach described below.
 See the [How epidemic dynamics affect bias severity](#how-epidemic-dynamics-affect-bias-severity) callout for a visual comparison of these approaches and Park et al. for a detailed discussion of approximate approaches [@parkEstimatingEpidemiologicalDelay2024].
 
-To properly account for double interval censoring, we need to modify the model to include the fact that we don't know when exactly on any given day the event happened.
+To properly account for double interval censoring, we need to modify the model to include the fact that we do not know when exactly on any given day the event happened.
 For example, if we know that symptom onset of an individual occurred on 20 June, 2024, and they were admitted to hospital on 22 June, 2024, this could mean an onset-to-hospitalisation delay from 1 day (onset at 23:59 on the 20th, admitted at 0:01 on the 22nd) to 3 days (onset at 0:01 on the 20th, admitted at 23:59 on the 22nd).
 
 ::: {.callout-note .optional collapse="true"}
 ## Visualising two types of censoring
 
-Let's visualise the difference between double and secondary censoring using a simple example (*you can change the parameters to see how the bias changes*).
+Let us visualise the difference between double and secondary censoring using a simple example (*you can change the parameters to see how the bias changes*).
 
 ```{r censoring-comparison, fig.height=6, fig.width=10}
 library(ggplot2)
@@ -412,7 +415,7 @@ The data set we have looked at so far in this session is a "final" data set repr
 However, information on delay distributions is often important during ongoing outbreaks as they can inform nowcasts and forecasts and help with broader interpretation of data.
 
 ::: callout-note
-For the truncation demonstration, we'll switch back to longer delays:
+For the truncation demonstration, we will switch back to longer delays:
 
 ```{r truncation-data}
 # Resimulate with longer delays for truncation demonstration
@@ -426,9 +429,10 @@ df <- add_delays(infection_times,
 Estimating delays in real time comes with particular challenges, as we know that our data are usually incomplete: not enough time has passed to observe all of the relevant events that could have happened.
 We call this incompleteness *right truncation*.
 This is a problem if we try to use an incomplete set of data about one type of event to infer the pattern of a previous epidemiological event. 
-For example, our target might be to infer the "primary" event of infections. We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
+For example, our target might be to infer the "primary" event of infections.
+We want to do this using some observed data about a "secondary" event, such as recent symptom onsets. 
 However, we are still in the middle of an outbreak.
-Some infected cases haven't yet presented with symptoms. 
+Some infected cases have not yet presented with symptoms. 
 So we only have a partial, incomplete count to work with.
 When we condition on an observed event with a delay in this way, we get **right truncation** of the target event. 
 Our estimates might be biased because we are missing some of the data to get the full picture.
@@ -436,7 +440,7 @@ Our estimates might be biased because we are missing some of the data to get the
 ::: {.callout-note .optional collapse="true"}
 ## Visualising truncation effects
 
-Let's visualise the effect of truncation with a simple example:
+Let us visualise the effect of truncation with a simple example:
 
 ```{r truncation-comparison, fig.height=5, fig.width=10}
 library(ggplot2)
@@ -509,11 +513,12 @@ ggplot() +
   guides(colour = "none")
 ```
 
-This figure shows how truncation systematically underestimates the mean delay (dashed lines) by excluding longer delays that haven't been observed yet.
+This figure shows how truncation systematically underestimates the mean delay (dashed lines) by excluding longer delays that have not been observed yet.
 
 :::
 
-This bias also changes throughout an outbreak. If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
+This bias also changes throughout an outbreak.
+If, for example, infections are exponentially increasing, then there will be disproportionately more people with recent symptom onset.
 Without adjustment, this would artificially decrease the estimate of the mean delay compared to its true value for all infections that have in fact already occurred.
 This happens because most infections are recent (due to the exponential increase), but later symptom onsets amongst these have not had a chance to happen yet.
 So among a cohort of people with symptom onset at the same time, those with shorter delays to onset would be over-represented.
@@ -610,7 +615,7 @@ tres <- nfidd_sample(tmod,
 tres
 ```
 
-Let's also check the mean and standard deviation of the truncation-adjusted delay distribution:
+Let us also check the mean and standard deviation of the truncation-adjusted delay distribution:
 
 ```{r truncated_mean_sd_summary}
 tres |>
@@ -671,7 +676,8 @@ During stable or declining epidemic phases, truncation bias is likely to be smal
 
 ## Decision framework for bias correction
 
-When faced with real epidemiological data, it can be challenging to decide which bias corrections to apply. The flowchart below provides practical guidance for making these decisions [@charnigaBestPracticesEstimating2024]:
+When faced with real epidemiological data, it can be challenging to decide which bias corrections to apply.
+The flowchart below provides practical guidance for making these decisions [@charnigaBestPracticesEstimating2024]:
 
 ![Decision framework for bias adjustment](figures/delay-biases/bias-correction-decision-flowchart.png){fig-alt="Flowchart showing decision process for choosing appropriate bias correction methods when estimating delay distributions"}
 
@@ -705,7 +711,7 @@ For an overview, see the review by [@parkEstimatingEpidemiologicalDelay2024].
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References 

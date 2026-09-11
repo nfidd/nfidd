@@ -6,11 +6,11 @@ bibliography: ../nfidd.bib
 
 # Introduction
 
-So far we've explored the delays and biases of real-time infectious disease surveillance data, started to correct for these, and considered the underlying process that drives the evolution of epidemics (looking at the reproduction number and renewal equation). 
-Next, we'll focus on predicting new information about how infectious disease transmission is evolving in the present and future. 
+So far we have explored the delays and biases of real-time infectious disease surveillance data, started to correct for these, and considered the underlying process that drives the evolution of epidemics (looking at the reproduction number and renewal equation). 
+Next, we will focus on predicting new information about how infectious disease transmission is evolving in the present and future. 
 
 We know that we have incomplete information in the present because of delays in the observation process (reporting delays). 
-The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we've already considered.
+The aim of nowcasting is to predict what an epidemiological time series will look like *after all delayed reports* are in, for which we need to account for the delays and biases we have already considered.
 
 ## Slides
 
@@ -67,7 +67,7 @@ Similar to the data discussed in the preceding session, this time is often only 
 
 We can simulate this reporting process.
 Let us assume that the symptom onsets are reported with a delay and that this delay is characterised by a lognormal distribution with meanlog 1 and sdlog 0.5:
-To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we don't simulate hospitalisations but reports of symptom onsets:
+To do so, we perform a very similar simulation to what we did in the [session on delay distributions](delay-distributions#simulating-delayed-epidemiological-data), except now we do not simulate hospitalisations but reports of symptom onsets:
 
 ```{r onset_report}
 data(infection_times)
@@ -78,7 +78,7 @@ df <- infection_times |>
   )
 ```
 
-We then assume that we're 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
+We then assume that we are 70 days into the outbreak, i.e. we only consider observations with a reporting time less than 71 - other symptom onset may have already happened, but we have not observed them yet.
 
 ```{r truncate_reports}
 cutoff <- 71
@@ -171,11 +171,15 @@ Estimating the "true curve" (i.e. what we expect to see once the data are comple
 
 ## The simplest possible nowcasting model
 
-Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data. In practice, the delay distribution is often not known and needs to be estimated from the data. We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
+Here we assume that the delay distribution is known and that we can use it to nowcast the most recent data.
+In practice, the delay distribution is often not known and needs to be estimated from the data.
+We could do this using methods from [the session on biases in delay distributions](sessions/biases-in-delay-distributions).
 
-In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets. A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 
+In the [session on convolutions](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections) we used delay distributions convolved with the infection times to estimate the time series of symptom onsets.
+A simple way to nowcast is to use the same approach but using the cumulative distribution function of the delay distribution rather than the probability density function and only apply it to the most recent data as this is the only data that can be subject to change (due to delays in reporting). 
 
-We will build intuition for this as usual using simulation. First we define the proportion reported using a delay distribution up to 15 days, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
+We will build intuition for this as usual using simulation.
+First we define the proportion reported using a delay distribution up to 15 days, again using a lognormal distribution with meanlog 1 and sdlog 0.5:
 
 ```{r}
 proportion_reported <- plnorm(1:15, 1, 0.5)
@@ -184,10 +188,12 @@ plot(proportion_reported)
 
 ::: {.callout-tip}
 ## The `plnorm` function
-The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples. That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
+The `plnorm()` function is related to the `rlnorm()` function we used earlier to simulate the individual level reporting delay, but instead it gives the cumulative distribution function rather than random samples.
+That is, it gives us the probability that a report is made on day 1 or earlier, day 2 or earlier, etc.
 :::
 
-We can now use this delay distribution to nowcast the most recent data. Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have created helper functions `make_gen_time_pmf()` and `make_ip_pmf()` to make it easier to re-use; we recommend to have a look at what these functions do), and apply the `reporting_delay` to the last 15 days of data.
+We can now use this delay distribution to nowcast the most recent data.
+Here we use the same simulation approach as in the [renewal session](R-estimation-and-the-renewal-equation) (here we have created helper functions `make_gen_time_pmf()` and `make_ip_pmf()` to make it easier to re-use; we recommend to have a look at what these functions do), and apply the `reporting_delay` to the last 15 days of data.
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -205,7 +211,9 @@ tail(reported_onset_df)
 
 ::: {.callout-tip}
 ## Take 3 minutes
-Spend a few minutes trying to understand the code above. What is the `proportion_reported`? What is the `reported_onsets`?
+Spend a few minutes trying to understand the code above.
+What is the `proportion_reported`?
+What is the `reported_onsets`?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -221,7 +229,8 @@ reported_onset_df |>
 ```
 :::
 
-We can now fit our first nowcasting model. Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
+We can now fit our first nowcasting model.
+Here we assume exactly the same generative process as we used for simulation and model the number of onsets as independent draws from a normal distribution.
 
 ```{r stan-simple-nowcast}
 mod <- nfidd_cmdstan_model("simple-nowcast")
@@ -230,7 +239,8 @@ mod
 
 ::: {.callout-tip}
 ## Take 2 minutes
-Familiarise yourself with the model above. What does it do?
+Familiarise yourself with the model above.
+What does it do?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -278,13 +288,15 @@ The points in this plot represent the data available when the nowcast was made (
 :::
 
 ::: {.callout-tip}
-As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets. This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset). In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
+As we found in the [using delay distributions to model the data generating process of an epidemic session](using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic#estimating-a-time-series-of-infections), this simple model struggles to recreate the true number of onsets.
+This is because it does not capture the generative process of the data (i.e. the transmission process and delays from infection to onset).
+In the next section we will see how we can use a model that does capture this generative process to improve our nowcasts.
 :::
 
 ::: {.callout-important .optional}
 ## Simple multiplicative nowcasting methods
 
-Before moving to more complex models, it's worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 
+Before moving to more complex models, it is worth noting that there is an even simpler nowcasting method that simply divides currently observed counts by the cumulative distribution function (CDF) of the delay distribution. 
 This approach is often called "multiplicative" or "scaling" nowcasting.
 
 While this method appears simple, it still embodies a model with specific assumptions that can be difficult to define precisely. 
@@ -301,7 +313,8 @@ These baseline methods can serve as useful benchmarks when developing more compl
 
 ## Adding in a geometric random walk to the nowcasting model
 
-As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-equation), a geometric random walk is a simple way to model multiplicative growth. Adding this into our simple nowcasting model may help us to better capture the generative process of the data and so produce a better nowcast.
+As we saw in the [session on the renewal equation](R-estimation-and-the-renewal-equation), a geometric random walk is a simple way to model multiplicative growth.
+Adding this into our simple nowcasting model may help us to better capture the generative process of the data and so produce a better nowcast.
 
 We first load the model
 
@@ -339,7 +352,8 @@ ggplot(rw_nowcast_onsets, aes(x = day)) +
 
 ::: {.callout-tip}
 ## Take 2 minutes
-What do you think of the nowcast now? Does it look better than the previous one?
+What do you think of the nowcast now?
+Does it look better than the previous one?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -402,13 +416,14 @@ ggplot(gamma_nowcast_onsets, aes(x = day)) +
 
 ::: {.callout-tip}
 ## Take 2 minutes
-What do you think of the nowcast now? How would you know you had the wrong delay if you didn't have the true delay distribution?
+What do you think of the nowcast now?
+How would you know you had the wrong delay if you did not have the true delay distribution?
 :::
 
 ::: {.callout-note collapse="true"}
 ## Solution
 - The nowcast now looks very different to the observed data. This is because the model is using the wrong delay distribution to nowcast the data.
-- If you didn't have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
+- If you did not have the true delay distribution you would not know that you had the wrong delay distribution. This is why it is important to estimate the delay distribution from the data.
 - In practice, you would likely compare the nowcast to the observed data and if they did not match you would consider whether the delay distribution was the cause.
 :::
 
@@ -421,7 +436,7 @@ What do you think of the nowcast now? How would you know you had the wrong delay
 
 # Wrap up
 
-- Review what you've learned in this session with the [learning objectives](../reference/learning_objectives)
+- Review what you have learned in this session with the [learning objectives](../reference/learning_objectives)
 - Share your [questions and thoughts](../reference/help)
 
 ## References

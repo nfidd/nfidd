@@ -1,0 +1,9 @@
+# Shared front matter for all slide decks in this directory.
+# Per-deck files set only their title, footer, and any deck-specific options.
+author: "Nowcasting and forecasting of infectious disease dynamics"
+engine: knitr
+format:
+  revealjs:
+    chalkboard: true
+    # Slides are level-2 headings (##); level-1 (#) headings are section dividers.
+    slide-level: 2

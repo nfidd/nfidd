@@ -18,3 +18,8 @@ CLAUDE.md
 
 # Quarto freeze directory
 _freeze/
+
+**/*.quarto_ipynb
+
+# Node tooling (scripts/)
+node_modules/

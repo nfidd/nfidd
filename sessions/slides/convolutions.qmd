@@ -1,12 +1,8 @@
 ---
 title: "Delay distributions at the population level"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-biases-in-epidemiological-delays.html
     footer: "Delay distributions at the population level"
-    chalkboard: true
 ---
 
 ## Individual delay distributions {.smaller}
@@ -57,12 +53,12 @@ ggplot(infections, aes(y = person)) +
 
 ## Why not use individual delays?
 
-- we don't always have individual data available
+- we do not always have individual data available
 - we often model other processes at the population level (such as transmission) and so being able to model delays on the same scale is useful
 - doing the computation at the population level requires fewer calculations (i.e. is faster)
 
 ::: {.fragment .fade-in}
-- **however, a downside is that we won't have realistic uncertainty, especially if the number of individuals is small**
+- **however, a downside is that we will not have realistic uncertainty, especially if the number of individuals is small**
 :::
 
 ## Convolution: From individual to population
@@ -83,13 +79,13 @@ We can use convolutions with the delay distribution that applies at the *individ
 
 ## What if $f$ is continuous?
 
-Having moved to the population level, we can't estimate individual-level event times any more.
+Having moved to the population level, we cannot estimate individual-level event times any more.
 
 Instead, we *discretise* the distribution (remembering that it is **double censored** - as both events are censored). 
 
 This can be solved mathematically but in the session we will use simulation.
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 - Simulate convolutions with infection counts
 - Discretise continuous distributions

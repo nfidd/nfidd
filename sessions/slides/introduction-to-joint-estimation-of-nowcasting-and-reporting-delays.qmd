@@ -1,16 +1,11 @@
 ---
 title: "Introduction to joint estimation of nowcasting and reporting delays"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-joint-estimation-of-nowcasting-and-reporting-delays.html
     footer: "Introduction to joint estimation of nowcasting and reporting delays"
-    slide-level: 3
-    chalkboard: true
 ---
 
-### Motivating example
+## Motivating example
 
 Often we see data like this
 
@@ -19,35 +14,36 @@ Often we see data like this
 
 (all figures in this deck are courtesy of Johannes Bracher)
 
-### The aim of nowcasting
+## The aim of nowcasting
 
 Predict what an epidemiological time series will look like *after all delayed reports* are in.
 
 ![](figures/nowcasting.png)
 
 
-### The limitations of simple nowcasting methods
+## The limitations of simple nowcasting methods
 
   - Hard to propagate uncertainty
-  - Doesn't account for observation error in the primary events
+  - Does not account for observation error in the primary events
   - Not a generative model of the data reporting process (hard to add complex reporting patterns)
   - If we get the delay wrong, we can get the nowcast wrong
 
-### Jointly estimating reporting delays and nowcasting
+## Jointly estimating reporting delays and nowcasting
 
-One potential solution is to jointly estimate the reporting delays and the nowcast. We can do this if we have multiple snapshots of the data.
+One potential solution is to jointly estimate the reporting delays and the nowcast.
+We can do this if we have multiple snapshots of the data.
 
 ![](figures/germany_historical.png)
 
-### Building on previous methods
+## Building on previous methods
 
 The joint model has three key components:
 
 1. **Model for underlying counts** (what will end up being reported)
 2. **Model for delay distribution** (how long the reporting process will be)
-3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we don't take the sum)))
+3. **Apply delays to counts** (transform onset dates to report dates (like a convolution but we do not take the sum)))
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 1. Simulate data with delayed reporting
 2. Perform a joint estimation of the delay and nowcast

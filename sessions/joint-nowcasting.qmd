@@ -7,13 +7,13 @@ bibliography: ../nfidd.bib
 # Introduction
 
 In the last session we introduced the idea of nowcasting using a simple model. 
-However, this approach had problems: we didn't fully account for uncertainty, or for example observation error in the primary events, and it's not a fully generative model of the data reporting process. 
+However, this approach had problems: we did not fully account for uncertainty, or for example observation error in the primary events, and it is not a fully generative model of the data reporting process. 
 And as we saw, if we get the delay distribution wrong, we can get the nowcast very wrong. 
 
 A better approach is to jointly estimate the delay distribution together with the nowcast. 
 We can do this by using information from multiple snapshots of the data as it changes over time (using a data structure called the "reporting triangle"). 
-In this session, we'll introduce this approach to joint estimation in nowcasting. 
-At the end we'll then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
+In this session, we will introduce this approach to joint estimation in nowcasting. 
+At the end we will then demonstrate a way to combine this with our previous work estimating the reproduction number, steadily improving our real time outbreak model.
 
 ## Slides
 
@@ -80,9 +80,9 @@ This builds on the data simulation approach we used in the concepts session, but
 ## Extending our data simulation approach
 
 Recall from the [nowcasting concepts session](sessions/nowcasting) that we simulated individual reporting delays and then aggregated them. 
-Now we'll simulate the same process but at the population level with observation error - for the same reasons we made this change in the [convolutions session](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
+Now we will simulate the same process but at the population level with observation error - for the same reasons we made this change in the [convolutions session](sessions/using-delay-distributions-to-model-the-data-generating-process-of-an-epidemic).
 
-First, let's generate our simulated onset dataset as before:
+First, let us generate our simulated onset dataset as before:
 
 ```{r, load-simulated-onset}
 gen_time_pmf <- make_gen_time_pmf()
@@ -142,7 +142,8 @@ filtered_reporting_triangle <- reporting_triangle |>
 tail(filtered_reporting_triangle)
 ```
 
-Finally, we sum this to get the counts we actually observe. This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
+Finally, we sum this to get the counts we actually observe.
+This is the same as the date we corrected for **right truncation** in the [nowcasting concepts session](sessions/nowcasting).
 
 ```{r counts-observed}
 available_onsets <- filtered_reporting_triangle |>
@@ -158,7 +159,8 @@ Notice how this simulation creates a similar, but different, data structure than
 ::: {.callout-note}
 ## Three-dimensional epidemiological data
 
-So far we've worked with data that has two dimensions. Such as:
+So far we have worked with data that has two dimensions.
+Such as:
 
 - **Onset day**: the day that each infected case saw symptoms begin
 - **Onset counts**: the number of cases with symptoms that began on each day
@@ -207,7 +209,8 @@ We now have two main modelling options:
 We will explore these in the next section.
 :::
 
-A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$). Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
+A key insight is that, at the current day $T$, the number of reports $n_{t, d}$ for each reference day $t$ at delay $d$ splits into those we have **already observed** (short delays, $d \leq T-t$) and those still **missing** (long delays, $d > T-t$).
+Summing over delay, the eventual total $N_t$ therefore splits into an observed and a missing part:
 
 $$
 N_{t} = \underbrace{\sum_{d=0}^{T-t} n_{t,d}}_{N_t^{\text{obs}}\ \text{(reports already in)}} \; + \; \underbrace{\sum_{d=T-t+1}^{D} n_{t,d}}_{N_t^{\text{miss}}\ \text{(to be estimated)}}
@@ -247,7 +250,7 @@ joint_mod
 
 ::: {.callout-tip collapse="true"}
 ## Model details
-This time we won't go into details of the model.
+This time we will not go into details of the model.
 For now, it is important that you understand the concept, but as the models get more complex, we hope that you trust us that the model does what we describe above.
 
 One thing to note is that we are now fitting the initial number of symptom onsets (`init_onsets`).
@@ -323,7 +326,10 @@ Reminder: The points in this plot represent the data available when the nowcast 
 
 ::: {.callout-tip}
 ## Take 5 minutes
-Look back at the last three nowcasts. How do they compare? What are the advantages and disadvantages of each? Could we improve the nowcasts further?
+Look back at the last three nowcasts.
+How do they compare?
+What are the advantages and disadvantages of each?
+Could we improve the nowcasts further?
 :::
 
 ::: {.callout-note collapse="true"}
@@ -345,14 +351,16 @@ This is because we are fitting a model to the reporting triangle, which is a muc
 ## Key learning points
 
 - The renewal equation provides a better reflection of epidemic dynamics than simple geometric random walks as it is closer to the true generative process of the data
-- When reporting delays don't provide enough information to identify recent trends, using the underlying generative model (renewal process) prevents bias
+- When reporting delays do not provide enough information to identify recent trends, using the underlying generative model (renewal process) prevents bias
 - Joint models can simultaneously estimate delays, nowcast, AND reproduction numbers without spurious declining trends
 - Such models are computationally intensive but provide the most accurate and comprehensive real-time epidemic assessment.
 They avoid issues of passing fixed estimates between the nowcast and the reproduction number estimation model.
 :::
 
 ::: {.callout-note}
-This section contains a lot of code and is quite complex. It is not necessary to understand all of it to get the main points of the session. We recommend reading through it to get a sense of how all the pieces fit together.
+This section contains a lot of code and is quite complex.
+It is not necessary to understand all of it to get the main points of the session.
+We recommend reading through it to get a sense of how all the pieces fit together.
 :::
 
 In the previous sessions, we have seen how to estimate the reproduction number and how to nowcast the data.
@@ -394,7 +402,7 @@ This would allow us to use the simple nowcasting model whilst still estimating t
 We would also remove the `generated quantities` block as we no longer reconstruct unobserved onsets via the reporting-delay model; we are not nowcasting the data, so simplify the observations to just the number of onsets.
 :::
 
-Now let's fit the final model for this session!
+Now let us fit the final model for this session!
 
 ```{r joint-nowcast-rt-fit, results = 'hide', message = FALSE}
 joint_rt_data <- c(joint_data,
@@ -415,7 +423,9 @@ joint_rt_fit <- nfidd_sample(
 ```
 
 ::: {.callout-tip}
-We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult-to-explore posterior. Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior. The downside is that fitting then takes longer.
+We use `adapt_delta = 0.95` here as this is a relatively complex model with a difficult-to-explore posterior.
+Increasing this setting decreases the step size of the sampler and so makes it easier for it to explore the posterior.
+The downside is that fitting then takes longer.
 :::
 
 ```{r joint-nowcast-rt-fit-summary}

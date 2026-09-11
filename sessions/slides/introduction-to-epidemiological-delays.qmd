@@ -1,12 +1,8 @@
 ---
 title: "Introduction to epidemiological delays"
-author: "Nowcasting and forecasting of infectious disease dynamics"
-engine: knitr
 format:
   revealjs:
-    output: slides/introduction-to-epidemiological-delay-distributions.html
     footer: "Introduction to epidemiological delays"
-    chalkboard: true
 ---
 
 ```{r seed}
@@ -95,19 +91,19 @@ hospital *admission* to *discharge*
 
 ## Key parameters in mathematical models {.smaller}
 
-![](figures/ferguson2020.png)
+![](figures/ferguson2020.png){width="80%"}
 
 [Ferguson et al., 2020](https://doi.org/10.25561/77482)
 
 ## Key parameters in mathematical models {.smaller}
 
-![](figures/ward2022.png)
+![](figures/ward2022.png){width="80%"}
 
 [Ward et al., 2020](https://doi.org/10.25561/77482)
 
 ## Key elements of infectious disease epidemiology {.smaller}
 
-![](figures/nishiura2007.png)
+![](figures/nishiura2007.png){width="80%"}
 [Nishiura et al., 2007](https://doi.org/10.1186/1742-7622-4-2)
 
 ## Why do we want to know these?
@@ -172,7 +168,7 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 
 ## Statistical inference for delays
 
-- We observe delay data but don't know true distribution parameters
+- We observe delay data but do not know true distribution parameters
 - Need to estimate parameters from incomplete, noisy data
 - **Bayesian approach**: prior knowledge + observed data → posterior estimates
 
@@ -182,7 +178,7 @@ ggplot(df, aes(x = x, y = density, group = id)) +
 - We specify: data structure, parameters to estimate, model relationships
 - Stan returns parameter estimates with proper uncertainty quantification
 
-## `r fontawesome::fa("laptop-code", "white")` Your Turn {background-color="#447099" transition="fade-in"}
+{{< include _your-turn.qmd >}}
 
 - Simulate epidemiological delays
 - Estimate parameters of a delay distribution

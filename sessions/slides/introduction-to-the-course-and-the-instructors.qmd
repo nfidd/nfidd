@@ -1,11 +1,8 @@
 ---
 title: "Introduction to the course and the instructors"
-author: "Nowcasting and forecasting of infectious disease dynamics"
 format:
   revealjs:
-    output: slides/introduction-to-the-course-and-the-instructors.html
     footer: "Introduction to the course and the instructors"
-    chalkboard: true
 ---
 
 ```{r instructors}
@@ -23,7 +20,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 })
 ```
 
-# Why this course?
+## Why this course?
 
 ::: {.incremental}
 - common questions in outbreak response
@@ -31,7 +28,7 @@ whoarewe <- lapply(sort(instructors), \(instructor) {
 - no comprehensive training resource
 :::
 
-# Who are we?
+## Who are we?
 
 ```{r whoarewe, results='asis'}
 cat(":::: {.columns}\n")
@@ -47,15 +44,15 @@ for (instructor in seq_along(whoarewe)) {
 cat("::::\n")
 ```
 
-# Who are you?
+## Who are you?
 
 Introduce yourself with:
 
 - name
 - where you travelled from
-- why you're here
+- why you are here
 
-# How the course works
+## How the course works
 
 ::: {.incremental}
 - each session opens with a short introduction
