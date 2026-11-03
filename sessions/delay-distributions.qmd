@@ -390,7 +390,7 @@ With real data, of course, we don't have this information available.
   ```
 See the [Using our Stan models guide](../reference/using-our-stan-models) for more available models
 
-- The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they barely affect the estimates. You can check this yourself by copying the model, changing its priors, and refitting.
+- The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they make little difference to the estimates. Refit with a tighter prior to see this for yourself.
 
   Following the [Using our Stan models guide](../reference/using-our-stan-models), write the model to a local file you can edit:
   ```{r, eval = FALSE}
@@ -411,7 +411,7 @@ See the [Using our Stan models guide](../reference/using-our-stan-models) for mo
   )
   res_prior$summary()
   ```
-  With the full data set the estimates barely move, even though the prior sits far from the true values. Now combine this with the sample-size challenge above and refit the same tight prior to `df_small` (100 observations). With little data the prior pulls the estimates towards it, and that is when priors start to matter.
+  With the full data set the estimates hardly move, even though the prior is far from the true values. Now refit that same tight prior to `df_small` (100 observations) from the sample-size challenge above. This time the prior pulls the estimates away from the true values.
 
 - Try using one of the methods in practice below to fit a distribution to the data.
 
