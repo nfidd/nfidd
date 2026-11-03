@@ -359,14 +359,14 @@ This visualisation captures both our estimate of the delay distribution and our 
 - In this session we were in the enviable situation of knowing which distribution was used to generate the data. 
 With real data, of course, we do not have this information available. 
 
-- **Impact of sample size**: Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. 
+- Try subsampling your data to see how fewer observations affect your parameter estimates and uncertainty. 
   
   Subsample to 100 observations and refit the model to compare results:
   ```{r, eval = FALSE}
   df_small <- df_onset_to_hosp |> slice_sample(n = 100)
   ```
 
-- **Different delay lengths**: The `add_delays()` function allows you to change the delay parameters.
+- The `add_delays()` function allows you to change the delay parameters.
   
   Try longer delays and see how this affects your parameter recovery:
   ```{r, eval = FALSE}
@@ -374,7 +374,7 @@ With real data, of course, we do not have this information available.
                        hosp_params = list(meanlog = 2.5, sdlog = 0.5))
   ```
 
-- **Different variability of the delay**: Try changing the variability of the delay to see how it affects uncertainty in estimates.
+- Try changing the variability of the delay to see how it affects uncertainty in estimates.
   
   More variable delays (higher sdlog):
   ```{r, eval = FALSE}
@@ -388,7 +388,7 @@ With real data, of course, we do not have this information available.
                           hosp_params = list(meanlog = 1.75, sdlog = 0.2))
   ```
 
-- **Different type of distribution**: Try using a completely different distribution for the delays.
+- Try using a completely different distribution for the delays.
   
   Use gamma distribution instead of lognormal:
   ```{r, eval = FALSE}
@@ -397,11 +397,34 @@ With real data, of course, we do not have this information available.
                         hosp_params = list(shape = 2, rate = 0.3))
   ```
 
-- **Different fitted distribution**: Try fitting a different distribution to the data. For example, use the gamma Stan model instead of lognormal:
+- Try fitting a different distribution to the data. For example, use the gamma Stan model instead of lognormal:
   ```{r, eval = FALSE}
   mod_gamma <- nfidd_cmdstan_model("gamma")
   ```
 See the [Using our Stan models guide](../reference/using-our-stan-models) for more available models
+
+- The lognormal Stan model uses weakly informative `normal(0, 10)` priors. With this much data they make little difference to the estimates. Refit with a tighter prior to see this for yourself.
+
+  Following the [Using our Stan models guide](../reference/using-our-stan-models), write the model to a local file you can edit:
+  ```{r, eval = FALSE}
+  mod_local <- nfidd_cmdstan_model("lognormal", compile = FALSE)
+  writeLines(mod_local$code(), "local-lognormal.stan")
+  ```
+  Open `local-lognormal.stan` and replace the priors with something tight and deliberately wrong:
+  ```stan
+  meanlog ~ normal(0, 0.1);
+  sdlog ~ normal(0, 0.1) T[0, ];
+  ```
+  then recompile and refit:
+  ```{r, eval = FALSE}
+  mod_prior <- nfidd_cmdstan_model(model_file = "local-lognormal.stan")
+  res_prior <- nfidd_sample(
+    mod_prior,
+    data = list(N = nrow(df_onset_to_hosp), y = df_onset_to_hosp$onset_to_hosp)
+  )
+  res_prior$summary()
+  ```
+  With the full data set the estimates hardly move, even though the prior is far from the true values. Now refit that same tight prior to `df_small` (100 observations) from the sample-size challenge above. This time the prior pulls the estimates away from the true values.
 
 - Try using one of the methods in practice below to fit a distribution to the data.
 
